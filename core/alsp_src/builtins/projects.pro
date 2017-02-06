@@ -152,10 +152,8 @@ gen_project_mgrAction(read_gui_spec, State)
 	tcl_call(shl_tcli, 
 		[rd_prj_spec, GuiPath, TextSlots, ListOfFilesSlots, ListSlots, AddlTextSlots],
 		InitResult),
-%pbi_write(rd_prj_spec=InitResult),pbi_nl,
 	forbidden_slots(project,Forbidden),
  	findall(T=V, (member(L, InitResult), member([T, V], L)), Eqns),
-%pbi_write(findall=Eqns),pbi_nl,
 	weak_all_setObjStruct(Eqns, Forbidden, State).
 
 %% For dev/debug: prints an Eqns list:
@@ -294,18 +292,13 @@ dump_object(State, Forbidden, Eqns)
 
 check_filepath(DistExt, State, FilePath)
 	:-
-%pbi_write(check_filepath(DistExt, xx, FilePath)),pbi_nl,
 	(DistExt==crf ->
 		Slot = suite_file
 		;
 		Slot = project_file
 	),
 	accessObjStruct(Slot, State, InitFilePath),
-pbi_write( check_valid_path(InitFilePath, DistExt, FilePath, state)), pbi_nl, pbi_nl,
-
-	check_valid_path(InitFilePath, DistExt, FilePath, State, Slot),
-
-pbi_nl,pbi_write( xx_check_valid_path(InitFilePath, DistExt, FilePath, state)), pbi_nl, pbi_nl.
+	check_valid_path(InitFilePath, DistExt, FilePath, State, Slot).
 
 check_valid_path(nil, DistExt, FilePath, State, Slot)
 	:-!,
@@ -885,8 +878,6 @@ new_cref
 
 	tcl_call(shl_tcli, [disable_cref_btns], _).
 
-
-
 export open_cref/0.
 open_cref
 	:-
@@ -925,15 +916,10 @@ open_cref
 
 	accessObjStruct(target, SuiteMgr, TargetXRFFile),
 	file_extension(TargetXRFFile, Name, _),
-	file_extension(Target2Files, Name, '/[xrf,html]'),
+	file_extension(Target2Files, Name, '[xrf,html]'),
 	tcl_call(shl_tcli, [show_text_slot,GuiPath,target,Target2Files], _),
 
 	tcl_call(shl_tcli, [disable_cref_btns], _).
-
-%%  .mbar.a entryconfigure "Test2" -state disabled
-%%  $menubar.tools add command -label "Open Cref Suite$elipsis"
-%%  .topals.mmenb entryconfigure "Open Cref Suite$elipsis" -state disabled
-
 
 /**************************** Cref Object slots: ***************
 	[   name=cref_panel_mgr, subClassOf=genericObjects,
@@ -993,7 +979,7 @@ gen_cref_mgrAction(show_report, Type, SuiteMgr)
 	(Type == xrf ->
 		%% Temporary, until opening the *.xrf in an als_document
 		%% is supported:
-		catenate('vi ', Target, Cmd)
+		catenate('cat ', Target, Cmd)
 		;
 		file_extension(Target, Name, _),
 		file_extension(HTMLTarget, Name, html),
@@ -1027,49 +1013,92 @@ als_ide_mgrAction(save_cref_suite, ALSIDEObject)
 gen_cref_mgrAction(save_cref_suite, SuiteMgr)
 	:-
 	gen_cref_mgrAction(save_to_file, SuiteMgr).
-/*	
-	send(SuiteMgr, update_check_complete(Flag)),
-	(Flag = ok ->
-		send(CurProject, save_to_file)
-		;
-		true
-	).
-*/
+
 gen_cref_mgrAction(save_to_file, State)
 	:-
 	read_gui_spec(State, PanelEqns),
-pbi_write(save_to_file_PanelEqns=PanelEqns),pbi_nl,pbi_nl,
-% save_to_file_PanelEqns=[title=,suite_file=x,suite_dir=./,list_of_files=,src_dir=./,target=]
-	
 	check4_suite_update(PanelEqns, State),
-
+	!,
 	accessObjStruct(title,State,Title),
 	check_filepath(crf, State, FilePath),
-pbi_write(save_to_file_cfp=FilePath), pbi_nl,
+	accessObjStruct(suite_dir,State,NewSuiteDir),
 	path_directory_tail(FullNewSuiteDirPath, NewSuiteDir, FilePath),
 
-%	forbidden_slots(cref,Forbidden),
-	extract_cref_suite(State, NewEqns),
-
+	extract_cref_suite(State, NewCrefSuiteEqns),
 	open(FullNewSuiteDirPath, write, OS, []),
 	printf(OS, '/* Cref suite: %t\n', [Title]),
 	printf(OS, '   Location: %t\n', [FullNewSuiteDirPath]),
 	printf(OS, ' */\n', []),
-	write_clauses(OS, NewEqns, [quoted(true)]),
+	write_clauses(OS, NewCrefSuiteEqns, [quoted(true)]),
 	close(OS).
 
-	check4_suite_update(PanelEqns, State),
-	dmember(suite_file=SioteFo;e
-	dmember(suite_dir=NewSuiteDir, PanelEqns),
+gen_cref_mgrAction(save_to_file, State).
 
-/*
-gen_project_mgrAction(update_check_complete(fail), State)
+check4_suite_update(PanelEqns, State)
 	:-
-	Title = 'Incomplete Project',
-	Msg = 'Project must have title and file name',
-	info_dialog(shl_tcli, Msg, Title).
-*/
+	dmember(suite_file=SuiteFile, PanelEqns),
+	c4_su_sf(SuiteFile, State),
 
+	dmember(suite_dir=SuiteDir, PanelEqns),
+	c4_su_suitd(SuiteDir, State),
+
+	dmember(src_dir=SrcDir, PanelEqns),
+	c4_su_srcd(SrcDir, State),
+
+	dmember(list_of_files=PrologFiles, PanelEqns),
+	c4_su_pfiles(PrologFiles, State).
+
+		%% Do we want to post the Cref panel titles too?::
+%	accessObjStruct(title,State,Title),
+%	Title \= '', 
+%	accessObjStruct(gui_spec, State, GuiPath),
+%	tcl_call(shl_tcli, [post_open_project,ProjTitle, GuiPath], _).
+
+c4_su_sf('', State)
+	:-
+	Msg = 'CrefPanel must have a spec (*.crf) name',
+	check4_suite_update_dialog(Msg),
+	fail.
+c4_su_sf(SuiteFile, State)
+	:-
+	setObjStruct(suite_file, State, SuiteFile).
+
+c4_su_suitd('', State)
+	:-
+	setObjStruct(suite_dir, State, './'),
+	Msg = 'CrefPanel missing Spec Dir. Will use: ./',
+	check4_suite_update_dialog(Msg).
+c4_su_suitd(SuiteDir, State)
+	:-
+	setObjStruct(suite_dir, State, SuiteDir).
+
+c4_su_srcd('', State)
+	:-
+	setObjStruct(src_dir, State, './'),
+	Msg = 'CrefPanel missing Source Dir. Will use: ./',
+	check4_suite_update_dialog(Msg).
+
+c4_su_srcd(SrcDir, State)
+	:-
+	setObjStruct(src_dir, State, SrcDir).
+
+c4_su_pfiles('', State)
+	:-
+	Msg = 'Warning: CrefPanel has no prolog files',
+	check4_suite_update_dialog(Msg).
+c4_su_pfiles([], State)
+	:-
+	Msg = 'Warning: CrefPanel has no prolog files',
+	check4_suite_update_dialog(Msg).
+c4_su_pfiles(PrologFiles, State)
+	:-
+	setObjStruct(list_of_files, State, PrologFiles).
+
+
+check4_suite_update_dialog(Msg)
+	:-
+	DialogTitle = 'Incomplete Cref Panel',
+	info_dialog(shl_tcli, Msg, DialogTitle).
 
 read_gui_spec(State, PanelEqns)
 	:-
@@ -1089,7 +1118,8 @@ do_flat_crf([ [X, Y] | CrefPanelVs], [X=Y | RestOut])
 extract_cref_suite(State, [src_dir=SrcDir, list_of_files=Files, target=Target])
 	:-
 	accessObjStruct(src_dir, State, SrcDir),
-	accessObjStruct(list_of_files, State, FullPaths),
+	accessObjStruct(list_of_files, State, InitFullPaths),
+	(InitFullPaths == '' -> FullPaths = [] ; FullPaths = InitFullPaths),
 	strip_dirs(FullPaths, Files),
 	accessObjStruct(target, State, PanelTarget),
 	file_extension(PanelTarget, Name, _),

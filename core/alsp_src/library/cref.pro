@@ -123,7 +123,11 @@ read_crf_file(SuiteDesc,Directory,FilesList,TargetFile, ConfigInfo, SuiteName)
 		(is_absolute_path(RawDirectory) ->
 			Directory = RawDirectory
 			;
-			path_directory_tail(Directory, '.', RawDirectory)
+			( RawDirectory == './' -> 
+				Directory = RawDirectory
+				;
+				path_directory_tail(Directory, '.', RawDirectory)
+			)
 		)
                 ;
 		Directory = '.'

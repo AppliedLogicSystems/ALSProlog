@@ -1818,9 +1818,6 @@ proc cref_panel \
     pack $base.report_buttons.xrf \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
-
-
-
     focus $base.suite_file.entry
 
     bind $base <Key> "prj_dirty_key $base %K"
@@ -1842,10 +1839,8 @@ proc rd_cref_panel {base} {
     lappend Result [list target [$base.target.entry get] ]
 
     return $Result
-
 }
 
-#	add_search_dirs $base.search_dirs.listbox $proenv(ppj_pathtype) $base
 proc folder_choose_dir {base Which} {
     	global array proenv
 	set CWD [pwd]
@@ -1861,7 +1856,6 @@ proc folder_choose_dir {base Which} {
     	$base.buttons.save configure -state active
 }
 
-
 proc disable_cref_btns {} {
     global elipsis
     .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state disabled
@@ -1874,12 +1868,6 @@ proc enable_cref_btns {} {
 }
 
 proc crefSteFileEntryCmd {base} {
-	#puts "crefSteFileEntryCmd=$base"
-	#puts "SteFile: |[$base.suite_file.entry get]|"
-	#puts "SteFile: |$curSuiteFile|"
-	#set sfsplit [split [$base.suite_file.entry get] . ]
-	#set sflen [llength $sfsplit]
-	#puts "sfsplit = $sfsplit sflen = $sflen"
     set curSuiteFile [$base.suite_file.entry get]
     set sfx [file extension $curSuiteFile]
 
@@ -1901,15 +1889,18 @@ proc crefSteFileEntryCmd {base} {
     } else {
 	set baseFile $suiteFileTail
     }
-    $base.title.entry insert end  $baseFile
-
-    $base.target.entry insert end  $baseFile.\[xrf,html\]
+    if {[expr [expr [llength [$base.title.entry get]]] == 0]} {
+        $base.title.entry insert end  $baseFile
+    }
+    if {[expr [expr [llength [$base.target.entry get]]] == 0]} {
+	$base.target.entry insert end  $baseFile.\[xrf,html\]
+    }
     
     return true;
 }
 
 proc crefTgtEntryCmd {base} {
-puts "crefTgtEntryCmd=$base"
-puts "suite_file: |[$base.suite_file.entry get]|"
+#puts "crefTgtEntryCmd=$base"
+#puts "suite_file: |[$base.suite_file.entry get]|"
 return true;
 }

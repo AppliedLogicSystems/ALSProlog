@@ -195,7 +195,6 @@ module alsdev.
 			non_file_edits = [] 
 		]
 	]).
-%pbi_write(defineClass=als_ide_mgr),pbi_nl,pbi_ttyflush.
 
         %%   SHL_SOURCE_HANDLER:
 :- defineClass(alsdev,

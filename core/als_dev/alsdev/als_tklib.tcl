@@ -16,13 +16,9 @@
 ######### General routines needing defining if interp \= shl_tcli
 ##################################################################################
 
-puts "als_tklib.tcl: Window procs info = |[info procs Window]|"
-#puts "als_tklib.tcl: winfo name = |[winfo name Window]|"
-
 if {[info procs Window] == ""} then {
 proc Window {args} {
 global vTcl
-
 	set cmd [lindex $args 0]
 	set name [lindex $args 1]
 	set newname [lindex $args 2]
