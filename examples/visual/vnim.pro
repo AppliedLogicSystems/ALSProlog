@@ -9,6 +9,13 @@
  |	Plays the game Nim as shown in
  |      "The Art of Prolog", Leon Sterling, Ehud Shapiro, 
  |		The MIT Press, 1986.
+ |
+ |	[https://en.wikipedia.org/wiki/Nim]:
+ |	Nim is a mathematical game of strategy in which two players 
+ |	take turns removing objects from distinct heaps. On each turn, 
+ |	a player must remove at least one object, and may remove any 
+ |	number of objects provided they all come from the same heap. 
+ |	The goal of the game is to be the player to remove the last object.
  *===================================================================*/
 
 /*---------------------------------------------------------------------*
@@ -60,7 +67,7 @@ check_user_win(Position, IPos)
 
 check_computer_win([])
 	:-!,
-	info_dialog('I win!', 'End of Game'),
+	info_dialog('I, the computer, win!', 'End of Game'),
 	quit.
 
 check_computer_win(_).
@@ -93,12 +100,10 @@ remove_zeros([R | Rs], [R | L])
 export select_stick/2.
 select_stick(Row, Stick)
 	:-
-pbi_write(select_stick),pbi_nl,
-trace,
 	check_row_ok(Row),
 	!,
 	sprintf(atom(Cmd), 
-		'.vn.p%t.b%t-%t configure -background #d9d9d9 -state disabled',
+		'.vn.p%t.b%t-%t configure  -text x -state disabled',
 		[Row, Row, Stick]),
 	tcl_call(tcli, Cmd, _),
 	cur_pos(P),
@@ -108,17 +113,29 @@ trace,
 	assert(cur_pos(P)).
 
 :- dynamic(working_row/1).
+    %% working_row records the row from which the user has stared removing 
+    %% sticks for this user-round of removals;  So check_row_ok/1 determines
+    %% if subsequent clicks in this round are still on that some initial row.
+    %% When the user says "I'm done choosing", then in user_done_picking/0,
+    %% working_row/1 is abolished.
 check_row_ok(Row)
 	:-
 	working_row(WR),
 	!,
+	    %% Is selected row the same as previously?:
 	fin_check_row_ok(WR, Row).
 
+	%% No rows were previously clicked on
+	%% during this user-round, so this
+	%% is the first; record it:
 check_row_ok(Row)
 	:-
 	assert(working_row(Row)).
 
+	%% Yes, the selected row is the same as previously:
 fin_check_row_ok(Row, Row) :-!.
+
+	%% No, so ring the bell to alert the user:
 fin_check_row_ok(_, _)
 	:-
 	tcl_call(tcli, bell, _),
@@ -173,7 +190,8 @@ app_n_args([0 | As], PR, [0 | NAs], Row, StickN)
 app_n_args([1 | As], PR, [0 | NAs], Row,StickN)
 	:-
 	sprintf(atom(Cmd), 
-		'.vn.p%t.b%t-%t configure -background #d9d9d9 -state disabled',
+%		'.vn.p%t.b%t-%t configure -background #d9d9d9 -state disabled',
+		'.vn.p%t.b%t-%t configure -text c -state disabled',
 		[Row, Row, StickN]),
 	tcl_call(tcli, Cmd, _),
 	NPR is PR-1,
