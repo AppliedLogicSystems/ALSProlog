@@ -42,7 +42,7 @@ Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit suppo
 
 Debian/Ubuntu: `sudo apt-get install build-essential gcc-multilib tk-dev git`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 tk-devel.i686 git`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
 ### Mac OS X
 
