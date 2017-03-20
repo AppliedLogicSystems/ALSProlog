@@ -1,25 +1,25 @@
-###[Term Manipulation](#111-term-manipulation)
-####[Comparison predicates](#1111-comparison-predicates)
-####[Term Classification](#1112-term-classification)
-####[Term Analysis & Synthesis](#1113-term-analysis--synthesis)
-####[List manipultation predicates](#1114-list-manipultation-predicates)
-####[Term Database](#1115-term-database)
-###[Atom and UIA Manipulation](#112-atom-and-uia-manipulation)
-###[Type Conversion](#113-type-conversion)
-###[Collectives](#114-collectives)
-###[Prolog Database](#115-prolog-database)
-###[Global Variables](#116-global-variables)
-###[Control](#117-control)
-###[Arithmetic](#118-arithmetic)
-###[Program and System Management](#119-program-and-system-management)
-###[Date and Time](#1110-date-and-time)
-###[File Names](#1111-file-names)
-###[File System](#1112-file-system)
-###[I-Code Calls](#1113-i-code-calls)
+### [Term Manipulation](#111-term-manipulation)
+#### [Comparison predicates](#1111-comparison-predicates)
+#### [Term Classification](#1112-term-classification)
+#### [Term Analysis & Synthesis](#1113-term-analysis--synthesis)
+#### [List manipultation predicates](#1114-list-manipultation-predicates)
+#### [Term Database](#1115-term-database)
+### [Atom and UIA Manipulation](#112-atom-and-uia-manipulation)
+### [Type Conversion](#113-type-conversion)
+### [Collectives](#114-collectives)
+### [Prolog Database](#115-prolog-database)
+### [Global Variables](#116-global-variables)
+### [Control](#117-control)
+### [Arithmetic](#118-arithmetic)
+### [Program and System Management](#119-program-and-system-management)
+### [Date and Time](#1110-date-and-time)
+### [File Names](#1111-file-names)
+### [File System](#1112-file-system)
+### [I-Code Calls](#1113-i-code-calls)
 
-##11.1 Term Manipulation
+## 11.1 Term Manipulation
 
-###11.1.1 Comparison predicates
+### 11.1.1 Comparison predicates
 ````
 @< /2
 @> /2
@@ -35,7 +35,7 @@ compare(?, +, +)
 standard order for Prolog terms. ==/2 and \==/2 perform limited identity (isomorphism) checks on their arguments. compare/3 subsumes both these comparison
 and identify checks.
 
-###11.1.2 Term Classification
+### 11.1.2 Term Classification
 ````
 atom/1
 atomic/1
@@ -45,7 +45,7 @@ number/1
 ````
 These predicates classify terms according to the types expressed by their names.
 
-###11.1.3 Term Analysis & Synthesis
+### 11.1.3 Term Analysis & Synthesis
 ````
 functor/3
 functor(Term, Atom, Integer)
@@ -91,7 +91,7 @@ nonvar(+)
 ````
 var(Term) succeeds iff Term is an uninstantiated variable, and nonvar/1 behaves exactly opposite.
 
-###11.1.4 List manipultation predicates
+### 11.1.4 List manipultation predicates
 
 ````
 append/3
@@ -143,7 +143,7 @@ defined by ==/2,and unifying the result with SortedList. keysort/2 expects
 List to be a list of terms of the form: Key-Data, sorting each pair by Key alone.
 See also the ALS Library.
 
-###11.1.5 Term Database
+### 11.1.5 Term Database
 ````
 recorda/3
 recorda(Key,Term,Ref)
@@ -158,7 +158,7 @@ recorded(Key,Term,Ref)
 recorded(Key,Term,Ref)
 ````
 
-##11.2 Atom and UIA Manipulation
+## 11.2 Atom and UIA Manipulation
 ````
 atom_length/2
 atom_length(Atom,Length)
@@ -207,7 +207,7 @@ gensym(+, -)
 ````
 Creates families of unique symbols.
 
-##11.3 Type Conversion
+## 11.3 Type Conversion
 ````
 atom_chars/2
 atom_chars(Atom,CharList)
@@ -254,7 +254,7 @@ name/2 converts between constants and Prolog strings (lists of character codes).
 It is included primarily for backwards compatibility with older versions of Prolog;
 use of [atom/number]_[chars/codes] above is recommended.
 
-##11.4 Collectives
+## 11.4 Collectives
 ````
 bagof/3
 bagof(Template,Goal,Collection)
@@ -287,7 +287,7 @@ b_findall(+, +, -, +)
 ````
 Like findall/3, except that it locates at most integer Bound > 0 number of solutions.
 
-##11.5 Prolog Database
+## 11.5 Prolog Database
 ````
 assert/1
 assert(Clause)
@@ -364,10 +364,10 @@ $clauseinfo/3
 $firstargkey/2
 ````
 
-##11.6 Global Variables
+## 11.6 Global Variables
 gv_alloc/1, make_gv/1 and relatives provide methods for manipulating global variables. See Chapter 8 (Global Variables, Destructive Update & Hash Tables) for a discussion.
 
-##11.7 Control
+## 11.7 Control
 ````
 cut(!)
 comma(,)
@@ -444,10 +444,10 @@ getPrologInterrupt/1
 ````
 The predicates provide access to the ALS Prolog interrupt mechanism. See Chapter 9.3 (Interrupts).
 
-##11.8 Arithmetic
+## 11.8 Arithmetic
 See is/2 in the Reference Manual.
 
-##11.9 Program and System Management
+## 11.9 Program and System Management
 ````
 als_system/1
 als_system(InfoList)
@@ -579,7 +579,7 @@ Retrieve information concerning all Prolog- or C-defined procedures.
 ````
 Retrieve detailed information about a given procedure.
 
-##11.10 Date and Time
+## 11.10 Date and Time
 
 These predicates provide access to the date and time functions of the underlying operating system. They are designed to be portable across operating systems. As
 such, they utilize Prolog-oriented, os-independent formats for date and time. Dates
@@ -656,7 +656,7 @@ gm_datetime(-, -)
 This predicate is similar to datetime/2, returning the Greenwich UTC date and time
 from the same call to the operating system clock.
 
-##11.11 File Names
+## 11.11 File Names
 
 File names and paths are one of the unpleasant ways in which operating systems differ. The file name and path predicates described in this section provide a substntial
 degree of portability across operating systems. They do not claim to handle or support all possible names or path descriptions in each supported operating system.
@@ -897,7 +897,7 @@ If Disk1 and Disk2 are atoms denoting disks, determines whether they are the
 same, allowing for identification of upper and lower case letters, as appropriate for
 the os.
 
-##11.12 File System
+## 11.12 File System
 The most important aspects of access to the file system are described in Chapter 11
 on Prolog I/O. However, there are a number of further useful operations which are
 described in this Section. 
@@ -905,7 +905,7 @@ The predicates discussed in this section are defined in
 the builtins file fs_cmn.pro together with the various system-specific files
 fsunix.pro, fswin32.pro, fsmac.pro. The primary predicates are the following:
 
-####Manipulating directories and files:
+#### Manipulating directories and files:
 ````
 get_cwd/1       - returns the current working directory
 change_cwd/1    - change the current working directory
@@ -915,7 +915,7 @@ remove_file/1   - removes a file from the current working directory
 exists_file/1   - determines whether or not a file exists
 file_status/2   - returns status information concerning a file
 ````
-####Lists of files in subdirectories:
+#### Lists of files in subdirectories:
 ````
 files/2       - returns a list of files, matching a pattern, in the current directory
 files/3       - returns a list of files, matching a pattern, residing in a directory
@@ -923,7 +923,7 @@ subdirs/1     - returns the list of subdirectories of the current directory
 subdirs_red/1 - returns the list of subdirectories of the current directory, sans ’.’ and ’..’
 directory/3   - returns a list of files of a given type and matching a pattern
 ````
-####Manipulating Drives:
+#### Manipulating Drives:
 ````
 get_current_drive/1    - returns the current drive
 change_current_drive/1 - changes the current drive
@@ -997,7 +997,7 @@ exists_file(+)
 Determines whether a file exists in the current directory. Applies to subdirectories
 as well as regular files.
 
-####File Types and Status
+#### File Types and Status
 
 Every OS classifies files into different types and provides them with various statuses. ALS Prolog provides abstract types for directories and regular files, together
 with the ability to utilize OS-specific types, as described in the following table. On
@@ -1075,7 +1075,7 @@ change_current_drive(+)
 If Drive is an atom describing a logical drive which exists, changes the current
 drive to become Drive. On Unix, simply succeeds with no side effects.
 
-##11.13 I-Code Calls
+## 11.13 I-Code Calls
 
 ````
 $icode/4
@@ -1227,7 +1227,7 @@ relinkdatabase (-25)
     desirable to relink the program before certain calls to assert or abolish.
 ````
 
-####Icode calls and .obp files
+#### Icode calls and .obp files
 
 A .obp file simply consists of parameters to icode calls (along with symbol table information). During the execution of a command, it is not always desirable to keep the command in the .obp file. A simple example of this is in
 the DCG expander where expand/2 is called from the parser as a command.
@@ -1236,7 +1236,7 @@ being added to the .obp file. If the expand command were retained, the assert
 operation would be done twice. Note also that when the .obp version of the
 file is loaded, the expand predicate will not be called. Only the assert operations that the expand predicate created will be performed.
 
-####Icode Instructions
+#### Icode Instructions
 
 The non-negative icode service numbers cause WAM instructions to be installed in the icode buffer. In the current version, argument/temporary (Ai, Xn)
 registers may range from 1 thru 16. Permanent variable numbers (Yn and MaxYn and EnvSize) may range from 1 thru 62. Only arities 0 thru 15 are permitted. Specifying procedure names, functors, and symbols (ProcName, Functor,

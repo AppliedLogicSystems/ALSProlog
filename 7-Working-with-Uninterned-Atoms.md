@@ -6,7 +6,7 @@ in the symbol table. These atoms are called UIAs (UnInterned Atoms).
 Because UIAs are stored on the heap, they are efficiently garbage collectable. Ordinary Prolog programs cannot distinguish between interned and uninterned atoms,
 except for possible differences in efficiency. However, programs which must interface to other external programs can sometimes find UIAs very useful.
 
-##7.1 The Efficiency of UIAs
+## 7.1 The Efficiency of UIAs
 
 Symbols are entered in the symbol table only once, so comparison between atoms
 which are symbols is very fast. This is because only the symbol table indices need
@@ -16,7 +16,7 @@ Thus, it is desirable to store atoms as symbols if they are likely to often be c
 searching a file. These objects should usually be stored as UIAs to avoid clogging
 up the symbol table.
 
-###7.1.1 When is a UIA created?
+### 7.1.1 When is a UIA created?
 
 ALS Prolog uses the following rules to decide whether a given occurrence of an
 atom should be a symbol or a UIA.
@@ -48,7 +48,7 @@ The rationale behind making atoms which are enclosed in single quotes into UIAs
 is that these sort of atoms most often appear as filenames or messages to write out.
 As such, they are rarely compared with other atoms.
 
-##7.2 Interning UIAs
+## 7.2 Interning UIAs
 
 It is sometimes desirable, under direct program control, to intern an atom which
 was originally stored as a UIA. This will cause all future occurrences of the atom,
@@ -72,9 +72,9 @@ All three quoted strings will be interned so that later occurrences will be stor
 symbols. The PI_forceuia() function can also be used to intern UIAs. See
 PI_forceui in the Foreign Interface Reference.
 
-##7.3 Manipulating UIAs
+## 7.3 Manipulating UIAs
 
-###7.3.1 Creating UIAs
+### 7.3.1 Creating UIAs
 
 There are several additional predicates which can be used to manipulate UIAs. A
 UIA of specific length can be created with a call to $uia_alloc/2 with the following
@@ -87,7 +87,7 @@ bytes) of the UIA to allocate. The actual size of the buffer allocated will be a
 created with $uia_alloc are initially filled with zeros, and will unify with the null
 atom (’’).
 
-###7.3.2 Modifying UIAs
+### 7.3.2 Modifying UIAs
 
 Values can be inserted into a UIA buffer using a number of different routines. We
 will discuss two of them here: $uia_pokeb/3 and $uia_pokes/3. The modifications
@@ -117,7 +117,7 @@ truncated at the end of the buffer. This is illustrated in the Figure below.
 ![](images/ActionOfUIAPokes.png)
 Figure. Action of $uia_pokes/3.
 
-###7.3.3 Accessing UIA Components
+### 7.3.3 Accessing UIA Components
 
 $uia_peekb/3, $uia_peeks/3, and $uia_peeks/4 are used to obtain specific
 bytes and symbols (UIAs) from a buffer created by $uia_alloc/2. The parameters for these procedures are specified as follows:
@@ -132,7 +132,7 @@ $uia_peekb/3 binds Value to the byte at position Offset. $uia_peeks/3 binds Extr
 Offset and extending to the end of the buffer. $uia_peeks/4 binds Extract to a UIA consisting of the characters beginning at position Offset and extending to position End where End = Offset + Size. If End would occur
 beyond the end of the buffer, Extract simply extends to the end of the buffer.
 
-###7.3.4 An Example.
+### 7.3.4 An Example.
 
 The following example procedure illustrates how to create a buffer and fill it with
 the name of a given atom with using $uia_pokes/3.
@@ -153,7 +153,7 @@ copy_list_to_uia([H | T], N, Buf)
        copy_list_to_uia(T, NN, Buf).
 ````
 
-###7.3.5 List of Routines for Working with UIAs
+### 7.3.5 List of Routines for Working with UIAs
 Below is a full list of the routines which may be used to modify and access component values of a UIA. {Details can be found in the ALS Prolog Reference Manual.}
 ````
 $uia_clip/2 - clip the given UIA
@@ -191,7 +191,7 @@ When Atom is a Prolog atom (symbol or UIA),
 returns the length of the print name of that atom (thus not counting the terminating
 null byte).
 
-##7.4 Observations on Using UIAs
+## 7.4 Observations on Using UIAs
 
 As indicated by the rules presented in Section 7.2 (Interning UIAs) , ALS Prolog
 automatically handles much of the use of UIAs. The preceeding Section presented

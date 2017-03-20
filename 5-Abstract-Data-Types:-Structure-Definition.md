@@ -71,7 +71,7 @@ xmakeWindowStruct(wi(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),
 ````
 Now let us examine the details.
 
-##5.1 Specifying Structure Definitions
+## 5.1 Specifying Structure Definitions
 
 defStructs directives are simply expressions of the form:
 
@@ -93,26 +93,26 @@ The right sides of the defStruct equality statements are Prolog terms whose stru
 is a list of atoms which are the symbolic names of the properties or slots of the structure being defined. For all of the rest of the equality statements, the right side is
 a single atom. The roles of these right side atoms are described below:
 
-###5.1.1 accessPred
+### 5.1.1 accessPred
 
 The name of the ternary (3-argument) predicate to be used for accessing the values
 of the slots in the structure.
 
-###5.1.2 setPred
+### 5.1.2 setPred
 
 The name of the ternary (3-argument) predicate to be used for setting or changing
 the values of the slots in the structure.
 
-###5.1.3 makePred
+### 5.1.3 makePred
 
 The name of the unary predicate used for obtaining a fresh structure of the defined
 type.
 
-###5.1.4 structLabel
+### 5.1.4 structLabel
 
 The name of the functor of the structure defined.
 
-###5.1.5 propertiesList
+### 5.1.5 propertiesList
 
 This is a list of slot specifications. A slot specification is one of the following:
 * an atom, which is the name of the particular slot, or

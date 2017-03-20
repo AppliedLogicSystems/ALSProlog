@@ -12,7 +12,7 @@ and interprets the (compiled) code which has been loaded. On all other versions 
 ALS Prolog, the debugger is a much more sophisticated program (written in ALS
 Prolog) that utilizes the interrupt facilities of ALS Prolog to directly debug the compiled (native) code produced by the ALS Prolog compiler. It does this without requiring you to set any special flags during compilation (loading).
 
-##14.1 The Four-Port Model
+## 14.1 The Four-Port Model
 The four-port model of Prolog execution provides a conceptual point of view for
 analyzing the flow of control during execution of a Prolog program. Think of each
 procedure in your Prolog program as having a box around it with four ports for getting in and out of the procedure.
@@ -77,7 +77,7 @@ second clause of likes/2, the original goal, likes(john,Who), now fails.
 ![](images/RedoFailFemale.png)
 Figure. Redo and fail tracing female/1.
 
-##14.2 Creeping Along With the Debugger
+## 14.2 Creeping Along With the Debugger
 
 The debugger helps you to find errors in your program by letting you look at the
 control flow of the program as well as showing you the variable bindings as the program goes through each of the ports. You can control how much information is
@@ -172,7 +172,7 @@ this:
 no.
 ````
 
-##14.3 Additional Debugger Commands
+## 14.3 Additional Debugger Commands
 
 If your program is large and/or complicated, looking at every port call in the program’s execution is often tiresome and unnecessary. Once a procedure is debugged, it is no longer necessary to trace its execution in detail.
 
@@ -180,7 +180,7 @@ However, other procedures may still contain errors. In this case, you want to ex
 of the correct portions of the program. This can be done by limiting the amount of
 information printed by the debugger..
 
-###14.3.1 Skipping Portions of Code
+### 14.3.1 Skipping Portions of Code
 
 The first method of limiting information is the skip command. This causes the debugger to run the current goal, while suppressing the port information for all subgoals in the interior of the call. However, if the traced goal fails because of the failure of a goal submitted after the traced goal, the debugger will print out all subgoals
 of the traced goal at their fail port. The following example demonstrates this behavior:
@@ -198,7 +198,7 @@ stop at any of the ports inside the call to likes/2. However, when the call fail
 because of the ;\hveleven return command in the Prolog shell’s answer showing
 mode, the fail ports from the interior of that call are printed.
 
-###14.3.2 Ignoring Even More Execution
+### 14.3.2 Ignoring Even More Execution
 
 The big skip command is similar to the skip command above, except that the internal failure ports are not printed when a call fails. You tell the debugger to do a
 big skip by typing S (uppercase ‘S’) followed by \ReturnKey . A big skip is also
@@ -213,7 +213,7 @@ Who = mary ;
 In this case, only the original call to likes/2 prints out a failure report. All the
 other failures are suppressed by the big skip in call number 1.
 
-###14.3.3 Getting Back Ignored Execution
+### 14.3.3 Getting Back Ignored Execution
 
 Sometimes you might skip over a call only to find that the call failed for some unknown reason. In other cases, the variable instantiations produced by a call are not
 what you expected. The retry command gives you another chance to trace the same
@@ -229,7 +229,7 @@ likes(john,mary)succeeded by retrying the call and creeping through its executio
 After a retry command, the state of the program is reset to the way it was just before
 the retried goal ran, except for side effects. Side effects not undone by a retry include modifications to the database via assert/1 or retract/1.
 
-##14.4 Changing the Leashing
+## 14.4 Changing the Leashing
 
 After watching all of the ports during a trace, you might find that you want don’t
 want to stop at every port that passes by. For example, it might not be useful to see
@@ -241,7 +241,7 @@ If you only want to set leashing on one port, you can omit the square brackets, 
     leash(call).
 leash(all) enables the printing of every port.
 
-##14.5 Spying on Code
+## 14.5 Spying on Code
 
 The spy/1 builtin allows you to set spy points in your program. A spy point will
 interrupt the normal execution of your program and begin tracing at every call to a
@@ -289,7 +289,7 @@ out its answer.
 If for any reason simplify/2 tries to find another solution, the debugger will
 wake up again at the redo port and allow you to continue tracing.
 
-##14.6 Leaping Ahead
+## 14.6 Leaping Ahead
 
 The debugger also lets you to leap from the trace of a call to the next spy point.
 Leaping suppresses the normal action of the debugger, allowing the program to
@@ -309,7 +309,7 @@ x,x+x.
 (7) 2 exit: simplify(1+1,2) ? c
 (8) 11 call: write(2) ?
 ````
-##14.7 Turning Off Spy Points
+## 14.7 Turning Off Spy Points
 
 The nospy/0 builtin removes all spy points from your program, while nospy/1
 removes a specific spy point:
@@ -319,11 +319,11 @@ Spy point removed for user:a/1.
 yes.
 ````
 
-##14.8 Getting Help
+## 14.8 Getting Help
 
 Typing ‘h’ at the ? prompt of the debugger gives a summary of the debugger commands.
 
-##14.9 Exiting the Debugger
+## 14.9 Exiting the Debugger
 
 There are two ways to leave the debugger. The abort command (a) abandons the
 current computation, and returns control to the Prolog shell. The exit command (e)

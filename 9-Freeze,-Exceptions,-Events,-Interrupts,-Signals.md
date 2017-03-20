@@ -1,4 +1,4 @@
-##9.1 Freeze
+## 9.1 Freeze
 
 ALS Prolog supports a ‘freeze’ control construct similar to those that appear in
 some other prolog systems (See [carlsson] for general information on delay terms and implementation strategies). Using ‘freeze’, one can implement a variety of approaches to co-routining and delayed evaluation.
@@ -146,7 +146,7 @@ D= 1
 yes. 
 ````
 
-##9.2 Exceptions
+## 9.2 Exceptions
 The exception mechanism of ALS Prolog allows programs to react to extraordinary
 circumstances in an efficient and appropriate manner. The most common extraordinary circumstance to be dealt with is errors. Often an error (perhaps inappropriate user input, etc.) is detected deep in the calling sequence of predicates in a program.
 The most appropriate reaction on the part of the program may be to return to a much
@@ -284,7 +284,7 @@ throw/0 predicate is executed, control is given to the ExceptionGoal. After
 the ExceptionGoal is run, control starts after the call to catch/2 which handled the exception. Invocations of catch/2 may be nested and a throw/0 will always
 goes to the most recent enclosing catch/2.
 
-##9.3 Interrupts
+## 9.3 Interrupts
 
 Each time a procedure is called, ALS Prolog compares the distance between the top
 of the heap and its boundary to see if a garbage collection is necessary. If this distance ever becomes less than a pre-defined value, called the heap safety value, the
@@ -498,7 +498,7 @@ appears in the file builtins.pro. This decompiler is used as the basis for listi
 as well as for retract. In addition, it is used to implement the debugger, found in
 the file debugger.pro.
 
-##9.4 Events
+## 9.4 Events
 
 The event handling mechanism of ALS Prolog (developed by Kevin Buettner, based on [Meier]) implements both the system-level error and exception mechanisms, together with the general user-level event mechanisms such as coupling to signals and application-based interrupts.  Most of the machinery of the event mechanism is readily discernible in the builtins file blt_evt.pro.
 At the present time, there are five predefined types of events:
@@ -583,7 +583,7 @@ alarm_handler(_,Goal,_)
 Note that the first clause uses propagate_event/3 to pass on all events except
 sigalrm, which is handled by the second clause.
 
-##9.5 Signals
+## 9.5 Signals
 
 ALS Prolog provides a strong mechanism for interfacing to external operating system signaling
 mechanisms. The machinery allows the programmer to connect external signals to internal Prolog events generally as described in the previous section. The details for the coupling are found in the builtins file blt_evt.pro. The connection between signal numbers and signal names is provied

@@ -4,7 +4,7 @@ once an association is installed, backtracking to a point prior to creation of t
 points concerning this.) Because both the associated term and value may occur on
 the heap, both a term and its associated value can contain uninstatiated variables.
 
-##8.1 ‘Named’ Global Variables
+## 8.1 ‘Named’ Global Variables
 
 The underlying primitive predicates set_global/2 and get_global/2 defined in the
 next section maintain a uniform global association list. This has the disadvantage
@@ -40,7 +40,7 @@ yes.
 X = travel_now.
 ````
 
-##8.2 The Primitive Global Variable Mechanism.
+## 8.2 The Primitive Global Variable Mechanism.
 
 The underlying or primitive global variable mechanism is best described in terms
 of a simple implementation point of view. Global variables are value cells with the
@@ -116,7 +116,7 @@ Note that gv_set/2 is a constant time operation so long as the second argument
 is an atom or integer. Otherwise, it requires time linearly proportional to the current
 depth of the choicepoint stack.
 
-##8.3 Destructive Modification/Update of Compound Terms
+## 8.3 Destructive Modification/Update of Compound Terms
 
 ALS Prolog provides a predicate which allows programs to destructively modify arguments of compound terms (or structures). This predicate is mangle/3. The
 effects of mangle/3 are destructive in the sense that they survive backtracking. The
@@ -140,7 +140,7 @@ Victim = doNot(fold,spindle,mutilate)
 yes.
 ````
 
-##8.4 ‘Named’ Hash Tables
+## 8.4 ‘Named’ Hash Tables
 
 The allocation and use of hash tables is supported by exploiting the fact that the
 implementation of terms is such that a term is an array of (pointers to) its arguments. So hash tables are created by combining a term (created on the heap) together with access routines implemented using basic hashing techniques. The destructive update feature mangle/3 is used in an essential manner. As was the case with global variables, at bottom lies a primitive collection of mechanisms, over
@@ -216,7 +216,7 @@ yes.
 no.
 ````
 
-##8.5 Primitive Hash Table Predicates
+## 8.5 Primitive Hash Table Predicates
 
 The core hash tables are physically simply terms of the form
 

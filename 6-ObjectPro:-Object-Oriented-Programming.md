@@ -61,7 +61,7 @@ local to the defining module. However, each object ‘knows’ the module of its
 
 can be made from the context of any module.
 
-##6.2 Defining Objects and Sending Messages
+## 6.2 Defining Objects and Sending Messages
 
 An object is defined by an expression of the form
 
@@ -122,7 +122,7 @@ is provided. This is merely syntactic sugar for
 That is, the implementation makes no attempt to verify that a send_self message
 is being truly sent from an object to itself.
 
-##6.3 Defining Classes
+## 6.3 Defining Classes
 
 A class is defined by a directive of the form
 
@@ -249,7 +249,7 @@ defineClass([name=engine,
 ])
 ````
 
-##6.4 Specifying Class Methods
+## 6.4 Specifying Class Methods
 
 To specify the methods of a class, the programmer must define a two argument
 predicate which will specify the reactions of instances of the class to various messages. The default name of this action predicate is

@@ -5,7 +5,7 @@ in an appropriate command window. The IDE displays an initial spash screen
 
 while it loads, and then replaces the spash screen with the main listener window.
 
-##16.1 Main Environment Window
+## 16.1 Main Environment Window
 The details of the appearance of the ALS IDE windows will vary across the platforms. Here is what reduced-size versions of the main window look like on Linux/Unix and on Windows:
 
 ![](images/alsdev_main_unix.gif)
@@ -30,11 +30,11 @@ while the Help Menu will in the future provide access to the help system (which
 can also be run separately). The Console Window is used to submit goals to the
 system and to view results.
 
-##16.2 Menus
+## 16.2 Menus
 The options indicated by the accellerator keys on the menus apply when the focus
 (insertion cursor) is located over the main listener window, over the debugger window, or over any editor window. [Some items under development will show as grayed-out.]
 
-###16.2.1 File Menu
+### 16.2.1 File Menu
 
 ![](images/FileMenu.png)
 
@@ -50,7 +50,7 @@ Selecting a file to open produces an edit window looking like the following:
 The Close, Save and SaveAs entries from the file menu apply to the edit window
 having the current focus.  Quit allows you to exit from the ALS Prolog IDE.
 
-###16.2.2 Edit Menu
+### 16.2.2 Edit Menu
 
 ![](images/edit_menu.gif)
 
@@ -84,7 +84,7 @@ new editor windows created will use the newly recorded preferences. Preferences
 for the main listener window and the debugger window are saved separately from
 the editor window preferences.
 
-###16.2.3 Prolog Menu
+### 16.2.3 Prolog Menu
 
 ![](images/PrologProjectMenu.png)
 
@@ -145,7 +145,7 @@ unchangable Prolog flags for the system:
 
 ![](images/static_flags.gif)
 
-###16.2.4 Tools Menu
+### 16.2.4 Tools Menu
 
 ![](images/tools_menu_notes.gif)
 
@@ -157,7 +157,7 @@ interpreter; the dialog prompts you for the name of the interpreter.
 
 Kill Tcl Interps destroys all user-defined Tcl/Tk interpreters.
 
-###16.2.5 Windows Menu
+### 16.2.5 Windows Menu
 
 This menu lists windows which have been opened. Double-clicking on an entry in
 this list will raise that window to the top of the desktop. Here is a typical situation:

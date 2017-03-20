@@ -1,7 +1,7 @@
 13 TTY Development Environment
 The TTY Development interface for ALS Prolog is similar to the original DEC-10
 system constructed in Edinburgh.
-###13.0.1 Starting up ALS Prolog
+### 13.0.1 Starting up ALS Prolog
 Starting up ALS Prolog varies from system to system. Under some systems such
 as ordinary Unix shells or DOS, one starts ALS Prolog by typing a shell command
 such as
@@ -24,7 +24,7 @@ Copyright (c) 1987-95 Applied Logic Systems
 ?-
 ````
 
-###13.0.2 Exiting Prolog
+### 13.0.2 Exiting Prolog
 There are several ways to exit ALS Prolog. The normal way to exit is to submit the
 goal
 ````
@@ -34,7 +34,7 @@ from the Prolog shell or from a Prolog program. The second way to exit can only
 be accomplished from the top level of the Prolog shell. There, you can type a character (such as Control-D on Unix) or sequence. of characters (such as Control-Z
 followed by a return on DOS. or # at the beginning of a line on the Mac) which signifies closing the default input stream. See halt/0 in the reference section. Finally, under the GUI or windowed interfaces, one can select an Exit menu button.
 
-##13.1 Asking Prolog to Do Something
+## 13.1 Asking Prolog to Do Something
 The most common way of telling Prolog what you want it to do is to submit a goal.
 If you are in the Prolog shell, and ?- is the prompt, then anything you type is considered to be a goal. A goal must end with a period, ‘ . ’, followed by a white space
 character (carriage return, blank, etc.). This is called a full stop. Goals must be correct Prolog terms. See Chapter 1 of the User Guide for a discussion concerning the
@@ -82,7 +82,7 @@ goals from files:
 Commands are specified by the :- prefix, while queries are specified by the ?-prefix. The only difference between the two is that queries write the message
 ‘yes.’ to the screen if the goal succeeds, and ‘no.’ if the goal fails, while commands do not write any result on the screen.
 
-##13.1.2 Command Line Editing and History
+## 13.1.2 Command Line Editing and History
 The ALS Prolog TTY shell supports command line editing and history similar to that for the Linux Bash shell.  One can move left or right on the line using the left or right arrow keys, can delete characters using the delete key, can insert characters by typing or by selecting some text and using the ^V (control-v) key.  If the command history is turned on, the up arrow key allows you to walk backward through previously submitted commands.
 
 The command line history keeping is turned on by placing 
@@ -103,7 +103,7 @@ By default, the history for previous sessions is loaded at the start of each ses
 occurs in the .alspro startup file, then the existing history file is NOT loaded when alspro starts.
 
 
-##13.2 How to Load Prolog Programs
+## 13.2 How to Load Prolog Programs
 There are basically two ways of loading Prolog programs into the ALS Prolog system:
 1.  When you start alspro from the command line you can give a list of
 files for the Prolog system to load as programs.
@@ -120,13 +120,13 @@ Finally, one can use the top-level list-as-reconsult construct:
 For more information on how to use the consulting predicates, see {ADD LINK}Section 9.2.1
 (Consulting Program Files) in the User Guide.
 
-##13.3 Stopping a Running Prolog Program
+## 13.3 Stopping a Running Prolog Program
 If you wish to interrupt a running ALS Prolog program, simply press the interrupt
 key for your system (e.g., the Control-C key on Linux, including Mac OS X, or the Control-Break key on DOS). You will be returned to the top level of the ALS Prolog shell.
 
-##13.4 How ALS Prolog Finds Prolog Files
+## 13.4 How ALS Prolog Finds Prolog Files
 When a request that a file be loaded is made (such as reconsult(myfile) ), ALS Prolog looks for the file in the following manner:  
-###13.4.1 Complex Pathnames
+### 13.4.1 Complex Pathnames
 If the file is not a simple pathname, that is, any file with a ‘file-slash’ character (‘/
 ’) in it (on Unix or DOS), or the ’file-color’ character (":") (on the Mac), the file
 will be loaded as specified. Some examples are:
@@ -136,7 +136,7 @@ Consulting /usr/gorilla/banana.pro...
 .../usr/gorilla/banana.pro consulted.
 yes.
 ````
-###13.4.2 Simple Pathnames
+### 13.4.2 Simple Pathnames
 If the file name is a simple pathname, then the file will be searched for in several
 directories, as follows:  
 1.  The current directory is searched first;
@@ -187,7 +187,7 @@ would cause the sibling subdirectory widget of the current directory to be searc
 immediately after the current directory and before any other directories. Assertions
 such as these can be placed in the ALS Prolog startup file (described below) to customize search paths for particular directries. See the User Guide for more information concerning loading files.
 
-##13.5 Controlling the Search Path
+## 13.5 Controlling the Search Path
 If you want to be able to consult some of your files that are not in your current directory, and you don’t want to use absolute pathnames, you can put the directories
 where those files reside on a path searchlist called ALSPATH. In additon, you can
 add directories using the comannd-line switch -S at start-up time ({ADD LINK}see Section 13.7
@@ -232,14 +232,14 @@ work like this:
 Such a call can be placed in the Prolog startup file or in one of your source files to
 occur automatically, as descirbed in the next section.
 
-##13.6 Using the Prolog Startup File
+## 13.6 Using the Prolog Startup File
 When ALS Prolog starts up, it looks first in the current directory and then in your
 home directory for a file named either .alspro (on Unix or the Mac) or alspro.pro
 (on DOS). After the Prolog builtins are loaded the .alspro (or alspro.pro) file is
 consulted if it exists. The purpose of the Prolog startup file is to allow you to automatically load various predicates and files which you routinely use, and to carry out
 possible customizations of your environment such as the modifications to the standard search path described in the previous section.
 
-##13.7 ALS Prolog Command Line Options
+## 13.7 ALS Prolog Command Line Options
 There are a number of options that can be included on the operating system shell
 command line when starting ALS Prolog. The following is a list of the options:
 ````
