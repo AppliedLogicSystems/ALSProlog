@@ -47,7 +47,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c nopckg.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
-	relocate_code.c cexception.c cassert.c demo.c
+	relocate_code.c cexception.c cassert.c
 
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
    blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
