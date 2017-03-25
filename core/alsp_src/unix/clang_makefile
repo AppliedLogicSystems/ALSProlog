@@ -1,19 +1,30 @@
-CC=clang -m32 -std=gnu99
-# Unused warning options and why:
+CC=clang -m32
 
-#-Wshadow - We use shadow variables - should be fixed someday.
-#-Wcast-qual - We force some cast qualifiers - should be fixed someday.
-#-Wcast-align - This reports many, many warnings. Is this a real problem?
-#-Wconversion - We always have prototypes, so this is not a concern.
-#-Waggregate-return - We use aggregate types.
-#-Wredundant-decls - Most redundant declarations are in system header files,
-#		     but there is some in out code, too. Fix someday.
-# -Wstrict-prototypes - Complains about arg-less function pointer like:
-#                       int (*func)(), which I think are legal.
-
-# -Werror has been removed until we move to Solaris 2.5+
-
-# Mavericks Optimization Problem: Any -O level causes crashes. Set -O0 for now.
-
-CFLAGS += -O0 -MMD -Wall -Wmissing-prototypes -Wwrite-strings \
-		 -Wnested-externs -Wpointer-arith
+CFLAGS += -MMD -Weverything \
+-Wno-unused-parameter \
+-Wno-shadow \
+-Wno-reserved-id-macro -Wno-undef -Wno-unused-macros -Wno-disabled-macro-expansion \
+-Wno-gnu-label-as-value \
+\
+-Wno-class-varargs \
+-Wno-conditional-uninitialized \
+-Wno-format-nonliteral \
+-Wno-unreachable-code-break \
+-Wno-sign-conversion \
+-Wno-conversion \
+-Wno-gnu-zero-variadic-macro-arguments \
+-Wno-duplicate-enum \
+-Wno-cast-qual \
+-Wno-cast-align \
+-Wno-padded \
+-Wno-missing-variable-declarations \
+-Wno-format-pedantic \
+-Wno-bad-function-cast \
+-Wno-float-equal \
+-Wno-sign-compare \
+-Wno-covered-switch-default \
+-Wno-switch-enum \
+-Wno-double-promotion \
+-Wno-unreachable-code \
+-Wno-unreachable-code-return \
+-Wno-missing-noreturn
