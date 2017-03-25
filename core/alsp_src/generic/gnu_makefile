@@ -89,7 +89,7 @@ binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
 all : default
 
 alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
-	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
+	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
