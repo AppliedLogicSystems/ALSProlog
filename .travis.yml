@@ -1,5 +1,10 @@
 language: C
 sudo: false
+
+os:
+  - linux
+  - osx
+
 addons:
   apt:
     packages:
