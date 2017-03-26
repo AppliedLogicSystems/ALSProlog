@@ -1,16 +1,16 @@
 language: C
 dist: trusty
-sudo: false
+sudo: true
 
 os:
   - linux
-  - osx
 
-addons:
-  apt:
-    packages:
-    - gcc-multilib
-    - tk-dev:i386
+#- osx
+
+before_install:
+  - sudo dpkg --add-architecture i386
+  - sudo apt-get -yq update
+  - sudo aptitude -y install gcc-multilib tk-dev:i386
 
 script:
   - cd core/unix ; make test
