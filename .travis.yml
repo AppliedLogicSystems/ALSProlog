@@ -1,11 +1,12 @@
 language: C
 dist: trusty
-sudo: true
+sudo: required
 
 os:
   - linux
   - osx
 
+# Use aptitude to force-install 32-bit versions of tcl/tk dev over 32-bit versions
 before_install: |
   if [[ "$TRAVIS_OS_NAME" == "linux" ]]
   then
@@ -17,5 +18,4 @@ before_install: |
   fi
 
 script:
-  - cd unix
-  - make && make test
+  - cd unix && make && make test
