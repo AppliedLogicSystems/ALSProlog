@@ -4,15 +4,13 @@ sudo: true
 
 os:
   - linux
-
-#- osx
+  - osx
 
 before_install:
   - sudo dpkg --add-architecture i386
   - sudo apt-get -yq update
-  - sudo aptitude -y install gcc-multilib tk-dev:i386
+  - sudo aptitude -yq install gcc-multilib tk-dev:i386
 
 script:
-  - cd core/unix ; make test
-
-# TODO: work out tk-dev:i386 dependency to allow full build
+  - cd unix
+  - make && make test
