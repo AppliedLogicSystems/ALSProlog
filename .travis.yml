@@ -7,9 +7,9 @@ os:
   - osx
 
 before_install:
-  - sudo dpkg --add-architecture i386
-  - sudo apt-get -yq update
-  - sudo aptitude -yq install gcc-multilib tk-dev:i386
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg --add-architecture i386                               ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -yq update                                         ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo aptitude -yq install gcc-multilib tcl-dev:i386 tk-dev:i386 ; fi
 
 script:
   - cd unix
