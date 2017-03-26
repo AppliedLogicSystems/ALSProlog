@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
     - gcc-multilib
+    - tk-dev:i386
 
 script:
   - cd core/unix ; make test
