@@ -78,7 +78,7 @@ extern	void	ic_put_reg		PARAMS(( Code, long ));
 /* icode2.c */
 extern	void	ic_install_bref		PARAMS(( ntbl_entry *, PWord, PWord ));
 extern	void	ic_install_instr	PARAMS(( ntbl_entry *, PWord, PWord ));
-extern	void	ic_install_tmjmp	PARAMS(( ntbl_entry *, long *, long ));
+extern	void	ic_install_tmjmp	PARAMS(( ntbl_entry *, long *, PWord ));
 #define ic_install_try_me_jmp ic_install_tmjmp
 #endif /* Portable */
 
