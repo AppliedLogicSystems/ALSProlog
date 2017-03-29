@@ -1,0 +1,7 @@
+environment:
+  matrix:
+    - OS: unix
+    - OS: win32
+
+build_script:
+  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make -k && make test"
