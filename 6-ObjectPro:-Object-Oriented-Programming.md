@@ -32,7 +32,7 @@ slots can be any Prolog entity, including (the state of) other objects. Messages
 sent to objects by calls of the form
 send(Object, Message).
 In general, objects are created, held in variables, passed around among routines, and
-sent messages in the stype above. When necessary, an object can be assigned a global name when it is created which can be used for sending messages to the object.
+sent messages in the style above. When necessary, an object can be assigned a global name when it is created which can be used for sending messages to the object.
 
 An object’s methods are determined by the class to which it belongs.
 A class is determined by three things:
@@ -78,7 +78,7 @@ instanceOf - atom (name of a class)
 values     - list of equations
 ````
 The instanceOf keyword equation is the only required equation; the value on
-the right side of this equation must be an atom which is the name of class which is
+the right side of this equation must be an atom which is the name of a class which is
 visible from the module in which the create_object call is made. Here is an
 example of a simple object definition, where iC_Engine must be the name of
 class:
@@ -96,10 +96,10 @@ equation are expressions of the form
 where SlotName is one of the named slots in the structure defining the object’s
 state. These slots are determined by the class to which the object belongs, and may
 be slots from the state-schema of the immediate class parent, or may also be slots
-from any of the state-schemata of ancestor classes. The intent of the values equation is to enable the programmer to prescribe initial values for some of the object’s
-slots when it is created.
+from any of the state-schemata of ancestor classes. The intent of the values equation is to enable the programmer to specify local slots, as well as to prescribe initial values for some of the object’s
+slots (both local and/or inherited) when it is created.
 
-When a global atomic name for the object is required, one includes an equation of
+When a global atomic name for the object is needed, one includes an equation of
 the form
 
     name = <atom> .
@@ -135,20 +135,20 @@ Here Eqns is a list of equations of the form
 The acceptable keywords, together with their associated Value types, are the following:
 ````
 name       - atom
-subclassOf - atom (name of a (parent) classe)
+subClassOf - atom (name of a (parent) class)
 addl_slots - list of atoms (names of local slots)
 defaults   - list of default values for slots
-consorts   - list of constraint expressions for slots
+constrs    - list of constraint expressions for slots
 export     - yes or no
 action     - atom
 ````
-The name equation and the subclassOf equation are both required.
+The name equation and the subClassOf equation are both required.
 
 The ObjectPro system pre-defines one top-level class named genericObjects;
 all classes are ultimately subclasses of the genericObjects class. genericObjects provides one visible slot, myName, which is always instantiated to the
 object’s name. Several other slots, normally non-visible, are also provided.
 
-A class is said to be an immediate subclass of the (parent) class named in the subclassOf equation. The relation subclass is the transitive closure of the immediate subclass relation.
+A class is said to be an immediate subclass of the (parent) class named in the subClassOf equation. The relation subclass is the transitive closure of the immediate subclass relation.
 
 The atoms on the addl_slots list specify slots in the structure defining the state
 of objects which are instances of this class. These new slot names must not be slot
@@ -161,19 +161,19 @@ addl_slot lists be distinct.
 Here are several examples of simple class definitions:
 ````
 :- defineClass([name=vehicle,
-                subclassOf=genericObjects,
+                subClassOf=genericObjects,
                 addl_slots=[locomotionType, powerSource] ]).
 
 :- defineClass([name=wheeledVehicle,
-                subclassOf=vehicle,
+                subClassOf=vehicle,
                 addl_slots=[numWheels] ]).
 
 :- defineClass([name=automobile,
-                subclassOf=wheeledVehicle,
+                subClassOf=wheeledVehicle,
                 addl_slots=[engine,autoClass,manufacturer] ]).
 
 :- defineClass([name=wingedVehicle,
-                subclassOf=vehicle,
+                subClassOf=vehicle,
                 addl_slots=[numWings] ]).
 ````
 The inheritance relations among these classes is shown in the Figure below.
@@ -222,6 +222,7 @@ Three types of constraint expressions are supported:
 * slotName = value
 * slotName < valueList
 * slotName - Var^Condition
+
 The first two cases are special cases of the third, and are provided for convenience.
 In all three cases, the left side of the expression is the name of a slot occurring in
 the complete state-schema of the class being defined (i.e., it is either the name of a
@@ -230,8 +231,10 @@ from which the class being defined inherits). In the case of slotName = value,
 value is any Prolog term. This constraint expression indicates that any instance
 of the class being defined must have the value of slot slotName set equal to
 value. The generated code ensures that when instances of the class are initialized
-(via the call send(Object, initialize)), the value of slotName is set
-to value. The constraint expression slotName < valueList requires that
+(such as via the call send(Object, initialize), or via a create_object call), the value of slotName is set
+to value. 
+
+The constraint expression slotName < valueList requires that
 the values of slotName be among the Prolog terms appearing on the list valueList. Here ’<’ is a short hand for ’is an element of’. The generated code for the class methods applies a test to any attempted update of the value of slotName to ensure that the new value is on the list valueList.
 
 As indicated, the third constraint expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs.
@@ -239,13 +242,22 @@ Conditon expresses a condition which any potential value for slotName in an
 instance of the class must meet in order to be installed. The generated code imposes
 this test on all attempts to update the value of slotName. The test is imposed by
 binding the incoming candidate value to the variable Var , and then calling the test
-Conditon. Here is a class specification including a constraint:
+Conditon. Here is a class specification including a constraint of the second type:
 ````
 defineClass([name=engine,
-     subclassOf=[genericObjects],
+     subClassOf=genericObjects,
      addl_slots= [powerType,fuel,engineClass, cur_rpm,running,temp],
      constrs=
-       [engineClass< [internalCombustion,steam,electric]]
+       [engineClass < [internalCombustion,steam,electric]]
+])
+````
+The same condition can be expressed by a constraint of the third type as follows:
+````
+defineClass([name=engine,
+     subClassOf=genericObjects,
+     addl_slots= [powerType,fuel,engineClass, cur_rpm,running,temp],
+     constrs=
+       [engineClass - member(X, [internalCombustion,steam,electric])]
 ])
 ````
 
@@ -282,11 +294,11 @@ The first call
 
 destructively updates the slot SlotName of State to contain Value, which cannot be an uninstantiated variable. However, Value can be a term containing uninstantiated variables. Any constraints imposed on this slot by the class must be satisfied by the incoming Value. The second call
 
-    accessObjStruct(SlotName, State, Value)
+    accessObjStruct(SlotName, State, VarOrValue)
 
 accesses the slot SlotName of State and unifies the value obtained with VarOrValue.
 
-The value of SlotDescrip above is a slot description , which is either a slot
+The value of SlotDescrip above is a slot description, which is either a slot
 name, or an expression of the form
 
     SlotName^SlotDescrip
@@ -313,8 +325,8 @@ as the definition of the class. (But it can reside in separate files.)
 Consider the class engine specified in the preceeding section. Simple start and
 stop methods can be implemented for this class by the following clauses:
 ````
-engineAction(start,State) := State^running := yes.
-engineAction(stop, State) := State^running := no.
+engineAction(start,State) :- State^running := yes.
+engineAction(stop, State) :- State^running := no.
 ````
 A method to query the status of an engine is given by:
 
@@ -330,19 +342,23 @@ genericObjectsAction(set_value(SlotDesc,Value),State)
 ````
 
 ## 6.5 Examples
+(Example code files can be found in the examples/objectpro section of the distribution.)
 
 The first simple example implements an elementary stack object:
 ````
 :- defineClass([name=stacker,
-                subclassOf=[genericObjects],
+                subclassOf=genericObjects,
                 addl_slots=[theStack, depth]
    ]).
-
-:- defineObject([name=stack,
-                 instanceOf=stacker,
-                 values=[theStack=[], depth=0]
-   ]).
-
+````
+The call
+````
+    create_object([name=stack, instanceOf=stacker, 
+                   values=[theStack=[], depth=0] ], Obj),
+````
+will create a stacker-type object; this call is included in the run_stacker driver code below.
+Here are the action clauses:
+````
 stackerAction(push(Item),State)
     :-  accessObjStruct(theStack, State, CurStack),
         setObjStruct(theStack, State, [Item | CurStack]),
@@ -445,7 +461,8 @@ automobileAction(status(Status),State)
              Status = off
        ).
 ````
-As in the stack example, we can create a simple loop to exercise this code:
+As in the stack example, we can create a simple loop to exercise this code.
+Here we make four calls to create_object/2 in order to build two automobiles:
 ````
 run_vehicles
     :- set_prolog_flag(unknown, fail),
@@ -461,7 +478,8 @@ run_vehicles(Autos)
     :- printf(’::>’, []), flush_output,
        read(Cmd),
        disp_run_vehicles(Cmd, Autos).
-       disp_run_vehicles(quit, Autos) :-!.
+
+disp_run_vehicles(quit, Autos) :-!.
 
 disp_run_vehicles(Cmd, Autos)
     :- exec_vehicles_cmd(Cmd, Autos),
@@ -493,3 +511,64 @@ And here is a trace of an execution of this code:
 2-|| status(off)
 ::>quit.
 yes.
+````
+
+## 6.6 Combining ObjectPro with Global Variables
+
+It is often convenient to combine the use of global variables (see [Chapter 8](https://github.com/AppliedLogicSystems/ALSProlog/wiki/8-Global-Variables%2C-Destructive-Update-%26-Hash-Tables)) with ObjectPro objects. In fact, the ALS Prolog shells for alspro and alsdev use this extensively.  Unlike using assertions to the prolog database, placing an object (e.g., the state of a shell) in a global variable preserves any uninstantiated variables contained in the object.
+
+Below is a modified version of the simple 'stack' example, changed to make use of a global variable which holds the stack object (the code is in the distribution in  examples/objectpro/oopex_stack_global.pro):
+````
+:- defineClass([name=stacker,
+                         subClassOf=genericObjects,
+                         addl_slots=[theStack, depth]
+                        ]).
+
+:- make_gv('_example_stack'),
+        create_object([name=stack, instanceOf=stacker,
+                values=[theStack=[], depth=0] ], Obj),
+        set_example_stack(Obj).
+
+stackerAction(push(Item), State)
+        :-
+        accessObjStruct(theStack, State, CurStack),
+        setObjStruct(theStack, State, [Item | CurStack]),
+        accessObjStruct(depth, State, CurDepth),
+        NewDepth is CurDepth + 1,
+        setObjStruct(depth, State, NewDepth).
+
+stackerAction(pop(Item), State)
+        :-
+        accessObjStruct(theStack, State, [Item | RestStack]),
+        setObjStruct(theStack, State, RestStack),
+        accessObjStruct(depth, State, CurDepth),
+        NewDepth is CurDepth - 1,
+        setObjStruct(depth, State, NewDepth).
+
+stackerAction(cur_stack(Stack), State)
+        :-
+        accessObjStruct(theStack, State, Stack).
+
+stackerAction(cur_depth(Depth), State)
+        :-
+        accessObjStruct(depth, State, Depth).
+
+run_stack :- rs.
+
+rs :-
+        write('4stack:>'),
+        flush_output,
+        read(Msg),
+        rs(Msg).
+
+rs(quit).
+
+rs(M) :-
+        get_example_stack(Obj),
+        send(Obj, M),
+        !,
+        printf('Msg=%t\n', [M]),
+        flush_output,
+        rs.
+
+````
