@@ -199,7 +199,10 @@ satisfy_slot_constrs(Class,SlotName,Module,Value)
 	:-
 	Module:clause(slot_constraint(Class,SlotName,Value,Call),true),
 	!,
-	call(Module:Call).
+	( call(Module:Call) -> true ;
+	  printf(error_stream,'Constraint [%t slot %t, value=%t] failed: %t\n', [Class,SlotName,Value,Call]),
+	  fail
+	).
 
 satisfy_slot_constrs(_,_,_,_).
 
@@ -354,26 +357,6 @@ genObjs(send_self(Message),State)
 	send_self(State, Message).
 
 genObjs(your_state(State),State).
-
-/*
-genObjs(insert_oop_event_request(Event),State)
-	:-
-	accessObjStruct(myName,State,Object),
-	insert_oop_event_request(Event,Object).
-
-genObjs(insert_oop_event_request(Event,Object),State)
-	:-
-	insert_oop_event_request(Event,Object).
-
-genObjs(queue_oop_event(Event),State)
-	:-
-	queue_oop_event(Event).
-*/
-
-		
-
-
-
 
 
 /*!-------------------------------------------------------
