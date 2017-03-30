@@ -4,4 +4,7 @@ environment:
     - OS: win32
 
 build_script:
-  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make -k && make test"
+  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make -k alspro"
+
+test_script:
+  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make test"
