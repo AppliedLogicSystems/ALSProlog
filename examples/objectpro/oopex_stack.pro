@@ -15,12 +15,6 @@
 			 addl_slots=[theStack, depth] 
 			]).
 
-defineObject([name=stack, 
-			  instanceOf=stacker,
-			  values=[theStack=[], depth=0] 
-			 ]).
-
-
 stackerAction(push(Item),State)
 	:-
 	accessObjStruct(theStack, State, CurStack),
