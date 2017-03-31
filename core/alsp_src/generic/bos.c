@@ -16,7 +16,7 @@
 #include "defs.h"
 
 #ifdef	HAVE_UNISTD_H
-#if defined(UNIX_LINUX) || defined(UNIX_IRIX)
+#if defined(UNIX_LINUX) || defined(UNIX_IRIX) || defined(UNIX_CYGWIN32)
 /* On Irix, crypt() is not defined in unistd.h */
 #include <crypt.h>
 #endif

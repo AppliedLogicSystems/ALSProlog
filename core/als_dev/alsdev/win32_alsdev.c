@@ -281,7 +281,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			
 	    AP_Call(w, AP_NewSymbolFromStr(w, "builtins"), &term);
 #endif
-		MessageBox(GetFocus(), "This is just a stub!", "ALS Prolog", 0);
+//		MessageBox(GetFocus(), "This is just a stub!", "ALS Prolog", 0);
 
 	}
 }
