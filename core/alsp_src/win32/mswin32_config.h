@@ -41,12 +41,5 @@
 
 #define REVERSE_ENDIAN 1
 
-/* The windows headers in Cygwin 1.3.4 are missing some prototypes,
-   so define them here to silence the waring messages. */
-#ifdef __GNUC__
-extern __inline__ void* GetCurrentFiber(void);
-extern __inline__ void* GetFiberData(void);
-#endif
-
 #include <winsock2.h>
 #include <windows.h>
