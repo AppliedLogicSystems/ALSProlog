@@ -200,8 +200,12 @@ satisfy_slot_constrs(Class,SlotName,Module,Value)
 	Module:clause(slot_constraint(Class,SlotName,Value,Call),true),
 	!,
 	( call(Module:Call) -> true ;
-	  printf(error_stream,'Constraint [%t slot %t, value=%t] failed: %t\n', [Class,SlotName,Value,Call]),
-	  fail
+	  open(atom(Msg), write, CS),
+	  printf(CS,'Constraint [%t slot %t, value=%t] failed: %t\n', [Class,SlotName,Value,Call]),
+	  close(CS),
+		%% do this to avoid unbinding a variable during the throw:
+	  Ball =.. [constraint_error, Msg],
+	  throw(Ball)
 	).
 
 satisfy_slot_constrs(_,_,_,_).

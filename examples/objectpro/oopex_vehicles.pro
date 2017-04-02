@@ -75,10 +75,26 @@ automobileAction(dump_state, State)
 run_vehicles
      :-
 	set_prolog_flag(unknown, fail),
+		/*--------------------------------------------------
+		  If the 
+		     setObjStruct(engineClass, Engine1, steam)
+		  call is uncommented below, the constraint
+			[engineClass = internalCombustion]     
+		  for iC_Engine will be violated, and the ObjectPro
+		  mechanism will throw an exception of the form
+			constraint_error(M)
+		  So we set a catch here to catch that exception if
+		  it is thrown, and at least report it, and perhaps
+		  perform some sort of recovery.
+		 *--------------------------------------------------*/
+	catch(run_vehicles0, constraint_error(M), write(M)).
+
+run_vehicles0
+	:-
 	create_object([instanceOf=iC_Engine ], Engine1),
 
 	    %% This will fail the engineClass=internalCombustion constraint:
-	setObjStruct(engineClass, Engine1, steam),
+%	setObjStruct(engineClass, Engine1, steam),
 
 	create_object([instanceOf=automobile,
 			values=[engine=Engine1] ], Auto1),
