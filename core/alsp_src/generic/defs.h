@@ -135,7 +135,7 @@
 #include "unix_config.h"
 #elif defined(MACOS)
 #include "macos_config.h"
-#elif defined(MSWIN32)
+#elif defined(MSWin32)
 #include "mswin32_config.h"
 #else
 #error
