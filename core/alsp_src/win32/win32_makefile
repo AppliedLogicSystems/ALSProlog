@@ -1,5 +1,5 @@
 # Generic Unix GNU Make file for ALS Prolog
-CPPFLAGS += -g -DWIN32 -DMSWIN32 -DMSWin32
+CPPFLAGS += -DWIN32 -DMSWIN32 -DMSWin32
 OS_SOURCE=win32io.c win32_locate.c win32_engine.c fswin32.c fsunix.c
 OS_AR = ar rusc
 OS_RANLIB = true
