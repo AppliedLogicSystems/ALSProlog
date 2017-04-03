@@ -260,6 +260,11 @@ defineClass([name=engine,
        [engineClass - member(X, [internalCombustion,steam,electric])]
 ])
 ````
+If a constraint fails either during defineClass or setObjStruct/3, the ObjectPro machinery throws an exception of the form
+````
+constraint_error(<Message>).
+````
+This can be caught with a surrounding catch/3 call and handled as needed by the program.
 
 ## 6.4 Specifying Class Methods
 
