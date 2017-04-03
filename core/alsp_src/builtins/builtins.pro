@@ -1049,9 +1049,9 @@ load_builtins(BDir, File)
 	sys_searchdir(Path),
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%	obp_push_stop,
+	obp_push_stop,
 	'$load'(FileAndPath, 0),
-%	obp_pop,
+	obp_pop,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
 	%%% Use the new Prolog-based consult mechanism:
@@ -1089,13 +1089,12 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 */
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
-%	obp_open(FilePathObp),
-%	obp_push_stop,
-	xconsult(FilePathPro, NErrs, ErrList).
-
-%	obp_close,
-%	obp_pop,
-%	(NErrs = 0, !; unlink(FilePathObp), fail).
+	obp_open(FilePathObp),
+	obp_push_stop,
+	xconsult(FilePathPro, NErrs, ErrList),
+	obp_close,
+	obp_pop,
+	(NErrs = 0, !; unlink(FilePathObp), fail).
 
 :-	auto_use(sio).
 :-	auto_use(debugger).
