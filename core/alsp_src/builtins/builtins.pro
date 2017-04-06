@@ -1067,7 +1067,8 @@ consult_builtins(File)
 consult_builtins(BDir, File) 
 	:-
 	sys_searchdir(Path),
-    '$atom_concat'(BDir,File, BltFile),
+        '$atom_concat'(BDir,File, BltFile),
+
 	'$atom_concat'(Path,BltFile,FileAndPath),
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
@@ -1089,10 +1090,10 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 */
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
-	obp_open(FilePathObp),
+%	obp_open(FilePathObp),
 	obp_push_stop,
 	xconsult(FilePathPro, NErrs, ErrList),
-	obp_close,
+%	obp_close,
 	obp_pop,
 	(NErrs = 0, !; unlink(FilePathObp), fail).
 
