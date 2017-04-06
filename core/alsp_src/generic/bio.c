@@ -511,40 +511,6 @@ pbi_obp_load()
 	FAIL;
 }
 
-int
-pbi_resource_load(void)
-{
-#ifdef MacOS
-				/* resource_load(FileName,Stat) */
-    PWord v1;
-    int   t1, status;
-    UCHAR *name;
-    int   old_makeobp = makeobp;
-
-    w_get_An(&v1, &t1, 1);
-
-    if (getstring(&name, v1, t1)) {
-
-	dbprot_t odbrs;
-	makeobp = 0;		/* don't want to make obp out of loading of
-				 		 * one
-				 		 */
-	odbrs = w_dbprotect(DBRS_WRITABLE);
-	status = obpres_load((char *) name);
-	(void) w_dbprotect(odbrs);
-	makeobp = old_makeobp;
-
-	if (status == 1)
-	    SUCCEED;
-	else
-	    FAIL;
-    }
-    else
-	FAIL;
-#else
-    FAIL;
-#endif
-}
 #endif /* SYS_OBP */
 
 
