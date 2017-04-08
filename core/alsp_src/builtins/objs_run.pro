@@ -199,7 +199,14 @@ satisfy_slot_constrs(Class,SlotName,Module,Value)
 	:-
 	Module:clause(slot_constraint(Class,SlotName,Value,Call),true),
 	!,
-	call(Module:Call).
+	( call(Module:Call) -> true ;
+	  open(atom(Msg), write, CS),
+	  printf(CS,'Constraint [%t slot %t, value=%t] failed: %t\n', [Class,SlotName,Value,Call]),
+	  close(CS),
+		%% do this to avoid unbinding a variable during the throw:
+	  Ball =.. [constraint_error, Msg],
+	  throw(Ball)
+	).
 
 satisfy_slot_constrs(_,_,_,_).
 
@@ -354,26 +361,6 @@ genObjs(send_self(Message),State)
 	send_self(State, Message).
 
 genObjs(your_state(State),State).
-
-/*
-genObjs(insert_oop_event_request(Event),State)
-	:-
-	accessObjStruct(myName,State,Object),
-	insert_oop_event_request(Event,Object).
-
-genObjs(insert_oop_event_request(Event,Object),State)
-	:-
-	insert_oop_event_request(Event,Object).
-
-genObjs(queue_oop_event(Event),State)
-	:-
-	queue_oop_event(Event).
-*/
-
-		
-
-
-
 
 
 /*!-------------------------------------------------------

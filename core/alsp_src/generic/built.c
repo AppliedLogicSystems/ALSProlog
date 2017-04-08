@@ -211,6 +211,7 @@ static struct blt_struct {
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE
+	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("unset_2nd", 1, pbi_unset_2nd, "_pbi_unset_2nd"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
@@ -377,7 +378,6 @@ static struct blt_struct {
 	BLT("obp_load", 2, pbi_obp_load, "_pbi_obp_load"),
 	BLT("obp_push_stop", 0, pbi_obp_push_stop, "_pbi_obp_push_stop"),
 	BLT("obp_pop", 0, pbi_obp_pop, "_pbi_obp_pop"),
-	BLT("resource_load", 1, pbi_resource_load, "_pbi_resource_load"),
 #endif /* SYS_OBP */
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),

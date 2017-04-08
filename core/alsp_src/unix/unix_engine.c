@@ -121,6 +121,12 @@ static void sigsegv_handler(int signum)
 
 struct sigaction original_sigsegv_action;
 
+#ifdef UNIX_DARWIN
+#define STACK_SIG SIGBUS
+#else
+#define STACK_SIG SIGSEGV
+#endif
+
 void os_init_prolog_globals(void)
 {
     struct sigaction action;
@@ -128,7 +134,7 @@ void os_init_prolog_globals(void)
     action.sa_handler = sigsegv_handler;
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0;
-    safe_sigaction(SIGSEGV, &action, &original_sigsegv_action);
+    safe_sigaction(STACK_SIG, &action, &original_sigsegv_action);
 }
 
 void alloc_prolog_memory(prolog_engine *pe, size_t stack_size, size_t heap_size)

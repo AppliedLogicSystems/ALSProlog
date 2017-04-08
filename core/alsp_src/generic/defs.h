@@ -96,7 +96,8 @@
 #define CodeGC		1
 #define AutoIndexing	1
 #define SPY		1
-#define OBP		1
+#define OBP		1 
+#undef OBP
 #define Indexing	1
 #define BigStruct	1
 
@@ -135,7 +136,7 @@
 #include "unix_config.h"
 #elif defined(MACOS)
 #include "macos_config.h"
-#elif defined(MSWIN32)
+#elif defined(MSWin32)
 #include "mswin32_config.h"
 #else
 #error

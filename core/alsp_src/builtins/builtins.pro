@@ -1042,7 +1042,6 @@ load_builtins(File)
 	 ; OS = mswin32, !, Sepr = '\\'
 	 ; Sepr = '/'),
 	'$atom_concat'('builtins',Sepr, BDir),
-%	(resource_load(File) ; load_builtins(BDir, File)).
 	load_builtins(BDir, File).
 
 load_builtins(BDir, File) 
@@ -1050,11 +1049,9 @@ load_builtins(BDir, File)
 	sys_searchdir(Path),
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%pbi_write(load-FileAndPath), pbi_nl,pbi_ttyflush,
 	obp_push_stop,
-	(resource_load(File) ; '$load'(FileAndPath, 0)),
+	'$load'(FileAndPath, 0),
 	obp_pop,
-%pbi_write('...done'), pbi_nl,pbi_ttyflush,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
 	%%% Use the new Prolog-based consult mechanism:
@@ -1070,13 +1067,12 @@ consult_builtins(File)
 consult_builtins(BDir, File) 
 	:-
 	sys_searchdir(Path),
-    '$atom_concat'(BDir,File, BltFile),
+        '$atom_concat'(BDir,File, BltFile),
+
 	'$atom_concat'(Path,BltFile,FileAndPath),
-%pbi_write(consulting_builtins=FileAndPath), pbi_nl,pbi_ttyflush,
 	'$atom_concat'(FileAndPath,'.pro',FilePathPro),
 	'$atom_concat'(FileAndPath,'.obp',FilePathObp),
 	cslt_blts_ld(File, FilePathPro,FilePathObp),
-%pbi_write('...done'),pbi_nl,pbi_ttyflush,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
 	/*---------------------------------------------------------*
@@ -1085,11 +1081,6 @@ consult_builtins(BDir, File)
 	 |	virtue of the initialization of top_clausegroup.
 	 *---------------------------------------------------------*/
 	 
-cslt_blts_ld(File, FilePathPro,FilePathObp)
-	:-
-	resource_load(File),
-	!.
-
 /*
 cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
@@ -1101,9 +1092,7 @@ cslt_blts_ld(File, FilePathPro,FilePathObp)
 	:-
 %	obp_open(FilePathObp),
 	obp_push_stop,
-%pbi_write('cslt_blts'=File), pbi_nl,pbi_ttyflush,
 	xconsult(FilePathPro, NErrs, ErrList),
-%pbi_write('..cslt_blts'=NErrs), pbi_nl,pbi_ttyflush,
 %	obp_close,
 	obp_pop,
 	(NErrs = 0, !; unlink(FilePathObp), fail).
@@ -1268,7 +1257,6 @@ ld_wins
 
 '$initialize' 
 	:-
-%pbi_debug('$initialize_starting'),
 	pckg_init.
 
 
@@ -1278,7 +1266,6 @@ ld_wins
 		%% This starts the tty shell:
 '$start' 
 	:-
-%pbi_debug('$start_starting'),
 	start_shell(builtins:prolog_shell).
 
 endmod.		%% builtins.pro -- Main File for builtins

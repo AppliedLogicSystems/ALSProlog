@@ -16,8 +16,8 @@
 *.lf
 foonew
 alspro
+core/unix/*/alsdev
 alspro_b
-alsdev
 alsdev_b
 *.tgz
 *.zip

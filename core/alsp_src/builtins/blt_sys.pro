@@ -501,8 +501,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	is_absolute_path(FileName),
 	!,
-	(resource_load(FileName)
-		; load(FileName,1,_,obp,_,_)
+	(load(FileName,1,_,obp,_,_)
 		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
 	record_lib_load(FileName),

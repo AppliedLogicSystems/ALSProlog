@@ -22,6 +22,8 @@ CPPFLAGS = $(BUILD_FLAGS) $(VERSION_FLAGS) \
 # Note: Darwin's cc won't recognize -isystem if there is a space before
 #       the path.
 
+#BUILD_FLAGS := $(BUILD_FLAGS) -DDEBUGSYS
+
 MAIN_SOURCE = topmain.c
 
 MAIN_OBJECTS = $(MAIN_SOURCE:.c=.o)
@@ -45,7 +47,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 	varproc.c vprintf.c wdisp.c wintcode.c \
 	winter.c nopckg.c \
 	ieeemath.c pimain.c new_alspi.c engine.c \
-	relocate_code.c cexception.c cassert.c demo.c
+	relocate_code.c cexception.c cassert.c
 
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
    blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
@@ -87,7 +89,7 @@ binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
 all : default
 
 alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
-	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LIBS)
+	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp

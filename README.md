@@ -1,7 +1,8 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
-[![Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
+[![Travis-CI Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/786esihnss6ksk7k/branch/master?svg=true)](https://ci.appveyor.com/project/AppliedLogicSystems/alsprolog/branch/master)
 
 The ALS Prolog source tree is divided into core and peripheral
 directories.  The core directory contains the source for the Prolog
@@ -40,9 +41,9 @@ Build Dependencies
 
 Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo apt-get install build-essential gcc-multilib tk-dev git`
+Debian/Ubuntu: `sudo pkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib tk-dev:i386`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 tk-devel.i686 git`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
 ### Mac OS X
 

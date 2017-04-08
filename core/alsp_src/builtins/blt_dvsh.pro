@@ -2378,23 +2378,6 @@ col2(B)
 	:-
 	tcl_call(shl_tcli, [do_2col,B], X).
 
-
-/***
-process_oop
-	:-
-	file_select_dialog(shl_tcli,[filetypes=[['oop files',['*.oop']]]],FileName),
-	(FileName = '' ->
-		true
-		;
-		objects:objectProcessFile(FileName,_)
-	).
-***/
-			
-
-
-
-
-
 endmod.
 
 /*-------------------------------------------------------------*

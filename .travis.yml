@@ -1,11 +1,21 @@
 language: C
-sudo: false
-addons:
-  apt:
-    packages:
-    - gcc-multilib
+dist: trusty
+sudo: required
+
+os:
+  - linux
+  - osx
+
+# Use aptitude to force-install 32-bit versions of tcl/tk dev over 32-bit versions
+before_install: |
+  if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  then
+    sudo dpkg --add-architecture i386
+    sudo apt-get -yq update
+    sudo apt-get -yq install gcc-multilib
+    sudo aptitude -yq install tcl-dev:i386
+    sudo aptitude -yq install tk-dev:i386
+  fi
 
 script:
-  - cd core/unix ; make test
-
-# TODO: work out tk-dev:i386 dependency to allow full build
+  - cd unix && make && make test
