@@ -40,8 +40,8 @@ vnim
 initialize_nim([1,3,5,7],opponent)
 	:-
 	init_tk_alslib,
-	tcl_call(tcli, [source, 'vn.tcl'], _),
-	tcl_call(tcli, [setup_nim], _),
+	tcl_call(shl_tcli, [source, 'vn.tcl'], _),
+	tcl_call(shl_tcli, [setup_nim], _),
 	assert(cur_pos(p(r(1),r(1,1,1),r(1,1,1,1,1),r(1,1,1,1,1,1,1)))).
 
 export user_done_picking/0.
@@ -105,7 +105,7 @@ select_stick(Row, Stick)
 	sprintf(atom(Cmd), 
 		'.vn.p%t.b%t-%t configure  -text x -state disabled',
 		[Row, Row, Stick]),
-	tcl_call(tcli, Cmd, _),
+	tcl_call(shl_tcli, Cmd, _),
 	cur_pos(P),
 	arg(Row, P, RowRep),
 	mangle(Stick, RowRep, 0),
@@ -138,7 +138,7 @@ fin_check_row_ok(Row, Row) :-!.
 	%% No, so ring the bell to alert the user:
 fin_check_row_ok(_, _)
 	:-
-	tcl_call(tcli, bell, _),
+	tcl_call(shl_tcli, bell, _),
 	!,
 	fail.
 
@@ -190,10 +190,9 @@ app_n_args([0 | As], PR, [0 | NAs], Row, StickN)
 app_n_args([1 | As], PR, [0 | NAs], Row,StickN)
 	:-
 	sprintf(atom(Cmd), 
-%		'.vn.p%t.b%t-%t configure -background #d9d9d9 -state disabled',
 		'.vn.p%t.b%t-%t configure -text c -state disabled',
 		[Row, Row, StickN]),
-	tcl_call(tcli, Cmd, _),
+	tcl_call(shl_tcli, Cmd, _),
 	NPR is PR-1,
 	StickM is StickN+1,
 	app_n_args(As, NPR, NAs, Row,StickM).

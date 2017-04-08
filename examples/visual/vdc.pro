@@ -59,7 +59,8 @@ vdc(Input, bad_input)
 	:-
 	Title = 'Error',
 	Msg = 'Bad Input!',
-	tcl_call(tcli, 
+%	tcl_call(tcli, 
+	tcl_call(shl_tcli, 
 		[tk_dialog, '.quit_dialog', Title, Msg, error, 0, 'OK'], _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5

@@ -19,13 +19,13 @@ start_mainwin
 		%% program during regular execution:
 	set_prolog_flag(unknown, fail),
 		%% Load your Tcl code:
-	tcl_call(tcli, [source,'mainwin.tcl'], _),
+	tcl_call(shl_tcli, [source,'mainwin.tcl'], _),
 		%% This could be at the end of mainwin.tcl (your preference):
-	tcl_call(tcli, ['Window',show,'.mainwin'], _),
+	tcl_call(shl_tcli, ['Window',show,'.mainwin'], _),
 
 		%% Set up the main window as an output stream:
-	open(tk_win(tcli,'.mainwin.txtwin.text'), write, OutS, [alias(main_out)]),
-	open(tk_win(tcli,'.mainwin.txtwin.text'), read, InS, [alias(main_in)]).
+	open(tk_win(shl_tcli,'.mainwin.txtwin.text'), write, OutS, [alias(main_out)]),
+	open(tk_win(shl_tcli,'.mainwin.txtwin.text'), read, InS, [alias(main_in)]).
 
 		%% When you run this inside the ALS IDE, there is already
 		%% an event loop running.  If you package from the IDE,

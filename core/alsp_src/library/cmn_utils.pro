@@ -48,6 +48,7 @@ load_app_settings([Term | SettingsTerms])
 	load_app_setting_term(Term),
 	load_app_settings(SettingsTerms).
 
+/*
 load_app_setting_term(agv(Tag)=Val)
 	:-!,
 	tcl_call(tcli, [set_tcl_ga,agv,Tag,Val], _).
@@ -55,6 +56,15 @@ load_app_setting_term(agv(Tag)=Val)
 load_app_setting_term(agv(Tag1,Tag2)=Val)
 	:-!,
 	tcl_call(tcli, [set_tcl_ga2,agv,Tag1,Tag2,Val], _).
+*/
+
+load_app_setting_term(agv(Tag)=Val)
+	:-!,
+	tcl_call(shl_tcli, [set_tcl_ga,agv,Tag,Val], _).
+
+load_app_setting_term(agv(Tag1,Tag2)=Val)
+	:-!,
+	tcl_call(shl_tcli, [set_tcl_ga2,agv,Tag1,Tag2,Val], _).
 
 load_app_setting_term(_).
 
