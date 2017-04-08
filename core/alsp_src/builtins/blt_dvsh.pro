@@ -8,8 +8,6 @@
  |	Creation Date: 1997
  *=============================================================*/
 
-%kk :- force_libload_all, save_image(alsdev, [start_goal(start_alsdev)]).
-
 		%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++
 		%!%!%! WARNING WARNING WARNING WARNING
 		%  THE RESATISFIABILITY % BUG

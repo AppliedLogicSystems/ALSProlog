@@ -663,3 +663,31 @@ proc run_cref_on_suite {Base} {
         send_prolog als_ide_mgr run_cref_on_suite
 }       
 
+proc html_report {} {
+        send_prolog als_ide_mgr show_html_report
+}
+
+proc xrf_report {} {
+        send_prolog als_ide_mgr show_xrf_report
+}
+
+proc cref_close {Base} {
+        global array proenv
+
+        set isdirtycheck [prj_perf_isdirtycheck $Base]
+        set savecrf [cref_save_check $Base $isdirtycheck]
+
+        if {$savecrf == 2} then {
+            save_cref_suite $Base
+        }
+        send_prolog als_ide_mgr cref_close
+}
+
+proc save_cref_suite {w} {
+	global array proenv
+	send_prolog als_ide_mgr save_cref_suite
+	set proenv($w,dirty) false
+    	set proenv($w.addlprj,dirty) false
+    	$w.buttons.save configure -state disabled
+	return 1
+}

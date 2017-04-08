@@ -99,12 +99,12 @@ export start_drawing/0.
 start_drawing
 	:-
 	init_tk_alslib,
-	tcl_call(tcli,[source,'drawing.tcl'],_),
-	tcl_call(tcli,[mkdrawing,''],_).
+	tcl_call(shl_tcli,[source,'drawing.tcl'],_),
+	tcl_call(shl_tcli,[mkdrawing,''],_).
 
 pro2tcl_options([], TclOptions, Interp)
 	:-
-	(var(Interp) -> Interp = tcli ; true).
+	(var(Interp) -> Interp = shl_tcli ; true).
 
 pro2tcl_options([interp=Interp | Options], TclOptions, Interp)
 	:-!,

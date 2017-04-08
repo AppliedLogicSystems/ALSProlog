@@ -51,8 +51,3 @@ proc mkdrawing {base} {
     pack $base.buttons.clear -in .drawing.buttons \
 	-anchor center -expand 0 -fill none -padx 20 -side right 
 }
-
-#Window show .
-#Window show .drawing
-#
-#main $argc $argv

@@ -37,15 +37,42 @@ export start_id/0.
 start_id
 	:- 
 	init_tk_alslib,
-	tcl_call(tcli, [source,'twigs_id.tcl'], X).
+	tcl_call(shl_tcli, [source,'twigs_id.tcl'], X).
 
 export reset/0.
 reset :-
        abolish(user_observed,1),              	% clear the database of recorded
        abolish(does_not_hold,1),          	% observations
-	tcl_call(tcli,[set_unknown],_),
+	tcl_call(shl_tcli,[set_unknown],_),
 	set_all_buttons(white),
-	tcl_call(tcli,[clear_report],_).
+	tcl_call(shl_tcli,[clear_report],_).
+
+apply_feature_preds(ValuesList, [], []) :-!.
+apply_feature_preds([], PredsList, []) :-!.
+
+apply_feature_preds( [unknown | ValuesList], [Pred | PredsList], AppsList)
+	:-!,
+	apply_feature_preds(ValuesList, PredsList, AppsList).
+
+apply_feature_preds( [Value | ValuesList], [Pred | PredsList], [App | AppsList])
+	:-
+	App =.. [Pred, Value],
+	asserta(user_observed(App)),
+	apply_feature_preds(ValuesList, PredsList, AppsList).
+
+
+export doId/1.
+	%DescPreds = [bud_scales, bud_color, terminal_buds, outer_scales, twigs],
+doId( Desc_list )
+	:-
+%write(Desc_list),nl,
+	DescPreds = [bud_scales, bud_color, terminal_buds, outer_scales, twigs],
+	apply_feature_preds(Desc_list, DescPreds, AppsList),
+%write(AppsList),nl,
+       entertain_hypothesis(Identification),  	% these 2 goals are a generate
+       validate(Identification),              	% and test loop
+%write(Identification),nl,
+	tcl_call(shl_tcli,[report_id, Identification], _).
 
 export identify/0.
 identify :-
@@ -59,7 +86,7 @@ identify :-
        abolish(does_not_hold,1).          	% observations
 
 obtain_description :-
-	tcl_call(tcli,[obtain_desc],DescArgs),
+	tcl_call(shl_tcli,[obtain_desc],DescArgs),
 	DescPreds = [bud_scales, bud_color, terminal_buds,
 			outer_scales, twigs],
 	map_desc(DescPreds, DescArgs).
@@ -93,7 +120,7 @@ entertain_hypothesis(Identification) :-     % duplicates 1st clause -- later
                                             % generate-&-test loop return to
                                             % here
 entertain_hypothesis(_) :-
-	tcl_call(tcli, [report_id,'Can\'t identify tree'], _),
+	tcl_call(shl_tcli, [report_id,'Can\'t identify tree'], _),
        abolish(user_observed,1),                 % the user has provided an
        abolish(does_not_hold,1),!,fail.     % impossible set of descriptors
                                                 % -- all possibilities have
@@ -147,7 +174,7 @@ act_on(Other, Attribute) :-
 % for act_on to be executed exactly once.
 
 report(Identification) :-
-	tcl_call(tcli, [report_id,Identification], _),
+	tcl_call(shl_tcli, [report_id,Identification], _),
        bagof(Characteristic, 
 		(trait(Characteristic, Identification), 
 			not orig_observe(Characteristic) ),
@@ -209,11 +236,11 @@ set_button_color([Desc | Traits], Color)
 	:-
 	Desc =.. [Func , Value],
 	catenate(['.tree_id.',Func,'.',Value], Button),
-	tcl_call(tcli,[Button,configure,'-selectcolor',Color],_),
+	tcl_call(shl_tcli,[Button,configure,'-selectcolor',Color],_),
 	set_button_color(Traits, Color).
 
 set_all_buttons(Color)
 	:-
-	tcl_call(tcli,[set_all_buttons,Color],_).
+	tcl_call(shl_tcli,[set_all_buttons,Color],_).
 
 endmod.

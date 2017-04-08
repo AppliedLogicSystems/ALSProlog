@@ -42,6 +42,10 @@ use tk_alslib.
 	%%
 	%%	?- vdc.
 
+export vdc/0.
+vdc :-
+	init_tk_alslib,
+	tcl_eval(shl_tcli, 'source vdc.tcl', _).
 
 export vdc/2.
 vdc(Input, Answer)
@@ -55,13 +59,9 @@ vdc(Input, bad_input)
 	:-
 	Title = 'Error',
 	Msg = 'Bad Input!',
-	tcl_call(tcli, 
+%	tcl_call(tcli, 
+	tcl_call(shl_tcli, 
 		[tk_dialog, '.quit_dialog', Title, Msg, error, 0, 'OK'], _).
-
-export vdc/0.
-vdc :-
-	init_tk_alslib,
-	tcl_eval(shl_tcli, 'source vdc.tcl', _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 

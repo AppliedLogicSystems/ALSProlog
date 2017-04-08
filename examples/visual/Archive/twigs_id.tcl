@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------#
 #		twigs_id.tcl
-#	Copyright (c) 1998-2017 Applied Logic Systems, Inc.
+#	Copyright (c) 1998 Applied Logic Systems, Inc.
 #
 #	Visual interface for the "Hickory Tree Identification Example"
 #	Widget descriptions developed using VTCL 1.10
@@ -101,7 +101,7 @@ proc vTclWindow.tree_id {base} {
     frame $base.bud_scales \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.bud_scales.label \
-        -borderwidth 1 -font {{MS Sans Serif} 12 bold} -text {Bud Scales:} 
+        -borderwidth 1 -font {{MS Sans Serif} 8 bold} -text {Bud Scales:} 
     radiobutton $base.bud_scales.valvate \
         -text Valvate -value valvate -variable agv(bud_scales) 
     radiobutton $base.bud_scales.imbricate \
@@ -111,7 +111,7 @@ proc vTclWindow.tree_id {base} {
     frame $base.bud_color \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.bud_color.label \
-        -borderwidth 1 -font {{MS Sans Serif} 12 bold} -text {Bud Color:} 
+        -borderwidth 1 -font {{MS Sans Serif} 8 bold} -text {Bud Color:} 
     radiobutton $base.bud_color.yellow \
         -text Yellow -value yellow -variable agv(bud_color) 
     radiobutton $base.bud_color.brownish \
@@ -121,7 +121,7 @@ proc vTclWindow.tree_id {base} {
     frame $base.terminal_buds \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.terminal_buds.label \
-        -borderwidth 1 -font {{MS Sans Serif} 12 bold} -text {Terminal Buds:} 
+        -borderwidth 1 -font {{MS Sans Serif} 8 bold} -text {Terminal Buds:} 
     radiobutton $base.terminal_buds.short \
         -text Short -value short -variable agv(terminal_buds) 
     radiobutton $base.terminal_buds.large \
@@ -131,7 +131,7 @@ proc vTclWindow.tree_id {base} {
     frame $base.outer_scales \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.outer_scales.outer_scales \
-        -borderwidth 1 -font {{MS Sans Serif} 12 bold} -text {Outer Scales:} 
+        -borderwidth 1 -font {{MS Sans Serif} 8 bold} -text {Outer Scales:} 
     radiobutton $base.outer_scales.persistent \
         -text Persistent -value persistent -variable agv(outer_scales) 
     radiobutton $base.outer_scales.deciduous \
@@ -141,7 +141,7 @@ proc vTclWindow.tree_id {base} {
     frame $base.twigs \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.twigs.label \
-        -borderwidth 1 -font {{MS Sans Serif} 12 bold} -text Twigs: 
+        -borderwidth 1 -font {{MS Sans Serif} 8 bold} -text Twigs: 
     radiobutton $base.twigs.orange_brown \
         -text Orange_brown -value orange_brown -variable agv(twigs) 
     radiobutton $base.twigs.reddish_brown \
@@ -151,17 +151,17 @@ proc vTclWindow.tree_id {base} {
     frame $base.buttons \
         -borderwidth 2 -height 75 -relief groove -width 125 
     button $base.buttons.start \
-	-font {{MS Sans Serif} 12 bold} \
+	-font {{MS Sans Serif} 8 bold} \
         -text Reset -command {prolog call identify reset}
     button $base.buttons.identify \
-	-font {{MS Sans Serif} 12 bold} -foreground #ff0000 \
-        -text Identify -command doId
+	-font {{MS Sans Serif} 8 bold} -foreground #ff0000 \
+        -text Identify -command {prolog call identify identify}
     frame $base.result \
         -borderwidth 2 -height 75 -relief groove -width 125 
     label $base.result.label \
         -borderwidth 1 -text {Tree Name:} 
     label $base.result.answer \
-        -background #ffffff -borderwidth 1 -font {{MS Sans Serif} 12 bold} \
+        -background #ffffff -borderwidth 1 -font {{MS Sans Serif} 8 bold} \
         -relief sunken -height 2 -text ? 
     ###################
     # SETTING GEOMETRY
@@ -180,7 +180,7 @@ proc vTclWindow.tree_id {base} {
         -in .tree_id.bud_scales -anchor center -expand 0 -fill none \
         -side left 
     pack $base.bud_scales.unknown \
-        -in .tree_id.bud_scales -anchor center -expand 0 -fill none -side top -side right
+        -in .tree_id.bud_scales -anchor center -expand 0 -fill none -side top 
     pack $base.bud_color \
         -in .tree_id -anchor center -expand 0 -fill x -side top 
     pack $base.bud_color.label \
@@ -190,7 +190,7 @@ proc vTclWindow.tree_id {base} {
     pack $base.bud_color.brownish \
         -in .tree_id.bud_color -anchor center -expand 0 -fill none -side left 
     pack $base.bud_color.unknown \
-        -in .tree_id.bud_color -anchor center -expand 0 -fill none -side top -side right
+        -in .tree_id.bud_color -anchor center -expand 0 -fill none -side top 
     pack $base.terminal_buds \
         -in .tree_id -anchor center -expand 0 -fill x -side top 
     pack $base.terminal_buds.label \
@@ -204,7 +204,7 @@ proc vTclWindow.tree_id {base} {
         -side left 
     pack $base.terminal_buds.unknown \
         -in .tree_id.terminal_buds -anchor center -expand 0 -fill none \
-        -side top -side right
+        -side top 
     pack $base.outer_scales \
         -in .tree_id -anchor center -expand 0 -fill x -side top 
     pack $base.outer_scales.outer_scales \
@@ -218,7 +218,7 @@ proc vTclWindow.tree_id {base} {
         -side left 
     pack $base.outer_scales.unknown \
         -in .tree_id.outer_scales -anchor center -expand 0 -fill none \
-        -side top -side right
+        -side top 
     pack $base.twigs \
         -in .tree_id -anchor center -expand 0 -fill x -side top 
     pack $base.twigs.label \
@@ -231,7 +231,7 @@ proc vTclWindow.tree_id {base} {
         -side left 
     pack $base.twigs.unknown \
         -in .tree_id.twigs -anchor center -expand 0 -fill none \
-        -side top -side right
+        -side top 
     pack $base.buttons \
         -in .tree_id -anchor center -expand 0 -fill x -side top 
     pack $base.buttons.start \
@@ -249,13 +249,6 @@ proc vTclWindow.tree_id {base} {
 
 	wm geometry $base ""
 }
-
-proc doId {} {
-    global agv
-    prolog call identify doId -list [obtain_desc]
-}
-   # puts "[obtain_desc]"
-#        -text Identify -command {prolog call identify identify}
 
 proc obtain_desc {} {
     global agv

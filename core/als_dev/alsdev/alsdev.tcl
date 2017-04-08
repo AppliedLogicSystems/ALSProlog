@@ -364,7 +364,7 @@ load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
-
+load_photo openfolder openfolder
 switch [tk windowingsystem] {
 	x11 {
 		load_photo closed_ptr closed_unix
