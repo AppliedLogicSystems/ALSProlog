@@ -41,6 +41,7 @@ export trace/1.
 export trace/2.
 	
 'trace' :-
+	(builtins:alsdev_running -> tcl_call(shl_tcli, [ensure_db_showing], _) ; true),
 	check_debug_io,
 	dbg_notrace,
 	setPrologInterrupt(debug_user),
