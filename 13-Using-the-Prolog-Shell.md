@@ -87,7 +87,7 @@ The ALS Prolog TTY shell supports command line editing and history similar to th
 
 The command line history keeping is turned on by placing 
 ````
-	history_file_locn(LOCN).
+	alspro_history_file_locn(LOCN).
 ````
 in the .alspro startup file, in either the current directory, or in the HOME directory.  The history
 file is named 
