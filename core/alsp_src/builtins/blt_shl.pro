@@ -40,7 +40,7 @@ start_shell(DefaultShellCall)
 		).
 
 :- dynamic(genFileLocn/3).
-:- dynamic(user:history_file_locn/1).
+:- dynamic(user:alspro_history_file_locn/1).
 :- dynamic(user:no_load_prev_history/0).
 
 start_shell0(DefaultShellCall)
@@ -77,7 +77,7 @@ start_shell0(DefaultShellCall)
 
 start_shell0(_).
 
-history_file_locn(L) :- user:history_file_locn(L), !.
+history_file_locn(L) :- user:alspro_history_file_locn(L), !.
 history_file_locn(home).
 
 check_setup_history_file(HistoryFile) :-
@@ -274,7 +274,6 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
-%	pathPlusFile(HOME,AutoFile,File),
 	join_path([HOME,AutoFile],File),
 	exists_file(File),
 	!,
