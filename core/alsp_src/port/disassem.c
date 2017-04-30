@@ -77,7 +77,7 @@ list_asm(addr, n)
     enum AbstractMachineOps instr;
 
 	printf("startaddr=%p  stopaddr=%p  codelen=%d\n",
-		addr,stopaddr,n),
+		addr,stopaddr,n);
 	fflush(stdout);
 
     for (ip = addr; ip < stopaddr; ) {
