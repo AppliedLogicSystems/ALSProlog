@@ -283,8 +283,8 @@ static	int	format_type	PARAMS(( UCHAR * ));
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 int do_lineedit = 0;
-static const char *lineedit_prompt="?- ";
-const char *history_file;
+char lineedit_prompt[PATH_MAX]= "?- ";
+char history_file[PATH_MAX] = ".alspro_history";
 int  do_load_prev_history = 1;
 
 
@@ -3764,12 +3764,15 @@ sio_set_lineedit_prompt()
 {
     PWord v1;
     int   t1;
+    const char *prompt;
 
     w_get_An(&v1, &t1, 1);
 
-    if (!getstring((UCHAR **)&lineedit_prompt, v1, t1)){
-        lineedit_prompt = "?- ";
+    if (!getstring((UCHAR **)&prompt, v1, t1)){
+        prompt = "?- ";
     }
+    strncpy(lineedit_prompt, prompt, sizeof(lineedit_prompt)-1);
+    lineedit_prompt[sizeof(lineedit_prompt) - 1] = '\0';
     SUCCEED;
 }
 
@@ -3782,12 +3785,15 @@ sio_set_history_file()
 {
     PWord v1;
     int   t1;
+	const char *path;
 
     w_get_An(&v1, &t1, 1);
 
-    if (!getstring((UCHAR **)&history_file, v1, t1)){
-        history_file = ".alspro_history";
+    if (!getstring((UCHAR **)&path, v1, t1)) {
+        path = ".alspro_history";
     }
+    strncpy(history_file, path, sizeof(history_file)-1);
+    history_file[sizeof(history_file) - 1] = '\0';
     SUCCEED;
 }
 
