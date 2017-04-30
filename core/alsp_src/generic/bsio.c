@@ -347,7 +347,7 @@ static const char *sublineedit_prompt="?_ ";
  * linenoise_readbuffer()
  */
 
-long
+static long
 linenoise_readbuffer(char *buf, long n)
 {
     char *line;
@@ -363,11 +363,8 @@ linenoise_readbuffer(char *buf, long n)
         do_load_prev_history = 0;
     }
 
-    if (do_lineedit == 1){
-        line = linenoise(lineedit_prompt);
-    } else if (do_lineedit == 2){
-        line = linenoise(sublineedit_prompt);
-    }
+    line = linenoise( do_lineedit == 1 ? lineedit_prompt : sublineedit_prompt);
+
     if (line == NULL){
         return 0;
     }
