@@ -97,7 +97,6 @@
 #define AutoIndexing	1
 #define SPY		1
 #define OBP		1 
-#undef OBP
 #define Indexing	1
 #define BigStruct	1
 
