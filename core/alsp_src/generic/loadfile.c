@@ -749,12 +749,13 @@ load_file(fname, options)
     char *fname;
     int   options;
 {
-    long  pro_time, obp_time;
+    long  pro_time;
     char *ext, *fnp;
     char  new_fname[256];
+#ifdef OBP
+    long  obp_time;
     int   status;
     long  old_reconsult_stamp = w_reconstamp;
-#ifdef OBP
     int   old_makeobp = makeobp;
     FILE *old_obp_fp = obp_fp;
     int   old_obp_nrecs = obp_nrecs;
