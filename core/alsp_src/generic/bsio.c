@@ -284,7 +284,7 @@ enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
 int do_lineedit = 0;
 char lineedit_prompt[PATH_MAX]= "?- ";
-char history_file[PATH_MAX] = ".alspro_history";
+char history_file[PATH_MAX] = "";
 int  do_load_prev_history = 1;
 
 
@@ -3787,7 +3787,7 @@ sio_set_history_file()
     w_get_An(&v1, &t1, 1);
 
     if (!getstring((UCHAR **)&path, v1, t1)) {
-        path = ".alspro_history";
+        path = "";
     }
     strncpy(history_file, path, sizeof(history_file)-1);
     history_file[sizeof(history_file) - 1] = '\0';
