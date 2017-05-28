@@ -85,10 +85,13 @@ check_setup_history_file(HistoryFile) :-
    setup_history_file(HFL, HistoryFile).
 
 setup_history_file(home, HistoryFile)
-        :-!,
+        :-
         getenv('HOME', UserHomePath),
+	!,
         pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
         sio_set_history_file(PathToHistoryFile).
+
+setup_history_file(home, _) :-!.
 
 setup_history_file(local, HistoryFile)
         :-!,
@@ -253,7 +256,8 @@ ss_load_dot_alspro(CLInfo)
 	dmember(os=OS, L),
 	(OS = macos -> Files = ['alspro.pro'] ;
 		OS = mswin32 -> Files = ['alspro.pro'] ;
-			Files = ['alspro.pro','.alspro']
+			%% .alspro is preferred on unix/darwin:
+			Files = ['.alspro','alspro.pro']
 	),
 	ss_load_dot_alspros(Files, Verbosity).
 
@@ -262,6 +266,9 @@ ss_load_dot_alspros([File | Files], Verbosity)
 	:-
 	ss_load_the_dot_alspro(File, Verbosity),
 	!,
+	ss_load_dot_alspros(Files, Verbosity).
+ss_load_dot_alspros([File | Files], Verbosity)
+	:-
 	ss_load_dot_alspros(Files, Verbosity).
 
 ss_load_the_dot_alspro(AutoFile, Verbosity)
@@ -279,7 +286,6 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 	!,
 	consult(File, [consult(false),quiet(Verbosity)]).
 
-ss_load_the_dot_alspro(_, _).
 
 /*-------------------------------------------------
  | print_banner/2

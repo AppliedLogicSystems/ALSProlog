@@ -1029,43 +1029,6 @@ exists_file(Path)
 	:-
 	'$access'(Path,0).
 
-/*!----------------------------------------------------------------
- | getenv/2
- | getenv(VarName, Value)
- | getenv(+, -)
- |
- |	-- Get the value of a (named) environment variable
- |
- | 	Fails if the name variable is unset.
- | The variable 'HOME' on Unix/Linux is treated specially:
- | If 'HOME' is unset, the call to getenv succeeds, with
- |	Value = <Path|To|alsdir>/user
- | If the subdir 'user' of alsdir does not exist, it is created.
- *!----------------------------------------------------------------*/
-
-export getenv/2.
-getenv('HOME', Value)
-	:-
-	getenv0('HOME', Value),
-	!.
-getenv('HOME', Value)
-	:-!,
-	sys_searchdir(AlsdirPath),
-	'$atom_concat'(AlsdirPath, 'user', UFileName),
-	Value = UFileName,
-	(exists(UFileName) -> 
-		true
-		;
-		get_cwd(CurWD),
-		change_cwd(AlsdirPath),
-		mkdir(user,511),
-		change_cwd(CurWD)
-	).
-getenv(Name, Value)
-	:-
-	getenv0(Name, Value).
-
-
 %% Temporary (backwards compat):
 export exists/1.
 exists(FileName) :-

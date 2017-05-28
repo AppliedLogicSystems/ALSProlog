@@ -322,7 +322,7 @@ static struct blt_struct {
 #ifndef PURE_ANSI
 	BLT("$access", 2, pbi_access, "_pbi_access"),
 #ifdef OSACCESS
-	BLT("getenv0", 2, pbi_getenv, "_pbi_getenv"),
+	BLT("getenv", 2, pbi_getenv, "_pbi_getenv"),
 	BLT("get_user_home", 2, pbi_get_user_home, "_pbi_get_user_home"),
 	BLT("tmpnam", 1, pbi_tmpnam, "_pbi_tmpnam"),
 #endif /* OSACCESS */
