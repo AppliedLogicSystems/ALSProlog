@@ -161,6 +161,10 @@ cl_test "$prolog -heap 2000 -heap 1000 -b -q -g 'statistics([_,_,heap(_,_,_,_,10
 cl_test "$prolog -stack 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),_,_])'" 0
 cl_test "$prolog -stack 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'" 0
 
+# Test empty environment
+
+cl_test "env -i $prolog -q -b -g true" 0
+
 # test error handling of invalid ALS_OPTIONS
 # Currently they don't fail, but should:
 
