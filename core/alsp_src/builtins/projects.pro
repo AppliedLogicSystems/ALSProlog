@@ -976,7 +976,6 @@ als_ide_mgrAction(show_xrf_report, ALSIDEObject)
 gen_cref_mgrAction(show_report, Type, SuiteMgr)
 	:-
 	accessObjStruct(target, SuiteMgr, Target),
-write(user,sr=[type=Type,tgt=Target]),nl(user),ttyflush(user),
 	(Type == xrf ->
 		%% Temporary, until opening the *.xrf in an als_document
 		%% is supported:
