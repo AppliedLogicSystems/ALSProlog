@@ -871,6 +871,7 @@ proc toggle_files_list {Win Which} {
 	global array proenv 
 
 	if {$proenv($Which) == "closed"} then {
+$Win.ctl_$Which.entry configure -state normal
     	$Win.ctl_$Which.open_btn configure -image open_ptr
 		set proenv($Which) open
     	pack $Win.$Which  \
@@ -887,6 +888,7 @@ proc toggle_files_list {Win Which} {
 		append GG $Wd x $Ht + $XX + $YY
 		wm geometry $Win $GG
 	} else {
+$Win.ctl_$Which.entry configure -state disabled
     	$Win.ctl_$Which.open_btn configure -image closed_ptr
 		set proenv($Which) closed
     	pack forget $Win.$Which 
@@ -928,7 +930,7 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
     label $Win.ctl_$Which.label \
         -text $Title
 	
-    entry $Win.ctl_$Which.entry 
+    entry $Win.ctl_$Which.entry -state disabled
 	bind $Win.ctl_$Which.entry <Return> "add_file_entry_to_list $Win.ctl_$Which.entry $Win.$Which.listbox"
 
     frame $Win.$Which \
@@ -1825,6 +1827,7 @@ proc cref_panel \
 	# Init document field
     set proenv($base,dirty) false
     set proenv($base.addlprj,dirty) false
+    send_prolog als_ide_mgr exist_reports
 }
 
 proc rd_cref_panel {base} {
