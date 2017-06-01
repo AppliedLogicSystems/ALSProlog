@@ -987,6 +987,23 @@ gen_cref_mgrAction(show_report, Type, SuiteMgr)
 		catenate('open ', HTMLTarget, Cmd)
 	),
 	system(Cmd).
+
+als_ide_mgrAction(exist_reports, ALSIDEObject)
+	:-
+	accessObjStruct(cur_cref_mgr,ALSIDEObject,ThisSuiteMgr),
+	gen_cref_mgrAction(exist_reports, ThisSuiteMgr).
+	
+
+gen_cref_mgrAction(exist_reports, SuiteMgr)
+	:-
+	accessObjStruct(target, SuiteMgr, Target),
+	(exists_file(Target) -> XrfExists = true ; XrfExists = false),
+	file_extension(Target, Name, _),
+	file_extension(HTMLTarget, Name, html),
+	(exists_file(HTMLTarget) -> HTMLExists = true ; HTMLExists = false),
+	accessObjStruct(gui_spec, SuiteMgr, GuiPath),
+	tcl_call(shl_tcli, [set_cref_rpt_btns, GuiPath, HTMLExists, XrfExists], _).
+
 		
 als_ide_mgrAction(cref_close, ALSIDEObject)
 	:-

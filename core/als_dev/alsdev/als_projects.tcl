@@ -641,6 +641,7 @@ proc do_gen_gui {} {
 
 proc run_cref_on_prj {Base} {
 	send_prolog als_ide_mgr run_cref_on_prj
+    	send_prolog als_ide_mgr exist_reports
 }
 
 proc show_lib_files { LibFiles } {
@@ -661,6 +662,7 @@ proc select_cref_suite {} {
 
 proc run_cref_on_suite {Base} {
         send_prolog als_ide_mgr run_cref_on_suite
+    	send_prolog als_ide_mgr exist_reports
 }       
 
 proc html_report {} {
@@ -690,4 +692,18 @@ proc save_cref_suite {w} {
     	set proenv($w.addlprj,dirty) false
     	$w.buttons.save configure -state disabled
 	return 1
+}
+
+proc set_cref_rpt_btns {GuiPath HTMLExists XrfExists} {
+        global array proenv
+	if {$HTMLExists} then {
+		$GuiPath.report_buttons.html configure -state normal
+	} else {
+		$GuiPath.report_buttons.html configure -state disabled
+	}
+	if {$XrfExists} then {
+		$GuiPath.report_buttons.xrf configure -state normal
+	} else {
+		$GuiPath.report_buttons.xrf configure -state disabled
+	}
 }
