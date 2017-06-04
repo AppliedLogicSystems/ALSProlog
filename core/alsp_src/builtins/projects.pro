@@ -979,7 +979,7 @@ gen_cref_mgrAction(show_report, Type, SuiteMgr)
 	(Type == xrf ->
 		%% Temporary, until opening the *.xrf in an als_document
 		%% is supported:
-		catenate('cat ', Target, Cmd)
+		tcl_call(shl_tcli, [load_readonly, Target], _)
 		;
 		file_extension(Target, Name, _),
 		file_extension(HTMLTarget, Name, html),
