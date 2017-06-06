@@ -51,7 +51,6 @@ proc create_document_window {title} {
 	global mod
 
 		# Create a unique window name:
-
 	incr proenv(document_index)
 	set w ".document$proenv(document_index)"
 	
@@ -313,6 +312,9 @@ proc dispose_document_window {w} {
 	if {[info exists proenv($w,file)] && [info exists proenv(document,$proenv($w,file))]} then {
 		unset proenv(document,$proenv($w,file))
 	}
+	if {[info exists proenv($w,file)] && [info exists proenv(readonly,$proenv($w,file))]} then {
+		unset proenv(readonly,$proenv($w,file))
+	}
 	if {[info exists proenv($w,title)]} then {
 		un_post_open_document $proenv($w,title)
 		unset proenv($w,title)
@@ -321,7 +323,7 @@ proc dispose_document_window {w} {
 	if {[info exists proenv($w,dirty)]} then {unset proenv($w,dirty)}
 	set i [lsearch -exact $proenv(document_list) $w]
 	set proenv(document_list) [lreplace $proenv(document_list) $i $i]
-	
+
 	destroy $w
 }
 
@@ -365,6 +367,27 @@ proc load_document {file} {
 	}
 	return $proenv(document,$file)
 }
+
+proc load_readonly {file} {
+        global array proenv
+        if {[info exists proenv(readonly,$file)]} {
+                raise $proenv(readonly,$file)
+        } else {
+                set file_name [lindex [file split $file] end]
+                set w [create_document_window $file_name]
+                try {
+                        load_text $file $w.text
+                        set proenv($w,file) $file
+                        set proenv($w,title) $file_name
+                        set proenv(readonly,$file) $w
+                        set proenv($w,src_handler) 0
+                } fail {
+                        dispose_document_window $w
+                }
+        }
+        return $proenv(readonly,$file)
+}
+
 
 proc close_and_reopen {w} {
 	global array proenv 
@@ -491,10 +514,13 @@ proc save_check {w} {
 	return $result
 }
 
-
 proc document.close {w} {
 	global array proenv	
-	if {[save_check $w]} then {
+	if {$proenv($w,src_handler) == 0} then {
+		dispose_document_window $w
+		return true
+	}
+	else if {[save_check $w]} then {
 		prolog call $proenv(dflt_mod) send -number $proenv($w,src_handler) -atom close_edit_win
 			## the prolog side used to do this, but moved back here:
 		unset proenv($w,is_example)

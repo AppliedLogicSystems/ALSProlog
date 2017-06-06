@@ -46,6 +46,7 @@ proc xpe2 { What1 What2 } {
 	# where:
 	#       Mod = $proenv(dflt_mod)
 	#       $proenv($Obj) = a number which is an object handle for Obj
+	#	    where Obj is a prolog object (e.g., ALS_IDE_Mgr, line 154 in blt_dvsh.pro
 	#       Msg is an atom
 	#
 	#### WARNING #### WARNING #### WARNING 
@@ -68,6 +69,7 @@ proc send_prolog {Obj Msg} {
 	# where:
 	#       Mod = $proenv(dflt_mod)
 	#       $proenv($Obj) = a number which is an object handle for Obj
+	#	    where Obj is a prolog object (e.g., ALS_IDE_Mgr, line 154 in blt_dvsh.pro
 	#       Msg is of type $Type
 	#               (normally use this with $Type = "list" )
 	#

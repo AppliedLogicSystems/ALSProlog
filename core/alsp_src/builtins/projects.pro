@@ -977,16 +977,14 @@ gen_cref_mgrAction(show_report, Type, SuiteMgr)
 	:-
 	accessObjStruct(target, SuiteMgr, Target),
 	(Type == xrf ->
-		%% Temporary, until opening the *.xrf in an als_document
-		%% is supported:
-		catenate('cat ', Target, Cmd)
+		tcl_call(shl_tcli, [load_readonly, Target], _)
 		;
 		file_extension(Target, Name, _),
 		file_extension(HTMLTarget, Name, html),
-		%% Must determine if open will work on Linux & Windows:
-		catenate('open ', HTMLTarget, Cmd)
-	),
-	system(Cmd).
+			%% Must determine if open will work on Linux & Windows:
+		catenate('open ', HTMLTarget, Cmd),
+		system(Cmd)
+	).
 
 als_ide_mgrAction(exist_reports, ALSIDEObject)
 	:-
