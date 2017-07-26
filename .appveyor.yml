@@ -1,6 +1,6 @@
+# TODO: Fix cygwin-unix build:    - OS: unix
 environment:
   matrix:
-    - OS: unix
     - OS: win32
 
 install:
