@@ -235,7 +235,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     if (setjmp(exit_return))
 	return (exit_status);
 
-	heapsize = setup->heap_size ? setup->heap_size : DEFAULT_HEAP_SIZE;
+    heapsize = setup->heap_size ? setup->heap_size : DEFAULT_HEAP_SIZE;
     stacksize = setup->stack_size ? setup->stack_size :DEFAULT_STACK_SIZE;
 #if	defined(arch_i386) || defined(arch_sparc) || defined(arch_m68k)
     icbufsize = setup->icbuf_size ? setup->icbuf_size : MIN_ICBUFSIZE;

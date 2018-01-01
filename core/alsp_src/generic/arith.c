@@ -122,17 +122,17 @@ pbi_time()
     w_get_An(&visdst, &tisdst, 9);
     w_get_An(&vkind, &tkind, 10);
 
-	if (tkind != WTP_INTEGER) 
+    if (tkind != WTP_INTEGER) 
 	FAIL;
 
     tv = time(0L);
 	if (vkind == 0)
-    	tp = localtime(&tv);
+    	    tp = localtime(&tv);
 	else {
-		if (vkind == 1)
+	    if (vkind == 1)
     		tp = gmtime(&tv);
-		else
-			FAIL;
+	    else
+		FAIL;
 	}
 
     if (w_unify(vsec, tsec, (PWord) tp->tm_sec, WTP_INTEGER) &&
@@ -306,8 +306,8 @@ do_is(v, t, ty)
 		case TK_E:
 		    return D_E;
 		default: 
-			error_functor = v; error_arity = 0;
-		   	longjmp(is_error, IS_EVALUABLE_TYPE_ERROR);
+		    error_functor = v; error_arity = 0;
+		    longjmp(is_error, IS_EVALUABLE_TYPE_ERROR);
 	    }
 
 	case WTP_LIST:
@@ -417,7 +417,7 @@ do_is(v, t, ty)
 		    	rv = rv - aint(rv);
 		    	break;
 		    default:
-		    error_functor = functor; error_arity = arity;
+			error_functor = functor; error_arity = arity;
 			longjmp(is_error, IS_EVALUABLE_TYPE_ERROR);
 		}
 
@@ -467,15 +467,15 @@ do_is(v, t, ty)
 			if (rv2 == 0)
 			    longjmp(is_error, IS_ZERO_DIVISOR_ERROR);
 			else
-				*ty = WTP_DOUBLE;
-			    return rv1 / rv2;
+			    *ty = WTP_DOUBLE;
+			return rv1 / rv2;
 		    case TK_SLASHSLASH:
 		    case TK_DIV:
 			if (rv2 == 0)
 			    longjmp(is_error, IS_ZERO_DIVISOR_ERROR);
 			else
-				*ty = WTP_INTEGER;
-			    return aint(rv1 / rv2);
+			    *ty = WTP_INTEGER;
+			return aint(rv1 / rv2);
 		    case TK_MOD:
 		    	if (ty1 != WTP_INTEGER || ty2 != WTP_INTEGER) {
 		    	    error_functor = functor; error_arity = arity;
@@ -483,13 +483,13 @@ do_is(v, t, ty)
 		    	} if (rv2 == 0)
 			    longjmp(is_error, IS_ZERO_DIVISOR_ERROR);
 			else
-				*ty = WTP_INTEGER;
+			    *ty = WTP_INTEGER;
 			return rv1 - floor(rv1 / rv2) * rv2;
 		    case TK_REM:
 			if (rv2 == 0)
 			    longjmp(is_error, IS_ZERO_DIVISOR_ERROR);
 			else
-				*ty = WTP_INTEGER;
+			    *ty = WTP_INTEGER;
 			return rv1 - aint(rv1 / rv2) * rv2;
 		    case TK_HAT:
 		    case TK_2ST:
@@ -516,14 +516,15 @@ do_is(v, t, ty)
 		return rv;
 	    }
 #endif /* DoubleType */
-	    else
+	    else {
 		error_functor = functor; error_arity = arity;
 		longjmp(is_error, IS_EVALUABLE_TYPE_ERROR);
+	    }
 	    break;
 
 #ifdef DoubleType
 	case WTP_DOUBLE:
-		ty = WTP_DOUBLE;
+	    ty = WTP_DOUBLE;
 	    w_get_double(&rv, v);
 	    return (rv);
 #endif /* DoubleType */
@@ -579,13 +580,13 @@ if (TP == WTP_INTEGER) {
 		else /* d is not an integer, so return it as a double */
 			goto return_as_double;
     }
-	else /* d cannot be represented as an integer, so return it as a double */
-		goto return_as_double;
-	}
+    else /* d cannot be represented as an integer, so return it as a double */
+	goto return_as_double;
+    }
 else	/* TP != WTP_INTEGER */
     {
-return_as_double:
-    w_mk_double(v, t, d);
+	return_as_double:
+	w_mk_double(v, t, d);
     }
 }
 
@@ -637,19 +638,19 @@ static int handle_is_error(int status)
     		break;
     	case IS_FLOAT_OVERFLOW_ERROR:
     		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"float_overflow"));
-   			break;
+   		break;
     	case IS_INT_OVERFLOW_ERROR:
     		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"int_overflow"));
-   			break;
+   		break;
     	case IS_UNDERFLOW_ERROR:
     		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"underflow"));
-   			break;
+   		break;
     	case IS_ZERO_DIVISOR_ERROR:
     		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"zero_divisor"));
-   			break;
+   		break;
     	case IS_UNDEFINED_ERROR:
     		PERR_EVALUATION(TK_IS, 2, find_token((UCHAR *)"undefined"));
-   			break;
+   		break;
    	default:
    		FAIL;
     }
@@ -671,8 +672,8 @@ pbi_is()
     	return handle_is_error(status);
     	
 
-	ty = WTP_INTEGER;
-	is_res = do_is(v2, t2, &ty);
+    ty = WTP_INTEGER;
+    is_res = do_is(v2, t2, &ty);
 
 /*    make_number(&v2, &t2, do_is(v2, t2)); */
 
