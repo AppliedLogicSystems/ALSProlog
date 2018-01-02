@@ -29,16 +29,18 @@ run_tests :-
 	tell(autotestlog),
 	run_tests0,
 	bagOf(TestID, failed(TestID), FailedTests),
-	final_message(FailedTests,autotestlog),
+	final_message(FailedTests,autotestlog, _),
 	flush_output(LOGStream),
 	close(LOGStream),
-	final_message(FailedTests,user_output),
+	final_message(FailedTests,user_output, Result),
 	flush_output,
-	told.
+	told,
+	Result.
 
 run_tests :-
 	printf(autotestlog,'!!!! Configuration Failure !!!!!\n',[]),
-	close(autotestlog).
+	close(autotestlog),
+	fail.
 
 configure_testing
 	:-
@@ -121,10 +123,10 @@ kill_off([(P,A) | PL],Mod)
 	Mod:abolish(P,A),
 	kill_off(PL,Mod).
 
-final_message([], OutStream)
+final_message([], OutStream, true)
 	:-!,
 	printf(OutStream,'All Tests Were Successful !!\n',[]).
-final_message(FailedTests, OutStream)
+final_message(FailedTests, OutStream, fail)
 	:-
 	printf(OutStream, 'The following tests failed:\n\t%t\n', FailedTests).
 endmod.
