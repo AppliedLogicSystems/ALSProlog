@@ -59,7 +59,7 @@ test_info(syms, syms, user, test,
 test_info(testcopy, testcopy, user, testnew,
 			'test of I/O.').
 
-test_info(testmath, testmath, user, test,
+test_info(testmath, testmath, user, autotest,
 			'test of math functions.').
 
 

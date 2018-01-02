@@ -21,6 +21,39 @@
  *		
  */
 
+autotest :- fail,
+	findall(mf(X,Y,Z), mf(X,Y,Z), L),
+	test_maths(L).
+
+test_maths([mf(MF,P,R1) | Tail]) :-
+	functor(MF, F, _), write('Testing '), write(F), write('.'), nl,
+	findall(test(MF, R1), P, L),
+	run_tests(L),
+	test_maths(Tail).
+test_maths([]).
+
+run_tests([test(F,R1) | Tail]) :-
+	write(test(F,R1)), nl,
+	R2 is F,
+	check_test(R1,R2,F),
+	run_tests(Tail).	
+run_tests([]).
+
+check_test(R1,R2,_) :- 
+	R1 >= 0,
+	0.999999996*R1 =< R2,
+	R2 =< 1.00000004*R1,
+	!.
+check_test(R1,R2,_) :-
+	R1 < 0,
+	1.00000004*R1 =< R2,
+	R2 =< 0.999999996,
+	!.
+check_test(R1,R2,MF) :-
+	write(MF), write(' gave result '), write(R2), write('.  '),
+	write(R1), write(' was expected.'),nl,
+	fail.
+
 test :-
 	mf(MF,P,R1),
 	functor(MF,F,_),
@@ -6137,6 +6170,9 @@ v_floor(2.2,2).
 v_floor(2.25,2).
 v_floor(2.3,2).
 
+mf(ceiling(_34),v_ceiling(_34,_56),_56).
+v_ceiling(2.3,3).
+v_ceiling(-2.3,-2).
 
 mf(sqrt(_34),v_sqrt(_34,_54),_54).
 v_sqrt(0,0).
