@@ -394,6 +394,7 @@ do_is(v, t, ty)
 		    case TK_CEILING:
 		    	*ty = WTP_INTEGER;
 		    	rv = ceil(rv);
+		    	break;
 		    case TK_SQRT:
 			rv = sqrt(rv);
 			break;
