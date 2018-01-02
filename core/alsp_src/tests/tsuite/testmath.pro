@@ -21,7 +21,7 @@
  *		
  */
 
-autotest :- fail,
+autotest :-
 	findall(mf(X,Y,Z), mf(X,Y,Z), L),
 	test_maths(L).
 
