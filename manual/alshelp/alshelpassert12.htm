@@ -184,15 +184,15 @@ are part of the current goal:
 <A NAME="23c02cc4"></A>The reason this didn’t work is an implementation issue. The following is the
 sequence of events illustrating what happened:
 <P></P>
-<A NAME="23c02cc5"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> First the assert(movie(jaws)) subgoal was run, causing a new procedure to be placed in the Prolog database.
+<A NAME="23c02cc5"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> First the assert(movie(jaws)) subgoal was run, causing a new procedure to be placed in the Prolog database.
 <P></P>
-<A NAME="23c02cc6"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>When the subgoal movie(X) was run, no choice point was created because there
+<A NAME="23c02cc6"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>When the subgoal movie(X) was run, no choice point was created because there
 were no other clauses to try if failure occurred.
 <P></P>
-<A NAME="23c02cc7"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>After movie(X) succeeded, the second clause of movie/1 was asserted, and the
+<A NAME="23c02cc7"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>After movie(X) succeeded, the second clause of movie/1 was asserted, and the
 initial goal succeeded, binding X to jaws.
 <P></P>
-<A NAME="23c02cc8"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>Backtracking was initiated by the ‘;’ response to the solution, but no second
+<A NAME="23c02cc8"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>Backtracking was initiated by the ‘;’ response to the solution, but no second
 solution was found for movie/1, even though there was a solution to be found.
 This was because there was no choice point to return to in movie/1.
 <P></P>

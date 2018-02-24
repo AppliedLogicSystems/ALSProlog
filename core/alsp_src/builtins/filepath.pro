@@ -44,6 +44,8 @@ export directory_self/1.
 export directory_self/2.
 export parent_path/1.
 export parent_path/2.
+export pathPlusFile/3.
+export pathPlusFilesList/3.
 export make_change_cwd/1.
 
 file_extension(FullName, Name, Ext) :-
@@ -56,10 +58,14 @@ file_extension(FullName, Name, Ext) :-
 		;
 		(atom_length(Last, Before), After = 0)
 	)),
-	sub_atom(Last, _, After, 0, Ext),
-	sub_atom(Last, 0, Before, _, BName),
-	dreverse([BName | RRestElts], NameElts),
-	join_path(NameElts, Name).
+	(Before == 0 ->
+		Name = Last, Ext = ''
+		;
+		sub_atom(Last, _, After, 0, Ext),
+		sub_atom(Last, 0, Before, _, BName),
+		dreverse([BName | RRestElts], NameElts),
+		join_path(NameElts, Name)
+	).
 
 file_extension(FullName, FileName, Ext) :-
 	atom_concat(FileName,'.',FileNameDot),

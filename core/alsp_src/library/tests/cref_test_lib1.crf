@@ -1,0 +1,8 @@
+
+%% Test suite spec for cref demo/testing
+
+src_dir = 'alsdir/library/tests'.
+
+list_of_files = ['cref_test_lib1.pro'].
+
+target = './tc2.xrf'.

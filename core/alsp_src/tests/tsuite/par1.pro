@@ -14,15 +14,10 @@
  | main is called to start the consumer / producer off.
  *-------------------------------------------------------*/
 
-main 
-	:-
-	als_system(SysVars),
-	dmember(os=OS,SysVars),
-	not(OS = macos), not(OS = mswin32),
+main 	:-
 	trap(main0,alarm_handler).	%% call main0/0 and establish handler
 
-main0 
-	:-
+main0 	:-
 	initQueue,
 	produce(0,L),
 	consume(L).

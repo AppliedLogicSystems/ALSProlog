@@ -10,6 +10,9 @@
  |
  | Module Name:	avl
  |
+ | Text/Demo procedure (non-exported): shell
+ |	Invoke by    avl:shell
+ |
  | Exported Procedures:
  |
  |	avl_create(Tree)	-- create an empty tree, Tree
@@ -57,24 +60,28 @@ export avl_inorder_wdata/2.
 export avl_insert/4.
 export avl_search/3.
 
-/*!-------------------------------------------------------------
- * avl_create/1
- * avl_create(Tree)	
- * avl_create(-)	
- *	
- * -	create an empty tree.
+/*!---------------------------------------------------------------
+ * shell/0	---- Demo/Test procedure
  *
- * avl_create(Tree) creates an empty avl tree which is
- * unified with Tree.
- *!-------------------------------------------------------------*/
-avl_create(empty).
-
-
-/*
- * shell/0	-- shell for testing out the avl insertion and searching
- *		   routines.
- *
- */
+ * shell for testing out the avl insertion and searching routines.
+ *   -- not exported; invoke with
+ *	avl:shell
+ * Commands:
+ *   quit   halt   exit
+ *   help
+ *   insert(Key-Data)  -- insert Data at Key 
+ *   in(Key, Data)     -- insert(Key-Data)
+ *   insert(Key)       -- insert(Key, d(Key))
+ *   write             -- apply write to tree
+ *   height,ht         -- show height of tree
+ *   inorder           -- display keys in order
+ *   inorder_data      -- display keys with data in order
+ *   preorder          -- dipslay keys in pre-order
+ *   count,c           -- show height of tree
+ *   stats,st          -- show height and count of tree
+ *   search(Key)       -- search tree for Key and display Data
+ *   x                 -- instantiate tree to a pre-set sample
+ *!--------------------------------------------------------------*/
 
 shell :- shell(empty).
 shell(Tree) :-
@@ -89,6 +96,9 @@ act_on(insert(Key-Data),Tree) :-
     !,
     avl_insert(Key,Data,Tree,NewTree),
     shell(NewTree).
+act_on(in(Key,Data),Tree) :-
+    !,
+    act_on(insert(Key-Data),Tree).
 act_on(insert(Item),Tree) :-
     !,
     avl_insert(Item,d(Item),Tree,NewTree),
@@ -103,6 +113,7 @@ act_on(height,Tree) :-
     height(Tree,Height),
     write(Height),nl,
     shell(Tree).
+act_on(ht,Tree) :- !, act_on(height,Tree).
 act_on(inorder,Tree) :-
     !,
     avl_inorder(Tree,List),
@@ -115,6 +126,9 @@ act_on(inorder_data,Tree) :-
     write(List),
     nl,
     shell(Tree).
+act_on(i_d,Tree) :-
+    !,
+    act_on(inorder_data,Tree).
 act_on(preorder,Tree) :-
     !,
     preorder(Tree,List),
@@ -127,12 +141,14 @@ act_on(count,Tree) :-
     write(Count),
     nl,
     shell(Tree).
+act_on(c,Tree) :- !, act_on(count,Tree).
 act_on(stats,Tree) :-
     !,
     height(Tree,Height),
     nelems(Tree,N),
     write('Height'=Height),write('  Element Count'=N),nl,
     shell(Tree).
+act_on(st,Tree) :- !, act_on(stats,Tree).
 act_on(search(Key),Tree) :-
     avl_search(Key,Data,Tree),
     !,
@@ -142,10 +158,55 @@ act_on(search(Key),Tree) :-
     !,
     write('Key '),write(Key),write(' not found.'),nl,
     shell(Tree).
+act_on(s(Key),Tree) :-
+    !,
+    act_on(search(Key),Tree).
+act_on(help,Tree) :-
+    !,
+    show_avl_help,
+    shell(Tree).
+act_on(x,_) :-
+    !,
+    x(Tree),
+    shell(Tree).
 act_on(_,Tree) :-
     write('Unrecognized command.'),nl, shell(Tree).
 
+show_avl_help
+    :-
+    write('quit   halt   exit'),nl,
+    write('help'),nl,
+    write('insert(Key-Data)  -- insert Data at Key '),nl,
+    write('in(Key, Data)     -- insert(Key-Data)'),nl,
+    write('insert(Key)       -- insert(Key, d(Key))'),nl,
+    write('write             -- apply write to tree'),nl,
+    write('height,ht         -- show height of tree'),nl,
+    write('inorder           -- display keys in order'),nl,
+    write('inorder_data      -- display keys with data in order'),nl,
+    write('i_d               -- display keys with data in order'),nl,
+    write('preorder          -- dipslay keys in pre-order'),nl,
+    write('count,c           -- show height of tree'),nl,
+    write('stats,st          -- show height and count of tree'),nl,
+    write('insert(Key)       -- search tree for Key and display Data'),nl,
+    write('x                 -- instantiate tree to a pre-set sample'),nl,
+    nl.
 
+x(rn(3,hello,bn(2,bye,empty,empty),ln(12,greetings,bn(5,solong,empty,empty),empty))).
+
+/*!-------------------------------------------------------------
+ * avl_create/1
+ * avl_create(Tree)	
+ * avl_create(-)	
+ *	-- exported
+ *	
+ * -	create an empty tree.
+ *
+ * avl_create(Tree) creates an empty avl tree which is
+ * unified with Tree.
+ *!-------------------------------------------------------------*/
+avl_create(empty).
+
+% Compute height of tree:
 height(empty,-1) :- !.
 height(Tree,Height) :-
     avl_left(Tree,Left),
@@ -155,11 +216,7 @@ height(Tree,Height) :-
     max(LH,RH,H),
     Height is H+1.
 
-/*
-max(N1,N2,N1) :- N1 >= N2,!.
-max(N1,N2,N2).
-*/
-
+% Compute number of elements of tree:
 nelems(empty,0) :- !.
 nelems(Tree,N) :-
     avl_left(Tree,Left),
@@ -172,6 +229,7 @@ nelems(Tree,N) :-
  | avl_inorder/2
  | avl_inorder(Tree,List)
  | avl_inorder(+,-)
+ |	-- exported
  |
  |	- returns list of keys in an avl tree in in-order traversal
  |
@@ -193,6 +251,7 @@ inorder(Tree,InL,OutL) :-
  | avl_inorder_wdata/2
  | avl_inorder_wdata(Tree,List)
  | avl_inorder_wdata(+,-)
+ |	-- exported
  |
  |	- returns list of keys and data in an avl tree in in-order traversal
  |
@@ -244,6 +303,7 @@ avl_right(Tree,Right) :- compound(Tree),arg(4,Tree,Right).
  * avl_insert/4
  * avl_insert(Key,Data,InTree,OutTree)
  * avl_insert(+,+,+,-)
+ *	-- exported
  *
  *	- inserts a node in an avl tree
  *
@@ -270,8 +330,10 @@ avl_insert(Key,Data,T,T) :-
     nl,
     tell(Current).
 
-
-%% insert(InTree,Key,Data,OutTree,Longer)
+%% --------------------------------------------------------------
+%% insertion workhorser:
+%% 	insert(InTree,Key,Data,OutTree,Longer)
+%% --------------------------------------------------------------
 
 % empty tree
 insert(empty,Key,Data,bn(Key,Data,empty,empty),longer) :- !.
@@ -372,6 +434,7 @@ insert_rfix(ln(KB,DB,ln(KC,DC,LC,RC),RB), KA,DA,LA,
  * avl_search/3
  * avl_search(Key,Data,Tree)
  * avl_search(+,?,+)
+ *	-- exported
  *
  *	- searches for a key in an avl tree
  *

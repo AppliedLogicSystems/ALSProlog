@@ -1,4 +1,4 @@
-/* ===========================================================*
+/*===========================================================*
  |				typecomp.pro
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
  |
@@ -11,23 +11,21 @@
  |	Revision: Feb, 1992: Restructuring; & add *.mac generation
  |	Revision: Jun, 1996: Add include facility
  |	User documentation in ..manual/Tools/Structs/defstruct.tex
- * ===========================================================*/
-
-/*--------------------------------------------------------------------------	
-				Sample specification:
-
-	defStruct(window,
-		propertiesList= [
-			windowName, 	% text name (atom/UIA)  of the window
-			......
-			special			% unused -- user can play with it
-			],
-		accessPred=accessWI,
-		setPred= setWI,
-		makePred= makeWindowStruct,
-		structLabel=wi
-		]).
- *-------------------------------------------------------------------------*/
+ |
+ |  Sample specification:
+ |
+ |	defStruct(window,
+ |		propertiesList= [
+ |			windowName, 	% text name (atom/UIA)  of the window
+ |			......
+ |			special			% unused -- user can play with it
+ |			],
+ |		accessPred=accessWI,
+ |		setPred= setWI,
+ |		makePred= makeWindowStruct,
+ |		structLabel=wi
+ |		]).
+ *===========================================================*/
 
 
 module builtins.

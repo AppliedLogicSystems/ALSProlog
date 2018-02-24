@@ -41,6 +41,7 @@ export trace/1.
 export trace/2.
 	
 'trace' :-
+	(builtins:alsdev_running -> tcl_call(shl_tcli, [ensure_db_showing], _) ; true),
 	check_debug_io,
 	dbg_notrace,
 	setPrologInterrupt(debug_user),
@@ -1101,11 +1102,13 @@ spy(Pred,Arity) :-
 	ensure_db_showing,
 	dbg_spyoff,
 	install_spypoints(Modules, Pred, Arity),
+    	builtins:get_primary_manager(ALSMgr),
+    	send(ALSMgr, refresh_wins),
 	setPrologInterrupt(spying),
 	setDebugInterrupt(spying),
-    printf(debugger_output,
-           'Spy point set on %t in modules %t.\n',
-           [Pred/Arity, Modules]),
+    	printf(debugger_output,
+           	'Spy point set on %t in modules %t.\n',
+           	[Pred/Arity, Modules]),
 	dbg_spyon.
 
 spy(Pred,Arity) :-
@@ -1144,7 +1147,10 @@ spy_pat(Module,Pred,Arity)
     !,
 	ensure_db_showing,
     dbg_spyoff,
+    setup_debug(Module, Pred, Arity),
     install_spypoints(SpyList),
+    builtins:get_primary_manager(ALSMgr),
+    send(ALSMgr, refresh_wins),
     setPrologInterrupt(spying),
     setDebugInterrupt(spying),
     printf(debugger_output,'Spy points set on: %t.\n', [SpyList]),
@@ -1171,6 +1177,7 @@ install_spypoints([ M:P/A | RestSpyPoints])
 install_spypoint(Mod,Pred,Arity) 
 	:-
     functor(CallForm,Pred,Arity),
+    setup_debug(Mod, Pred, Arity),
     clause(spying_on(CallForm,Mod),true),
     !.
 
@@ -1376,6 +1383,8 @@ nospy(Module,Predicate,Arity) :-
     (Condition = true -> retract(spying_on(CallForm,Module))
 		      ;  retract((spying_on(CallForm,Module) :- Condition))),
     check_spyoff,
+    builtins:get_primary_manager(ALSMgr),
+    send(ALSMgr, refresh_wins),
     printf(debugger_output,'Spy point removed for %t:%t/%t\n',
     		[Module,Predicate,Arity]), 
     !.
@@ -1413,9 +1422,14 @@ export nospy/0.
 'nospy' :-
 	dbg_spyoff,
 	findall(M:P-Tail, clause(spying_on(P,M),Tail), L),
-	remove_spypoints(L).
+	remove_spypoints(L),
+        builtins:get_primary_manager(ALSMgr),
+        send(ALSMgr, refresh_wins).
 
-remove_spypoints([]) :- !.
+remove_spypoints([]) :- 
+	!,
+    	builtins:get_primary_manager(ALSMgr),
+    	send(ALSMgr, refresh_wins).
 remove_spypoints([M:Call-Tail | More]) :-
     functor(Call,P,A),
     dbg_nospy(M,P,A),
@@ -1451,6 +1465,10 @@ nospy(Module:Pred/Arity) :-!,
 nospy(Pred/Arity) :-!,
 	functor(CallForm,Pred,Arity),
 	findall(M:CallForm-Tail, clause(spying_on(CallForm,M),Tail), L),
+	remove_spypoints(L).
+nospy(Pred) :-
+	atom(Pred),
+	findall(M:CallForm-Tail, (clause(spying_on(CallForm,M),Tail),functor(CallForm,Pred,_)), L),
 	remove_spypoints(L).
 
 nospy([]) :-!.
@@ -1543,6 +1561,7 @@ setup_debug(nowins, Module, Predicate, Arity, _, [])
 	:-!.
 setup_debug(DebugIOChannel, Module, Predicate, Arity, CGsSetup, NextCGsSetup)
 	:-
+		% CG = ClauseGroup
 	get_fcg(Module,Predicate,Arity,CG,DefiningMod),
 	!,
 	fin_setup_debug(CG, DefiningMod, Predicate, Arity, CGsSetup, NextCGsSetup).
@@ -1930,7 +1949,9 @@ act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response)
 act_on_response(stack_trace, Port,Box,Depth, Module,Goal,Wins,Response) :-
 	!,
 	printf(debugger_output,'----begin stack trace----\n', []),
-	deb_stack_trace(1,1),
+%	deb_stack_trace(1,1),
+%	deb_stack_trace(1,1),
+	builtins:stack_trace(1, debugger).
 	printf(debugger_output,'----end stack trace----\n', []),
 	show_again(Port,Box,Depth,Module,Goal,Wins,Response).
 

@@ -1,4 +1,4 @@
-/* ============================================================ *
+/*============================================================ *
  |		template_write.pro
  |	Copyright (c) 2004 Applied Logic Systems, Inc.
  |
@@ -36,13 +36,21 @@
  | a) which contain an odd number of non-double percent (%) characters;
  | b) which contain the subexpression %%%%.
  | The occurrence of an ill-formed template will terminate processing.
- * ============================================================ */
+ *============================================================ */
 
 :-[strings].
 
 module template_write.
 
 export template_process_lines/3.
+export process_template_files/2.
+export template_write_files/3.
+export template_write_file/3.
+export template_write_lines/3.
+export template_rewrite/3.
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 template_process_lines([], Env, []).
 template_process_lines([SchemeLine | SchemeLines], Env, DoneLines)
     :-
@@ -61,7 +69,6 @@ template_process_lines([SchemeLine | SchemeLines], Env, DoneLines)
  | an environment file, which is used to process the 
  | template files.
  *-----------------------------------------------------------*/
-export process_template_files/2.
 process_template_files(Files, EnvFile)
 	:-
 	read_templates_env(EnvFile, Env, Ext),
@@ -81,7 +88,6 @@ process_template_files(Files, EnvFile)
  | file F.Ext by replacing all occurrences of A by B for
  | all equations A = B on Env.
  *-----------------------------------------------------------*/
-export template_write_files/3.
 template_write_files([], _, _).
 template_write_files([File | Files], Env, Ext)
 	:-
@@ -102,7 +108,6 @@ template_write_files([File | Files], Env, Ext)
  | file F.OutExt by replacing all occurrences of A by B for
  | all equations A = B on Env.
  *-----------------------------------------------------------*/
-export template_write_file/3.
 template_write_file(File, OutExt, Env)
 	:-
 	exists_file(File),
@@ -128,7 +133,6 @@ template_write_file(File, Ext, Env)
  | Env = an environment;
  | OS = an output stream to which the resulting lines are written.
  *-----------------------------------------------------------*/
-export template_write_lines/3.
 template_write_lines([], _, _).
 template_write_lines([Line | SourceLines], Env, OS)
 	:-
@@ -167,7 +171,6 @@ dispatch_catch(Ball, Line, Start, Env)
  | it may possibly be expanded in a list of lists of segments
  | (i.e., it expands into multiple lines).
  *-----------------------------------------------------------*/
-export template_rewrite/3.
 template_rewrite('', _, [''])
 	:-!.
   %% check for recursive line expansion:

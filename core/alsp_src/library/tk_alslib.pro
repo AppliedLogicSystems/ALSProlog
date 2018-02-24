@@ -488,9 +488,9 @@ fselect_modes(Options, DefaultName, Ext, Mode, Title, IDir, FileTypes)
 				;
 				catenate('.',InitExt,Ext)
 			)
-			; 
-			Ext = ''
 		)
+		; 
+		Ext = ''
 	),
 	(dmember(mode=Mode, Options) -> true ; Mode = select),
 	(dmember(title=Title, Options) -> 

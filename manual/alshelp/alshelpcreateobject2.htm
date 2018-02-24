@@ -1,12 +1,10 @@
 <HTML>
 <HEAD>
-<TITLE>create_object/2</TITLE>
+<TITLE>create_object/2 -  create an object</TITLE>
 </HEAD><BODY>
-<A NAME="6d362452"></A><B>create_object/2
+<A NAME="03433fc8"></A><B>   <A NAME="654c4066"></A>create_object/2 -  create an object
 <P></P>
-<A NAME="034200ce"></A><A NAME="03433fc8"></A></B>   create_object/2 -  create an object
-<P></P>
-<A NAME="0341ebff"></A><B>FORMS
+<A NAME="0341ebff"></A>FORMS
 <P></P>
 <A NAME="0341f3e6"></A></B>create_object(Eqns, Obj) 
 <P></P>
@@ -22,11 +20,11 @@
 <P></P>
 <A NAME="0341ebaa"></A>The acceptable keywords, together with their associated Value types, are:
 <P></P>
-<A NAME="0341ebd6"></A><A NAME="034200f9"></A>instanceOf - atom (name of a class) 
+<A NAME="034200f9"></A><A NAME="0341ebd6"></A>instanceOf - atom (name of a class) 
 <P></P>
 <A NAME="0341ebce"></A><A NAME="0341ebcd"></A><UL><LI>alues  - list of equations 
 <P></P>
-<A NAME="0341ebd0"></A></UL>The instanceOf keyword equation is the only required equation; the value on the right side
+<A NAME="0341ebd0"></A></UL>The <A NAME="0341ebcf"></A>instanceOf keyword equation is the only required equation; the value on the right side
 of this equation must be an atom which is the name of class which is visible
 from the module in which the create_object call is made.  
 <P></P>
@@ -36,7 +34,7 @@ from the module in which the create_object call is made.
 <P></P>
 <A NAME="0341f286"></A></UL>equation are expressions of the form
 <P></P>
-<A NAME="0343065c"></A><A NAME="0341f287"></A>SlotName = <A NAME="03430653"></A>SlotValue 
+<A NAME="0341f287"></A>SlotName = SlotValue 
 <P></P>
 <A NAME="0341f288"></A>where SlotName is one of the named slots in the structure defining the object’s state. 
 These slots are determined by the class to which the object belongs, and may be
@@ -46,7 +44,7 @@ created.
 <P></P>
 <A NAME="0341f2b9"></A>When a global atomic name for the object is required, Eqns includes an equation of the form
 <P></P>
-<A NAME="0341f2b0"></A><A NAME="0341f2b1"></A>name  =  &lt;atom&gt; .
+<A NAME="0341f2b1"></A><A NAME="0341f2b0"></A>name  =  &lt;atom&gt; .
 <P></P>
 <A NAME="0341f25b"></A><B>EXAMPLES
 <P></P>

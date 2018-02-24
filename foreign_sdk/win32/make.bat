@@ -1,9 +1,9 @@
-rmdir ALS_Prolog_Foreign_SDK /S
+rmdir ALS_Prolog_Foreign_SDK /S /Q
 
 mkdir "ALS_Prolog_Foreign_SDK"
 cd "ALS_Prolog_Foreign_SDK"
 mkdir ALS_Prolog_Support
-copy ..\..\..\core\win32\alspro.lib ALS_Prolog_Support
+copy ..\..\..\core\win32\libalspro.a ALS_Prolog_Support
 copy ..\..\..\core\alsp_src\generic\alspi.h ALS_Prolog_Support
 copy ..\..\..\core\alsp_src\generic\alspi_slib.h ALS_Prolog_Support
 copy ..\..\..\core\alsp_src\generic\alspi_slib.c ALS_Prolog_Support

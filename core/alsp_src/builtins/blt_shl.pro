@@ -40,6 +40,8 @@ start_shell(DefaultShellCall)
 		).
 
 :- dynamic(genFileLocn/3).
+:- dynamic(user:alspro_history_file_locn/1).
+:- dynamic(user:no_load_prev_history/0).
 
 start_shell0(DefaultShellCall)
 	:-
@@ -52,7 +54,7 @@ start_shell0(DefaultShellCall)
 	assert(save_clinfo(CLInfo)),
 	output_system_banner(CLInfo),
 
-	library_setup,
+	library_setup(CLInfo),
 /* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
 	rel_arith:set_ics(cs(0,0,0)),
@@ -65,10 +67,49 @@ start_shell0(DefaultShellCall)
 	!,
 		%% 
 	ss_load_dot_alspro(CLInfo),
+
+        HistoryFile = '.alspro_history',
+        check_setup_history_file(HistoryFile),
+        check_load_prev_history,
+
 	setup_init_goal(CLInfo, ShellCall),
 	user:ShellCall.
 
 start_shell0(_).
+
+history_file_locn(L) :- user:alspro_history_file_locn(L), !.
+history_file_locn(home).
+
+check_setup_history_file(HistoryFile) :-
+   history_file_locn(HFL),
+   setup_history_file(HFL, HistoryFile).
+
+setup_history_file(home, HistoryFile)
+        :-
+        getenv('HOME', UserHomePath),
+	!,
+        pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
+        sio_set_history_file(PathToHistoryFile).
+
+setup_history_file(home, _) :-!.
+
+setup_history_file(local, HistoryFile)
+        :-!,
+        sio_set_history_file(HistoryFile).
+
+setup_history_file(BadLocn, HistoryFile)
+        :-
+        write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+        setup_history_file(home, HistoryFile).
+
+check_load_prev_history
+        :-
+        user:no_load_prev_history,
+        !,
+        sio_set_no_load_prev_history.
+
+check_load_prev_history.
+
 
 init_als_shl_mgr
 	:-
@@ -194,8 +235,7 @@ ss_load_files([])
 	:-!.
 ss_load_files([F | T])
 	:-
-%	catch(	reconsult(F),
-	catch(	simple_load(user, F),
+	catch(	reconsult(F),
 	      	Reason,
 			shell_exception(Reason)
 		),
@@ -216,7 +256,8 @@ ss_load_dot_alspro(CLInfo)
 	dmember(os=OS, L),
 	(OS = macos -> Files = ['alspro.pro'] ;
 		OS = mswin32 -> Files = ['alspro.pro'] ;
-			Files = ['alspro.pro','.alspro']
+			%% .alspro is preferred on unix/darwin:
+			Files = ['.alspro','alspro.pro']
 	),
 	ss_load_dot_alspros(Files, Verbosity).
 
@@ -225,6 +266,9 @@ ss_load_dot_alspros([File | Files], Verbosity)
 	:-
 	ss_load_the_dot_alspro(File, Verbosity),
 	!,
+	ss_load_dot_alspros(Files, Verbosity).
+ss_load_dot_alspros([File | Files], Verbosity)
+	:-
 	ss_load_dot_alspros(Files, Verbosity).
 
 ss_load_the_dot_alspro(AutoFile, Verbosity)
@@ -237,13 +281,11 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 	:-
 		%% What about DOS (also Mac, etc.) here?:
 	getenv('HOME',HOME),
-%	pathPlusFile(HOME,AutoFile,File),
 	join_path([HOME,AutoFile],File),
 	exists_file(File),
 	!,
 	consult(File, [consult(false),quiet(Verbosity)]).
 
-ss_load_the_dot_alspro(_, _).
 
 /*-------------------------------------------------
  | print_banner/2
@@ -264,7 +306,7 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-2015 Applied Logic Systems, Inc.\n\n',[]),
+	printf(OutS,'   Copyright (c) 1987-2017 Applied Logic Systems, Inc.\n\n',[]),
 	flush_output(OutS).
 
 system_name(L, Name)
@@ -295,25 +337,24 @@ prolog_shell
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 prolog_shell(InStream,OutStream,ID) 
 	:-
-	init_prolog_shell(InStream, OutStream,ID,CurLevel,CurDebuggingState,Wins),
+	init_prolog_shell(ID,InStream, OutStream,CurLevel,CurDebuggingState,Wins),
 	prolog_shell_loop(Wins,InStream,OutStream),
 	shell_exit(InStream, OutStream,CurLevel,CurDebuggingState).
 
-/*-----------------------------------------------------------------------*
- | init_prolog_shell/6
- | init_prolog_shell(InStream, OutStream,ID,CurLevel,DebugState,Wins)
- | init_prolog_shell(+, +,+,-,-,-)
+/*---------------------------------------------------------------------------------------*
+ | init_prolog_shell/8
+ | init_prolog_shell(ID,InStream, OutStream,CurLevel,DebugState,Wins,DotFile,HistoryFile)
+ | init_prolog_shell(+, +,+,-,-,-,+,+)
  |
- *-----------------------------------------------------------------------*/
+ *---------------------------------------------------------------------------------------*/
 
 export init_prolog_shell/6.
-init_prolog_shell(InStream,OutStream,ID,CurLevel,CurDebuggingState,Wins)
+init_prolog_shell(ID,InStream,OutStream,CurLevel,CurDebuggingState,Wins)
 	:-
 	gc,
 	als_system(SysList),
 	sio:input_stream_or_alias_ok(InStream, RealInStream),
 	set_stream_pgoals(RealInStream, user_prompt_goal(OutStream) ),
-
 
 	get_debugging_state(CurDebuggingState),
 	set_debugging_state(debug_state(debug_off,0,1,0,debug_off)),
@@ -427,18 +468,27 @@ shell_read(InStream,OutStream,G,N,V)
 		  shell_read0_err_disp(Ball,InStream,OutStream,G,N,V)
 		  ).
 
+	/* After switching to using linenoise for shell input,
+	 * Prompt1, Prompt2, and OldPrompt are extraneous for alspro;
+         */
 shell_read0(Prompt1,Prompt2,InStream,G,N,V) 
 	:- !,
+	(InStream == user_input -> 
+		P1 = '', P2 = '' ; 
+		P1 = Prompt1, P2 = Prompt2),
 	sio:get_user_prompt(OldPrompt),
 	catch((
-		sio:set_user_prompt(Prompt1),
+		sio:set_user_prompt(P1),
+		sio_set_do_lineedit(1),
 		sio:skip_layout(InStream),
-		sio:set_user_prompt(Prompt2),
+		sio:set_user_prompt(P2),
+		sio_set_do_lineedit(2),
 		read_term(InStream,G,[vars_and_names(V,N)])
 	), Exception, (
 		sio:set_user_prompt(OldPrompt),
 		throw(Exception)
 	)),
+	sio_set_do_lineedit(0),
 	sio:set_user_prompt(OldPrompt).
 
 shell_read0(Prompt1,Prompt2,InStream,stream_not_ready,[],[]).

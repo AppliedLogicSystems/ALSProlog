@@ -8,8 +8,6 @@
  |	Creation Date: 1997
  *=============================================================*/
 
-%kk :- force_libload_all, save_image(alsdev, [start_goal(start_alsdev)]).
-
 		%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++%%%!!!+++
 		%!%!%! WARNING WARNING WARNING WARNING
 		%  THE RESATISFIABILITY % BUG
@@ -80,10 +78,15 @@ continue_prolog_loop(Status).
 	%% Cold startup in saved image, from TTY-command line start (i.e,unix):
 
 report_error(Error) :-
+        catch(report_error0(Error), _, (pbi_write(Error), pbi_nl)).
+report_error0(Error) :-
 	tk_new(I),
 	sprintf(atom(ErrorStr), '%t', [Error]),
 	tcl_call(I, [tk_messageBox,
 		'-icon', error, '-message', ErrorStr, '-type', ok], _).
+
+:- dynamic(user:alsdev_history_file_locn/1).
+:- dynamic(user:no_load_prev_alsdev_history/0).
 
 export start_alsdev/0.
 start_alsdev :-
@@ -110,7 +113,7 @@ start_alsdev0
 
 	setup_init_ide_classes(ALS_IDE_Mgr),
 
-	library_setup,
+	library_setup(CLInfo),
 
 /* WHY IS THIS MISSING?
 #if (all_procedures(syscfg,intconstr,0,_))
@@ -119,7 +122,8 @@ start_alsdev0
 */
 	sys_env(OS, _, _),
 	join_path([ALSDIRPath,shared], Shared),
-	catch(tk_new(shl_tcli),Ball1,fail),
+	tk_new(shl_tcli),
+
 	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
 	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
 	(OS = macos ->
@@ -329,8 +333,10 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
-	tcl_call(shl_tcli, 
-		[set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+
+
+	tcl_call(shl_tcli, [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
+
     sio:set_input(ISS),
     sio:set_output(OSS),
 
@@ -389,7 +395,11 @@ tdvf,
 		%% for use by clear_workspace:
 	findall(GVID, global_gv_info:gvi(GVID,_,_,_),SysGlobals),
 	alsdev:assert(system_global_vars(SysGlobals)),
-	builtins:prolog_shell(ISS,OSS,alsdev).
+
+	alsdev:alsdev_ini_path(DotFilePath),
+	handle_alsdev_history,
+	tcl_call(shl_tcli, [manage_alsdev_history],_),
+	prolog_shell(ISS,OSS,alsdev).
 
 alsdev_splash(Path)
 	:-
@@ -403,6 +413,49 @@ alsdev_splash(Path)
 		)
 	),
 	tcl_call(shl_tcli, [splash, Path], _).
+
+
+	/* ----------------------------
+ 	 | Manage alsdev_history file
+ 	 *----------------------------*/
+
+handle_alsdev_history
+	:-
+	HistoryFile = '.alsdev_history',
+        check_setup_alsdev_history_file(HistoryFile),
+        check_load_prev_alsdev_history.
+
+alsdev_history_file_locn(L) :- user:alsdev_history_file_locn(L), !.
+alsdev_history_file_locn(home).
+
+check_setup_alsdev_history_file(HistoryFile) :-
+	builtins:ini_config_items(DotALSDEVItems),
+	(member( alsdev_history_file_locn(HFL), DotALSDEVItems) -> true ; HFL = home), 
+   	setup_alsdev_history_file(HFL, HistoryFile).
+
+setup_alsdev_history_file(home, HistoryFile)
+        :-!,
+        getenv('HOME', UserHomePath),
+        pathPlusFile(UserHomePath, HistoryFile, PathToHistoryFile),
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, alsdev_history_file, PathToHistoryFile],_).
+
+setup_alsdev_history_file(local, HistoryFile)
+        :-!,
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, alsdev_history_file, HistoryFile],_).
+
+setup_alsdev_history_file(BadLocn, HistoryFile)
+        :-
+        write(user_output, 'Error: Bad History File Location' = BadLocn), nl,
+        setup_alsdev_history_file(home, HistoryFile).
+
+check_load_prev_alsdev_history
+        :-
+        user:no_load_prev_alsdev_history,
+        !,
+	tcl_call(shl_tcli, [set_tcl_ga, proenv, do_load_prev_alsdev_history, false],_).
+
+check_load_prev_alsdev_history.
+
 
     %% Debugger streams: The debugger window text window:
 	%% Initially these don't have the debugger_[input,output] aliases;
@@ -675,6 +728,17 @@ special_cl_processing(prolog_script, File, NoSuffixFile, Ext)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*
+als_ide_mgrAction(WHAT, State)
+	:-
+pbi_write('WHAT'=WHAT),pbi_nl,
+	fail.
+*/
+
+als_ide_mgrAction(refresh_wins, State)
+    	:-
+ 	tcl_call(shl_tcli, [refresh_spy_preds_if_showing], _).
+
 als_ide_mgrAction([Functor | Args], State)
 	:-
 	Msg =.. [Functor | Args],
@@ -737,6 +801,7 @@ setup_ide_project_globals(ALSIDEObject)
 	 |	2. Asserts all the info it extracts, for later use;
 	 |	3. Extracts basic geometry info for use in initial
 	 |	   creation of .topals and .debugwin;
+	 | * Called from alsdev.tcl: establish_defaults
 	 *-----------------------------------------------------------*/
 alsdev_ini_defaults(DefaultVals, TopGeom, DebugGeom, DebugVis)
 	:-
@@ -790,67 +855,60 @@ strip_tags([(_ = V0) | TVs], [V | Vs])
 	strip_tags(TVs, Vs).
 
 :- dynamic(alsdev_ini_path/1).
+
+getPrefsFilePath(unix,'.alsdev').
+
+getPrefsFilePath(unix,PrefsFilePath)
+	:-
+	getenv('HOME', HomeDir),
+	split_path(HomeDir, HomeDirList),
+	PrefsFile = '.alsdev',
+	append(HomeDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
+getPrefsFilePath(mswin32,PrefsFilePath)
+	:-
+	builtins:sys_searchdir(SSD),
+	split_path(SSD, SSDList),
+	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
+	PrefsFile = 'alsdev.ini',
+	append(ImageDirList, [PrefsFile], PrefsFileList),
+	join_path(PrefsFileList, PrefsFilePath).
+
 find_alsdev_ini(Items)
 	:-
 	sys_env(unix,_,_),
 	!,
-	getenv('HOME', HomeDir),
-	split_path(HomeDir, HomeDirList),
-#if (all_procedures(syscfg,intconstr,0,_))
-	PrefsFile = '.clpbnr',
-#else
-	PrefsFile = '.alsdev',
-#endif
-	append(HomeDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
+	finish_alsdev_ini(unix,Items).
 
-/*
 find_alsdev_ini(Items)
-	:-
+	:-   %% not in unix:
 	sys_env(mswin32,_,_),
-	getenv('windir', HomeDir0),
-	split_path(HomeDir0, HomeDir0List),
-	PrefsFile = '.alsdev',
-	get_user_name(User),
-	append(HomeDir0List, ['Profiles',User,PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items),
-	!.
-*/
-
-find_alsdev_ini(Items)
-	:-
-		%% not in unix:
-	builtins:sys_searchdir(SSD),
-	split_path(SSD, SSDList),
-	(append(ImageDirList, [alsdir], SSDList) ; ImageDirList = SSDList),
-	(sys_env(mswin32,_,_) ->
-		PrefsFile = 'alsdev.ini'
-		;
-			%% Macintosh:
-		PrefsFile = 'alsdev_prefs'
-	),
-	append(ImageDirList, [PrefsFile], PrefsFileList),
-	fin_find_alsdev_ini(PrefsFileList, Items).
-
-fin_find_alsdev_ini(PrefsFileList, Items)
-	:-
-	join_path(PrefsFileList, PrefsFilePath),
-	exists_file(PrefsFilePath),
-	assert(alsdev_ini_path(PrefsFilePath)),
 	!,
+	finish_alsdev_ini(mswin32,Items).
+
+finish_alsdev_ini(unix,Items)
+	:-
+	getPrefsFilePath(unix,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
 	grab_terms(PrefsFilePath, Items).
 
-fin_find_alsdev_ini(PrefsFileList, [])
+finish_alsdev_ini(mswin32,Items)
 	:-
-	join_path(PrefsFileList, PrefsFilePath),
-		% Make a trivial file; put space in it to avoid
-		% os problems with empty files...
+	getPrefsFilePath(mswin32,PrefsFilePath),
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
+	grab_terms(PrefsFilePath, Items).
+
+finish_alsdev_ini(PrefsFilePath,[])
+	:-
 	open(PrefsFilePath, write, S, []),
 	put_code(S, 0' ),
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
-
-
 
 
 change_window_settings(WinSettingsVals, WinGroup)
@@ -963,11 +1021,11 @@ als_ide_mgrAction([open_edit_win, FileName, BaseFileName, Ext ], State)
 	:-
 	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
 
-als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State)
+als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext, IsExample), State)
 	:-
 	accessObjStruct(edit_files, State, PrevEditFiles),
 	send_self(State, obtain_src_mgr(BaseFileName, FileMgr)),
-	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext)),
+	send(FileMgr, open_edit_win(FileName, BaseFileName, Ext, IsExample)),
 	send_self(State, record_src_mgr(BaseFileName, FileMgr)).
 
 als_ide_mgrAction(map_edit_wins, State)
@@ -1644,7 +1702,7 @@ source_trace_closedown(STWin)
 
 set_debugwin_width(MSize, MainWinSize)
 	:-
-	NChars is floor(1.8 * (MainWinSize)//MSize ),
+	max(floor(1.8 * (MainWinSize)//MSize), 5, NChars),
 	sio:is_stream(debugger_output, DS),
 	set_line_length(DS, NChars).
 
@@ -1719,7 +1777,6 @@ vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	accessObjStruct(mrfcg, DBGMGR, CG),
 	(CG > 0 ->
 		send(DBGMGR,  get_mrfcg(CG, SrcMgr))
-%		send(SrcMgr,  ensure_window_open)
 		;
 		true
 	),
@@ -1727,7 +1784,8 @@ vv_showGoalToUserWin(Port,Box,Depth, Module, Goal, DBGMGR, Response)
 	showGoalToUserWin_other(Port,Box,Depth, Module, Goal, Response, CG, DBGMGR, SrcMgr).
 
 		%% Staying in the same file; nothing to do:
-check_win_cleanup(_, CG, CG, _, _) :-!.
+check_win_cleanup(_, CG, CG, _, _) :-
+	!.
 
 		%% Now we have just switched between files; if Port is
 		%% call or redo, need to remove trace coloring, etc., 
@@ -1743,7 +1801,6 @@ check_win_cleanup(_, _, _, _, _).
 
 check_presence_and_cleanup(SrcMgr, MRFCG, DBGMGR)
 	:-
-
 	send(DBGMGR, mgr_by_cg(MRFCG, MRSrcMgr)),
 	send(MRSrcMgr, clear_decorations),
 	send( SrcMgr, start_src_trace),
@@ -1939,11 +1996,9 @@ showGoalToUserWin_other(Port,Box,Depth, Module, XGoal, Response, MRFCG, DBGMGR, 
 	!,
 	write_term(debugger_output, Module:XGoal, [lettervars(false)]),
 	flush_output(debugger_output),
-
 	re_color_port(Port, MRFCG, SrcMgr),
-
-%	send(DBGMGR, show_stack_list),
 	!,
+		% clean up if Port = exit; Port = fail
 	(dbg_boundary(MRFCG,Box,Depth,general,Port,XGoal,DBGMGR, SrcMgr) ->
 		nl(debugger_output),
 		Response = debug
@@ -2284,7 +2339,6 @@ endmod.
 
 module alsdev.
 
-/*
 check_reload_consults
 	:-
 	builtins:get_primary_manager(ALSMgr),
@@ -2300,8 +2354,8 @@ check_reload_consults
 		;
 		Ans = 'No'
 	),
-	consult_all(LoadedFiles).
-*/
+	consult_all(LoadedFiles),
+	reset_all_spypoints.
 
 
 consult_all([]).
@@ -2323,23 +2377,6 @@ export col2/1.
 col2(B)
 	:-
 	tcl_call(shl_tcli, [do_2col,B], X).
-
-
-/***
-process_oop
-	:-
-	file_select_dialog(shl_tcli,[filetypes=[['oop files',['*.oop']]]],FileName),
-	(FileName = '' ->
-		true
-		;
-		objects:objectProcessFile(FileName,_)
-	).
-***/
-			
-
-
-
-
 
 endmod.
 
@@ -2653,35 +2690,52 @@ shl_source_handlerAction(open_edit_win('', BaseFileName, TclWin), State)
 	accessObjStruct(myHandle, State, MyHandle),
 	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
 
-	%% File document case:
+/*
 shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
 	:-
 	setObjStruct(source_file, State, FileName),
 	setObjStruct(ext, State, Ext),
 	shl_source_handlerAction(complete_open_edit_win(FileName,_), State).
+*/
+
+	%% File document case:
+shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext), State)
+	:-
+	shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext, false), State).
+
+shl_source_handlerAction(open_edit_win(FileName, BaseFileName, Ext, IsExample), State)
+	:-
+	setObjStruct(source_file, State, FileName),
+	setObjStruct(ext, State, Ext),
+	shl_source_handlerAction(complete_open_edit_win(FileName,_,IsExample), State).
 
 shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
 	:-
 	accessObjStruct(source_file, State, FileName),
 	FileName \= nil, FileName \='',
 	!,
-	shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State).
+	shl_source_handlerAction(complete_open_edit_win(FileName,TclWin, false), State).
 
 shl_source_handlerAction(open_edit_win_by_base(BaseFileName, Ext, SearchList), State)
 	:-
 	file_extension(FileDesc, BaseFileName, Ext),
 	path_to_try_from_desc(SearchList, FileDesc, FileTryPath),
 	!,
-	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin), State),
+	shl_source_handlerAction(complete_open_edit_win(FileTryPath,TclWin, false), State),
 	setObjStruct(source_file, State, FileTryPath),
 	setObjStruct(ext, State, Ext).
 
-shl_source_handlerAction(complete_open_edit_win(FileName,TclWin), State)
+shl_source_handlerAction(complete_open_edit_win(FileName,TclWin,IsExample), State)
 	:-
 	tcl_call(shl_tcli, [load_document, FileName], TclWin),
 	setObjStruct(tcl_doc_path, State, TclWin),
 	accessObjStruct(myHandle, State, MyHandle),
-	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _).
+	tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,src_handler,MyHandle], _),
+	(IsExample=true ->
+		tcl_call(shl_tcli, [set_tcl_ga2,proenv,TclWin,is_example,true], _)
+		;
+		true
+	).
 
 shl_source_handlerAction(close_edit_win, State)
 	:-

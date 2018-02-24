@@ -1693,12 +1693,12 @@ wait_data(tcltk, Stream, Call)
 	stream_addl1(Stream, Alias),
 	stream_addl2(Stream, ti(Interp,WaitVarName)),
 	stream_name(Stream, WinID),
+%pbi_write('sio.pro-wait_data:Alias'=Alias),pbi_write(' Interp'=Interp),pbi_write(' WV'=WaitVarName),pbi_write(' WinID'=WinID),pbi_nl,
 	tcl_call(Interp, [set_prompt_mark, WinID], _),
 	tcl_call(Interp, 
 		[bind,WinID,'<Return>', [ xmit_line_plain,WinID,Alias,WaitVarName]], _),
 	tcl_call(Interp, [set,WaitVarName,0], _),
 	tcl_call(Interp, [wait_for_line1, WaitVarName], WaitRes),
-%pbi_write(wd_tcltk_A),pbi_nl,pbi_ttyflush,
 	finish_wait_data_tcltk(WaitRes, Stream, Call).
 
 	%% Returned -1: Got a ^C:
@@ -1712,12 +1712,10 @@ finish_wait_data_tcltk(-3, Stream, Call)
 	stream_extra(Stream,XTRA),
 	set_stream_extra(Stream,eof(XTRA)),
 	sio_set_eof(Stream),
-%pbi_write(wd_tcltk_CTLD),pbi_nl,pbi_ttyflush,
 	sio_set_errcode(Stream,8).			% SIO_INTERR
 
 finish_wait_data_tcltk(WaitRes, Stream, Call)
 	:-
-%pbi_write(wd_tcltk_default(Call)),pbi_nl,pbi_ttyflush,
 	call(Call).
 
 force_control_c_during_read(StreamAlias)
@@ -1762,6 +1760,7 @@ loop_for_data(Type, Stream)
 open_window_stream(Window,Mode,Options,Stream) 
 	:- 
 	getWinID(Window,WinID),
+pbi_write(open_window_stream_WinID=WinID),pbi_nl,
 	getWinGV(WinID,WinPosGV),
 	initialize_stream(window,Window,Options,Stream),
 	file_modes(Mode,NMode,SMode),
@@ -3288,7 +3287,7 @@ write_buffer(tk_win,Stream) :-
 	tcl_call(Interp, [WinID,mark,set,insert,end], _),
 	tcl_call(Interp, [WinID,see,end], _),
 	tcl_call(Interp, [winfo,parent,WinID], Parent),
-	tcl_call(Interp, [raise_patch,Parent], _),
+	tcl_call(Interp, [raise,Parent], _),
 	tcl_call(Interp, [focus,WinID], _),
 	tcl_call(Interp, [update], _).
 /*
@@ -4098,6 +4097,7 @@ queue_control(MsgQID, Cmd, Perms, Info)
 user_prompt_goal(Stream) 
 	:-
 	get_user_prompt(Prompt),
+%stream_name(Stream, SN), pbi_write(upg+SN + '|' + Prompt + '|'), pbi_nl,
 	put_atom(Stream,Prompt),
 	flush_output(Stream).
 

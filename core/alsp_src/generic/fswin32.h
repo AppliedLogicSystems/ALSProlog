@@ -63,8 +63,7 @@ int als_system(const char * command);
 #include <unistd.h>
 
 #define lstat stat
-pid_t _getpid(void);
-#define getpid _getpid
+
 #else
 
 #include <sys/stat.h>

@@ -67,9 +67,9 @@ opt_test () {
 command="$prolog -q < /dev/null"
 output=`eval $command`
 
-if test "$output" != "?- "
+if test "$output" != ""
 then
-	error "$command" "?- " "$output"
+	error "$command" "" "$output"
 fi
 
 # Test -b (batch) argument.
@@ -96,6 +96,7 @@ fi
 # test success/fail/exception return values for -b -g options
 
 cl_test "$prolog -q -b -g true" 0
+cl_test "$prolog -q -b -g halt" 0
 cl_test "$prolog -q -b -g fail" 1
 cl_test "$prolog -q -b -g 'throw(foo)'" 2
 
@@ -159,6 +160,10 @@ cl_test "$prolog -heap 1000 -heap 2000 -b -q -g 'statistics([_,_,heap(_,_,_,_,20
 cl_test "$prolog -heap 2000 -heap 1000 -b -q -g 'statistics([_,_,heap(_,_,_,_,1024000),_])'" 0
 cl_test "$prolog -stack 2000 -stack 1000 -b -q -g 'statistics([_,stack(_,_,1024000),_,_])'" 0
 cl_test "$prolog -stack 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,2048000),_,_])'" 0
+
+# Test empty environment
+
+cl_test "env -i $prolog -q -b -g true" 0
 
 # test error handling of invalid ALS_OPTIONS
 # Currently they don't fail, but should:

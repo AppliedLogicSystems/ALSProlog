@@ -1,0 +1,12 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Shell scripts must always have LF line endings on checkout.
+version
+*.sh text eol=lf
+
+# Tests use BTF files (Binary Text Files), which are binary.
+*.btf binary
+
+# Use export substitution to burn version info into source tarballs
+version export-subst

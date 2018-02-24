@@ -9,38 +9,25 @@
 #|  Generic Mods: Ken Bowen [March 2000]
 ##=================================================================================
 
-if {$tcl_platform(platform) == "macintosh"} {
-	set agv(.document,font)		{Monaco 9 normal}
-} elseif {$tcl_platform(platform) == "windows"} {
-	set agv(.document,selectbackground) SystemHighlight
-} elseif {$tcl_platform(platform) == "unix"} {
-	set agv(.document,background) #d9d9d9
-	set agv(.document,selectforeground) black
-	set agv(.document,selectbackground) #c3c3c3
-}
 set agv(edit,visible) {}
 
 # Menu accelerator modifier key and elipsis string.
 
-if {$tcl_platform(platform) == "macintosh"} {
-	set mod "Cmd"
-	set elipsis "…"
-} else {
-	set mod "Ctrl"
-	set elipsis "..."
+switch [tk windowingsystem] {
+	aqua  { set mod "Command" ; set elipsis "‚Ä¶"   }
+	win32 { set mod "Ctrl"    ; set elipsis "..." }
+	x11   { set mod "Ctrl"    ; set elipsis "..." }
 }
 
 proc add_default_menus {menubar} {
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
+	if {[tk windowingsystem] == "aqua"} {
 		menu $menubar.apple -tearoff 0
-		$menubar.apple add command -label "About ALS Prolog…" -command {display_me About .about}
+		$menubar.apple add command -label "About ALS Prolog‚Ä¶" -command {display_me About .about}
 		$menubar add cascade -menu $menubar.apple
 	}
 }
 
 proc add_minimal_generic_file_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	
@@ -49,18 +36,15 @@ proc add_minimal_generic_file_menu {menubar type window} {
 	
     $menubar.file add separator
 
-	if {$tcl_platform(platform) == "windows"} {
-    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" \
-			-command "re exit_app"
-    } else {
-    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" \
-			-command "re exit_app"
+	switch [tk windowingsystem] {
+		aqua  {}
+		win32 { $menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_app} }
+		x11   { $menubar.file add command -label "Quit"              -accelerator "$mod-Q" -command {re exit_app} }
 	}
 	$menubar add cascade -menu $menubar.file -label "File" -underline 0
 }
 
 proc add_generic_file_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	
@@ -80,19 +64,17 @@ proc add_generic_file_menu {menubar type window} {
 #    $menubar.file add command -label "Print$elipsis" -accelerator "$mod-P"\
 #		-command "re {$type.print $window}" -state disabled
     $menubar.file add separator
-
-	if {$tcl_platform(platform) == "windows"} {
-    	$menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" \
-			-command "re exit_app"
-    } else {
-    	$menubar.file add command -label "Quit" -accelerator "$mod-Q" \
-			-command "re exit_app"
+	
+	switch [tk windowingsystem] {
+		aqua  {}
+		win32 { $menubar.file add command -label "Exit" -underline 1 -accelerator "$mod-Q" -command {re exit_app} }
+		x11   { $menubar.file add command -label "Quit"              -accelerator "$mod-Q" -command {re exit_app} }
 	}
+
 	$menubar add cascade -menu $menubar.file -label "File" -underline 0
 }
 
 proc add_minimal_generic_edit_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv
@@ -106,7 +88,6 @@ proc add_minimal_generic_edit_menu {menubar type window} {
 	$menubar add cascade -menu $menubar.edit -label "Edit" -underline 0
 }
 proc add_generic_edit_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv
@@ -123,7 +104,7 @@ proc add_generic_edit_menu {menubar type window} {
     $menubar.edit add command \
         -label Paste -underline 0 -accelerator "$mod-V" -command "re {$type.paste $window}"
     $menubar.edit add command \
-        -label Clear -underline 2 -command "re {$type.clear $window}"
+        -label Delete -underline 2 -command "re {$type.delete $window}"
     $menubar.edit add separator
     $menubar.edit add command \
         -label {Select All} -underline 8 -accelerator "$mod-A" -command "re {$type.select_all $window}"
@@ -138,7 +119,6 @@ proc add_generic_edit_menu {menubar type window} {
 }
 
 proc add_windows_menu {menubar type window} {
-	global tcl_platform
 	global mod
 	global elipsis
 	global agv
@@ -148,11 +128,10 @@ proc add_windows_menu {menubar type window} {
 }
 
 proc add_help_menu {menubar} {
-	global tcl_platform
 	global mod
 	global elipsis
 
-	if {$tcl_platform(platform) != "macintosh"} {
+	if {[tk windowingsystem] != "aqua"} {
 		$menubar add cascade -label "Help" -underline 0 -menu $menubar.help
 		menu $menubar.help -tearoff 0
 		$menubar.help add command -label "Commands Overview" \
@@ -163,10 +142,9 @@ proc add_help_menu {menubar} {
 }
 
 proc add_help_menu_sub {menubar HelpCmds} {
-	global tcl_platform
 	global mod
 	global elipsis
-	if {$tcl_platform(platform) != "macintosh"} {
+	if {[tk windowingsystem] != "aqua"} {
 		$menubar add cascade -label "Help" -underline 0 \
 			-menu $menubar.help 
 		menu $menubar.help -tearoff 0
@@ -221,11 +199,10 @@ proc listener.select_all {w} {
 
 
 proc listener.copy_paste { w } {
-	global tcl_platform
 	global agv
 #	set w .topals
 
-	if  {$tcl_platform(platform) == "unix"} {
+	if  {[tk windowingsystem] == "x11"} {
 		set WhichSel PRIMARY
 	} else {
 		set WhichSel CLIPBOARD
@@ -387,7 +364,6 @@ proc save_fonts_and_colors { Window } {
 
 
 proc vTclWindow.alsdev_settings {base} {
-	global tcl_platform
 	global agv
 
 
@@ -400,7 +376,7 @@ proc vTclWindow.alsdev_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 233x142+199+212
     wm maxsize $base 1137 870
@@ -427,14 +403,12 @@ proc vTclWindow.alsdev_settings {base} {
 			-command "font_family_choice \"[$FamilyMenu entrycget $iii -label]\" \$agv(fonts_and_colors)"
 	}
 
-    label $base.size_label -text {Size:}
-    if {$tcl_platform(platform) == "macintosh"} then {
-		set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) \
-			9 10 12 14 18 24 36]
-	} else {
-		set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) \
-			6 8 10 12 14 16 18 20 22 24]
+	switch [tk windowingsystem] {
+		aqua    { set fontsizes {9 10 12 14 18 24 36} }
+		deafult { set fontsizes {6 8 10 12 14 16 18 20 22 24} }
 	}
+    label $base.size_label -text {Size:}
+	set SizeMenu [tk_optionMenu $base.sizemenu agv(text,size) {*}$fontsizes]
 	set MenuEndNum [$SizeMenu index end]
 	for {set iii 0} {$iii <= $MenuEndNum} {incr iii} {
 		$SizeMenu entryconfigure $iii \

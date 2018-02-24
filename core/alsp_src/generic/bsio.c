@@ -31,6 +31,9 @@
 #include "defs.h"
 #include <math.h>
 #include "cinterf.h"
+#ifndef MSWin32
+#include "linenoise.h"
+#endif
 #include "fpbasis.h"
 
 #include "new_alspi.h"
@@ -279,6 +282,12 @@ static	int	format_type	PARAMS(( UCHAR * ));
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
+int do_lineedit = 0;
+char lineedit_prompt[PATH_MAX]= "?- ";
+char history_file[PATH_MAX] = "";
+int  do_load_prev_history = 1;
+
+
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
 {
@@ -332,9 +341,60 @@ long standard_console_error(char *buf, long n)
 
 #else
 
+static const char *sublineedit_prompt="?_ ";
+
+/*
+ * linenoise_readbuffer()
+ */
+
+static long
+linenoise_readbuffer(char *buf, long n)
+{
+    char *line;
+    int count;
+
+        /* Load the history file once (i.e., at startup)
+           do_load_prev_history is set == 1 by default (set == 0 during shell startup)
+           Setting it to 0 ensures the
+           history will only be loaded once during an alspro shell session.
+        */
+    if (do_lineedit == 1 && do_load_prev_history == 1){
+        linenoiseHistoryLoad(history_file);
+        do_load_prev_history = 0;
+    }
+
+    line = linenoise( do_lineedit == 1 ? lineedit_prompt : sublineedit_prompt);
+
+    if (line == NULL){
+        return 0;
+    }
+    count = (int)strlen(line);
+                /* count+1 because '\n' may be added here: */
+    if (count+1 <= n )
+    {
+        linenoiseHistoryAdd(line);  // Add to the history.
+        linenoiseHistorySave(history_file);  // Save the history on disk.
+        memcpy(buf, line, count);
+        buf[count] = '\n'; count++;
+    }
+    else {    /* Incoming line overruns buf: */
+        errno = ENOBUFS;
+        count = -1;
+   }
+    free(line);
+    return (long)count;
+}
+
 long standard_console_read(char *buf, long n)
 {
-    return read(STDIN_FILENO, buf, n);
+    if (do_lineedit !=  0)
+    {
+	return linenoise_readbuffer(buf, n);
+   
+    } else {
+        return read(STDIN_FILENO, buf, n);
+    }
+
 }
 
 long standard_console_write(char *buf, long n)
@@ -3674,6 +3734,80 @@ ssbq_get_msg()
 
 }
 #endif /* SSBQ */
+
+
+/*
+ * sio_set_do_lineedit()
+ */
+
+int
+sio_set_do_lineedit()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+    do_lineedit = (int)v1;
+    SUCCEED;
+}
+
+/*
+ * sio_set_lineedit_prompt(Prompt)
+ */
+
+int
+sio_set_lineedit_prompt()
+{
+    PWord v1;
+    int   t1;
+    const char *prompt;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring((UCHAR **)&prompt, v1, t1)){
+        prompt = "?- ";
+    }
+    strncpy(lineedit_prompt, prompt, sizeof(lineedit_prompt)-1);
+    lineedit_prompt[sizeof(lineedit_prompt) - 1] = '\0';
+    SUCCEED;
+}
+
+/*
+ * sio_set_history_file(FileName)
+ */
+
+int
+sio_set_history_file()
+{
+    PWord v1;
+    int   t1;
+	const char *path;
+
+    w_get_An(&v1, &t1, 1);
+
+    if (!getstring((UCHAR **)&path, v1, t1)) {
+        path = "";
+    }
+    strncpy(history_file, path, sizeof(history_file)-1);
+    history_file[sizeof(history_file) - 1] = '\0';
+    SUCCEED;
+}
+
+
+/*
+ * sio_set_no_load_prev_history
+ * Sets do_load_prev_history = 0 to suppress loading previous history:
+ * Default is to load the previous history.
+ */
+
+int
+sio_set_no_load_prev_history()
+{
+        do_load_prev_history = 0;
+        SUCCEED;
+}
+
 
 /*
  * sio_readbuffer(SD)

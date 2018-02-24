@@ -1,4 +1,4 @@
-libactivate(builtins,[library,cmn_utils],
+libactivate(app_utils,[library,cmn_utils],
     [ save_settings/1, load_app_settings/1, 
       info_record/2, info_record/3, interleave/3,
       basic_app_init/0, cmd_comps/5, adjust_locn_for_runcmd/1,

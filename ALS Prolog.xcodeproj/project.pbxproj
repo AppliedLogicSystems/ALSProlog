@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1308834B1FFC6619006C260E /* linenoise.c in Sources */ = {isa = PBXBuildFile; fileRef = 1308834A1FFC6619006C260E /* linenoise.c */; };
 		13F1CB9A10569E1A005DEDB9 /* alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CADE10569E1A005DEDB9 /* alloc.c */; };
 		13F1CBA110569E1A005DEDB9 /* arith.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAEC10569E1A005DEDB9 /* arith.c */; };
 		13F1CBA210569E1A005DEDB9 /* bcinter.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAED10569E1A005DEDB9 /* bcinter.c */; };
@@ -30,7 +31,6 @@
 		13F1CBB410569E1A005DEDB9 /* compmath.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB0810569E1A005DEDB9 /* compmath.c */; };
 		13F1CBB510569E1A005DEDB9 /* cutmacro.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB0910569E1A005DEDB9 /* cutmacro.c */; };
 		13F1CBB610569E1A005DEDB9 /* debugsys.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB0C10569E1A005DEDB9 /* debugsys.c */; };
-		13F1CBB710569E1A005DEDB9 /* demo.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB0F10569E1A005DEDB9 /* demo.c */; };
 		13F1CBB910569E1A005DEDB9 /* dump_wam.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB1E10569E1A005DEDB9 /* dump_wam.c */; };
 		13F1CBBA10569E1A005DEDB9 /* engine.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB2010569E1A005DEDB9 /* engine.c */; };
 		13F1CBBB10569E1A005DEDB9 /* expand.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB2210569E1A005DEDB9 /* expand.c */; };
@@ -46,9 +46,6 @@
 		13F1CBC610569E1A005DEDB9 /* gc.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB3210569E1A005DEDB9 /* gc.c */; };
 		13F1CBCD10569E1A005DEDB9 /* gv.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB4D10569E1A005DEDB9 /* gv.c */; };
 		13F1CBCE10569E1A005DEDB9 /* index.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5310569E1A005DEDB9 /* index.c */; };
-		13F1CBCF10569E1A005DEDB9 /* int_net.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5410569E1A005DEDB9 /* int_net.c */; };
-		13F1CBD010569E1A005DEDB9 /* intaux.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5610569E1A005DEDB9 /* intaux.c */; };
-		13F1CBD110569E1A005DEDB9 /* intrv.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5710569E1A005DEDB9 /* intrv.c */; };
 		13F1CBD210569E1A005DEDB9 /* lexan.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5B10569E1A005DEDB9 /* lexan.c */; };
 		13F1CBD310569E1A005DEDB9 /* lforeign.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5D10569E1A005DEDB9 /* lforeign.c */; };
 		13F1CBD410569E1A005DEDB9 /* loadfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB5E10569E1A005DEDB9 /* loadfile.c */; };
@@ -69,10 +66,8 @@
 		13F1CBE310569E1A005DEDB9 /* random.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB7D10569E1A005DEDB9 /* random.c */; };
 		13F1CBE410569E1A005DEDB9 /* relocate_code.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB7F10569E1A005DEDB9 /* relocate_code.c */; };
 		13F1CBE510569E1A005DEDB9 /* rinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8010569E1A005DEDB9 /* rinfo.c */; };
-		13F1CBE610569E1A005DEDB9 /* security.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8210569E1A005DEDB9 /* security.c */; };
 		13F1CBE710569E1A005DEDB9 /* sig.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8410569E1A005DEDB9 /* sig.c */; };
 		13F1CBE910569E1A005DEDB9 /* symtab.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8710569E1A005DEDB9 /* symtab.c */; };
-		13F1CBEA10569E1A005DEDB9 /* th_intrv.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8810569E1A005DEDB9 /* th_intrv.c */; };
 		13F1CBEB10569E1A005DEDB9 /* topmain.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8910569E1A005DEDB9 /* topmain.c */; };
 		13F1CBEC10569E1A005DEDB9 /* varproc.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8A10569E1A005DEDB9 /* varproc.c */; };
 		13F1CBED10569E1A005DEDB9 /* vprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CB8D10569E1A005DEDB9 /* vprintf.c */; };
@@ -92,6 +87,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		130883491FFC6619006C260E /* linenoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linenoise.h; sourceTree = "<group>"; };
+		1308834A1FFC6619006C260E /* linenoise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linenoise.c; sourceTree = "<group>"; };
 		13F1CADE10569E1A005DEDB9 /* alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alloc.c; sourceTree = "<group>"; };
 		13F1CAE010569E1A005DEDB9 /* alloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alloc.h; sourceTree = "<group>"; };
 		13F1CAE110569E1A005DEDB9 /* alsmem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alsmem.h; sourceTree = "<group>"; };
@@ -133,7 +130,6 @@
 		13F1CB0C10569E1A005DEDB9 /* debugsys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = debugsys.c; sourceTree = "<group>"; };
 		13F1CB0D10569E1A005DEDB9 /* debugsys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debugsys.h; sourceTree = "<group>"; };
 		13F1CB0E10569E1A005DEDB9 /* defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
-		13F1CB0F10569E1A005DEDB9 /* demo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = demo.c; sourceTree = "<group>"; };
 		13F1CB1010569E1A005DEDB9 /* dfltsys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dfltsys.h; sourceTree = "<group>"; };
 		13F1CB1E10569E1A005DEDB9 /* dump_wam.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dump_wam.c; sourceTree = "<group>"; };
 		13F1CB1F10569E1A005DEDB9 /* dump_wam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dump_wam.h; sourceTree = "<group>"; };
@@ -164,12 +160,6 @@
 		13F1CB5110569E1A005DEDB9 /* icodegen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icodegen.h; sourceTree = "<group>"; };
 		13F1CB5210569E1A005DEDB9 /* icom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = icom.h; sourceTree = "<group>"; };
 		13F1CB5310569E1A005DEDB9 /* index.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = index.c; sourceTree = "<group>"; };
-		13F1CB5410569E1A005DEDB9 /* int_net.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = int_net.c; sourceTree = "<group>"; };
-		13F1CB5510569E1A005DEDB9 /* int_net.c-old */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "int_net.c-old"; sourceTree = "<group>"; };
-		13F1CB5610569E1A005DEDB9 /* intaux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = intaux.c; sourceTree = "<group>"; };
-		13F1CB5710569E1A005DEDB9 /* intrv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = intrv.c; sourceTree = "<group>"; };
-		13F1CB5810569E1A005DEDB9 /* intrv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = intrv.h; sourceTree = "<group>"; };
-		13F1CB5910569E1A005DEDB9 /* intrv_pr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = intrv_pr.h; sourceTree = "<group>"; };
 		13F1CB5A10569E1A005DEDB9 /* istr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = istr.h; sourceTree = "<group>"; };
 		13F1CB5B10569E1A005DEDB9 /* lexan.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lexan.c; sourceTree = "<group>"; };
 		13F1CB5C10569E1A005DEDB9 /* lexan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexan.h; sourceTree = "<group>"; };
@@ -210,12 +200,9 @@
 		13F1CB7F10569E1A005DEDB9 /* relocate_code.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = relocate_code.c; sourceTree = "<group>"; };
 		13F1CB8010569E1A005DEDB9 /* rinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rinfo.c; sourceTree = "<group>"; };
 		13F1CB8110569E1A005DEDB9 /* rinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rinfo.h; sourceTree = "<group>"; };
-		13F1CB8210569E1A005DEDB9 /* security.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = security.c; sourceTree = "<group>"; };
-		13F1CB8310569E1A005DEDB9 /* security.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = security.h; sourceTree = "<group>"; };
 		13F1CB8410569E1A005DEDB9 /* sig.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sig.c; sourceTree = "<group>"; };
 		13F1CB8510569E1A005DEDB9 /* sig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sig.h; sourceTree = "<group>"; };
 		13F1CB8710569E1A005DEDB9 /* symtab.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = symtab.c; sourceTree = "<group>"; };
-		13F1CB8810569E1A005DEDB9 /* th_intrv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = th_intrv.c; sourceTree = "<group>"; };
 		13F1CB8910569E1A005DEDB9 /* topmain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = topmain.c; sourceTree = "<group>"; };
 		13F1CB8A10569E1A005DEDB9 /* varproc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = varproc.c; sourceTree = "<group>"; };
 		13F1CB8B10569E1A005DEDB9 /* varproc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = varproc.h; sourceTree = "<group>"; };
@@ -348,7 +335,6 @@
 				13F1CB0C10569E1A005DEDB9 /* debugsys.c */,
 				13F1CB0D10569E1A005DEDB9 /* debugsys.h */,
 				13F1CB0E10569E1A005DEDB9 /* defs.h */,
-				13F1CB0F10569E1A005DEDB9 /* demo.c */,
 				13F1CB1010569E1A005DEDB9 /* dfltsys.h */,
 				13F1CB1E10569E1A005DEDB9 /* dump_wam.c */,
 				13F1CB1F10569E1A005DEDB9 /* dump_wam.h */,
@@ -379,12 +365,6 @@
 				13F1CB5110569E1A005DEDB9 /* icodegen.h */,
 				13F1CB5210569E1A005DEDB9 /* icom.h */,
 				13F1CB5310569E1A005DEDB9 /* index.c */,
-				13F1CB5410569E1A005DEDB9 /* int_net.c */,
-				13F1CB5510569E1A005DEDB9 /* int_net.c-old */,
-				13F1CB5610569E1A005DEDB9 /* intaux.c */,
-				13F1CB5710569E1A005DEDB9 /* intrv.c */,
-				13F1CB5810569E1A005DEDB9 /* intrv.h */,
-				13F1CB5910569E1A005DEDB9 /* intrv_pr.h */,
 				13F1CB5A10569E1A005DEDB9 /* istr.h */,
 				13F1CB5B10569E1A005DEDB9 /* lexan.c */,
 				13F1CB5C10569E1A005DEDB9 /* lexan.h */,
@@ -425,12 +405,9 @@
 				13F1CB7F10569E1A005DEDB9 /* relocate_code.c */,
 				13F1CB8010569E1A005DEDB9 /* rinfo.c */,
 				13F1CB8110569E1A005DEDB9 /* rinfo.h */,
-				13F1CB8210569E1A005DEDB9 /* security.c */,
-				13F1CB8310569E1A005DEDB9 /* security.h */,
 				13F1CB8410569E1A005DEDB9 /* sig.c */,
 				13F1CB8510569E1A005DEDB9 /* sig.h */,
 				13F1CB8710569E1A005DEDB9 /* symtab.c */,
-				13F1CB8810569E1A005DEDB9 /* th_intrv.c */,
 				13F1CB8910569E1A005DEDB9 /* topmain.c */,
 				13F1CB8A10569E1A005DEDB9 /* varproc.c */,
 				13F1CB8B10569E1A005DEDB9 /* varproc.h */,
@@ -455,6 +432,8 @@
 		13F1CBFF10569FD2005DEDB9 /* unix */ = {
 			isa = PBXGroup;
 			children = (
+				1308834A1FFC6619006C260E /* linenoise.c */,
+				130883491FFC6619006C260E /* linenoise.h */,
 				13F1CC0010569FD2005DEDB9 /* aix_config.h */,
 				13F1CC0110569FD2005DEDB9 /* aix_makefile */,
 				13F1CC0210569FD2005DEDB9 /* build_all */,
@@ -554,7 +533,11 @@
 			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "ALS Prolog" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* ALS Prolog */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -608,7 +591,6 @@
 				13F1CBB410569E1A005DEDB9 /* compmath.c in Sources */,
 				13F1CBB510569E1A005DEDB9 /* cutmacro.c in Sources */,
 				13F1CBB610569E1A005DEDB9 /* debugsys.c in Sources */,
-				13F1CBB710569E1A005DEDB9 /* demo.c in Sources */,
 				13F1CBB910569E1A005DEDB9 /* dump_wam.c in Sources */,
 				13F1CBBA10569E1A005DEDB9 /* engine.c in Sources */,
 				13F1CBBB10569E1A005DEDB9 /* expand.c in Sources */,
@@ -624,9 +606,6 @@
 				13F1CBC610569E1A005DEDB9 /* gc.c in Sources */,
 				13F1CBCD10569E1A005DEDB9 /* gv.c in Sources */,
 				13F1CBCE10569E1A005DEDB9 /* index.c in Sources */,
-				13F1CBCF10569E1A005DEDB9 /* int_net.c in Sources */,
-				13F1CBD010569E1A005DEDB9 /* intaux.c in Sources */,
-				13F1CBD110569E1A005DEDB9 /* intrv.c in Sources */,
 				13F1CBD210569E1A005DEDB9 /* lexan.c in Sources */,
 				13F1CBD310569E1A005DEDB9 /* lforeign.c in Sources */,
 				13F1CBD410569E1A005DEDB9 /* loadfile.c in Sources */,
@@ -635,6 +614,7 @@
 				13F1CBD710569E1A005DEDB9 /* mem.c in Sources */,
 				13F1CBD810569E1A005DEDB9 /* module.c in Sources */,
 				13F1CBD910569E1A005DEDB9 /* new_alspi.c in Sources */,
+				1308834B1FFC6619006C260E /* linenoise.c in Sources */,
 				13F1CBDA10569E1A005DEDB9 /* newpckgcoff.c in Sources */,
 				13F1CBDB10569E1A005DEDB9 /* nopckg.c in Sources */,
 				13F1CBDC10569E1A005DEDB9 /* paction.c in Sources */,
@@ -647,10 +627,8 @@
 				13F1CBE310569E1A005DEDB9 /* random.c in Sources */,
 				13F1CBE410569E1A005DEDB9 /* relocate_code.c in Sources */,
 				13F1CBE510569E1A005DEDB9 /* rinfo.c in Sources */,
-				13F1CBE610569E1A005DEDB9 /* security.c in Sources */,
 				13F1CBE710569E1A005DEDB9 /* sig.c in Sources */,
 				13F1CBE910569E1A005DEDB9 /* symtab.c in Sources */,
-				13F1CBEA10569E1A005DEDB9 /* th_intrv.c in Sources */,
 				13F1CBEB10569E1A005DEDB9 /* topmain.c in Sources */,
 				13F1CBEC10569E1A005DEDB9 /* varproc.c in Sources */,
 				13F1CBED10569E1A005DEDB9 /* vprintf.c in Sources */,
@@ -706,6 +684,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-DPORT",
@@ -726,6 +705,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = (
 					"-DPORT",
 					"-DUNIX",

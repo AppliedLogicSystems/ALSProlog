@@ -38,6 +38,10 @@
 
 module mpml.
 
+export standard_today/1.
+export macro/2.
+export macro_ref/3.
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% Standard PXML Macros
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,10 +50,14 @@ module mpml.
 	%% ---- Text Matters ----
 	%%-----------------------
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 macro(ref(URL0,   Content), Result)
 	:-
 	macro_ref(URL0,   Content, Result).
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 macro_ref(URL/Options,   Content, a([href=URL | Options], [Content])) :-!.
 macro_ref(URL,   Content, a([href=URL], [Content])) :-!.
 
@@ -327,7 +335,8 @@ name_value_text([Tag=Val | Eqs], [Text | TextList])
 	%% --- Generic Matters --
 	%%-----------------------
 
-export standard_today/1.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 standard_today(Date)
 	:-
 	date(YY/MM/DD),

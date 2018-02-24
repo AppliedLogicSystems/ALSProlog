@@ -501,8 +501,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	is_absolute_path(FileName),
 	!,
-	(resource_load(FileName)
-		; load(FileName,1,_,obp,_,_)
+	(load(FileName,1,_,obp,_,_)
 		; existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) ),
 	!,
 	record_lib_load(FileName),
@@ -597,6 +596,7 @@ force_libload_file(File,DirDC)
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
+%curmod(MMM),
 	libhide(M,[LH|LT],PredList),
 	mc_all(ModClosures, M, [LH | LT]),
 	!.
@@ -623,6 +623,7 @@ do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
 	'$create_mod_close'(M, UserPredicate,Arity, Procedure),
 	Arity1 is Arity + 1.
 
+:-dynamic(lib_mod_list/1).
 libhide(M,List,PredList) 
 	:-
 %	subPath(List, LibFileName),
@@ -638,7 +639,25 @@ libhide0([P/A | Rest], M, LibFileName)
 	newmodule(M),
 	exportpred(P,A),
 	endmodule,
+	note_lib_mod(M),
 	libhide0(Rest,M,LibFileName).
+
+	%% record modules having library entries in: lib_mod_list/1
+	%% used by cref to determine library imports
+note_lib_mod(MF)
+	:-
+	lib_mod_list(LibModList),
+	!,
+	(dmember(MF, LibModList) -> 
+		true
+		;
+		retract(lib_mod_list(_)),
+		assert(lib_mod_list([MF | LibModList]))
+	).
+
+note_lib_mod(M)
+	:-
+	assert(lib_mod_list([M])).
 
 
 /*---------------------------------------------------------------------

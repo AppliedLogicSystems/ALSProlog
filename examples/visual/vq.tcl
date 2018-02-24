@@ -25,7 +25,7 @@ proc chessboard {} {
     label $base.info.soln_num \
         -text {0} -padx 2
     button $base.info.next_btn \
-        -text {Next} -padx 2 -command { set OkWait ok}
+        -text {Next} -padx 2 -command { set OkWait ok} -width 10
     button $base.info.all_btn \
         -text {All} -padx 8 -command find_all_the_rest
 							

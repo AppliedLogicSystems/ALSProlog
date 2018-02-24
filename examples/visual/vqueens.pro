@@ -60,11 +60,11 @@ all_queens_text
 all_queens0
 	:- 
 	init_tk_alslib,
-	tcl_call(tcli, [source, 'vq.tcl'], _),
-	tcl_call(tcli, [image,create,photo,qcrown,'-file','queen_crown_icon.gif'],_),
-	tcl_call(tcli, [image,create,photo,blank,'-file','blank_crown_icon.gif'],_),
+	tcl_call(shl_tcli, [source, 'vq.tcl'], _),
+	tcl_call(shl_tcli, [image,create,photo,qcrown,'-file','queen_crown_icon.gif'],_),
+	tcl_call(shl_tcli, [image,create,photo,blank,'-file','blank_crown_icon.gif'],_),
 	InitTime is cputime,
-	tcl_call(tcli, [chessboard], _),
+	tcl_call(shl_tcli, [chessboard], _),
 	generate_board(8),
 	bagof(X,get_solutions(X),L),
 	length(L,N),
@@ -128,15 +128,15 @@ show_soln(Soln)
 	(M = none -> true 
 		; 
 		display_soln(Soln, M),
-		tcl_call(tcli, [update],_),
+		tcl_call(shl_tcli, [update],_),
 		update_soln_num,
 		(wait_for_next ->
-			tcl_call(tcli, [wait_on_button],_)
+			tcl_call(shl_tcli, [wait_on_button],_)
 			;
 			true
 		),
 		!,
-		tcl_call(tcli, [clear_board,M], _)
+		tcl_call(shl_tcli, [clear_board,M], _)
 	).
 
 display_soln([], M).
@@ -145,16 +145,16 @@ display_soln([square(R,C) | Soln], M)
 	R0 is R-1, C0 is C-1,
 	sname(R0,C0,SN),
 	(M = text ->
-		tcl_call(tcli, [SN,configure,'-text','Q'],_)
+		tcl_call(shl_tcli, [SN,configure,'-text','Q'],_)
 		;
-		tcl_call(tcli, [SN,configure,'-image',qcrown],_)
+		tcl_call(shl_tcli, [SN,configure,'-image',qcrown],_)
 	),
 	display_soln(Soln, M).
 
 generate_board(N)
 	:-
 	generate_board(0,N),
-	tcl_call(tcli,[raise,'.vq'],_).
+	tcl_call(shl_tcli,[raise,'.vq'],_).
 
 generate_board(M,N)
 	:-
@@ -172,8 +172,8 @@ generate_row(K,N,M)
 generate_row(K,N,M)
 	:-
 	sname(M,K,SN),
-	tcl_call(tcli, [label,SN,'-relief',groove],_),
-	tcl_call(tcli, [grid,SN,'-row',M,'-column',K,'-sticky','nsew'],_),
+	tcl_call(shl_tcli, [label,SN,'-relief',groove],_),
+	tcl_call(shl_tcli, [grid,SN,'-row',M,'-column',K,'-sticky','nsew'],_),
 	NextK is K+1,
 	generate_row(NextK,N,M).
 
@@ -184,23 +184,21 @@ sname(M,K,SN)
 place_queen(square(R,C))
 	:-
 	sname(R,C,SN),
-%	tcl_call(tcli, [SN,configure,'-text','Q'],_),
-	tcl_call(tcli, [SN,configure,'-image',qcrown],_),
-	tcl_call(tcli, [update],_).
+	tcl_call(shl_tcli, [SN,configure,'-image',qcrown],_),
+	tcl_call(shl_tcli, [update],_).
 
 place_queen(square(R,C))
 	:-
 	sname(R,C,SN),
-	tcl_call(tcli, [SN,configure,'-text',''],_),
-	tcl_call(tcli, [SN,configure,'-image',blank],_),
-	tcl_call(tcli, [update],_).
+	tcl_call(shl_tcli, [SN,configure,'-text',''],_),
+	tcl_call(shl_tcli, [SN,configure,'-image',blank],_),
+	tcl_call(shl_tcli, [update],_).
 
 update_soln_num
 	:-
-    tcl_call(tcli, ['.vq.info.soln_num','cget','-text'],Prev),
-	atomread(Prev,PrevNum),
-	NextNum is PrevNum+1,
-    tcl_call(tcli, ['.vq.info.soln_num','configure','-text',NextNum],_).
+    tcl_call(shl_tcli, ['.vq.info.soln_num','cget','-text'],Prev),
+    NextNum is Prev+1,
+    tcl_call(shl_tcli, ['.vq.info.soln_num','configure','-text',NextNum],_).
 
 find_all_the_rest
 	:-

@@ -16,6 +16,10 @@
 #include <tcl.h>
 #include <tk.h>
 
+#ifndef CONST86
+#  define CONST86
+#endif
+
 #ifndef BUILD_PSL
 /*
 #define ITCL
@@ -53,7 +57,7 @@ char *version[2] = {
 #endif
 #endif
 
-static Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
+static CONST86 Tcl_ObjType *tcl_integer_type, *tcl_double_type, *tcl_list_type;
 
 static AP_Obj TclToPrologObj(Tcl_Interp *interp, Tcl_Obj *tcl_obj, AP_World *w, AP_Obj *vars);
 static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *interp);
@@ -125,9 +129,9 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 		break;	
 	case AP_ATOM:
 		if (AP_IsNullList(w, prolog_obj)) {
-			tcl_obj = Tcl_NewStringObj((char *)"", -1);		
+			tcl_obj = Tcl_NewStringObj("", -1);
 		} else {
-			tcl_obj = Tcl_NewStringObj((char *)AP_GetAtomStr(w, prolog_obj), -1);
+			tcl_obj = Tcl_NewStringObj(AP_GetAtomStr(w, prolog_obj), -1);
 		}
 		break;
 	case AP_LIST:
@@ -137,13 +141,11 @@ static Tcl_Obj *PrologToTclObj(AP_World *w, AP_Obj prolog_obj, Tcl_Interp *inter
 		}
 		break;
 	case AP_STRUCTURE:
-		tcl_obj = Tcl_NewStringObj((char *)"structure", -1);
+		tcl_obj = Tcl_NewStringObj("structure", -1);
 		break;
 	case AP_VARIABLE:
-		tcl_obj = Tcl_NewStringObj((char *)"variable", -1);
+		tcl_obj = Tcl_NewStringObj("variable", -1);
 		break;
-	default:
-	  tcl_obj = NULL;
 	}
 	
 	return tcl_obj;
@@ -156,25 +158,24 @@ static AP_Obj tcltk_module;
 static int
 PrologToTclResult(Tcl_Interp *interp, AP_World *w, AP_Result prolog_result)
 {
+	int result;
 	switch (prolog_result) {
 	case AP_SUCCESS:
-	default:
 		Tcl_SetObjResult(interp, Tcl_NewIntObj(1));
-		return TCL_OK;
+		result = TCL_OK;
 		break;
 	case AP_FAIL:
 		Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
-		return TCL_OK;
+		result = TCL_OK;
 		break;
 	case AP_EXCEPTION: {
 		AP_Obj term_to_string, string;
-		AP_Result r;
 		term_to_string = AP_NewInitStructure(w,
 						AP_NewSymbolFromStr(w, "term_to_string"),
 						2,
 						AP_GetException(w),
 						AP_UNBOUND_OBJ);
-		r = AP_Call(w, tcltk_module, &term_to_string);
+		AP_Call(w, tcltk_module, &term_to_string); // ignore result
 		string = AP_GetArgument(w, term_to_string, 2);
 		
 		Tcl_ResetResult(interp);
@@ -182,10 +183,11 @@ PrologToTclResult(Tcl_Interp *interp, AP_World *w, AP_Result prolog_result)
 			"prolog exception: ",
 			AP_GetAtomStr(w, string),
 			NULL);
-		return TCL_ERROR;
-		break;
+		result = TCL_ERROR;
 		}
+		break;
 	}
+	return result;
 }
 
 static AP_Result
@@ -258,7 +260,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 	AP_Result result;
 
 	if (objc < 4 || (objc%2) != 0) {
-		Tcl_WrongNumArgs(interp, 1, objv, (char *)"call module functor ?-type arg ...?");
+		Tcl_WrongNumArgs(interp, 1, objv, "call module functor ?-type arg ...?");
 		return TCL_ERROR;
 	}
 	
@@ -279,7 +281,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 		call = AP_NewStructure(w, functor, argc);
 		
 		for (a = 0, i = 4, vars = AP_NullList(w); a < argc; a++, i+=2) {
-			if (Tcl_GetIndexFromObj(NULL, objv[i], callOptions, (char *)"", TCL_EXACT, &option) == TCL_OK) {
+			if (Tcl_GetIndexFromObj(NULL, objv[i], callOptions, "", TCL_EXACT, &option) == TCL_OK) {
 				switch (option) {
 				case NUMBER:
 					if (Tcl_ConvertToType(interp, objv[i+1], tcl_integer_type) == TCL_OK
@@ -303,7 +305,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 				}
 			} else {
 				Tcl_WrongNumArgs(interp, 2, objv,
-					(char *)"module functor ?-type arg ...?"
+					"module functor ?-type arg ...?"
 				);
 				return TCL_ERROR;
 			}
@@ -331,7 +333,7 @@ Tcl_ALS_Prolog_Call(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl_O
 			name = AP_GetAtomStr(w, AP_GetArgument(w, pair, 1));
 			if (*name) {
 				value = AP_GetArgument(w, pair, 2);
-				Tcl_ObjSetVar2(interp, Tcl_NewStringObj((char *)name, -1), NULL, PrologToTclObj(w, value, interp), 0);
+				Tcl_ObjSetVar2(interp, Tcl_NewStringObj(name, -1), NULL, PrologToTclObj(w, value, interp), 0);
 			}
 		}
 	}
@@ -347,11 +349,11 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 	int option;
 
 	if (objc < 2) {
-		Tcl_WrongNumArgs(interp, 1, objv, (char *)"option ?arg ...?");
+		Tcl_WrongNumArgs(interp, 1, objv, "option ?arg ...?");
 		return TCL_ERROR;
 	}
 	
-	if (Tcl_GetIndexFromObj(interp, objv[1], prologOptions, (char *)"option", TCL_EXACT, &option)
+	if (Tcl_GetIndexFromObj(interp, objv[1], prologOptions, "option", TCL_EXACT, &option)
 		!= TCL_OK) {
 		return TCL_ERROR;
 	}
@@ -360,33 +362,28 @@ Tcl_ALS_Prolog_ObjCmd(ClientData prolog_world, Tcl_Interp *interp, int objc, Tcl
 	case PROLOG_CALL:
 	default:
 		return Tcl_ALS_Prolog_Call(prolog_world, interp, objc, objv);
-		break;
 	case PROLOG_READ_CALL:
 		return Tcl_ALS_Prolog_Read_Call(prolog_world, interp, objc, objv);
-		break;
 	case PROLOG_INTERRUPT:
 		PI_interrupt();
 		return TCL_OK;
-		break;
 	}
 }
 
 static int
 Tcl_DoOneEventCmd(ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv)
 {
-#pragma unused(data)
-
 	int index, result;
 	
 	enum {EVENT_WAIT, EVENT_DONT_WAIT};
 	const char *eventOptions[] = {"wait", "dont_wait", NULL};
 
 	if (objc != 2) {
-		Tcl_WrongNumArgs(interp, 1, objv, (char *)"option");
+		Tcl_WrongNumArgs(interp, 1, objv, "option");
 		return TCL_ERROR;
 	}
 	
-    if (Tcl_GetIndexFromObj(interp, objv[1], eventOptions, (char *)"option", 0, &index)
+    if (Tcl_GetIndexFromObj(interp, objv[1], eventOptions, "option", 0, &index)
 	    != TCL_OK) {
     	return TCL_ERROR;
     }
@@ -603,7 +600,9 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 	Tcl_Interp *interp;
 	
 	result = built_interp(w, &interp, &interp_name);
-	
+
+	// Similar to 2009 note above, this cause Tk_Init to fail (tk.tcl not found)
+#if 0
 	{
 		Tcl_DString path;
 		const char *elements[3];
@@ -619,6 +618,7 @@ static AP_Result tk_new(AP_World *w, AP_Obj interp_name)
 		Tcl_SetVar(interp, (char *)"tk_library", path.string, TCL_GLOBAL_ONLY);
 		Tcl_DStringFree(&path);
 	}
+#endif
 
 	if (result == AP_SUCCESS) {
 		int r = Tk_Init(interp);
@@ -755,7 +755,6 @@ static AP_Result tcl_delete(AP_World *w, AP_Obj interp_name)
 
 static AP_Result tcl_delete_all(AP_World *ignore)
 {
-#pragma unused(ignore)
 	Tcl_HashEntry *entry;
 	Tcl_HashSearch search;
 
@@ -773,8 +772,6 @@ static AP_Result tcl_delete_all(AP_World *ignore)
 
 static AP_Result tk_main_loop(AP_World *ignore)
 {
-#pragma unused(ignore)
-
 	Tk_MainLoop();
 	return AP_SUCCESS;
 }

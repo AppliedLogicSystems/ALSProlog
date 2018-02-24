@@ -4,9 +4,9 @@
 </HEAD><BODY>
 <A NAME="00e75f24"></A><B>bufread/[2,4]
 <P></P>
-<A NAME="69acd870"></A><A NAME="00e75f4b"></A></B>bufread/2 - runs the Prolog parser on a string of text
+bufread/2 –  - runs the Prolog parser on a string of text
 <P></P>
-<A NAME="69acd871"></A>bufread/4 - similiar to bufread/2, giving additional information
+bufread/4 –  - similiar to bufread/2, giving additional information
 <P></P>
 <A NAME="69acd872"></A><B>FORMS
 <P></P>
@@ -18,9 +18,9 @@
 <P></P>
 <A NAME="69acdfda"></A></B>bufread/2 takes a Prolog string, Buffer, and attempts to transform it into a Prolog term. It does this by:
 <P></P>
-<A NAME="69acdfd1"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> Reading the first term out of Buffer (trailing characters from Buffer are ignored) and unifying it with Structure.
+<A NAME="69acdfd1"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> Reading the first term out of Buffer (trailing characters from Buffer are ignored) and unifying it with Structure.
 <P></P>
-<A NAME="69acdfd2"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> Returning in Vars a list of the quoted variable names occurring in the term
+<A NAME="69acdfd2"></A><IMG SRC="images/Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> Returning in Vars a list of the quoted variable names occurring in the term
 read.
 <P></P>
 <A NAME="69acdfd3"></A>If an error has occured, the head will be an error message (a Prolog string),

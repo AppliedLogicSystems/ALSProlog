@@ -9,8 +9,6 @@
  |	Revised: May 1993
  *==================================================================*/
 
-tt :- install_lib('/elvis/prolog/Utils/misc_db.pro').
-
 module builtins.
 
 export install_lib/0.
@@ -1171,4 +1169,6 @@ all_list_diffs([Tag-ThisExports | TagExports], CommonExports,
 endmod.
 
 
+
+tt :- install_lib('/elvis/prolog/Utils/misc_db.pro').
 

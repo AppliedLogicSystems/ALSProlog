@@ -25,20 +25,20 @@ module builtins.
 		subClassOf = genericObjects,
 		export = yes,
 		addl_slots =
-			[ 
-				shell_module, 	  	  %% module for the shell (alsshell/alsdev)
-				prolog_library, 	  %% path to the ...
-				initial_dir,    	  %% initial directory we wake up in
-				initial_search_dirs,  %% initial search list
-				source_mgrs,	   	  %% list of managers for consulted files
-				cslt_ctxt,		   	  %% (list) stack of "current source_mgr" 
-				break_level			  %% break shell level (old global BreakLevel)
-			],
+		[ 
+			shell_module, 	  	  %% module for the shell (alsshell/alsdev)
+			prolog_library, 	  %% path to the ...
+			initial_dir,    	  %% initial directory we wake up in
+			initial_search_dirs,  %% initial search list
+			source_mgrs,	   	  %% list of managers for consulted files
+			cslt_ctxt,		   	  %% (list) stack of "current source_mgr" 
+			break_level			  %% break shell level (old global BreakLevel)
+		],
 		defaults = [ 
-				shell_module = alsshell,   %% make alsdev reset this...
-				source_mgrs = [],
-				cslt_ctxt	= [],
-				break_level = [b(0,user,true)]
+			shell_module = alsshell,   %% make alsdev reset this...
+			source_mgrs = [],
+			cslt_ctxt	= [],
+			break_level = [b(0,user,true)]
 		]
 	]).
 
@@ -54,16 +54,16 @@ module builtins.
 		subClassOf=genericObjects,
 		export = yes,
 		addl_slots=
-			[ 
-				source_type,		%% file/anon win/....
-				source_file, 		%% OS path to the ...
-				base_file,			%% underlying file name
-				ext,				%% underlying extension
-				obp_file,			%% OS path to obp file if exists, or nil
-				fcg, 				%% File clause group # for this (consulted) file
-				consult_mode,		%% normal/debug
-				last_consult		%% Time of last consult,
-			],
+		[ 
+			source_type,		%% file/anon win/....
+			source_file, 		%% OS path to the ...
+			base_file,			%% underlying file name
+			ext,				%% underlying extension
+			obp_file,			%% OS path to obp file if exists, or nil
+			fcg, 				%% File clause group # for this (consulted) file
+			consult_mode,		%% normal/debug
+			last_consult		%% Time of last consult,
+		],
 		defaults= [ 
 			source_type		= file,
 			ext				= '',
@@ -76,6 +76,9 @@ module builtins.
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% GETTING A SOURCE MANAGER
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%% In alspro, so nothing to do:
+als_shl_mgrAction(refresh_wins, State).
 
 als_shl_mgrAction(obtain_src_mgr(BaseFileName, FileMgr), State) 
 	:-!,
@@ -180,11 +183,12 @@ module alsdev.
 		subClassOf=als_shl_mgr,
 		module = alsdev,
 		addl_slots=
-			[ 
-				debugger_mgr,   %% debugger state object
-				cur_project,    %% current project manager object    
-				edit_files,     %% list of files open for editing
-				non_file_edits  %% list of non-file (new) windows open for editing
+		[ 
+			debugger_mgr,   %% debugger state object
+			cur_project,    %% current project manager object    
+			cur_cref_mgr,    %% current cref suite manager object    
+			edit_files,     %% list of files open for editing
+			non_file_edits  %% list of non-file (new) windows open for editing
 			],
 		defaults= [ 
 			edit_files = [], 
@@ -214,15 +218,15 @@ module alsdev.
 		subClassOf=shl_source_handler,
 		module = alsdev,
 		addl_slots=
-			[
-				debugger_mgr,		%% home to daddy...
-				last_visual_load,	%% Time of last load of file text widget
-				num_lines,			%% num lines in the file
-				linesizes,			%% list of num chars in each line
-				invlineindex,		%% list of char offsets to start of each line
-				head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
-				call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
-			],
+		[
+			debugger_mgr,		%% home to daddy...
+			last_visual_load,	%% Time of last load of file text widget
+			num_lines,			%% num lines in the file
+			linesizes,			%% list of num chars in each line
+			invlineindex,		%% list of char offsets to start of each line
+			head_tag,			%% i(S,E) = last colored "matching head (aph)tag" lcn
+			call_tag			%% i(S,E) = last colored "matching_call (apg)tag" lcn
+		],
 		defaults= [ 
 			visible				= false,
 			last_visual_load 	= 0,
@@ -237,59 +241,69 @@ module alsdev.
 		subClassOf=genericObjects,
 		module = alsdev,
 		addl_slots=
-			[ 
-				debug_main_win, 			%% path to the ...
-				debug_visible,  			%% true/false: debug_main_win visible
-				src_trace_mgrs_by_file,		%% list of active mgrs, by file path
-				fcg_index_size,				%% size of array for src_trace_mgrs_by_fcg
-				src_trace_mgrs_by_fcg,		%% array (term) of active mgrs, by fcg
-				mrfcg,						%% most recent file clause group touched
-				stack_display_size,			%% size of stack to display
-				stack_display_stream,		%% stream to write stack to
-				stack_display_list			%% listbot to write stack to
-			],
+		[ 
+			debug_main_win, 		%% path to the ...
+			debug_visible,  		%% true/false: debug_main_win visible
+			src_trace_mgrs_by_file,		%% list of active mgrs, by file path
+			fcg_index_size,			%% size of array for src_trace_mgrs_by_fcg
+			src_trace_mgrs_by_fcg,		%% array (term) of active mgrs, by fcg
+			mrfcg,				%% most recent file clause group touched
+			stack_display_size,		%% size of stack to display
+			stack_display_stream,		%% stream to write stack to
+			stack_display_list		%% listbot to write stack to
+		],
 		defaults= [ 
-			debug_main_win			= '.debugwin',
-			debug_visible			=  false,
+			debug_main_win		= '.debugwin',
+			debug_visible		=  false,
 			src_trace_mgrs_by_file	= [],
 			src_trace_mgrs_by_fcg	= [],
-			mrfcg = 0,
-			stack_display_size		= 20,
+			mrfcg 			= 0,
+			stack_display_size	= 20,
 			stack_display_stream	= debugger_output,
-			stack_display_list		= '.debugwin.stacklist'
+			stack_display_list	= '.debugwin.stacklist'
 			]
 	]).
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Project Manager ObjectPro CLASS DEFINITIONS  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%% Note: Only one project can be open at a time;
+		%% The manager for the project is read in from
+		%% the project file when the (existing) project is
+		%% opened, and is written back out to the project
+		%% file when the project is closed.
 
 
 :- defineClass(
 	[   name=gen_project_mgr,
 		subClassOf=genericObjects,
 		addl_slots=
-			[
-				internal_name,
-				title,
-				project_file,
-				primary_project_dir,	% normally where project_file is
-				list_of_files_slots,
-				list_slots,
-				text_slots,
-				search_dirs,
-				search_trees,
-				gui_spec,
-				slot_names
+		[
+			internal_name,
+			title,
+			project_file,
+			primary_project_dir,	% normally where project_file is
+			list_of_files_slots,
+			list_slots,
+			text_slots,
+			search_dirs,
+			search_trees,
+			gui_spec,
+			slot_names
 			], 
 		defaults=
-			[
-				title = '',
-				project_file = '',
-				list_of_files_slots = [],
-				list_slots = [],
-				text_slots = [],
-				search_dirs = [],
-				search_trees = [],
-				slot_names = []
-			] 
+		[
+			title = '',
+			project_file = '',
+			list_of_files_slots = [],
+			list_slots = [],
+			text_slots = [],
+			search_dirs = [],
+			search_trees = [],
+			slot_names = []
+		] 
 	]).
 
 		%% The manager for a prolog/tcl/c project:
@@ -297,45 +311,95 @@ module alsdev.
 	[   name=project_mgr,
 		subClassOf=gen_project_mgr,
 		addl_slots=
-			[
-				production_goal,
-				debug_goal,
-				executable_name,
-				prolog_files,
-				library_files,
-				file_types,
-				default_dirs,
-				project_loaded			%% true/fail
+		[
+			addl_text_slots,
+			production_goal,
+			debug_goal,
+			executable_name,
+			stub_name,
+			distdir_name,
+			prolog_files,
+			library_files,
+			file_types,
+			default_dirs,
+			project_loaded			%% true/fail
 			], 
 		defaults=
-			[
-				project_loaded = fail,
-				list_of_files_slots = [
-					prolog_files
-%					,library_files,
-					],
-				list_slots = [ ],
-				text_slots = [ ],
-				production_goal = start_,
-				debug_goal = debug_start_,
-				prolog_files = [],
-				library_files = [],
-				file_types =  [ 
-%					[prolog_files, ['.pro', '.pl'] ]
-					[prolog_files, ['.*'] ]
-%					,[prolog_library_files, ['.pro'] ],
+		[
+			project_loaded = fail,
+			list_of_files_slots = [
+				prolog_files
+%				,library_files,
 				],
-				default_dirs = [],
-				slot_names = [
-					[production_goal,	'Startup Goal:'],
-					[debug_goal, 		'Debug Goal:'],
-					[executable_name, 	'Image Name:'],
-					[prolog_files, 		'Files:']
-%					,[library_files, 	'Library Files:'],
-				]
+			list_slots = [ ],
+			text_slots = [],
+			addl_text_slots = [ 
+				production_goal, 
+				debug_goal, 
+			       	executable_name, 
+				stub_name, 
+				distdir_name
+				          ],
+			production_goal = prodGoal,
+			debug_goal = debugGoal,
+			executable_name = execName, 
+			stub_name = stubName,
+			distdir_name = 'MyDistDir',
+			prolog_files = [],
+			library_files = [],
+			file_types =  [ 
+				[['Prolog Files', ['.pro', '.pl'] ]],
+				[prolog_library_files, ['.pro'] ]
+			],
+			default_dirs = [],
+			slot_names = [
+				[production_goal,	'Startup Goal:'],
+				[debug_goal, 		'Debug Goal:'],
+				[executable_name, 	'Image Name:'],
+				[stub_name, 		'Stub Name:'],
+				[distdir_name,		'Dist Dir Name:'],
+				[prolog_files, 		'Prolog Files:'],
+				[library_files, 	'Library Files:']
 			]
+		]
 	]).
 
 
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%  Cref Suite ObjectPro CLASS DEFINITIONS  %%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%% Note: Only one suite can be open at a time;
+		%% The manager for the suite is created on the
+		%% fly using the suite values when an (existing)
+		%% cref suite is opened, or a blank suite is
+		%% created on the fly when a new suite is requested;
+		%% the suite values are written back out to the 
+		%% suite file when the suite is closed (via a 
+		%% button on the Cref panel.
+
+:- defineClass(
+	[   name=cref_panel_mgr,
+		subClassOf=genericObjects,
+		addl_slots=
+		[
+			internal_name,
+			title,
+			suite_file,	% *.crf
+			suite_dir,	% where suite_file is
+			list_of_files,
+			src_dir,	% (internal) dir where files reside
+			target,
+			gui_spec
+			], 
+		defaults=
+		[
+			title = '',
+			suite_file = '',
+			list_of_files = [],
+			target = ''
+		] 
+	]).
 
 endmod.
+

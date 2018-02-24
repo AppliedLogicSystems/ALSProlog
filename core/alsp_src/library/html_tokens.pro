@@ -37,8 +37,16 @@
 
 module pxml.
 
-
 export grab_html_tokens_cleaned/2.
+export grab_html_tokens/2.
+export cut_cmts_js/2.
+export rtt/2.
+export read_tokens_lines/2.
+export read_tokens/2.
+export read_tokens/5.
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 grab_html_tokens_cleaned(Path, HTMLPageTokens)
     :-
     grab_lines(Path, RawLines),
@@ -46,7 +54,8 @@ grab_html_tokens_cleaned(Path, HTMLPageTokens)
     read_tokens_lines(ScriptlessLines, HTMLPageTokens).
 
 
-export grab_html_tokens/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 grab_html_tokens(Path, HTMLPageTokens)
     :-
     open(Path, read, S),
@@ -56,7 +65,8 @@ grab_html_tokens(Path, HTMLPageTokens)
 	%% Strip out comments, java script & styles
 	%%------------------------------------------
 
-export cut_cmts_js/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 cut_cmts_js(RawLines, ScriptlessLines)
     :-
     cut_cmts_js(RawLines, normal, ScriptlessLines).
@@ -183,14 +193,16 @@ script_cmt_cut(normal, Line, [Line | ScriptlessLinesTail], normal,
 	%%------------------------------------------
 	%% Tokenize the input
 	%%------------------------------------------
-export rtt/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 rtt(File, Tokens)
 	:-
 	open(File, read, S),
 	read_tokens(S, Tokens),
 	close(S).
 
-export read_tokens_lines/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 read_tokens_lines(Lines, Tokens)
 	:-
 	read_tokens_lines(Lines, normal, Tokens).
@@ -207,7 +219,8 @@ read_tokens_lines([Line | Lines], Flag, Tokens)
 %trace,
 	read_tokens_lines(Lines, InterFlag, InterTail).
 
-export read_tokens/2.
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 read_tokens(S, Tokens)
 	:-
 	read_tokens(normal, S,  Tokens, [], _).
@@ -241,7 +254,6 @@ read_tokens(S, Tokens)
  |    for the context 'href=...'
  | FlagOut is the mode current when the last token is read.
  *----------------------------------------------------------------*/
-export read_tokens/5.
 read_tokens(comment_eol, S, Tail, Tail, comment)
 	:-!.
 
@@ -564,10 +576,8 @@ next_token(0'&, S, T, NxtC)
 	((NNxtC=0' ; NNxtC=0'	; NNxtC=10; NNxtC=13) ->
 		Cs = [], NxtC = NNxtC
 		;
-		dispatch_read_to_semi(NNxtC, S, Cs, NxtC),
-		get_code(S,NxtC)
+		dispatch_read_to_semi(NNxtC, S, Cs, NxtC)
 	),
-%	read_to_semi(S, Cs, NxtC),
 	atom_codes(T, [0'& | Cs]).
 
 next_token(C1, S, T,NxtC)
@@ -592,17 +602,19 @@ dispatch_read_to_terminator(C, S, [], C)
 dispatch_read_to_terminator(C, S, [], C)
 	:-
 	C = 0'=, !.
+dispatch_read_to_terminator(C, S, [], C)
+        :-
+        C = 0'&, !.
 	
 
 read_to_semi(S, Cs, NxtC)
 	:-
 	get_code(S, C),
-%put_code(C),nl,
 	dispatch_read_to_semi(C, S, Cs, NxtC).
 
 dispatch_read_to_semi(0';, S, [0';], NxtC)
 	:-!,
-	get_code(S, C).
+	get_code(S, NxtC).
 dispatch_read_to_semi(C, S, [C | Cs], NxtC)
 	:-
 	read_to_semi(S, Cs, NxtC).

@@ -8,6 +8,8 @@
 
 module prologdoc.
 
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
 build_standard_index(Data, General, ModsDescs, SortedAllModsEntries, OneLiners)
 	:-
 	setup_mods4idx(ModsDescs, Mods4Idx),

@@ -3,12 +3,13 @@
 set -eu
 
 case `uname -rs` in
-    "SunOS 4"*)	ARCH=sunos ;;
-    "SunOS 5"*)	ARCH=solaris ;;
-    Linux*) 	ARCH=linux ;;
-    "HP-UX"*)	ARCH=hpux ;;
-    "IRIX"*)	ARCH=irix ;;
-    "Darwin"*)	ARCH=darwin ;;
+    "SunOS 4"*)	ARCH=sunos   ; SOEXT=so    ;;
+    "SunOS 5"*)	ARCH=solaris ; SOEXT=so    ;;
+    Linux*) 	ARCH=linux   ; SOEXT=so    ;;
+    "HP-UX"*)	ARCH=hpux    ; SOEXT=sl    ;;
+    "IRIX"*)	ARCH=irix    ; SOEXT=so    ;;
+    "CYGWIN"*)  ARCH=cygwin  ; SOEXT=dll   ;;
+    "Darwin"*)	ARCH=darwin  ; SOEXT=dylib ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
 
@@ -34,7 +35,9 @@ EXE=alsdev ;
 EXET=alsdev ;
 EXAMPLE_SET="als pxs more objectpro visual chat80 Prolog1000" ;
 MANUAL=als_man.pdf ; # standard manual is missing.
+REFMANUAL=ref_man.pdf ; 
 MANUALNAME=als-prolog-manual.pdf ;
+REFMANUALNAME=als-ref-manual.pdf ;
 HELP="alshelp" ;
 ;;
 esac
@@ -46,13 +49,13 @@ cp -pr "$BIN/$EXE" "$DISTDIR/$EXET"
 if test -f "$BIN/$EXE.pst"
 then
     cp -pr "$BIN/$EXE.pst" "$DISTDIR/$EXET.pst"
+elif test -f "$BIN/$EXE.exe.pst"
+then
+    cp -pr "$BIN/$EXE.exe.pst" "$DISTDIR"
 fi
-cp -pr "$BIN/alsdir" "$DISTDIR"
-rm -f "$DISTDIR/alsdir/builtins/blt_shl.pro"
-rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
-rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
-rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
-cp -pr "$BIN/lib" "$DISTDIR"
+
+# Use -L to force dereferences of symbolic links
+cp -pRL "$BIN/alsdir" "$DISTDIR"
 
 mkdir "$DISTDIR/examples"
 for E in $EXAMPLE_SET ; do
@@ -62,9 +65,14 @@ done
 cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
-mkdir "$DISTDIR/help"
-cp -pr $MAN/$HELP/* "$DISTDIR/help"
-cp -p $MAN/als_help.htm "$DISTDIR/als_help.htm"
+cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
+mkdir "$DISTDIR/alshelp"
+cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
+cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
+cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
+cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
+cp -p "$ALS_PROLOG/core/alsp_src/doc/alspro.1" "$DISTDIR/alspro.1"
+
 
 #mkdir "$DISTDIR/alsdir/library"
 #cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
@@ -76,20 +84,14 @@ then
 	cp -pr "$BIN/alspro" "$DISTDIR"
 	if test -f "$BIN/alspro.pst"
 	then
-		cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	    cp -pr "$BIN/alspro.pst" "$DISTDIR"
+	elif test -f "$BIN/alspro.exe.pst"
+	then
+	    cp -pr "$BIN/alspro.exe.pst" "$DISTDIR"
+
 	fi
 	cp -pr "$BIN/libalspro.a" "$DISTDIR"
-	if test $ARCH = hpux
-	then
-		cp -pr "$BIN/libalspro.sl" "$DISTDIR"
-	else 
-        if test $ARCH = darwin
-	then
-		cp -pr "$BIN/libalspro.dylib" "$DISTDIR"
-	else
-		cp -pr "$BIN/libalspro.so" "$DISTDIR"
-        fi
-	fi
+	cp -pr "$BIN/libalspro.$SOEXT" "$DISTDIR"
 fi
 
 tar -C $ARCH -czf $DISTNAME-$ARCH.tgz $DISTNAME

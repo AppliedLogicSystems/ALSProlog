@@ -2,9 +2,9 @@
 <HEAD>
 <TITLE>stream_position/3</TITLE>
 </HEAD><BODY>
-<A NAME="c8978f1d"></A>stream_position/3
+<A NAME="c8978f1d"></A><B>stream_position/3
 <P></P>
-<A NAME="02bce79b"></A><A NAME="00e87983"></A>stream_position/3 - reposition a stream
+<A NAME="02bce79b"></A><A NAME="00e87983"></A> | -stream_position/3 - reposition a stream
 <P></P>
 <A NAME="02bcef00"></A><B>FORMS
 <P></P>
@@ -18,24 +18,24 @@
 side effect, the stream position of this stream is set to the position
 represented by New_position.   New_position may be one of the following values:
 <P></P>
-<A NAME="02bceefb"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> An absolute integer which represents the address of a character in the stream.
+<A NAME="02bceefb"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7> An absolute integer which represents the address of a character in the stream.
  The beginning of the stream or the first character in the stream has position
 0.  The second character in the stream has position 1 and so on.
 <P></P>
-<A NAME="02bceefd"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bceefc"></A>beginning_of_stream.
+<A NAME="02bceefd"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bceefc"></A>beginning_of_stream.
 <P></P>
-<A NAME="02bceefe"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term beginning_of_stream(N) where N is an integer greater than zero.  The position represented by this term is
+<A NAME="02bceefe"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term beginning_of_stream(N) where N is an integer greater than zero.  The position represented by this term is
 the beginning of the stream plus N bytes.
 <P></P>
-<A NAME="02bced7d"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bceeff"></A>end_of_stream.
+<A NAME="02bced7d"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bceeff"></A>end_of_stream.
 <P></P>
-<A NAME="02bced74"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term end_of_stream(N) where N is an integer less than or equal to zero.  This allows positions (earlier
+<A NAME="02bced74"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term end_of_stream(N) where N is an integer less than or equal to zero.  This allows positions (earlier
 than the end of  stream) to be specified relative to the end of the stream.  The 
 position represented by this term is the end-of-stream position  plus N bytes.
 <P></P>
-<A NAME="02bced76"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bced75"></A>current_position.
+<A NAME="02bced76"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The atom <A NAME="02bced75"></A>current_position.
 <P></P>
-<A NAME="02bced77"></A><IMG SRC="Bullet.gif" ALT="Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term current_position(N) where N is an integer.  This allows positions to be specified relative to the current
+<A NAME="02bced77"></A><IMG SRC="images/Bullet.gif" ALT="images/Bullet.gif" BORDER=0 WIDTH=3 HEIGHT=7>The term current_position(N) where N is an integer.  This allows positions to be specified relative to the current
 position in the file.
 <P></P>
 <A NAME="02bced78"></A><B>ERRORS

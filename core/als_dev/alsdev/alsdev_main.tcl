@@ -5,9 +5,11 @@
 #|		Tcl/Tk main window for the alsdev environment
 ##=================================================================================
 
+#puts [info tclversion]
+#puts $tk_version
+
 proc vTclWindow.topals {args} {
 	global array proenv
-	global tcl_platform
 	global mod
 
     set base .topals
@@ -17,16 +19,13 @@ proc vTclWindow.topals {args} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch .topals -class Toplevel -background $proenv(.topals,background) 
+    toplevel .topals -class Toplevel -background $proenv(.topals,background) 
     wm focusmodel .topals passive
     wm geometry .topals $proenv(.topals,geometry)
 	wm positionfrom .topals user
     wm maxsize .topals 1265 994
     wm minsize .topals 1 1
-    if {$tcl_platform(platform) != "macintosh"} {
-    	# This command removes the zoom box from Macintosh windows.
-    	wm overrideredirect .topals 0
-    }
+   	wm overrideredirect .topals 0
     wm resizable .topals 1 1
     wm deiconify .topals
     wm title .topals "ALS Prolog Environment"
@@ -77,7 +76,7 @@ proc vTclWindow.topals {args} {
         -yscrollcommand {.topals.vsb set} \
 		-exportselection true
 
-    if {$tcl_platform(platform) == "macintosh"} {
+    if {[tk windowingsystem] == "aqua"} {
         .topals.text configure -highlightthickness 0
     }
 
@@ -97,12 +96,9 @@ proc vTclWindow.topals {args} {
     pack .topals.vsb -side right -fill both
     pack .topals.text -fill both -expand 1 -side left
 
-#	bind .topals.text <Unmap> {unmap_alsdev_main}
-#	bind .topals.text <Map> {map_alsdev_main}
-
 	# accelerators
-	bind_accelerators .topals $mod listener
-	post_open_document Environment .topals 
+#	bind_accelerators .topals $mod listener
+#	post_open_document Environment .topals 
 
 }
 
@@ -116,7 +112,7 @@ proc vTclWindow.dyn_flags {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     # Withdraw the window so that it doesn't appear during prolog heartbeat
     wm withdraw $base
     wm focusmodel $base passive
@@ -132,7 +128,7 @@ proc vTclWindow.dyn_flags {base} {
     button $base.buttons.dismiss \
 		-padx 2 -text Dismiss \
         -command {wm withdraw .dyn_flags}
-    button $base.buttons.save \
+    button $base.
 		-padx 2 -text {Save as Defaults} \
         -command {prolog call alsdev save_prolog_flags ; wm withdraw .dyn_flags}
 
@@ -211,7 +207,7 @@ proc vTclWindow.about {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 171x215
     center $base
@@ -222,7 +218,6 @@ proc vTclWindow.about {base} {
     wm deiconify $base
     wm title $base "About ALS Prolog"
 	wm protocol .about WM_DELETE_WINDOW {remove_me About .about}
-#	wm protocol .about WM_DELETE_WINDOW {wm withdraw .about}
 
     label $base.alsdev \
         -font {helvetica 14 {bold italic}} -text {ALS Prolog} 
@@ -295,7 +290,7 @@ proc vTclWindow.break_choices {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 155x260+109+214
     wm maxsize $base 1137 870
@@ -361,7 +356,7 @@ proc vTclWindow.static_flags {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base
+    toplevel $base
     wm withdraw $base
 
     wm title $base "Static Prolog Flags"
@@ -386,15 +381,20 @@ proc create_static_flag_entry { info } {
 }
 
 
+##=================================================================================
+# Project Document fields
+# proenv($base,dirty) - true iff document window is dirty.
+##=================================================================================
 proc init_prj_spec \
-	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs} {
-
+	{base TextSlots ListOfFilesSlots ListSlots SlotNames FileTypes DfltDirs AddlTextSlots AddlTextSlotsValues LibFiles} {
 	global array proenv
+
+set HHB [list $LibFiles]
 
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm maxsize $base \
 		[expr [winfo screenwidth .] - 80] \
@@ -404,14 +404,14 @@ proc init_prj_spec \
     wm resizable $base 1 0
     wm deiconify $base
     wm title $base "Project Specification"
-	wm protocol $base WM_DELETE_WINDOW "close_project"
+    wm protocol $base WM_DELETE_WINDOW "prj_close $base"
 
     frame $base.title \
         -borderwidth 1 -height 30 -relief raised -width 30 
     label $base.title.label \
         -anchor w -text {Project Title:} 
     entry $base.title.entry \
-        -cursor {} -highlightthickness 0 
+        -cursor {} -highlightthickness -1 
 
     frame $base.project_file \
         -borderwidth 1 -height 30 -relief raised -width 30 
@@ -419,6 +419,8 @@ proc init_prj_spec \
         -anchor w -text {Project File Name:} 
     entry $base.project_file.entry \
         -cursor {} -highlightthickness 0 
+
+    set proenv(ppj_pathtype) relative
 
     ###################
     # SETTING GEOMETRY
@@ -448,26 +450,26 @@ proc init_prj_spec \
     ###################
 	create_sd_toggle  $base search_dirs \
 		{Search Individual Directories:} \
-		[list add_search_dirs $base.search_dirs.listbox] \
-		[list del_search_dirs $base.search_dirs.listbox] \
-		[list move_selection_up $base.search_dirs.listbox] \
-		[list move_selection_down $base.search_dirs.listbox]
+		[list add_search_dirs $base.search_dirs.listbox $proenv(ppj_pathtype) $base] \
+		[list del_search_dirs $base.search_dirs.listbox $base] \
+		[list move_selection_up $base.search_dirs.listbox $base] \
+		[list move_selection_down $base.search_dirs.listbox $base]
 
     ###################
     # Lists of Files 
     ###################
 	foreach FS $ListOfFilesSlots {
-		set FTs	[find_pair_value $FS $FileTypes]
+		set FTs	[find_pair_valueX $FS $FileTypes]
 		set FN	[find_pair_value $FS $SlotNames] 
 		set XFN ""
 		set DfltD [find_pair_value $FS $DfltDirs]
 		append XFN $FN " (" $FTs "):"
-		create_lofs_toggle $base $FS $XFN $FTs \
-			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD ] \
-			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD ] \
-			[list del_from_files_list $base.$FS.listbox] \
-			[list move_selection_up $base.$FS.listbox] \
-			[list move_selection_down $base.$FS.listbox]
+		create_lofs_toggle $base $FS {Prolog Files:} $FTs \
+			[list add_to_files_list $FS $base.$FS.listbox $FTs $FN $DfltD $base] \
+			[list add_to_files_list_mult $FS $base.$FS.listbox $FTs $FN $DfltD  $base] \
+			[list del_from_files_list $base.$FS.listbox $base] \
+			[list move_selection_up $base.$FS.listbox $base] \
+			[list move_selection_down $base.$FS.listbox $base]
 	}
     ###################
     # Lists of Items
@@ -479,7 +481,6 @@ proc init_prj_spec \
 		[list move_selection_up $base.$LS.listbox] \
 		[list move_selection_down $base.$LS.listbox]
 	}
-
     ###################
     # CREATING WIDGETS
     ###################
@@ -488,11 +489,10 @@ proc init_prj_spec \
     frame $base.buttons \
         -borderwidth 1 -relief sunken 
     button $base.buttons.save \
-        -command "save_project" -padx 11 -pady 4 -text Save 
-    button $base.buttons.close \
-        -command "close_project" -padx 11 -pady 4 -text Close 
+        -command "save_project $base" -padx 11 -pady 4 -text Save -state disabled
     button $base.buttons.addl \
-        -command "addl_project_info $base" -padx 11 -pady 4 -text Addl 
+        -command "addl_project_info $base {$TextSlots} {$SlotNames} {$AddlTextSlots} {$AddlTextSlotsValues } [list $LibFiles]" \
+	-padx 11 -pady 4 -text Addl 
     button $base.buttons.load \
         -command "load_this_project" -padx 11 -pady 4 -text {(Re)Load}
     ###################
@@ -504,14 +504,142 @@ proc init_prj_spec \
         -anchor center -expand 0 -fill x -side top 
     pack $base.buttons.save \
         -anchor center -expand 0 -fill none -padx 2 -side left 
-    pack $base.buttons.close \
-        -anchor center -expand 0 -fill none -padx 2 -side left 
     pack $base.buttons.addl \
-        -anchor center -expand 0 -fill none -padx 2 -side left 
+        -anchor center -expand 0 -fill none -padx 35 -side left 
     pack $base.buttons.load \
         -anchor center -expand 0 -fill none -padx 2 -side right 
 
-	#wm geometry $base ""
+    focus $base.project_file.entry
+
+    bind $base <Key> "prj_dirty_key $base %K"
+
+	# Init document field
+    set proenv($base,dirty) false
+    set proenv($base.addlprj,dirty) false
+
+}
+
+proc prj_dirty_key {w k} {
+    global array proenv
+	if {$k != "Home" && $k != "End" && $k != "Prior" && $k != "Next"
+		&& $k != "Left" && $k != "Right" && $k != "Up" && $k != "Down"
+		&& $k != "Control_L" && $k != "Control_R"
+		&& $k != "Shift_L" && $k != "Shift_R"
+		&& $k != "Alt_L" && $k != "Alt_R"
+		&& $k != "Meta_L" && $k != "Meta_R"
+		&& $k != "Caps_Lock" && $k != "Num_Lock" && $k != "Help"
+		} then {
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
+	}
+}
+proc addl_prj_dirty_key {w k pw} {
+    global array proenv
+	if {$k != "Home" && $k != "End" && $k != "Prior" && $k != "Next"
+		&& $k != "Left" && $k != "Right" && $k != "Up" && $k != "Down"
+		&& $k != "Control_L" && $k != "Control_R"
+		&& $k != "Shift_L" && $k != "Shift_R"
+		&& $k != "Alt_L" && $k != "Alt_R"
+		&& $k != "Meta_L" && $k != "Meta_R"
+		&& $k != "Caps_Lock" && $k != "Num_Lock" && $k != "Help"
+		} then {
+		set proenv($w,dirty) true
+    		$pw.buttons.save configure -state active
+	}
+}
+
+# checks whether the project (including addl info) is dirty:
+proc prj_perf_isdirtycheck {w} {
+    global array proenv
+
+    set addl_project_info_win $w.addlprj
+
+    set addl_isdirtycheck false
+    if {[winfo exists $addl_project_info_win] } {
+        if {$proenv($addl_project_info_win,dirty)} then {
+   	    set addl_isdirtycheck true
+	}
+    }
+
+# NOTE: isdirtycheck = true iff the project is dirty
+# So: isdirtycheck false iff the project is clean
+# Ie, project is clean, or project is dirty, but user says to close anyway:
+
+	set isdirtycheck false
+        if {$proenv($w,dirty) || $addl_isdirtycheck} then {
+    		set isdirtycheck true
+	}
+    return $isdirtycheck
+}
+
+proc prj_close {w} {
+    	global array proenv
+
+    	set isdirtycheck [prj_perf_isdirtycheck $w]
+
+	set saveprj [prj_save_check $w $isdirtycheck]
+
+        if {$saveprj == 2} then {
+            save_project $w
+	    send_prolog als_ide_mgr shutdown_project
+	} elseif {$saveprj == 0} then {
+	    send_prolog als_ide_mgr shutdown_project
+	}
+
+}
+
+#-----------------------------------------------
+#  checks project dirty state, and offers user
+#  opportunity to save it if project is dirty:
+#  Returns 1 if it is ok to close the project:
+#    1 if project is clean
+#    1 if:
+#       -- proj was dirty, user said to save it,
+#          and save was successful
+#    1 if:
+#       -- proj was dirty and 
+#          user said not to save it,
+#    0 if user hit Cancel on saving prompt
+#    0 if:
+#       -- proj was dirty, user said to save it,
+#          but save was not successful
+#-----------------------------------------------
+proc prj_save_check {w isdirtycheck} {
+        global array proenv
+
+        if {$isdirtycheck} then {
+                raise $w
+                set title [$w.title.entry get]
+                set answer [tk_dialog .document_save_dialog "" \
+                        "Save changes to the project \"$title\" before closing?" \
+                        {} \
+                        2 "Don't Save" "Cancel" "Save"]
+		set result $answer
+        } else {
+                set result 0
+        }
+        return $result
+}
+#-----------------------------------------------
+#  checks for dirty state of cref panel
+#  see above in prj_save_check comment for details
+#-----------------------------------------------
+
+proc cref_save_check {w isdirtycheck} {
+        global array proenv
+
+        if {$isdirtycheck} then {
+                raise $w
+#                set title [$w.title.entry get]
+                set answer [tk_dialog .document_save_dialog "" \
+                        "Save changes to the Cref Panel before closing?" \
+                        {} \
+                        2 "Don't Save" "Cancel" "Save"]
+		set result $answer
+        } else {
+                set result 0
+        }
+        return $result
 }
 
 proc find_pair_value { Tag PairList } {
@@ -519,6 +647,14 @@ proc find_pair_value { Tag PairList } {
 	foreach Entry $PairList {
 		if { [lindex $Entry 0] == $Tag } then {
 			return [lindex $Entry 1]
+		} 
+	}
+}
+proc find_pair_valueX { Tag PairList } {
+	set Value ""
+	foreach Entry $PairList {
+		if { [lindex $Entry 0] == $Tag } then {
+			return $Entry
 		} 
 	}
 }
@@ -547,13 +683,12 @@ proc show_text_slot {GuiPath Slot Value} {
 proc show_list_slot {GuiPath Slot ValueList PrjMgrHandle} {
 	$GuiPath.$Slot.listbox delete 0 end
 	eval $GuiPath.$Slot.listbox insert end $ValueList
-#	set Last [$GuiPath.$Slot.listbox index end]
 	bind $GuiPath.$Slot.listbox <Double-Button-1> \
 		[list prj_slot_focus $Slot $GuiPath.$Slot.listbox $PrjMgrHandle]
 }
 
 proc create_ls_toggle { Win Which Title Add Del Up Down} {
-	global proenv
+	global array proenv
 
     ###################
     # CREATING WIDGETS
@@ -631,7 +766,7 @@ proc create_ls_toggle { Win Which Title Add Del Up Down} {
 }
 
 proc create_sd_toggle { Win Which Title Add Del Up Down} {
-	global proenv
+	global array proenv
 
     ###################
     # CREATING WIDGETS
@@ -655,7 +790,9 @@ proc create_sd_toggle { Win Which Title Add Del Up Down} {
         -padx 10 -text relative -value relative -variable proenv(ppj_pathtype) 
     radiobutton $Win.$Which.prefs.pathtype.abs \
         -padx 10 -text absolute -value absolute -variable proenv(ppj_pathtype) 
+
 	set proenv(ppj_pathtype) relative
+
     listbox $Win.$Which.listbox \
         -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* \
         -xscrollcommand "$Win.$Which.02 set" \
@@ -671,7 +808,7 @@ proc create_sd_toggle { Win Which Title Add Del Up Down} {
         -borderwidth 1 -height 30 -relief sunken -width 30 
 
     button $Win.$Which.buttons.add \
-        -command "add_search_dirs $Win.$Which.listbox \"\$proenv(ppj_pathtype)\"" \
+        -command "add_search_dirs $Win.$Which.listbox \"\$proenv(ppj_pathtype)\" $Win" \
 		-padx 11 -pady 4 -text {Add}
     button $Win.$Which.buttons.del \
         -command $Del -padx 11 -pady 4 -text {Delete} 
@@ -731,9 +868,10 @@ proc create_sd_toggle { Win Which Title Add Del Up Down} {
 }
 
 proc toggle_files_list {Win Which} {
-	global proenv 
+	global array proenv 
 
 	if {$proenv($Which) == "closed"} then {
+$Win.ctl_$Which.entry configure -state normal
     	$Win.ctl_$Which.open_btn configure -image open_ptr
 		set proenv($Which) open
     	pack $Win.$Which  \
@@ -750,6 +888,7 @@ proc toggle_files_list {Win Which} {
 		append GG $Wd x $Ht + $XX + $YY
 		wm geometry $Win $GG
 	} else {
+$Win.ctl_$Which.entry configure -state disabled
     	$Win.ctl_$Which.open_btn configure -image closed_ptr
 		set proenv($Which) closed
     	pack forget $Win.$Which 
@@ -757,10 +896,26 @@ proc toggle_files_list {Win Which} {
 	}
 }
 
-
+######## For Load Project:
+#clofs_t:  Win=.project_1483293097_0 Which=prolog_files Title=Prolog Files:
+#clofs_t2: FileTypes=
+#clofs_t3: Add=add_to_files_list prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t4: AddMult=add_to_files_list_mult prolog_files .project_1483293097_0.prolog_files.listbox {} {Prolog Files:} {} .project_1483293097_0
+#clofs_t5: Del=del_from_files_list .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t6: Up=move_selection_up .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#clofs_t7: Down=move_selection_down .project_1483293097_0.prolog_files.listbox .project_1483293097_0
+#
 
 proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
-	global proenv
+	global array proenv
+
+#puts "clofs_t:  Win=$Win Which=$Which Title=$Title"
+#puts "clofs_t2: FileTypes=$FileTypes"
+#puts "clofs_t3: Add=$Add"
+#puts "clofs_t4: AddMult=$AddMult"
+#puts "clofs_t5: Del=$Del"
+#puts "clofs_t6: Up=$Up"
+#puts "clofs_t7: Down=$Down"
 
     ###################
     # CREATING WIDGETS
@@ -775,7 +930,7 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
     label $Win.ctl_$Which.label \
         -text $Title
 	
-    entry $Win.ctl_$Which.entry 
+    entry $Win.ctl_$Which.entry -state disabled
 	bind $Win.ctl_$Which.entry <Return> "add_file_entry_to_list $Win.ctl_$Which.entry $Win.$Which.listbox"
 
     frame $Win.$Which \
@@ -847,42 +1002,58 @@ proc create_lofs_toggle { Win Which Title FileTypes Add AddMult Del Up Down} {
 	pack forget $Win.$Which
 }
 
-proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots } {
+proc rd_prj_spec {base TextSlots ListOfFilesSlots ListSlots AddlTextSlots} {
 	set Result ""
 
 	set TxtSs ""
-    lappend TxtSs [list title [$base.title.entry get] ]
-    lappend TxtSs [list project_file [$base.project_file.entry get] ]
+    	lappend TxtSs [list title [$base.title.entry get] ]
+    	lappend TxtSs [list project_file [$base.project_file.entry get] ]
 
 	set LstSs ""
-    lappend LstSs [list search_dirs [$base.search_dirs.listbox get 0 end] ]
-#    lappend LstSs [list search_trees [$base.search_trees.listbox get 0 end] ]
+    	lappend LstSs [list search_dirs [$base.search_dirs.listbox get 0 end] ]
 
 	foreach TS $TextSlots {
-    	lappend TxtSs [list $TS [$base.$TS.entry get] ]
+    		lappend TxtSs [list $TS [$base.$TS.entry get] ]
 	}
 	foreach TS $ListOfFilesSlots {
-    	lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
+    		lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
 	}
 	foreach TS $ListSlots {
-    	lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
+    		lappend LstSs [list $TS [$base.$TS.listbox get 0 end] ]
 	}
 	lappend Result  $TxtSs $LstSs
+
+    	if {[winfo exists $base.addlprj]} {
+		set AddlInfo [rd_prj_spec_addl $base.addlprj $AddlTextSlots]
+		lappend Result  $AddlInfo
+    	}
+
 	return $Result
 }
 
+proc rd_prj_spec_addl {base AddlTextSlots} {
+	set AddlTxtSsVs ""
+	foreach TS $AddlTextSlots {
+    		set sss [$base.$TS get]
+		set bb [list $TS $sss]
+    		lappend AddlTxtSsVs [list $TS [$base.$TS get]]
+	}
+	set LibFiles [list "library_files" [$base.cpd17.01 get 0 end]]
+    	lappend AddlTxtSsVs $LibFiles
+	return $AddlTxtSsVs
+}
 
-proc addl_project_info { parent_base } {
+proc addl_project_info { parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues LibFiles} {
 	set proj_title [$parent_base.title.entry get]  
 	if {$proj_title == ""} then {
 		tk_messageBox -message "Missing project title!" -icon error \
 			-title "Missing info" -type ok
 		return
 	}
-	addl_project_info_win $parent_base.addlprj $proj_title
+	addl_project_info_win $parent_base.addlprj $proj_title $parent_base $TextSlots $SlotNames $AddlTextSlots $AddlTextSlotsValues $LibFiles
 }
 
-proc addl_project_info_win {base proj_title} {
+proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames AddlTextSlots AddlTextSlotsValues LibFiles} {
     if {[winfo exists $base]} {
         wm deiconify $base; return
     }
@@ -891,28 +1062,30 @@ proc addl_project_info_win {base proj_title} {
     ###################
     toplevel $base -class Toplevel
     wm focusmodel $base passive
-    wm geometry $base 326x343+320+148
+    wm geometry $base 326x413+320+148
     wm maxsize $base 1137 870
     wm minsize $base 1 1
     wm overrideredirect $base 0
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Additional Project Information"
-    label $base.lab_title \
+    wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
+
+    label $base.title_label \
         -borderwidth 1 -text {Project Title:} 
-    label $base.title_val -text $proj_title -relief sunken
-    label $base.lab_start \
-        -borderwidth 1 -text {Start Goal:} 
-    entry $base.start_entry
-    label $base.lab_debug \
-        -borderwidth 1 -text {Debug Goal:} 
-    entry $base.debug_entry
+    label $base.title_value -text $proj_title -relief sunken
+
+    frame $base.cref_btns \
+        -borderwidth 2 -height 75 -relief groove -width 125 
+    button $base.cref_btns.add \
+        -command "run_cref_on_prj $base" -padx 11 -pady 4 -text {Run CREF on project} 
+
     label $base.lab_library \
         -borderwidth 1 -text {Library Files:} 
     frame $base.cpd17 \
         -borderwidth 1 -height 8 -relief raised -width 30 
     listbox $base.cpd17.01 \
-        -font -Adobe-Helvetica-Medium-R-Normal-*-*-120-*-*-*-*-*-* -height 6 \
+        -font -Adobe-Helvetica-Medium-R-Normal-*-*-140-*-*-*-*-*-* -height 6 \
         -xscrollcommand "$base.cpd17.02 set" \
         -yscrollcommand "$base.cpd17.03 set" 
     scrollbar $base.cpd17.02 \
@@ -921,52 +1094,70 @@ proc addl_project_info_win {base proj_title} {
     scrollbar $base.cpd17.03 \
         -borderwidth 1 -command "$base.cpd17.01 yview" -orient vert \
         -width 10 
-    label $base.lab_exec \
-        -borderwidth 1 -text {Executable File Name:} 
-    entry $base.exec_entry
     frame $base.lib_btns \
         -borderwidth 2 -height 75 -relief groove -width 125 
     button $base.lib_btns.add \
-        -command add_lib_file -padx 11 -pady 4 -text {Add Lib File} 
+        -command "add_lib_file" -padx 11 -pady 4 -text {Add Lib File} 
     button $base.lib_btns.del \
-        -command delete_lib_file -padx 11 -pady 4 -text {Delete Lib File} 
-    label $base.lab_stub \
+        -command "delete_lib_file $base.cpd17.01 $base $parent_base" -padx 11 -pady 4 -text {Delete Lib File} 
+    label $base.production_goal_label \
+        -borderwidth 1 -text {} 
+    entry $base.production_goal
+    label $base.debug_goal_label \
+        -borderwidth 1 -text {Debug Goal:} 
+    entry $base.debug_goal
+    label $base.executable_name_label \
+        -borderwidth 1 -text {Executable File Name:} 
+    entry $base.executable_name
+    label $base.stub_name_label \
         -borderwidth 1 -text {Stub File Name:} 
-    entry $base.stub_entry
-    label $base.lab_distdir \
+    entry $base.stub_name
+    label $base.distdir_name_label \
         -borderwidth 1 -text {Distribution Dir Name:} 
-    entry $base.distdir_entry
+    entry $base.distdir_name
     frame $base.dist_btns \
         -borderwidth 2 -height 75 -relief groove -width 125 
     button $base.dist_btns.mkexec \
         -command make_executable -padx 11 -pady 4 -text {Make Executable} 
     button $base.dist_btns.mkdist \
         -command make_dist -padx 11 -pady 4 -text {Make Distribution} 
+
+    set LLL "_label"
+    foreach TxtSl $AddlTextSlots {
+		set xLab $TxtSl$LLL
+		set xSN [find_pair_value $TxtSl $SlotNames]
+		set xVV [find_pair_value $TxtSl $AddlTextSlotsValues]
+    		$base.$xLab configure -text $xSN
+		$base.$TxtSl insert 0 $xVV
+
+}
+    set Listbox $base.cpd17.01
+    foreach Ff $LibFiles {
+	$Listbox insert end $Ff
+    }
+	
     ###################
     # SETTING GEOMETRY
     ###################
     grid columnconf $base 1 -weight 1
     grid rowconf $base 4 -weight 1
-    grid $base.lab_title \
-        -in $base -column 0 -row 0 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.title_val \
+    grid $base.title_label \
+        -in $base -column 0 -row 0 -columnspan 1 -rowspan 1 -padx 5 -sticky e 
+    grid $base.title_value \
         -in $base -column 1 -row 0 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.lab_start \
-        -in $base -column 0 -row 1 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.start_entry \
-        -in $base -column 1 -row 1 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.lab_debug \
-        -in $base -column 0 -row 2 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.debug_entry \
-        -in $base -column 1 -row 2 -columnspan 1 -rowspan 1 -sticky ew 
+
+    grid $base.cref_btns \
+        -in $base -column 0 -row 1 -columnspan 2 -rowspan 1 -sticky ew 
+    grid $base.cref_btns.add \
+        -in $base.cref_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
+        -padx 10 -sticky w 
+
     grid $base.lab_library \
-        -in $base -column 0 -row 3 -columnspan 1 -rowspan 1 -padx 3 \
+        -in $base -column 0 -row 2 -columnspan 1 -rowspan 1 -padx 3 \
         -sticky w 
+
     grid $base.cpd17 \
-        -in $base -column 0 -row 4 -columnspan 2 -rowspan 1 -sticky nesw 
+        -in $base -column 0 -row 3 -columnspan 2 -rowspan 1 -sticky nesw 
     grid columnconf $base.cpd17 0 -weight 1
     grid rowconf $base.cpd17 0 -weight 1
     grid $base.cpd17.01 \
@@ -978,54 +1169,64 @@ proc addl_project_info_win {base proj_title} {
     grid $base.cpd17.03 \
         -in $base.cpd17 -column 1 -row 0 -columnspan 1 -rowspan 1 \
         -sticky ns 
-    grid $base.lab_exec \
-        -in $base -column 0 -row 6 -columnspan 1 -rowspan 1 -padx 5 \
-        -sticky e 
-    grid $base.exec_entry \
-        -in $base -column 1 -row 6 -columnspan 1 -rowspan 1 -sticky ew 
+
     grid $base.lib_btns \
-        -in $base -column 0 -row 5 -columnspan 2 -rowspan 1 -sticky ew 
+        -in $base -column 0 -row 6 -columnspan 2 -rowspan 1 -sticky ew 
     grid $base.lib_btns.add \
         -in $base.lib_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -sticky w 
     grid $base.lib_btns.del \
         -in $base.lib_btns -column 1 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -pady 2 -sticky e 
-    grid $base.lab_stub \
+
+
+    grid $base.production_goal_label \
         -in $base -column 0 -row 7 -columnspan 1 -rowspan 1 -padx 5 \
         -sticky e 
-    grid $base.stub_entry \
+    grid $base.production_goal \
         -in $base -column 1 -row 7 -columnspan 1 -rowspan 1 -sticky ew 
-    grid $base.lab_distdir \
+
+    grid $base.debug_goal_label \
         -in $base -column 0 -row 8 -columnspan 1 -rowspan 1 -padx 5 \
         -sticky e 
-    grid $base.distdir_entry \
+    grid $base.debug_goal \
         -in $base -column 1 -row 8 -columnspan 1 -rowspan 1 -sticky ew 
+
+    grid $base.executable_name_label \
+        -in $base -column 0 -row 9 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.executable_name \
+        -in $base -column 1 -row 9 -columnspan 1 -rowspan 1 -sticky ew 
+
+
+    grid $base.stub_name_label \
+        -in $base -column 0 -row 10 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.stub_name \
+        -in $base -column 1 -row 10 -columnspan 1 -rowspan 1 -sticky ew 
+    grid $base.distdir_name_label \
+        -in $base -column 0 -row 11 -columnspan 1 -rowspan 1 -padx 5 \
+        -sticky e 
+    grid $base.distdir_name \
+        -in $base -column 1 -row 11 -columnspan 1 -rowspan 1 -sticky ew 
     grid $base.dist_btns \
-        -in $base -column 0 -row 9 -columnspan 2 -rowspan 1 -sticky ew 
+        -in $base -column 0 -row 12 -columnspan 2 -rowspan 1 -sticky ew 
     grid $base.dist_btns.mkexec \
         -in $base.dist_btns -column 0 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -sticky w 
     grid $base.dist_btns.mkdist \
         -in $base.dist_btns -column 1 -row 0 -columnspan 1 -rowspan 1 \
         -padx 10 -pady 2 -sticky e 
+
+    bind $base <Key> "addl_prj_dirty_key $base %K $parent_base"
+
+	# Init document field
+    set proenv($base,dirty) false
+
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 proc vTclWindow.ide_settings {base} {
-	global proenv
+	global array proenv
 
     if {$base == ""} {
         set base .ide_settings
@@ -1036,7 +1237,7 @@ proc vTclWindow.ide_settings {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base
+    toplevel $base
     #wm focusmodel $base passive
     #wm geometry $base 374x208+269+255
     #wm maxsize $base 1137 870
@@ -1142,8 +1343,6 @@ proc vTclWindow.ide_settings {base} {
         -side left 
     pack $base.spacer2 \
         -in .ide_settings -anchor center -expand 0 -fill x -side top 
-
-    #wm geometry $base ""
 }
 
 proc slider_change_ide_printdepth { Value } {
@@ -1195,7 +1394,7 @@ proc set_heartbeat { Value } {
 }
 
 proc change_ide_depth_type { } {
-	global proenv
+	global array proenv
 	prolog call builtins change_ide_depth_type -atom $proenv(main_depth_type)
 }
 
@@ -1207,7 +1406,7 @@ set proenv(searchdirect) forward
 set proenv(searchnature) exact
 
 proc vTclWindow.find_repl {base} {
-	global proenv
+	global array proenv
 
     if {$base == ""} {
         set base .find_repl
@@ -1218,7 +1417,7 @@ proc vTclWindow.find_repl {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 510x200+140+392
     wm maxsize $base 1137 870
@@ -1390,7 +1589,7 @@ proc vTclWindow.syn_errors {base} {
     ###################
     # CREATING WIDGETS
     ###################
-    toplevel_patch $base -class Toplevel
+    toplevel $base -class Toplevel
     wm focusmodel $base passive
     wm geometry $base 521x247+261+300
     wm maxsize $base 1137 870
@@ -1442,3 +1641,269 @@ proc vTclWindow.syn_errors {base} {
         -sticky ns 
 }
 
+###################################################################
+## CREF
+
+##=================================================================================
+# Project Document fields
+# proenv($base,dirty) - true iff document window is dirty.
+##=================================================================================
+proc cref_panel \
+	{base} {
+	global array proenv
+
+    ###################
+    # CREATING WIDGETS
+    ###################
+    toplevel $base -class Toplevel
+    wm focusmodel $base passive
+    wm maxsize $base \
+		[expr [winfo screenwidth .] - 80] \
+		[expr [winfo screenheight .] - 80]
+    wm minsize $base 1 1
+    wm overrideredirect $base 0
+    wm resizable $base 1 0
+    wm deiconify $base
+    wm title $base "CREF"
+    wm protocol $base WM_DELETE_WINDOW "cref_close $base"
+
+    frame $base.suite_file \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.suite_file.label \
+        -anchor w -text {Suite Spec (*.crf):} 
+    entry $base.suite_file.entry \
+        -cursor {} -highlightthickness -1 -vcmd "crefSteFileEntryCmd $base" -validate focusout
+
+    frame $base.suite_dir \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    button $base.suite_dir.folder_choose \
+        -command "folder_choose_dir $base suite_dir" -image openfolder -padx 11 -pady 4 
+    label $base.suite_dir.label \
+        -anchor w -text {Spec Dir:} 
+    entry $base.suite_dir.entry \
+        -cursor {} -highlightthickness -1
+
+    frame $base.title \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.title.label \
+        -anchor w -text {Suite Title:} 
+    entry $base.title.entry \
+        -cursor {} -highlightthickness 0 
+
+    frame $base.src_dir \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.src_dir.label \
+        -anchor w -text {Source Dir:} 
+    button $base.src_dir.folder_choose \
+        -command "folder_choose_dir $base src_dir" -image openfolder -padx 11 -pady 4 
+    entry $base.src_dir.entry \
+        -cursor {} -highlightthickness -1 
+
+    frame $base.target \
+        -borderwidth 1 -height 30 -relief raised -width 30 
+    label $base.target.label \
+        -anchor w -text {Targets:} 
+    entry $base.target.entry \
+        -cursor {} -highlightthickness -1 -vcmd "crefTgtEntryCmd $base" -validate focusout
+
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.suite_file \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.suite_file.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.suite_file.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.suite_dir \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.suite_dir.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.suite_dir.folder_choose \
+        -anchor w -expand 0 -fill none -side left 
+    pack $base.suite_dir.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.title \
+        -anchor center -expand 0 -fill x -pady 2 -side top 
+    pack $base.title.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.title.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.src_dir \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.src_dir.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.src_dir.folder_choose \
+        -anchor w -expand 0 -fill none -side left 
+    pack $base.src_dir.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    pack $base.target \
+        -anchor center -expand 0 -fill x -pady 4 -side top 
+    pack $base.target.label \
+        -anchor center -expand 0 -fill none -padx 2 -pady 2 -side left 
+    pack $base.target.entry \
+        -anchor center -expand 1 -fill x -padx 2 -pady 2 -side right 
+
+    ###################
+    # Lists of Files 
+    ###################
+	create_lofs_toggle $base "prolog_files" {Prolog Files:} "" \
+		[list add_to_files_list prolog_files $base.prolog_files.listbox {} {Prolog Files:} {} $base] \
+		[list add_to_files_list_mult prolog_files $base.prolog_files.listbox {} {Prolog Files:} {}  $base] \
+		[list del_from_files_list $base.prolog_files.listbox $base] \
+		[list move_selection_up $base.prolog_files.listbox $base] \
+		[list move_selection_down $base.prolog_files.listbox $base]
+
+
+    ###################
+    # Lists of Items
+    ###################
+#	foreach LS $ListSlots {
+#		create_ls_toggle $base $LS [find_pair_value $LS $SlotNames] \
+#		[list add_to_list_$LS $base.$LS.listbox] \
+#		[list del_from_list_$LS $base.$LS.listbox] \
+#		[list move_selection_up $base.$LS.listbox] \
+#		[list move_selection_down $base.$LS.listbox]
+#	}
+    ###################
+    # CREATING WIDGETS
+    ###################
+   frame $base.sep_buttons \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $base.buttons \
+        -borderwidth 1 -relief sunken 
+    button $base.buttons.save \
+        -command "save_cref_suite $base" -padx 11 -pady 4 -text Save -state disabled
+    button $base.buttons.close \
+        -command "cref_close $base" \
+	-padx 11 -pady 4 -text Close 
+    button $base.buttons.run_cref \
+        -command "run_cref_on_suite $base" -padx 11 -pady 4 -text {Run Cref}
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.sep_buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.buttons.save \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.buttons.close \
+        -anchor center -expand 0 -fill none -padx 35 -side left 
+    pack $base.buttons.run_cref \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
+    ##########################
+    # CREATING REPORTS BUTTONS
+    ##########################
+   frame $base.sep_reports \
+        -background #000000 -borderwidth 1 -height 3 -relief sunken -width 30 
+    frame $base.report_buttons \
+        -borderwidth 1 -relief sunken 
+    button $base.report_buttons.html \
+        -command html_report -padx 11 -pady 4 -text {HTML Report} 
+    button $base.report_buttons.xrf \
+        -command xrf_report -padx 11 -pady 4 -text {XRF Report} 
+    ###################
+    # SETTING GEOMETRY
+    ###################
+    pack $base.sep_reports \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.report_buttons \
+        -anchor center -expand 0 -fill x -side top 
+    pack $base.report_buttons.html \
+        -anchor center -expand 0 -fill none -padx 2 -side left 
+    pack $base.report_buttons.xrf \
+        -anchor center -expand 0 -fill none -padx 2 -side right 
+
+    focus $base.suite_file.entry
+
+    bind $base <Key> "prj_dirty_key $base %K"
+
+	# Init document field
+    set proenv($base,dirty) false
+    set proenv($base.addlprj,dirty) false
+    send_prolog als_ide_mgr exist_reports
+}
+
+proc rd_cref_panel {base} {
+	set Result ""
+    lappend Result [list title [$base.title.entry get] ]
+    lappend Result [list suite_file [$base.suite_file.entry get] ]
+    lappend Result [list suite_dir [$base.suite_dir.entry get] ]
+
+    lappend Result [list list_of_files [$base.prolog_files.listbox get 0 end] ]
+
+    lappend Result [list src_dir [$base.src_dir.entry get] ]
+    lappend Result [list target [$base.target.entry get] ]
+
+    return $Result
+}
+
+proc folder_choose_dir {base Which} {
+    	global array proenv
+	set CWD [pwd]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory -initialdir $CWD]
+	cd $CWD
+	if {($NewDir == "") || ($CWD == $NewDir)} then {
+		return
+	}
+	$base.$Which.entry delete 0 end
+	$base.$Which.entry insert end $NewDir
+	set proenv($base,dirty) true
+    	$base.buttons.save configure -state active
+}
+
+proc disable_cref_btns {} {
+    global elipsis
+    .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state disabled
+    .topals.mmenb.tools entryconfigure "New Cref Suite" -state disabled
+}
+proc enable_cref_btns {} {
+    global elipsis
+    .topals.mmenb.tools entryconfigure "Open Cref Suite$elipsis" -state active
+    .topals.mmenb.tools entryconfigure "New Cref Suite" -state active
+}
+
+proc crefSteFileEntryCmd {base} {
+    set curSuiteFile [$base.suite_file.entry get]
+    set sfx [file extension $curSuiteFile]
+
+    if {! [string equal $sfx ".crf"]} then {
+	if {! [string equal $curSuiteFile ""]} {
+		$base.suite_file.entry insert end ".crf"
+	}
+    } 
+    set specDir [file dirname $curSuiteFile]
+    if {[string equal $specDir ""]} {
+	$base.suite_dir.entry insert end $specDir
+    }
+    set suiteFileTail [file tail [$base.suite_file.entry get]]
+    set suiteFileTailSplit [split $suiteFileTail .]
+    set sFTSLen [llength $suiteFileTailSplit]
+
+    if {[expr $sFTSLen > 1]} {
+	set baseFile [lindex $suiteFileTailSplit 0]
+    } else {
+	set baseFile $suiteFileTail
+    }
+    if {[expr [expr [llength [$base.title.entry get]]] == 0]} {
+        $base.title.entry insert end  $baseFile
+    }
+    if {[expr [expr [llength [$base.target.entry get]]] == 0]} {
+	$base.target.entry insert end  $baseFile.\[xrf,html\]
+    }
+    
+    return true;
+}
+
+proc crefTgtEntryCmd {base} {
+#puts "crefTgtEntryCmd=$base"
+#puts "suite_file: |[$base.suite_file.entry get]|"
+return true;
+}

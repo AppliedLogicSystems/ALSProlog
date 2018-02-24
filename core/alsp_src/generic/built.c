@@ -211,6 +211,7 @@ static struct blt_struct {
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE
+	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
 	BLT("unset_2nd", 1, pbi_unset_2nd, "_pbi_unset_2nd"),
 	BLT("$delay", 4, pbi_delay, "_pbi_delay"),
@@ -377,7 +378,6 @@ static struct blt_struct {
 	BLT("obp_load", 2, pbi_obp_load, "_pbi_obp_load"),
 	BLT("obp_push_stop", 0, pbi_obp_push_stop, "_pbi_obp_push_stop"),
 	BLT("obp_pop", 0, pbi_obp_pop, "_pbi_obp_pop"),
-	BLT("resource_load", 1, pbi_resource_load, "_pbi_resource_load"),
 #endif /* SYS_OBP */
 #ifdef OLDCONSULT
 	BLT("old_consult", 2, pbi_old_consult, "_pbi_old_consult"),
@@ -465,6 +465,10 @@ static struct blt_struct {
 	BLT("sio_getpos", 2, sio_getpos, "_sio_getpos"),
 	BLT("sio_seek", 4, sio_seek, "_sio_seek"),
 	BLT("sio_readbuffer", 1, sio_readbuffer, "_sio_readbuffer"),
+	BLT("sio_set_do_lineedit", 1, sio_set_do_lineedit, "_sio_set_do_lineedit"),
+	BLT("sio_set_lineedit_prompt", 1, sio_set_lineedit_prompt, "_sio_set_lineedit_prompt"),
+        BLT("sio_set_history_file", 1, sio_set_history_file, "_sio_set_history_file"),
+        BLT("sio_set_no_load_prev_history", 0, sio_set_no_load_prev_history, "_sio_set_no_load_prev_history"),
 	BLT("sio_writebuffer", 1, sio_writebuffer, "_sio_writebuffer"),
 	BLT("sio_bufshift", 1, sio_bufshift, "_sio_bufshift"),
 	BLT("sio_next_token", 3, sio_next_token, "_sio_next_token"),

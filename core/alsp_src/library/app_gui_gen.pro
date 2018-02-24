@@ -7,24 +7,19 @@
  |	Author: Ken Bowen
  *===============================================================*/
  
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-gga :-
-	files('*.spec',SFs),
-	SFs \= [],
-	popup_select_items(shl_tcli, SFs, [], [TgtSF|_]),
-	app_gui_gen:ggaf(TgtSF, [gen_time=new]).
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-
-app_gg :- app_gui_gen:do_app_gg.
 
 module app_gui_gen.
 use tk_alslib.
+use strings.
 
 export do_app_gg/0.
+export start_app_gui_gen/1.
+export start_app_gui_gen/3.
+export ggaf/2.
+export create_new_app/1.
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 do_app_gg
 	:-
 	pbi_get_command_line(RawCommandLine),
@@ -42,8 +37,9 @@ app_gg_parse(['-p' | Rest ], SpecFile, Opts)
 	app_gg_parse(Rest, SpecFile, Opts).
 
 
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 	/* CALLED FROM GUI WHEN THE SPEC FILE FOLDER IS NOT SPECIFIED: */
-export start_app_gui_gen/1.
 start_app_gui_gen(SpecFile)
 	:-
 	ggaf(SpecFile, [gen_time=new]),
@@ -51,8 +47,9 @@ start_app_gui_gen(SpecFile)
 		'Application files generated from spec: %t', [SpecFile]),
 	info_dialog(shl_tcli, Msg, 'Application Generation').
 
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 	/* CALLED FROM GUI WHEN THE SPEC FILE FOLDER IS SPECIFIED: */
-export start_app_gui_gen/3.
 start_app_gui_gen(SpecFile, SpecFolder, InitTgtFolder)
 	:-
 	(InitTgtFolder = '' ->
@@ -65,8 +62,9 @@ start_app_gui_gen(SpecFile, SpecFolder, InitTgtFolder)
 		'Application files generated from spec: %t', [SpecFile]),
 	info_dialog(shl_tcli, Msg, 'Application Generation').
 
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 	%% Generate from a source file:
-export ggaf/2.
 ggaf(SpecFile, Opts)
 	:-
 	grab_terms(SpecFile, Terms),
@@ -97,8 +95,6 @@ ggaf0(SpecFile, Opts, Terms, _)
 	dmember( type=SpecType, SP),
 	ggtype(SpecType, SP, Options, SpecFile, Options, GuiName).
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
 find_console([ConsoleSP | RestSPs], ConsoleSP, RestSPs)
 	:-
 	dmember(type=console,ConsoleSP),
@@ -106,9 +102,6 @@ find_console([ConsoleSP | RestSPs], ConsoleSP, RestSPs)
 find_console([SP | TailSPs], ConsoleSP, [SP | RestSPs])
 	:-
 	find_console(TailSPs, ConsoleSP, RestSPs).
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
 
 initial_setup(Options,AppName,Filename,GuiGenus,File)
 	:-
@@ -128,8 +121,7 @@ initial_setup(Options,AppName,Filename,GuiGenus,File)
 		;
 		true
 	).
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+
 gga(ConsoleSP, RestSPs, Options)
 	:-
 	initial_setup(Options,AppName,Filename,GuiGenus,File),
@@ -171,8 +163,6 @@ gga(ConsoleSP, RestSPs, Options)
 		close(PackOS)  ).
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
 lgui_gen0(SPs, Options, Filename, GuiGenus, Mode, OS, AppName, GuiName)
 	:-
 	tcl_setup(Options, Mode, OS, AppName, GuiName),
@@ -1217,19 +1207,6 @@ setup_app_dir(Path)
 	change_cwd('..').
  *-----------------------------------------------------------------*/
 
-%endmod.
-
-
-/*===============================================================*
- |		create_new_app.pro
- |		Copyright (c) 2000-01  Applied Logic Systems, Inc.
- |	
- |		Generator for new app with GUI; creates skeletal
- |		*.spec file, *.ppj file, and installs app_files, etc.
- |
- |	Author: Ken Bowen
- *===============================================================*/
- 
  /*
 t00 :-
 	Eqns = [app_name = foo_bar, exe_name =fb],
@@ -1240,10 +1217,7 @@ tee :- tcl_call(shl_tcli, [do_new_app_top], _).
 */
 
 
-%module app_gui_gen.
-use strings.
 
-export create_new_app/1.
 create_new_app(Eqns)
 	:-
 	create_new_app(Eqns, '.').
@@ -1655,3 +1629,15 @@ t :-
 	ggaf(SpecFile, [gen_time=new]).
 
 
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+gga :-
+	files('*.spec',SFs),
+	SFs \= [],
+	popup_select_items(shl_tcli, SFs, [], [TgtSF|_]),
+	app_gui_gen:ggaf(TgtSF, [gen_time=new]).
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+app_gg :- app_gui_gen:do_app_gg.

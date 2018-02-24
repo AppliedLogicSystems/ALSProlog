@@ -2,7 +2,7 @@ all: standard
 
 core:
 	$(MAKE) -C ../core/unix
-	cd ../foreign_sdk/unix ; ./build
+	cd ../foreign_sdk/unix ; ./build.sh
 
 odbc:
 	cd ../extensions/odbc/i386_mswin32 ; ./build.bat
@@ -19,3 +19,6 @@ standard: core
 test: core
 	$(MAKE) -C ../core/unix test
 
+distclean:
+	$(MAKE) -C ../core/unix distclean
+	sh superclean.sh

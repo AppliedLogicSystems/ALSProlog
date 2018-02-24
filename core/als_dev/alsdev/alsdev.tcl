@@ -18,33 +18,16 @@
 #|	This is hard-coded in the following.
 ##=================================================================================
 
-# Load packages for opening documents from the Finder/Explorer on
-# Macintosh and Windows.  The user provided procedure tkOpenDocument
-# is called to handles files opened this way.
+# Load custom packages for each windowing system.
 #
 # OpenDocument is an ALS-custom package for Windows.  This package contains
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
-#
-# appleevents is a standard Tcl/Tk package for the Mac.
 
-#puts ALSTCLPATH=$ALSTCLPATH
-
-if {$tcl_platform(platform) == "windows"} {
-	load {} OpenDocument
-	load {} getDirectory
-	load {} getFiles
+switch [tk windowingsystem] {
+	win32   { load {} OpenDocument }
+	default {}
 }
-if {$tcl_platform(platform) == "macintosh"} {
-	load {} appleevents
-	load {} getDirectory
-	load {} getFiles
-}
-
-#TODO Figure out if getDir/Files is still needed in 2009 -CEH
-#package require getDirectory
-#package require getFiles
-
 
 proc xpe { What } {
 	global array proenv
@@ -56,12 +39,14 @@ proc xpe2 { What1 What2 } {
 	return $proenv($What1,$What2)
 }
 
+
 	#--------------------------------------------------------------
 	#   Effectively calls prolog with:
 	#       Mod:send(Obj, Msg)
 	# where:
 	#       Mod = $proenv(dflt_mod)
 	#       $proenv($Obj) = a number which is an object handle for Obj
+	#	    where Obj is a prolog object (e.g., ALS_IDE_Mgr, line 154 in blt_dvsh.pro
 	#       Msg is an atom
 	#
 	#### WARNING #### WARNING #### WARNING 
@@ -84,6 +69,7 @@ proc send_prolog {Obj Msg} {
 	# where:
 	#       Mod = $proenv(dflt_mod)
 	#       $proenv($Obj) = a number which is an object handle for Obj
+	#	    where Obj is a prolog object (e.g., ALS_IDE_Mgr, line 154 in blt_dvsh.pro
 	#       Msg is of type $Type
 	#               (normally use this with $Type = "list" )
 	#
@@ -159,18 +145,28 @@ set proenv(dflt_mod)			alsdev
 set proenv(untitled_counter)	0
 set proenv(posted_vis)			{}
 
+set proenv(alsdev_history_file)		""
+set proenv(do_load_prev_alsdev_history)	true
+
 	## window appearance stuff - initial defaults:
+
+# Define cross-platform version of systemHighlight
+switch [tk windowingsystem] {
+    x11 {
+	set systemHighlightText black
+	set systemHighlight #c3c3c3
+    }
+    default {
+	set systemHighlightText systemHighlightText
+	set systemHighlight systemHighlight
+    }
+}
 
 set proenv(debugwin_button,background)	#cee8e6
 set proenv(interrupt_button,foreground)	#ff0000
 
-if {$tcl_platform(platform) == "macintosh"} then {
-	set proenv(.topals,geometry)	400x300+3+22
-	set proenv(.debugwin,geometry)	400x300+300+22
-} else {
-	set proenv(.topals,geometry)	400x300+5+6
-	set proenv(.debugwin,geometry)	400x300+300+0
-}
+set proenv(.topals,geometry)	600x500
+set proenv(.debugwin,geometry)	600x300
 
 set proenv(.topals,foreground)	black
 set proenv(.debugwin,foreground)	black
@@ -180,41 +176,21 @@ set proenv(.topals,background)	#ffffff
 set proenv(.debugwin,background)	#ffffff
 set proenv(.document,background)	#ffffff
 
-set proenv(.topals,selectforeground)	systemHighlightText
-set proenv(.debugwin,selectforeground)	systemHighlightText
-set proenv(.document,selectforeground)	systemHighlightText
+set proenv(.topals,selectforeground)	$systemHighlightText
+set proenv(.debugwin,selectforeground)	$systemHighlightText
+set proenv(.document,selectforeground)	$systemHighlightText
 
-set proenv(.topals,selectbackground)	systemHighlight
-set proenv(.debugwin,selectbackground)	systemHighlight
-set proenv(.document,selectbackground)	systemHighlight
+set proenv(.topals,selectbackground)	$systemHighlight
+set proenv(.debugwin,selectbackground)	$systemHighlight
+set proenv(.document,selectbackground)	$systemHighlight
 
-set proenv(.topals,font)	{user 10 normal}
-set proenv(.debugwin,font)	{user 10 normal}
-set proenv(.document,font)	{user 10 normal}
+set proenv(.topals,font)	{user 14 normal}
+set proenv(.debugwin,font)	{user 14 normal}
+set proenv(.document,font)	{user 14 normal}
 
 set proenv(.topals,tabs)	{}
 set proenv(.debugwin,tabs)	{}
 set proenv(.document,tabs)	{}
-
-if {$tcl_platform(platform) == "macintosh"} {
-	set proenv(.topals,font)		{Monaco 9 normal}
-	set proenv(.debugwin,font)		{Monaco 9 normal}
-	set proenv(.document,font)		{Monaco 9 normal}
-} elseif {$tcl_platform(platform) == "windows"} {
-	set proenv(.topals,selectbackground)	SystemHighlight
-	set proenv(.debugwin,selectbackground)	SystemHighlight
-	set proenv(.document,selectbackground)	SystemHighlight
-} elseif {$tcl_platform(platform) == "unix"} {
-	set proenv(.topals,background)	#d9d9d9	
-	set proenv(.debugwin,background)	#d9d9d9
-	set proenv(.document,background)	#d9d9d9
-	set proenv(.topals,selectforeground)	black
-	set proenv(.debugwin,selectforeground)	black
-	set proenv(.document,selectforeground)	black
-	set proenv(.topals,selectbackground)	#c3c3c3
-	set proenv(.debugwin,selectbackground)	#c3c3c3
-	set proenv(.document,selectbackground)	#c3c3c3
-}
 
 set	proenv(edit,visible)		{}
 
@@ -229,28 +205,8 @@ set proenv(main_depth_type) nonflat
 proc main {argc argv} {
 }
 
-# Patches for Windows to make toplevel and raise activate the window.
-
-proc toplevel_patch {w args} {
-	global tcl_platform
-
-	eval toplevel $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
-proc raise_patch {w args} {
-	global tcl_platform
-
-	eval raise $w $args
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $w
-	}
-}
-
 proc show_window {w} {
-	raise_patch $w
+	raise $w
 	wm deiconify $w
 }
 
@@ -293,25 +249,11 @@ proc vTclWindow. {args} {
 	# 		INITIAL SETUP
 	#--------------------------------
 
-switch $tcl_platform(platform) {
-	unix {
-		set MainFont system
-	}
-	windows {
-		set MainFont system
-	}
-	macintosh {
-		set MainFont application
-	}
-	default {
-		set MainFont system
-	}
-}
-
 proc establish_defaults {} {
 	global array proenv
 
 	prolog call alsdev alsdev_ini_defaults  -var DefaultVals -var TopGeom -var DebugGeom -var DebugVis
+
 	reset_default_values $DefaultVals
 	if {$TopGeom != ""} then { set proenv(.topals,geometry) $TopGeom }
 	if {$DebugGeom != ""} then { set proenv(.debugwin,geometry) $DebugGeom }
@@ -354,6 +296,8 @@ proc return_proenv_defaults {} {
 
 establish_defaults
 
+#Called from builtins/blt_dvsh.pro > alsdev(Shared, ALS_IDE_Mgr):
+#	 tcl_call(shl_tcli, [do_main_als_bindings],_),
 proc do_main_als_bindings {} {
 	bind .topals.text <Unmap> {unmap_alsdev_main}
 	bind .topals.text <Map> {map_alsdev_main}
@@ -398,17 +342,10 @@ proc map_alsdev_debug {} {
 }
 
 proc load_source {path name} {
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
-		uplevel "source -rsrc {$name}"
-	} else {
-		uplevel "source \[file join {$path} {$name.tcl}]"
-	}
+	uplevel "source \[file join {$path} {$name.tcl}]"
 }
 
 # Load Tcl source
-# Note: When you add a new source file, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_source $ALSTCLPATH {alsdev_main}
 load_source $ALSTCLPATH {als_settings}
@@ -418,78 +355,125 @@ load_source $ALSTCLPATH {als_menu}
 load_source $ALSTCLPATH {als_document}
 load_source $ALSTCLPATH {als_projects}
 
-#load_source $ALSTCLPATH {prodebug}
-
-#load_source $ALSTCLPATH {als_tkfbox}
-
 proc load_photo {image_name base_name} {
-	global tcl_platform ALSTCLPATH
-	if {$tcl_platform(platform) == "macintosh"} {
-		image create photo $image_name -format gif -data [resource read GIFf $base_name]
-	} else {
-		image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
-	}
+	global ALSTCLPATH
+	image create photo $image_name -file [file join $ALSTCLPATH .. images $base_name.gif]
 }
 
 # Load images
-# Note: When you add a new image, also add it to mac_alsdev.r
-# to ensure that it is stored in the Mac resources.
 
 load_photo up_arrow_gif up-arrow-blue
 load_photo down_arrow_gif down-arrow-blue
 load_photo right_gif right-arrow-blue
 load_photo left_gif left-arrow-blue
-
-switch $tcl_platform(platform) {
-	unix {
+load_photo openfolder openfolder
+switch [tk windowingsystem] {
+	x11 {
 		load_photo closed_ptr closed_unix
 		load_photo open_ptr open_unix
 	}
-	windows {
+	win32 {
 		load_photo closed_ptr closed_wins
 		load_photo open_ptr open_wins
 	}
-	macintosh {
+	aqua {
 		load_photo closed_ptr closed_mac
 		load_photo open_ptr open_mac
-	}
-	default {
-		load_photo closed_ptr closed_wins
-		load_photo open_ptr open_wins
 	}
 }
 
 	## source any other needed files here.....
 
 #################################################
-#####				MAIN WINDOW				#####
+#####		MAIN WINDOW		    #####
 #################################################
 
 	## Bindings for the main window:
 
+###################################################################################
+# set_top_bindings is called from 
+# builtins/blt_dvsh.pro > alsdev(Shared, ALS_IDE_Mgr):
+#	tcl_call(shl_tcli,
+#                [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_)
+###################################################################################
+
 proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
-	bind $WinPath <Return> \
-		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
-	bind $WinPath <Control-d> \
-		"ctl-d_action $WinPath $StreamAlias "
-	bind $WinPath <Control-c> "listener.copy .topals"
-	bind $WinPath <Control-u> \
-		"ctl-u_action $WinPath"
 
-		## This is intended to be totally global in the IDE:
-	bind all <Control-period> interrupt_action
+ 	bind $WinPath <Return> \
+ 		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
+        bind $WinPath <Control-d> \
+                "ctl-d_action $WinPath $StreamAlias "
+        bind $WinPath <Control-c> "listener.copy .topals"
+        bind $WinPath <Control-u> \
+                "ctl-u_action $WinPath"
+ 
+                ## This is intended to be totally global in the IDE:
+        bind all <Control-period> interrupt_action
 
-	bind $WinPath <KeyPress> "listener.check_at_end .topals"
-	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
-	bind Text <ButtonRelease-2> " " 
+                # Use of break from: http://wiki.tcl.tk/1152 : Replacing the Text Bindings
+        bind $WinPath <BackSpace> {
+        if {[%W compare insert != 1.0] && \
+                [%W compare insert > {lastPrompt + 1c}]} {
+                %W delete insert-1c
+                %W see insert
+            }
+            break
+        }
+        bind $WinPath <Control-h> [bind .topals.text <BackSpace>]
+
+        bind $WinPath <Left> {
+        if {[%W compare insert != 1.0] && \
+                [%W compare insert > {lastPrompt + 1c}]} {
+                %W mark set insert insert-1c
+                %W see insert
+            }
+            break
+        }
+
+        bind $WinPath <Up> {
+            do_history %W
+            break
+        }
+
+        bind $WinPath <Down> {
+            do_rev_history %W
+            break
+        }
+
+        bind $WinPath <KeyPress> {
+                if {[%W compare insert <= lastPrompt]} {
+                	%W mark set insert end
+            		break
+		}
+	}
 
 }
 
-proc listener.check_at_end {xw} {
-	set w .topals
-	$w.text mark set insert end 
-}
-
+#### The original set_top_bindings (as of June 2016):
+# All KeyPress events write the key char into .topals.text, so:
+# delete will consume prompt; but listener.copy_paste keeps Left and Up from more than 1 action
+# proc set_top_bindings { WinPath StreamAlias WaitVarName DataVar } {
+# 
+# 	bind $WinPath <Return> \
+# 		"xmit_line_plain $WinPath $StreamAlias $WaitVarName"
+# 	bind $WinPath <Control-d> \
+# 		"ctl-d_action $WinPath $StreamAlias "
+# 	bind $WinPath <Control-c> "listener.copy .topals"
+# 	bind $WinPath <Control-u> \
+# 		"ctl-u_action $WinPath"
+# 
+# 		## This is intended to be totally global in the IDE:
+# 	bind all <Control-period> interrupt_action
+# 
+# 	bind $WinPath <KeyPress> "listener.check_at_end .topals"
+# 	bind $WinPath <ButtonPress-2> "listener.copy_paste .topals"
+# 	bind Text <ButtonRelease-2> " " 
+# }
+#proc listener.check_at_end {xw} {
+#	set w .topals
+#	$w.text mark set insert end 
+#puts "listener.check_at_end: end= [$w.text index end] insert= [$w.text index insert]"
+#}
 
 	## Variable on which we execute 'tkwait variable ...' when we really
 	## have to wait for input (e.g., getting the user's response during 
@@ -561,22 +545,107 @@ proc wait_for_line1 { WaitVar } {
 
 proc xmit_line_plain { TxtWin StreamAlias WaitVarName} {
 	upvar #0 $WaitVarName WaitForLine
-
-#puts "xmit_line_plain: TxtWin=$TxtWin Alias=$StreamAlias WaitVar=$WaitVarName"
+	global array histArray
+	global histPosition
+	global showPosition
 
 	set InsertIndex [$TxtWin index insert]
 	set InsertLine [string range $InsertIndex 0 [expr [string first "." $InsertIndex] - 1 ]]
 	incr InsertLine
 	set EndIndex [$TxtWin index end]
 	set EndLine [string range $EndIndex 0 [expr [string first "." $EndIndex] - 1 ]]
-
 	if {$EndLine == $InsertLine} then {
 		set ThisLine [ $TxtWin get {lastPrompt +1 chars} {end -1 chars} ]
+		incr histPosition 
+		set histArray($histPosition) $ThisLine
+		set showPosition $histPosition
 		set WaitForLine 1
 		prolog call builtins add_to_stream_buffer -atom $StreamAlias -atom $ThisLine\n
 	} 
 	$TxtWin see end
 	$TxtWin mark set insert end
+}
+
+global array histArray
+array set histArray {}
+global histPosition
+set histPosition 0
+global showPosition
+set showPosition 0
+
+proc manage_alsdev_history {} {
+    global proenv
+    global histArray
+    global histPosition
+    global showPosition
+    set histPosition 0
+
+    if {$proenv(do_load_prev_alsdev_history)} {
+ 
+	if {[file exists $proenv(alsdev_history_file)]} {
+		set showPosition 1
+		set fp [open $proenv(alsdev_history_file) r]
+		set file_data [read $fp]
+		close $fp
+		set data [split $file_data "\n"]
+		foreach line $data {
+	    		if {[string length $line] >0} {
+				incr histPosition 
+				set histArray($histPosition) $line
+	    		}
+	    	}
+	    	set showPosition [lindex [array statistics histArray] 0]
+         }
+    }
+}
+
+proc do_history {WinPath} {
+	global histArray
+	global histPosition
+	global showPosition
+
+	if {$showPosition > 0} {
+		ctl-u_action .topals.text
+		$WinPath insert end $histArray($showPosition)
+ 		incr showPosition -1 
+	}
+}
+
+proc do_rev_history {WinPath} {
+	global histArray
+	global histPosition
+	global showPosition
+
+	set rLimit [lindex [array statistics histArray] 0]
+	if {$showPosition < $rLimit} {
+		ctl-u_action .topals.text
+ 		incr showPosition 1 
+		$WinPath insert end $histArray($showPosition)
+	}
+}
+
+
+proc dumpHist {} {
+    global histArray
+    global histPosition
+
+    puts "dumpHist: histPosition=$histPosition size=[lindex [array statistics histArray] 0]"
+
+    for {set i 1} {$i <= $histPosition} {incr i} {
+        puts "$i: $histArray($i)"
+    }
+}
+
+proc save_history {} {
+    global proenv
+    global histArray
+    global histPosition
+
+	set fo [open $proenv(alsdev_history_file) "w"]
+	for {set i 1} {$i <= $histPosition} {incr i} {
+    		puts $fo $histArray($i)
+	}
+	close $fo
 }
 
 proc ctl-c_action_during_read { WinPath StreamAlias WaitVar } {
@@ -617,12 +686,7 @@ proc wake_up_look_around { } {
 
 proc interrupt_action {} {
 	global WakeUpLookAround
-	global tcl_platform
-	if {$tcl_platform(platform) == "macintosh"} {
-		prolog interrupt
-	} else {
-		set WakeUpLookAround -1
-	}
+	set WakeUpLookAround -1
 }
 
 proc ctl-d_action { TxtWin StreamAlias } {
@@ -690,7 +754,8 @@ proc kill_tcl_interps  { } {
 
 proc set_directory { } {
 	set CWD [pwd]
-	set NewDir [getDirectory]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory]
 	if {$NewDir != ""} {
 		cd $NewDir
 		show_dir_on_main $NewDir
@@ -703,12 +768,14 @@ proc show_dir_on_main { Dir } {
 
 proc exit_prolog { } {
 	global WaitForLine
+	global proenv
 
 	set ans [tk_messageBox -icon warning -parent .topals \
 				-title "Exit Prolog?" -message "Really Exit ALS Prolog?" \
 				-type yesno -default yes]
 	if {$ans == "yes"} then {
 		prolog call alsdev possible_save_project
+
 		if {[document.close_all]} then {
 			if {[catch {
 					save_window_positions
@@ -716,9 +783,10 @@ proc exit_prolog { } {
 				} result]} then {
 				# maybe do "bgerror $result" or some other message here
 			}
-			exit
-#			set WaitForLine -3
+			set WaitForLine -3
 		}
+		save_history
+		exit
 	} else {
 		return 0
 	}
@@ -771,6 +839,7 @@ proc consult_file {} {
 		-filetypes {{"Prolog Files" {.pro .pl } } {{All Files} {*} } } ]
 	if {$file == ""} then { return }
 	prolog call alsdev do_reconsult -atom $file
+	refresh_spy_preds_if_showing
 	return true
 }
 
@@ -789,7 +858,6 @@ proc listener.save {w}  { listener.save_as $w }
 
 proc listener.save_as {w} {
 	global array proenv
-	global tcl_platform
 	
 	set file [tk_getSaveFile -initialfile prolog_env \
 		-defaultextension .txt ]
@@ -1193,10 +1261,24 @@ proc refresh_preds_list {Mod} {
 	}
 }
 
+proc refresh_spy_win0 {} {
+	refresh_spy_win
+	set_module_focus user
+	refresh_preds_list user
+
+}
 proc refresh_spy_win {} {
 	refresh_mods_list
 	set MF [get_module_focus]
 	if  {$MF != ""} then { refresh_preds_list $MF }
+}
+
+proc refresh_spy_preds_if_showing {} {
+	global array proenv
+
+	if {[winfo exists .pred_info] == 1} then { 
+		refresh_spy_win
+	}
 }
 
 proc move_to_spying_list {} {
@@ -1664,17 +1746,22 @@ proc run_cref  {} {
 	prolog call alsdev run_cref
 }
 
+###########################################
+# Mac OS X Support via tk::mac functions
+#------------------------------------------
 
-proc tkOpenDocument args {
-	global tcl_platform
-	foreach file $args {
-		if {$tcl_platform(platform) == "windows"} {
-			set file [file attributes "$file" -longname]
-		}
-		if { [file extension "$file"] == ".ppj" } then {
-			prolog call alsdev launch_project -atom $file
-		} else {
-			document.open $file
+if {[tk windowingsystem] == "aqua"} {
+	proc ::tk::mac::Quit {} {
+		exit_prolog
+	}
+
+	proc ::tk::mac::OpenDocument {args} {
+		foreach file $args {
+			if { [file extension "$file"] == ".ppj" } then {
+				prolog call alsdev launch_project -atom $file
+			} else {
+				document.open $file
+			}
 		}
 	}
 }
@@ -1689,7 +1776,7 @@ proc do_2col {base} {
 ###############________________________________##################
 
 
-if {$tcl_platform(platform) == "macintosh"} {
+if {[tk windowingsystem] == "aqua"} {
 	# Make .topals.mmenb the default menu for all windows.
 	. configure -menu .topals.mmenb
 }
@@ -1699,13 +1786,13 @@ Window show .topals
 # update idletasks seems to push .topals behind other windows on
 # Windows, so just call update.
 
-if {$tcl_platform(platform) == "windows"} then {
+if {[tk windowingsystem] == "win32"} then {
 	update
 } else {
 	update idletasks
 }
 
-raise_patch .topals
+raise .topals
 wm positionfrom .topals user
 wm geometry .topals $proenv(.topals,geometry)
 focus .topals.text
@@ -1714,6 +1801,6 @@ focus .topals.text
 # install a custom window procedure on .topals window for handling
 # document opened form the Explorer.
 
-if {$tcl_platform(platform) == "windows"} {
+if {[tk windowingsystem] == "win32"} {
 	AttachOpenDocumentHandler
 }

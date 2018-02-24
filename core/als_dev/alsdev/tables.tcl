@@ -32,7 +32,6 @@ proc load_table_package {DirsList} {
 
 proc build_table {BaseName InfoArrayName OptsList} {
 	upvar #0 $InfoArrayName IA 
-	global array tcl_platform
 
 	eval [list global array $InfoArrayName]
 	set IA(library) Tktable
@@ -86,12 +85,8 @@ proc build_table {BaseName InfoArrayName OptsList} {
 
 #proc table_object {InfoArrayName } {
 #	upvar #0 $InfoArrayName IA
-#	global array tcl_platform
 
 	eval toplevel $IA(tabletop)
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $IA(tabletop)
-	}
 	table $IA(table) \
 		-rows $IA(rows) \
 		-height $IA(height) \
@@ -234,12 +229,8 @@ tk_dialog .jjj "NOL" "$NOL" "" 0 OK
 
 proc table_object2 {InfoArrayName OptsList} {
 	upvar #0 $InfoArrayName IA
-	global array tcl_platform
 
 	eval toplevel $IA(tabletop)
-	if {$tcl_platform(platform) == "windows"} {
-		focus -force $IA(tabletop)
-	}
 	eval table $IA(table) $OptsList
 
 	scrollbar $IA(yscrollbar) -command [list $IA(table) yview]  

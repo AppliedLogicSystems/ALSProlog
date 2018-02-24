@@ -51,8 +51,13 @@ proc select_project_file {} {
 	} else { return "" }
 }
 
-proc save_project {} {
+proc save_project {w} {
+	global array proenv
 	send_prolog als_ide_mgr save_project
+	set proenv($w,dirty) false
+    	set proenv($w.addlprj,dirty) false
+    	$w.buttons.save configure -state disabled
+	return 1
 }
 
 proc close_project {} {
@@ -60,18 +65,19 @@ proc close_project {} {
 }
 
 proc new_project {} {
+	global array proenv
+
 	send_prolog als_ide_mgr start_new_project
 }
 
-
-proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
-	global tcl_platform
-
+proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir w } {
+	global array proenv
 	set types {{"Prolog Files" {.pro .pl}} {"Tcl/Tk Files" {.tcl}} {{All Files} *}}
 	set DFT [list -filetypes $types]
 		# DFT currently not used.
 		# -title "Files to Add to Project" not used.
-	set Choices [getFiles -initialdir $DfltDir]
+		# cf: https://www.tcl.tk/man/tcl8.4/TkCmd/getOpenFile.htm
+	set Choices [tk_getOpenFile -initialdir $DfltDir -multiple true -filetypes $FileTypes ]
 	if {$Choices != ""} then {
 		set Prev [$Listbox get 0 end]
 		foreach Entry $Choices {
@@ -82,10 +88,13 @@ proc add_to_files_list { FS Listbox FileTypes FileKind  DfltDir } {
 				}
 			}
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
 	}
 }
 
 proc add_file_entry_to_list { Entry Listbox } {
+    global array proenv
     set NewFile [$Entry get]
 	if {$NewFile != ""} then {
 		set Prev [$Listbox get 0 end]
@@ -99,8 +108,8 @@ proc add_file_entry_to_list { Entry Listbox } {
 
 
 
-#proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir} {
-#	global tcl_platform
+#proc add_to_files_list_mult { FS Listbox FileTypes FileKind DfltDir w} {
+#    global array proenv
 #
 #	prolog call alsdev choose_mult_files \
 #		-list $FileTypes -atom $FileKind -atom $DfltDir -var Choices
@@ -111,10 +120,13 @@ proc add_file_entry_to_list { Entry Listbox } {
 #				$Listbox insert end $Entry
 #			}
 #		}
+#		set proenv($w,dirty) true
+#    		$w.buttons.save configure -state active
 #	}
 #}
 
-proc del_from_files_list { Listbox } {
+proc del_from_files_list { Listbox w } {
+    	global array proenv
 	set SelNums [$Listbox curselection]
 	set N [llength $SelNums]
 	if {$N == 0} then {
@@ -127,10 +139,13 @@ proc del_from_files_list { Listbox } {
 		foreach i $SelNums {
 			$Listbox delete $i
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
 	}
 }
 
-proc move_selection_up {Listbox} {
+proc move_selection_up {Listbox w} {
+    	global array proenv
 	set SelIdx [lindex [$Listbox curselection] 0]
 	if {$SelIdx == 0} then {
 		bell
@@ -141,9 +156,12 @@ proc move_selection_up {Listbox} {
 	$Listbox delete $SelIdx
 	$Listbox insert $NewIdx $Item
 	$Listbox selection set $NewIdx
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
-proc move_selection_down {Listbox} {
+proc move_selection_down {Listbox w} {
+    	global array proenv
 	set SelIdx [lindex [$Listbox curselection] 0]
 	set Last [expr [$Listbox index end] - 1]
 	if {$SelIdx == $Last} then {
@@ -155,12 +173,16 @@ proc move_selection_down {Listbox} {
 	$Listbox delete $SelIdx
 	$Listbox insert $NewIdx $Item
 	$Listbox selection set $NewIdx
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
 
-proc add_search_dirs {Listbox PathType} {
+proc add_search_dirs {Listbox PathType w} {
+    	global array proenv
 	set CWD [pwd]
-	set NewDir [getDirectory -initialdir $CWD]
+		# cf: https://www.tcl.tk/man/tcl8.3/TkCmd/chooseDirectory.htm
+	set NewDir [tk_chooseDirectory -initialdir $CWD]
 	cd $CWD
 	set PrevEntries [$Listbox get 0 end]
 	if {($NewDir == "") || ($CWD == $NewDir)} then {
@@ -185,9 +207,12 @@ proc add_search_dirs {Listbox PathType} {
 			}
 		}
 	}
+	set proenv($w,dirty) true
+    	$w.buttons.save configure -state active
 }
 
-proc del_search_dirs {Listbox} {
+proc del_search_dirs {Listbox w} {
+    	global array proenv
 	set SelNums [$Listbox curselection]
 	set N [llength $SelNums]
 	if {$N == 0} then {
@@ -200,12 +225,67 @@ proc del_search_dirs {Listbox} {
 		foreach i $SelNums {
 			$Listbox delete $i
 		}
+		set proenv($w,dirty) true
+    		$w.buttons.save configure -state active
+	}
+}
+
+proc add_lib_file {} {
+	global array proenv
+
+	send_prolog als_ide_mgr add_lib_file
+}
+
+proc select_library_file {LibPath} {
+	global array proenv
+
+	set Libfile [tk_getOpenFile \
+		-filetypes {{"Prolog Library Files" {.pro}}}\
+		-title "Prolog Library File to Add"\
+		-initialdir $LibPath]
+	return $Libfile
+}
+
+proc addto_libfiles_disp {File GuiPath} {
+	global array proenv
+	set ListBox $GuiPath.addlprj.cpd17.01
+	$ListBox insert end $File
+	set proenv($GuiPath,dirty) true
+        $GuiPath.buttons.save configure -state active
+}
+
+proc addto_libfiles_disp_list {FilesList GuiPath} {
+	global array proenv
+	set ListBox $GuiPath.addlprj.cpd17.01
+
+	foreach lf $FilesList {$ListBox insert end $lf}
+
+	set proenv($GuiPath,dirty) true
+        $GuiPath.buttons.save configure -state active
+}
+
+proc delete_lib_file { Listbox w pw} {
+    	global array proenv
+	set SelNums [$Listbox curselection]
+	set N [llength $SelNums]
+	if {$N == 0} then {
+		bell
+		return
+	}
+	set ans [tk_messageBox -icon warning -title "Delete Library Files?" \
+		-message "Delete the $N selected files?" -type yesno -default yes]
+	if {$ans == "yes"} then {
+		foreach i $SelNums {
+			$Listbox delete $i
+		}
+		set proenv($w,dirty) true
+    		$pw.buttons.save configure -state active
 	}
 }
 
 
 proc prj_slot_focus { Slot Listbox PrjMgrHandle } {
-	global proenv
+	global array proenv
 	set Item [$Listbox get [lindex [$Listbox curselection] 0] ]
 	prolog call $proenv(dflt_mod) send \
 		-number $PrjMgrHandle  -list [list prj_slot_focus $Slot $Item]
@@ -557,3 +637,73 @@ proc do_gen_gui {} {
 }
 
 
+###################### cref
+
+proc run_cref_on_prj {Base} {
+	send_prolog als_ide_mgr run_cref_on_prj
+    	send_prolog als_ide_mgr exist_reports
+}
+
+proc show_lib_files { LibFiles } {
+	global array proenv
+}
+
+proc select_cref_suite {} {
+	set CrefSuite [tk_getOpenFile \
+		-filetypes {{"Cref Suite Files" {.crf}}} \
+		-title "Cref Suite File to Open"]
+	set File [file tail $CrefSuite]
+	set Dir [file dirname $CrefSuite]
+
+	if {$CrefSuite != ""} then {
+		return [list $File [file split $Dir ]]
+	} else { return "" }
+}
+
+proc run_cref_on_suite {Base} {
+        send_prolog als_ide_mgr run_cref_on_suite
+    	send_prolog als_ide_mgr exist_reports
+}       
+
+proc html_report {} {
+        send_prolog als_ide_mgr show_html_report
+}
+
+proc xrf_report {} {
+        send_prolog als_ide_mgr show_xrf_report
+}
+
+proc cref_close {Base} {
+        global array proenv
+
+        set isdirtycheck [prj_perf_isdirtycheck $Base]
+        set savecrf [cref_save_check $Base $isdirtycheck]
+
+        if {$savecrf == 2} then {
+            save_cref_suite $Base
+        }
+        send_prolog als_ide_mgr cref_close
+}
+
+proc save_cref_suite {w} {
+	global array proenv
+	send_prolog als_ide_mgr save_cref_suite
+	set proenv($w,dirty) false
+    	set proenv($w.addlprj,dirty) false
+    	$w.buttons.save configure -state disabled
+	return 1
+}
+
+proc set_cref_rpt_btns {GuiPath HTMLExists XrfExists} {
+        global array proenv
+	if {$HTMLExists} then {
+		$GuiPath.report_buttons.html configure -state normal
+	} else {
+		$GuiPath.report_buttons.html configure -state disabled
+	}
+	if {$XrfExists} then {
+		$GuiPath.report_buttons.xrf configure -state normal
+	} else {
+		$GuiPath.report_buttons.xrf configure -state disabled
+	}
+}

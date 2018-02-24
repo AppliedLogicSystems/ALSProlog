@@ -1,22 +1,25 @@
 # Generic Unix GNU Make file for ALS Prolog
-CPPFLAGS += -I$(ALSDEVDIR)/getFiles -I $(ALSDEVDIR)/getDirectory -g -DWIN32 -DMSWIN32 -DMSWin32
+CPPFLAGS += -DWIN32 -DMSWin32
 OS_SOURCE=win32io.c win32_locate.c win32_engine.c fswin32.c fsunix.c
 OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = dll
 OS_SL_LINK = $(CC) -shared
-LIBS = -lwsock32
+LIBS = -lwsock32 -lcomdlg32
 SL_LINK_LIBS = $(LIBS)
+TCLVER=86
 
-VPATH += :$(ALSDEVDIR)/getFiles:$(ALSDEVDIR)/getDirectory
+ALS_BUILD_SUPPORT = /usr/i686-w64-mingw32/sys-root/mingw/
+ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include/tcl8.6
 
-ALS_BUILD_SUPPORT = '/cygdrive/c/Program Files/Metrowerks/CodeWarrior/ALS Build Support'
-ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/'Tcl-Tk Support/include' -isystem $(ALS_BUILD_SUPPORT)/'Tcl-Tk Support/include/X11'
-ALS_BUILS_SUPPORT_LIBS = 
+ALS_BUILD_SUPPORT_LIBDIR = -L $(ALS_BUILD_SUPPORT)/lib
 
-ALSDEV_OS_SOURCE = win32_alsdev.c tcl_interface.c alsdev_demo.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
+# Set path to allow access to Tcl/Tk DLLs
+export PATH := $(ALS_BUILD_SUPPORT)/bin:$(PATH)
 
-ALS_STUB_SOURCE = win32_alsdev.c tcl_interface.c getDirectory.c win32_getDirectory.c getFiles.c win32_getFiles.c
+ALSDEV_OS_SOURCE = win32_alsdev.c
+
+ALS_STUB_SOURCE = win32_alsdev.c tcl_interface.c
 ALS_STUB_OBJECTS = $(ALS_STUB_SOURCE:.c=.o)
 
 alsdir : alsdir/builtins alsdir/library
@@ -36,7 +39,7 @@ alsdir/shared : $(MAKEFS)
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
 	cd alsdir/shared ; cp ../../$(CORE)/als_dev/alsdev/*.tcl .
-				 
+
 alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
 	mkdir -p alsdir/images
 	rm -f alsdir/images/*.*

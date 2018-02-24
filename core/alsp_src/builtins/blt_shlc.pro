@@ -185,6 +185,16 @@ ss_parse_command_line(['-no_dot_alspro' | T], L, Mod,CLInfo)
 	mangle(9, CLInfo, false),
 	ss_parse_command_line(T, RestL, Mod,CLInfo).
 
+	%% -h: Print help info
+ss_parse_command_line(['-h' | T], L, Mod,CLInfo)
+	:-!,
+	show_help.
+
+	%% --help: Print help info
+ss_parse_command_line(['--help' | T], L, Mod,CLInfo)
+	:-!,
+	show_help.
+
 	%% Otherwise: should be file for special processing:
 ss_parse_command_line([File | T], L, Mod,CLInfo)
 	:-
@@ -259,6 +269,30 @@ ss_cl_assert1(AX, Mod)
 	:-
 	Mod:assertz(AX).
 
+show_help
+	:-
+	write('    Help for alspro'),nl,
+	write('    alspro [options] [source [sources]]'),nl,
+	write('    [source:: <path/to/file>filename.ext]'),nl,
+	write('    [options]'),nl,
+	write('    -s <path>   Adds <path(/to/dir) to system search dirs'),nl,
+	write('    -g<goal>    <goal> an arbitrary prolog goal (no :-,?-)'),nl,
+	write('                Runs <goal> after startup') ,nl,
+	write('    -b          Prevents default shell from running, after'),nl,
+	write('                executing -g<goal> if present') ,nl,
+	write('    -q          Suppress all standard system loading messages'),nl,
+	write('    -v          Causes all standard system loading messages to be printed'),nl,
+	write('    -gic        Generate all *.obp files in current working dir'),nl,
+	write('    -gis        Generate *.obp files in same dir as source'),nl,
+	write('    -giac       Generate *.obp files in named subdir of current working dir'),nl,
+	write('    -gias       Generate *.obp files in named subdir of source dir'),nl,
+	write('    -a,-A<goal> <goal> an arbitrary prolog goal; causes <goal> to be asserted'),nl,
+	write('    -heap num   Sets heap to num * 1024 bytes'),nl,
+	write('    -stack num  Sets stack to num * 1024 bytes'),nl,
+	nl,nl,
+	halt.
+
+
 	%%%%%%%
 	%%%%%%%
 
@@ -281,8 +315,10 @@ setup_init_goal(CLInfo, ShellCall)
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-library_setup
+library_setup(CLInfo)
 	:-
+	arg(2,CLInfo,ConsultNoise),
+	OutputStream = user_output,
 	(ConsultNoise = true -> true ;
 		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
@@ -393,5 +429,24 @@ als_advise(Stream, FormatString, Args)
 	:-
 	printf(Stream, FormatString, Args),
 	flush_output(Stream).
+
+export get_examples_dir/1.
+get_examples_dir(ExamplesDir)
+        :-
+        sys_searchdir(ALSDirPath),
+        path_elements(ALSDirPath, ALSDirPathElements),
+        dreverse(ALSDirPathElements, [alsdir | RRestElts]),
+        dreverse(ExamplesPathElements, [examples | RRestElts]),
+        path_elements(ExamplesDir, ExamplesPathElements).
+
+export get_examples_write_dir/1.
+get_examples_write_dir(ExamplesWriteDir)
+	:-
+	getenv('HOME', HomePath),
+        path_elements(HomePath, HomePathElements),
+	append(HomePathElements, ['Documents', 'PrologExamples'], ExamplesWriteDirElements),
+        path_elements(ExamplesWriteDir, ExamplesWriteDirElements).
+
+	
 
 endmod.

@@ -1,0 +1,6 @@
+/* Cref suite: cref_test0
+   Location: /Users/ken/ALS/GitHub/ALSProlog/core/alsp_src/library/tests/cref_test0.crf
+ */
+src_dir = './alsdir/library/tests'.
+list_of_files = ['cref_test1.pro','cref_test2.pro','cref_test3.pro'].
+target = 'tc.xrf'.
