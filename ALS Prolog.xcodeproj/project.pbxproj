@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+<<<<<<< HEAD
+		1306B6DF208E74E400723913 /* linenoise.c in Sources */ = {isa = PBXBuildFile; fileRef = 1306B6DD208E74E400723913 /* linenoise.c */; };
+=======
 		1308834B1FFC6619006C260E /* linenoise.c in Sources */ = {isa = PBXBuildFile; fileRef = 1308834A1FFC6619006C260E /* linenoise.c */; };
+>>>>>>> 9ff95e0c890bbf1d17cb3a1cbb4776ba43e684ca
 		13F1CB9A10569E1A005DEDB9 /* alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CADE10569E1A005DEDB9 /* alloc.c */; };
 		13F1CBA110569E1A005DEDB9 /* arith.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAEC10569E1A005DEDB9 /* arith.c */; };
 		13F1CBA210569E1A005DEDB9 /* bcinter.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAED10569E1A005DEDB9 /* bcinter.c */; };
@@ -87,8 +91,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+<<<<<<< HEAD
+		1306B6DD208E74E400723913 /* linenoise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linenoise.c; sourceTree = "<group>"; };
+		1306B6DE208E74E400723913 /* linenoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linenoise.h; sourceTree = "<group>"; };
+=======
 		130883491FFC6619006C260E /* linenoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linenoise.h; sourceTree = "<group>"; };
 		1308834A1FFC6619006C260E /* linenoise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linenoise.c; sourceTree = "<group>"; };
+>>>>>>> 9ff95e0c890bbf1d17cb3a1cbb4776ba43e684ca
 		13F1CADE10569E1A005DEDB9 /* alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alloc.c; sourceTree = "<group>"; };
 		13F1CAE010569E1A005DEDB9 /* alloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alloc.h; sourceTree = "<group>"; };
 		13F1CAE110569E1A005DEDB9 /* alsmem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alsmem.h; sourceTree = "<group>"; };
@@ -432,8 +441,13 @@
 		13F1CBFF10569FD2005DEDB9 /* unix */ = {
 			isa = PBXGroup;
 			children = (
+<<<<<<< HEAD
+				1306B6DD208E74E400723913 /* linenoise.c */,
+				1306B6DE208E74E400723913 /* linenoise.h */,
+=======
 				1308834A1FFC6619006C260E /* linenoise.c */,
 				130883491FFC6619006C260E /* linenoise.h */,
+>>>>>>> 9ff95e0c890bbf1d17cb3a1cbb4776ba43e684ca
 				13F1CC0010569FD2005DEDB9 /* aix_config.h */,
 				13F1CC0110569FD2005DEDB9 /* aix_makefile */,
 				13F1CC0210569FD2005DEDB9 /* build_all */,
@@ -616,6 +630,7 @@
 				13F1CBD910569E1A005DEDB9 /* new_alspi.c in Sources */,
 				1308834B1FFC6619006C260E /* linenoise.c in Sources */,
 				13F1CBDA10569E1A005DEDB9 /* newpckgcoff.c in Sources */,
+				1306B6DF208E74E400723913 /* linenoise.c in Sources */,
 				13F1CBDB10569E1A005DEDB9 /* nopckg.c in Sources */,
 				13F1CBDC10569E1A005DEDB9 /* paction.c in Sources */,
 				13F1CBDD10569E1A005DEDB9 /* parser.c in Sources */,
@@ -684,7 +699,11 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+<<<<<<< HEAD
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+=======
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+>>>>>>> 9ff95e0c890bbf1d17cb3a1cbb4776ba43e684ca
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-DPORT",
@@ -705,7 +724,11 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+<<<<<<< HEAD
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+=======
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+>>>>>>> 9ff95e0c890bbf1d17cb3a1cbb4776ba43e684ca
 				OTHER_CFLAGS = (
 					"-DPORT",
 					"-DUNIX",
