@@ -287,6 +287,7 @@ char lineedit_prompt[PATH_MAX]= "?- ";
 char history_file[PATH_MAX] = "";
 int  do_load_prev_history = 1;
 
+static const char *sublineedit_prompt="?_ ";
 
 #ifdef PURE_ANSI
 long standard_console_read(char *buf, long n)
@@ -315,6 +316,9 @@ long standard_console_read(char *buf, long n)
 	
 	ResetEvent(InteruptCompleteEvent);
 	
+	const char *prompt = do_lineedit == 1 ? lineedit_prompt : sublineedit_prompt;
+	standard_console_write(prompt, strlen(prompt));
+
 	i = ReadFile(GetStdHandle(STD_INPUT_HANDLE), buf, n, &nr, NULL);
 	
 	if (i) {
