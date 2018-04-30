@@ -345,8 +345,6 @@ long standard_console_error(char *buf, long n)
 
 #else
 
-static const char *sublineedit_prompt="?_ ";
-
 /*
  * linenoise_readbuffer()
  */
