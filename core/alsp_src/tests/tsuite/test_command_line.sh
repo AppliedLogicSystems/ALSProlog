@@ -64,12 +64,17 @@ opt_test () {
 
 # Test -q (quiet) argument.
 
+case $(uname) in
+	"CYGWIN"*)	expected_output="?- " ;;
+	        *) 	expected_output=""    ;;
+esac
+
 command="$prolog -q < /dev/null"
 output=`eval $command`
 
-if test "$output" != ""
+if test "$output" != "$expected_output"
 then
-	error "$command" "" "$output"
+	error "$command" "$expected_output" "$output"
 fi
 
 # Test -b (batch) argument.
