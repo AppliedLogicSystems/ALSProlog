@@ -32,7 +32,7 @@ ALSDEV_SOURCE = $(ALSDEV_OS_SOURCE) tcl_interface.c
 
 ALSDEV_OBJECTS = $(ALSDEV_SOURCE:.c=.o)
 
-GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
+GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bcurl.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
 	bmisc.c bos.c bparser.c bpckg.c \
 	bsio.c bsystem.c built.c butil.c \
