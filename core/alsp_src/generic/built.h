@@ -447,4 +447,4 @@ extern	int	pbi_t_sut_int	PARAMS(( void ));
 extern	int	pbi_pos_atom	PARAMS(( void ));
 #endif /* SUBTYPES */
 
-extern	int	curl_intf	PARAMS(( void ));
+extern	int	curl_c_builtin	PARAMS(( void ));
