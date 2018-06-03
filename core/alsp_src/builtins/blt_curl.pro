@@ -12,8 +12,7 @@ module curl.
 export curl/2.
 curl(URL, Target)
 	:-
-	Opts = [], 
-	add_url(URL, Opts, Options),
+	Options = [url=URL, writedata=true],
 	cont_curl(Options, Target).
 
 export curl/3.
@@ -34,9 +33,14 @@ cont_curl(Options, Target)
 	do_curl(TOptions).
 
 
-handle_target(Target, Options, [uia=Target | Options])
+handle_target(Target, Options, TOptions)
 	:-
-	var(Target), !.
+	var(Target), 
+	!,
+	(member(uia=Target, Options) ->
+		TOptions = Options 
+		; 
+		TOptions = [uia=Target | Options] ).
 
 handle_target(Target, Options, [file=Target | Options])
 	:-
@@ -57,38 +61,48 @@ do_curl(Options)
 	adjust_opts(Options, AdjOptions),
 	cont_do_curl(AdjOptions).
 
+        /* make "stdopts" expand to set these "standard" common options
+    ret += curl_easy_setopt(easyhandle, CURLOPT_MAXREDIRS, 50L);
+    ret += curl_easy_setopt(easyhandle, CURLOPT_TCP_KEEPALIVE, 1L);
+    ret += curl_easy_setopt(easyhandle, CURLOPT_USERAGENT, "curl/7.54.0");
+        */
+
 adjust_opts([], []).
-/* set config to handle undefined skip_opt/1 correctly: 
-adjust_opts([Opt | Options], AdjOptions)
-	:-
-	skip_opt(Opt),
-	!,
-	adjust_opts(Options, AdjOptions).
-*/
 adjust_opts([Opt | Options], [AdjOpt | AdjOptions])
 	:-
-	adjust_opt(Opt, AdjOpt),
+	adjust_req(Opt, AdjOpt),
 	adjust_opts(Options, AdjOptions).
 
-adjust_opt(L=R, UC_L=R)
+
+adjust_req(L=R, AdjOpt=R)
 	:-
+	atom(L),
 	make_uc_sym(L, UC_L),
+	adj_opt(UC_L, AdjOpt),
 	!.
-	
-adjust_opt(Opt, UC_F=A)
+
+adjust_req(Opt, AdjOpt=A)
 	:-
 	functor(Opt, F, 1),
 	make_uc_sym(F, UC_F),
+	adj_opt(UC_L, AdjOpt),
 	!,
 	arg(1, Opt, A).
 
-adjust_opt(Opt, F=A)
+adjust_req(Opt, _)
 	:-
-	Ball = error(curl_error(unknow_option(Opt))),
+	Ball = error(curl_error(unknown_option(Opt))),
 	throw(Ball).
 	
+
+adj_opt('UIA', 'RESULT') :-!.
+adj_opt('RES', 'RESULT') :-!.  
+adj_opt(Opt, Opt).
+
+
 cont_do_curl(Options)
 	:-
+write('>>curl_c_builtin'=Options),nl,
 	curl_c_builtin(Options, Error),
 	finish_curl_c(Error, Options).
 
