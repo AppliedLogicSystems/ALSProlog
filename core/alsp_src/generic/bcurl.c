@@ -434,16 +434,8 @@ printf("opt_action == CURLOPT_WRITEDATA: downtype != 0 filename=%s\n",filename);
 
                 	if(ret != CURLE_OK) {
                     	fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
-                    	FAIL;
+                    	PI_FAIL;
                 	} 
-/*
-else {
-                    curl_easy_getinfo(easyhandle, CURLINFO_RESPONSE_CODE, &response_code);
-                    if(!w_unify(prc, prc_t, response_code, WTP_INTEGER)) {
-                        FAIL;
-                    }
-                }
-*/
                         /* close the header file */
                 fclose(pagefile);
 		}
