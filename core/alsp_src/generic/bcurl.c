@@ -9,9 +9,11 @@
  | See live samples at end of ~builtins/blt_curl.pro
  *=======================================================================*/
 
-/* #include <curl/curl.h> must preceed #include "defs.h" */
+#include "alspi.h"
+#include <stdlib.h>
+#include <strings.h>
+
 #include <curl/curl.h>
-#include "defs.h"
 
 /* Prolog types:
 #define PI_VAR          0 unbound variables
@@ -160,7 +162,7 @@ curl_c_builtin(void)
     ret = curl_global_init(CURL_GLOBAL_ALL);
     if(ret != CURLE_OK) {
         fprintf(stderr, "curl_global_init() failed: %s\n", curl_easy_strerror(ret));
-        FAIL;
+        PI_FAIL;
     }
 
     PI_getan(&error, &error_t, 2);
@@ -174,7 +176,7 @@ curl_c_builtin(void)
         /* Process the options list: */
     if(oplist_t != PI_LIST) {
 	/* Turn into a prolog error */
-        FAIL;
+        PI_FAIL;
     }
     else if(oplist_t==PI_SYM && oplist==nil_sym) {
         /* nothing to do: list = [] */
@@ -314,10 +316,10 @@ printf("Enter case CURLOPTTYPE_STRINGPOINT: arg2_t=%d\n",arg2_t);
 	    char perrmsg[120];
    	    sprintf(perrmsg, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
             PI_makeuia(&uia_var, &uia_var_t, perrmsg);
-	    if (w_unify(error, error_t, uia_var, uia_var_t))
-                SUCCEED;
+	    if (PI_unify(error, error_t, uia_var, uia_var_t))
+                PI_SUCCEED;
             else
-                FAIL;
+                PI_FAIL;
 
         } else {  /* curl_easy_perform succeeded */
 
@@ -336,8 +338,8 @@ printf("CURLINFO: j=%d ciiCtr=%d cii.info_code=%d cii.info_type=%d cii.arg2_t=%d
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_string);
 printf("CURLINFO: info_code=%d type=CURLINFO_STRING value=%s\n",cii.info_code,curlinfo_string);
                 	    PI_makeuia(&uia_var, &uia_var_t, (char *)curlinfo_string);
-	        	    if (!w_unify(cii.arg2, cii.arg2_t, uia_var, uia_var_t)) {
-                    		FAIL;
+	        	    if (!PI_unify(cii.arg2, cii.arg2_t, uia_var, uia_var_t)) {
+                    		PI_FAIL;
 			    }
 			    break;
 			}
@@ -345,8 +347,8 @@ printf("CURLINFO: info_code=%d type=CURLINFO_STRING value=%s\n",cii.info_code,cu
 			{
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_long);
 printf("CURLINFO: info_code=%d type=CURLINFO_LONG value=%ld\n",cii.info_code,curlinfo_long);
-                	    if(!w_unify(cii.arg2, cii.arg2_t, curlinfo_long, WTP_INTEGER)) {
-                    		FAIL;
+                	    if(!PI_unify(cii.arg2, cii.arg2_t, curlinfo_long, PI_INT)) {
+                    		PI_FAIL;
 			    }
 			    break;
 			}
@@ -357,8 +359,8 @@ printf("CURLINFO: info_code=%d type=CURLINFO_LONG value=%ld\n",cii.info_code,cur
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_double);
 printf("CURLINFO: info_code=%d type=CURLINFO_DOUBLE value=%ld\n",cii.info_code,curlinfo_double);
 			    PI_makedouble(&dbl_var, &dbl_var_t, curlinfo_double);
-                	    if(!w_unify(cii.arg2, cii.arg2_t, dbl_var, dbl_var_t)) {
-				FAIL;
+                	    if(!PI_unify(cii.arg2, cii.arg2_t, dbl_var, dbl_var_t)) {
+				PI_FAIL;
 			    }
 			    break;
 			}
@@ -381,10 +383,10 @@ printf("\nCURLINFO done - Start post-curl_easy_perform processing: opt_action=%d
 
 			/* turn the returned chunk.memory into a uia */
                 PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
-	        if (w_unify(result_var, result_var_t, uia_var, uia_var_t))
-                    SUCCEED;
+	        if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
+                    PI_SUCCEED;
                 else
-                    FAIL;
+                    PI_FAIL;
 	    } else {
 		
 	    }
