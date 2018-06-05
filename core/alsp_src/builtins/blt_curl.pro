@@ -40,7 +40,7 @@ handle_target(Target, Options, TOptions)
 	(member(uia=Target, Options) ->
 		TOptions = Options 
 		; 
-		TOptions = [uia=Target | Options] ).
+		TOptions = [result=Target | Options] ).
 
 handle_target(Target, Options, [file=Target | Options])
 	:-
@@ -56,6 +56,7 @@ handle_target(postdata=FF, Options, [postdata=FF | Options])
 handle_target(postdata(FF), Options, [postdata=FF | Options])
 	:-!.
 
+export do_curl/1.
 do_curl(Options)
 	:-
 	adjust_opts(Options, AdjOptions),
@@ -85,7 +86,7 @@ adjust_req(Opt, AdjOpt=A)
 	:-
 	functor(Opt, F, 1),
 	make_uc_sym(F, UC_F),
-	adj_opt(UC_L, AdjOpt),
+	adj_opt(UC_F, AdjOpt),
 	!,
 	arg(1, Opt, A).
 
