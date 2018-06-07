@@ -367,6 +367,8 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
 
         		curl_easy_setopt(easyhandle, CURLOPT_READFUNCTION, read_callback);
 
+        		curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDSIZE, (long)wt.sizeleft);
+
 			 	/* pointer to pass to our read function */ 
     			curl_easy_setopt(easyhandle, CURLOPT_READDATA, &wt);
 
