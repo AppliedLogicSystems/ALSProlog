@@ -82,12 +82,10 @@ struct WriteThis {
 
 static size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
 {
-printf(">>Invoke read_callback\n");
   struct WriteThis *wt = (struct WriteThis *)userp;
   size_t buffer_size = size*nmemb;
  
   if(wt->sizeleft) {
-printf(">>>> read_callback: wt->readptr=%s\n", wt->readptr);
     /* copy as much as possible from the source to the destination */ 
     size_t copy_this_much = wt->sizeleft;
     if(copy_this_much > buffer_size)
@@ -124,7 +122,7 @@ char*
 normalize_info(char* option_str)
 {
     if ( strncmp("CURLINFO_", option_str, 9) != 0 ){
-		/* option_str = "CURLOPT_" + option_str; */
+		/* option_str = "CURLINFO_" + option_str; */
 	char *tstr = (char *)malloc(1 + strlen(option_str) + 9);
 	strcpy(tstr, "CURLINFO_");
 	strcat(tstr, option_str);
@@ -135,7 +133,7 @@ normalize_info(char* option_str)
 
 #define name2value(symbol) { #symbol, symbol }
 
-/* Below in the included curlopt_list.h,
+/* Below, in the included curlopt_list.h,
 	name2value(CURLOPT_URL), will expand to { "CURLOPT_URL", CURLOPT_URL },
 	etc.
  */
@@ -176,7 +174,6 @@ curl_c_builtin(void)
     PWord uia_var;
     int uia_var_t;
     int opt_action;
-//    int option_nvlist_length = 0;
     int ret = 0;
     int downtype = 0; /* 0 = uia, 1 = file target */
     char *filename;
@@ -193,10 +190,19 @@ curl_c_builtin(void)
     ret = curl_global_init(CURL_GLOBAL_ALL);
     if(ret != CURLE_OK) {
         fprintf(stderr, "curl_global_init() failed: %s\n", curl_easy_strerror(ret));
-        PI_FAIL;
+			/* Report error to prolog */
+	char perrmsg[120];
+   	sprintf(perrmsg, "curl_global_init() failed: %s\n", curl_easy_strerror(ret));
+        PI_makeuia(&uia_var, &uia_var_t, perrmsg);
+	if (PI_unify(error, error_t, uia_var, uia_var_t)) 
+            PI_SUCCEED;
+        else
+            PI_FAIL;
     }
 
+	/* This should be an uninstantiated var, used for returning error info to prolog */
     PI_getan(&error, &error_t, 2);
+
     PI_makesym(&nil_sym,&niltype,"[]");
     PI_getan(&oplist, &oplist_t, 1);
 
@@ -208,7 +214,7 @@ curl_c_builtin(void)
 
         /* Process the options list: */
     if(oplist_t != PI_LIST) {
-	/* Turn into a prolog error */
+	/* This error is handled in curl/3 in blt_curl.pro. */
         PI_FAIL;
     }
     else if(oplist_t==PI_SYM && oplist==nil_sym) {
@@ -236,14 +242,14 @@ curl_c_builtin(void)
 	    } 
 
 		/* ------ First handle any non-CURLOPT cases ------ */
-		/* Save any incoming prolog variables for RESULT and RESPONSE_CODE */
+		/* Save any incoming prolog variables for RESULT */
 
 	    if (0==strcmp("RESULT", a1buf)){
 		/* save the prolog result var */
 		result_var = arg2;
 		result_var_t = arg2_t;
-	    } else {
-
+	    } else 
+	    {
 		char *nni = normalize_info(a1buf);
 		int info_code = lookup_code(nni);
 		int info_type = info_code & CURLINFO_TYPEMASK;
@@ -251,11 +257,8 @@ curl_c_builtin(void)
 		char *nopt = normalize_opt(a1buf);
 	        int opt_code = lookup_code(nopt);
 
-//printf("\n&&&& a1buf=%s nopt=%s %d nni=%s info_code=%d info_type=%d\n",a1buf,nopt, opt_code, nni,info_code,info_type);
-
 		/* CURLINFO types are all > 0x100000  */
 		if (info_code != 1){
-//printf("++ CURLINFO setup :  arg1_t=%d a1=%s arg2_t=%d \n",arg1_t,a1buf,arg2_t);
 		     /* This (arg1 / a1buf) is a request for something CURLINFO;
 			So presumably (arg2,arg2_t) is a prolog variable (bound or unbound)
 			which needs to be unified against the given CURLINFO
@@ -270,11 +273,10 @@ curl_c_builtin(void)
 		    CIIArray[ciiCtr] = cii;
     		    ciiCtr += 1;
 
-		} else {
+		} else 
+		{
 
 		/* ------ Now handle all the CURLOPT cases ------ */
-
-//printf("handle CURLOPT cases: opt_code=%ld CURLOPT_READDATA=%ld CURLOPT_URL=%ld\n",opt_code,CURLOPT_READDATA,CURLOPT_URL);
 
 			/* Do any required option-specific setup -- based on opt_code */
 		switch (opt_code) {
@@ -282,14 +284,12 @@ curl_c_builtin(void)
 		    case CURLOPT_WRITEDATA: 
 		    {
 		        opt_action = CURLOPT_WRITEDATA;
-printf("----set opt_action=%d for WRITEDATA/FUNCTION - CURLOPT_WRITEDATA=%d\n",opt_action,CURLOPT_WRITEDATA);
 
 	    	    	if (arg2_t == PI_SYM){
                 	   PI_getsymname(a2buf,arg2,BUFSIZE);
 	    	    	} else if (arg2_t == PI_UIA ){
                 	   PI_getuianame(a2buf,arg2,BUFSIZE);
 		    	}
-printf("opt_action = CURLOPT_WRITEDATA: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,arg2_t,a2buf);
 
 				/* WRITEDATA=true says: result should be a uia */
 			if (0==strcmp("true", a2buf))
@@ -310,10 +310,16 @@ printf("opt_action = CURLOPT_WRITEDATA: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,arg
 				/* WRITEDATA=anything else: try to open the anything as a file to take the result */
 			    downtype = 1;
     			    filename = a2buf;
-printf("opt_action = CURLOPT_WRITEDATA: a1buf=%s arg2_t=%d a2buf=%s filename=%s\n",a1buf,arg2_t,a2buf,filename);
 
                 		/* send all data to this function  */
         		    curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data2file);
+                		/* open the file */
+        	    pagefile = fopen(filename, "wb");
+		    if(pagefile) 
+		    {
+                        	/* write the page body to this file handle */
+                	curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, pagefile);
+		    }
 
 			}
 		        break;
@@ -322,7 +328,6 @@ printf("opt_action = CURLOPT_WRITEDATA: a1buf=%s arg2_t=%d a2buf=%s filename=%s\
 		    case CURLOPT_POSTFIELDSIZE: 
 		    case CURLOPT_POSTFIELDS: 
 	   	    { 
-printf("opt_action = CURLOPT_POSTFIELDS: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,arg2_t,a2buf);
 		        opt_action = CURLOPT_POSTFIELDS;
 
 			if (arg2_t==5)
@@ -335,15 +340,17 @@ printf("opt_action = CURLOPT_POSTFIELDS: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,ar
 
 				/* like WRITEDATA=true: capture result & turn into a uia */
 
-        	            chunk.memory = malloc(1); 	/* will be grown as needed by the realloc above */
-        	            chunk.size = 0;    		/* no data at this point */
-        	            chunk.memory[0] = '\0';
+        	        chunk.memory = malloc(1); 	/* will be grown as needed by the realloc above */
+        	        chunk.size = 0;    		/* no data at this point */
+        	        chunk.memory[0] = '\0';
 
                                 /* send all data to this function  */
-        	            curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        	        curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
                                 /* we pass our 'chunk' struct to the callback function */
-        	            curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
+        	        curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+			break;
 		    }
 
 		    case CURLOPT_READFUNCTION:
@@ -356,12 +363,8 @@ printf("opt_action = CURLOPT_POSTFIELDS: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,ar
         		else
             		    PI_getsymname(a2buf,arg2,BUFSIZE);
 
-printf("opt_action = CURLOPT_READDATA: a1buf=%s arg2_t=%d a2buf=%s\n",a1buf,arg2_t,a2buf);
-        
 			wt.readptr = a2buf;
   			wt.sizeleft = strlen(a2buf);
-
-printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2buf,wt.readptr,wt.sizeleft);
 
         		curl_easy_setopt(easyhandle, CURLOPT_POST, 1L);
 
@@ -372,14 +375,24 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
 			 	/* pointer to pass to our read function */ 
     			curl_easy_setopt(easyhandle, CURLOPT_READDATA, &wt);
 
-/* curl_easy_setopt(easyhandle, CURLOPT_VERBOSE, 1L);  */
+				/* like WRITEDATA=true: capture result & turn into a uia */
+
+        	        chunk.memory = malloc(1); 	/* will be grown as needed by the realloc above */
+        	        chunk.size = 0;    		/* no data at this point */
+        	        chunk.memory[0] = '\0';
+
+                                /* send all data to this function  */
+        	        curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+                                /* we pass our 'chunk' struct to the callback function */
+        	        curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, (void *)&chunk);
+
 			break;
 		    }
 
 		    default: 
 		    {
 			/* normalize-the-option approach */
-//printf("--defualt: normalize-the-option approach\n");
 		
 	    	        int val_type = 10000 * (opt_code / 10000);
 
@@ -387,14 +400,12 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
   	    	        switch (val_type) {
   			    case CURLOPTTYPE_LONG: 
 			    {
-//printf("Enter case CURLOPTTYPE_LONG: arg2_t=%d\n",arg2_t);
 		    	        long opt_long = (long)arg2;   //... grab long from prolog ...
   		    	        curl_easy_setopt(easyhandle, opt_code, opt_long);
 		    	        break;
 			    }
 			    case CURLOPTTYPE_STRINGPOINT: 
 			    {
-//printf("Enter case CURLOPTTYPE_STRINGPOINT: filename=|%s|\n",filename);
 				char g2buf[BUFSIZE];    /* if a2buf is used below, var filename gets overwritten */
 	    	    		if (arg2_t == PI_SYM){
                 	    	    PI_getsymname(g2buf,arg2,BUFSIZE);
@@ -402,7 +413,6 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
                 	    	    PI_getuianame(g2buf,arg2,BUFSIZE);
 		    		}
 		    		char *opt_str = g2buf;  //... grab string from prolog ...
-//printf("case CURLOPTTYPE_STRINGPOINT: opt_code=%d arg2_t=%d a2buf=%s opt_str=%s\n",opt_code,arg2_t,a2buf,opt_str);
 		    		curl_easy_setopt(easyhandle, opt_code, opt_str);
        		    		break;
 			    }
@@ -413,7 +423,7 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
 
 		}    	/* option-specific setup: finish switch on opt_code */
 
-		}
+		} 	/* end else for if(info_code != 1) */
 
 	    } 	/* Finish else for: handle all the CURLOPT cases */
 
@@ -436,25 +446,21 @@ printf("\n^^^^CURLOPT_READDATA: a2buf=%s wt.readptr=%s  wt.sizeleft=%zu\n\n",a2b
 	    char perrmsg[120];
    	    sprintf(perrmsg, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
             PI_makeuia(&uia_var, &uia_var_t, perrmsg);
-	    if (PI_unify(error, error_t, uia_var, uia_var_t))
+	    if (PI_unify(error, error_t, uia_var, uia_var_t)) 
                 PI_SUCCEED;
             else
                 PI_FAIL;
 
         } else {  /* curl_easy_perform succeeded */
 
-printf("\n\n==========Enter curl_easy_perform succeeded\n");
-
-	    for (int j=1; j<ciiCtr; j++){
+	    for (int j=1; j<ciiCtr; j++)
+	    {
 		    struct CurlInfoIn cii = CIIArray[j];
-printf("CURLINFO: j=%d ciiCtr=%d cii.info_code=%d cii.info_type=%d cii.arg2_t=%d\n", 
-		j, ciiCtr, cii.info_code, cii.info_type, cii.arg2_t);
 
 		    switch(cii.info_type) {
 			case CURLINFO_STRING:
 			{
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_string);
-printf("CURLINFO: info_code=%d type=CURLINFO_STRING value=%s\n",cii.info_code,curlinfo_string);
                 	    PI_makeuia(&uia_var, &uia_var_t, (char *)curlinfo_string);
 	        	    if (!PI_unify(cii.arg2, cii.arg2_t, uia_var, uia_var_t)) {
                     		PI_FAIL;
@@ -464,7 +470,6 @@ printf("CURLINFO: info_code=%d type=CURLINFO_STRING value=%s\n",cii.info_code,cu
 			case CURLINFO_LONG:
 			{
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_long);
-printf("CURLINFO: info_code=%d type=CURLINFO_LONG value=%ld\n",cii.info_code,curlinfo_long);
                 	    if(!PI_unify(cii.arg2, cii.arg2_t, curlinfo_long, PI_INT)) {
                     		PI_FAIL;
 			    }
@@ -474,8 +479,8 @@ printf("CURLINFO: info_code=%d type=CURLINFO_LONG value=%ld\n",cii.info_code,cur
 			{
 			    PWord dbl_var;
 			    int dbl_var_t;
+
             		    curl_easy_getinfo(easyhandle, cii.info_code, &curlinfo_double);
-printf("CURLINFO: info_code=%d type=CURLINFO_DOUBLE value=%f\n",cii.info_code,curlinfo_double);
 			    PI_makedouble(&dbl_var, &dbl_var_t, curlinfo_double);
                 	    if(!PI_unify(cii.arg2, cii.arg2_t, dbl_var, dbl_var_t)) {
 				PI_FAIL;
@@ -487,69 +492,45 @@ printf("CURLINFO: info_code=%d type=CURLINFO_DOUBLE value=%f\n",cii.info_code,cu
 			    /* Make into prolog error */
 			    fprintf(stderr,"CURLINFO proc. error: Unknown type: %d\n", cii.info_type);
 			}
-		    }
-	    }
-
-printf("\nCURLINFO done - Start post-curl_easy_perform processing: opt_action=%d\n",opt_action);
+		    }		/* end switch on cii.info_type */
+	    }			/* end for (int j=1; j<ciiCtr; loop */
 
 	    if (opt_action == CURLOPT_WRITEDATA)
 	    {
 		if (downtype == 0)
 		{
-                /*
-                 * Now, our chunk.memory points to a memory block that is chunk.size
-                 * bytes big and contains the remote file.
-                 */
-
-			/* turn the returned chunk.memory into a uia */
-                PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
-	        if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
-                    PI_SUCCEED;
-                else
-                    PI_FAIL;
-
-		} else
-		{
-printf("opt_action == CURLOPT_WRITEDATA: downtype != 0 filename=%s\n",filename);
-                		/* open the file */
-        	    pagefile = fopen(filename, "wb");
-		    if(pagefile) 
-		    {
-                        	/* write the page body to this file handle */
-                	curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, pagefile);
-
-                        	/* get the remote file & write to local file */
-                	ret = curl_easy_perform(easyhandle);
-
-                	if(ret != CURLE_OK) {
-                    	fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(ret));
-                    	PI_FAIL;
-                	} 
-                        	/* close the header file */
-                	fclose(pagefile);
-		    }	/* end: pagefile exists */
-        	}	/* end: downtype = 1 */
-		}	/* end: opt_action == CURLOPT_WRITEDATA */
-
-		else if (opt_action == CURLOPT_POSTFIELDS)
-		{
-printf("opt_action == CURLOPT_POSTFIELDS\n");
-		    if (result_var_t == 0){
+                       /*
+                 	* Now, our chunk.memory points to a memory block that is chunk.size
+                 	* bytes big and contains the remote file.
+                 	*/
+				/* turn the returned chunk.memory into a uia */
                 	PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
 	        	if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
                     	    PI_SUCCEED;
                 	else
                     	    PI_FAIL;
-		    }
-		}	/* end: opt_action == CURLOPT_POSTFIELDS */
-
-		else if (opt_action == CURLOPT_READDATA)
+		} else /* downtype == 1 */
 		{
-printf("opt_action == CURLOPT_READDATA\n");
-		}	/* end: opt_action == CURLOPT_READDATA */
+                        /* close the header file */
+		    if(pagefile) {
+                	fclose(pagefile);
+		    }
+        	}	/* end: downtype = 1 */
+	    }	/* end: opt_action == CURLOPT_WRITEDATA */
 
+	    else if (opt_action == CURLOPT_POSTFIELDS || opt_action == CURLOPT_READDATA)
+	    {
+	        if (result_var_t == 0){
+                    PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
+	            if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
+                        PI_SUCCEED;
+                    else
+                    	PI_FAIL;
+		}
+	    }		/* end: opt_action==CURLOPT_READDATA || opt_action==CURLOPT_READDAT */
 
-        }
+        }	/* curl_easy_perform succeeded */
+
 	/* shouldn't get here: SUCCEED OR FAIL SHOULD OCCUPY EVERY PATH */
 return 1;
 }

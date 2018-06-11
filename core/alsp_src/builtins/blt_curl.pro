@@ -12,20 +12,29 @@ module curl.
 export curl/2.
 curl(URL, Target)
 	:-
-	Options = [url=URL, writedata=true],
+	Options = [url=URL],
 	cont_curl(Options, Target).
 
 export curl/3.
+curl(URL, [], Target)
+	:-
+	cont_curl([url=URL], Target).
 curl(URL, Opts, Target)
 	:-
+	functor(Opts, '.', 2),
+	!,
 	add_url(URL, Opts, Options),
 	cont_curl(Options, Target).
+curl(URL, Opts, Target)
+	:-
+	printf('Arg %t must be a list!\n',[Opts]),
+	fail.
 
 add_url(URL, SourceOptions, SourceOptions)
 	:-
 	member( url =_, SourceOptions),
 	!.
-add_url(URL, SourceOptions, [url=URL | SourceOptions]).
+add_url(URL, SourceOptions, ['URL'=URL | SourceOptions]).
 	
 cont_curl(Options, Target)
 	:-
@@ -33,14 +42,19 @@ cont_curl(Options, Target)
 	do_curl(TOptions).
 
 
-handle_target(Target, Options, TOptions)
+handle_target(Target, Options, FTOptions)
 	:-
 	var(Target), 
 	!,
 	(member(uia=Target, Options) ->
 		TOptions = Options 
 		; 
-		TOptions = [result=Target | Options] ).
+		TOptions = [result=Target | Options] ),
+	((member(writedata=_, TOptions); member('WRITEDATA'=_, TOptions)) -> 
+		FTOptions = TOptions
+		;
+		FTOptions = ['WRITEDATA'=true | TOptions]
+	).
 
 handle_target(Target, Options, [file=Target | Options])
 	:-
@@ -62,18 +76,27 @@ do_curl(Options)
 	adjust_opts(Options, AdjOptions),
 	cont_do_curl(AdjOptions).
 
-        /* make "stdopts" expand to set these "standard" common options
-    ret += curl_easy_setopt(easyhandle, CURLOPT_MAXREDIRS, 50L);
-    ret += curl_easy_setopt(easyhandle, CURLOPT_TCP_KEEPALIVE, 1L);
-    ret += curl_easy_setopt(easyhandle, CURLOPT_USERAGENT, "curl/7.54.0");
-        */
-
 adjust_opts([], []).
 adjust_opts([Opt | Options], [AdjOpt | AdjOptions])
 	:-
 	adjust_req(Opt, AdjOpt),
 	adjust_opts(Options, AdjOptions).
 
+
+adjust_req(file(F), 'WRITEDATA'=F)
+	:-!.
+adjust_req(file = F, 'WRITEDATA'=F)
+	:-!.
+
+adjust_req(postfields(FF), 'POSTFIELDS'=FF)
+	:-!.
+adjust_req(postfields=FF, 'POSTFIELDS'=FF)
+	:-!.
+
+adjust_req(postdata(FF), 'READDATA'=FF)
+	:-!.
+adjust_req(postdata=FF, 'READDATA'=FF)
+	:-!.
 
 adjust_req(L=R, AdjOpt=R)
 	:-
@@ -103,7 +126,6 @@ adj_opt(Opt, Opt).
 
 cont_do_curl(Options)
 	:-
-write('>>curl_c_builtin'=Options),nl,
 	curl_c_builtin(Options, Error),
 	finish_curl_c(Error, Options).
 
@@ -114,7 +136,7 @@ finish_curl_c(Error, Options)
 
 finish_curl_c(Error, Options)
 	:-
-	Ball = error(curl_error(Error), Options),
+	Ball = curl_error(Error),
 	throw(Ball).
 
 endmod.
@@ -122,8 +144,36 @@ endmod.
 /* ================= SAMPLES ================== *
 ?- curl('http://example.com', X).
 
-?- curl('http://example.com', './my_local_file.txt').
+X='<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
 
-?- curl('https://postman-echo.com/post', postfields('name=admin&shoesize=12')).
+yes.
 
+?- curl('http://example.com', ['RESPONSE_CODE'=RC,total_time=TT], X).
+
+RC=200 
+TT=1.172075 
+X='<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
+
+yes.
+
+?- curl('http://example.com', [writedata='./my_local_file.txt'], _).
+
+yes.
+
+Note: The local file ./my_local_file.txt is created an contains:
+'<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
+
+?- curl('https://postman-echo.com/post', [postfields('name=admin&shoesize=12'),result=RR],_).
+
+RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"headers":{"host":"postman-echo.com","content-length":"22","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"name":"admin","shoesize":"12"},"url":"https://postman-echo.com/post"}'
+
+yes.
+
+?- curl('https://postman-echo.com/post', [postdata='lorem ipsum doler',response_code(RC),total_time(TT)],X).
+
+RC=200 
+TT=2.970517 
+X='{"args":{},"data":"","files":{},"form":{"lorem ipsum doler":""},"headers":{"host":"postman-echo.com","content-length":"17","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum doler":""},"url":"https://postman-echo.com/post"}'
+
+Note: Above, "accept":"* / *" should not have any spaces, but that conflicts with being in a comment.
  * ============================================ */
