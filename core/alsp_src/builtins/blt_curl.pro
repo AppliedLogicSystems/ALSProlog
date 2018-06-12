@@ -12,13 +12,13 @@ module curl.
 export curl/2.
 curl(URL, Target)
 	:-
-	Options = [url=URL],
+	Options = ['URL'=URL],
 	cont_curl(Options, Target).
 
 export curl/3.
 curl(URL, [], Target)
-	:-
-	cont_curl([url=URL], Target).
+	:-!,
+	cont_curl(['URL'=URL], Target).
 curl(URL, Opts, Target)
 	:-
 	functor(Opts, '.', 2),
@@ -32,43 +32,75 @@ curl(URL, Opts, Target)
 
 add_url(URL, SourceOptions, SourceOptions)
 	:-
-	member( url =_, SourceOptions),
+	(member( url =_, SourceOptions); member( 'URL' =_, SourceOptions)),
 	!.
 add_url(URL, SourceOptions, ['URL'=URL | SourceOptions]).
 	
 cont_curl(Options, Target)
 	:-
-	handle_target(Target, Options, TOptions),
+	uc_unw(Options, MOptions),
+	handle_target(Target, MOptions, TOptions),
 	do_curl(TOptions).
 
+uc_unw([], []).
+uc_unw([Opt | Options], [MOpt | MOptions])
+	:-
+	mod_uc_unw(Opt, MOpt),
+	uc_unw(Options, MOptions).
 
-handle_target(Target, Options, FTOptions)
+mod_uc_unw(Opt, AdjTag=A)
+	:-
+	functor(Opt, F, 1),
+	make_uc_sym(F, UC_F),
+	adj_opt(UC_F, AdjTag),
+	!,
+	arg(1, Opt, A).
+
+mod_uc_unw(L=R, AdjOpt=R)
+	:-
+	atom(L),
+	make_uc_sym(L, UC_L),
+	adj_opt(UC_L, AdjOpt),
+	!.
+
+mod_uc_unw(Exp, _)
+	:-
+	printf('Unknown curl option: %t\n', [Exp]),
+	!,
+	fail.
+	
+adj_opt('UIA', 'RESULT') :-!.
+adj_opt('FILE', 'WRITEDATA') :-!.
+adj_opt('RES', 'RESULT') :-!.  
+adj_opt(Opt, Opt).
+
+handle_target(Target, Options, WTOptions)
 	:-
 	var(Target), 
 	!,
-	(member(uia=Target, Options) ->
-		TOptions = Options 
-		; 
-		TOptions = [result=Target | Options] ),
-	((member(writedata=_, TOptions); member('WRITEDATA'=_, TOptions)) -> 
-		FTOptions = TOptions
-		;
-		FTOptions = ['WRITEDATA'=true | TOptions]
-	).
+	check_uia_target(Target, Options, TOptions),
+	check_writedata(TOptions, WTOptions).
 
-handle_target(Target, Options, [file=Target | Options])
+handle_target(Target, Options, ['RESULT' = Target | WOptions])
 	:-
-	atom(Target), !.
+	check_writedata(Options, WOptions).
 
-handle_target(postfields=FF, Options, [postfields=FF | Options])
-	:-!.
-handle_target(postfields(FF), Options, [postfields=FF | Options])
-	:-!.
+check_uia_target(Target, Options, Options)
+	:-
+	(member('UIA'=Target, Options) ; 
+		member('RESULT'=Target, Options) ),
+	!.
 
-handle_target(postdata=FF, Options, [postdata=FF | Options])
-	:-!.
-handle_target(postdata(FF), Options, [postdata=FF | Options])
-	:-!.
+check_uia_target(Target, Options, ['RESULT' = Target | Options]).
+
+check_writedata(Options, Options)
+	:-
+	( member('WRITEDATA'=true, Options) ;
+	  member('POSTFIELDS'=_, Options) ;
+	  member('READDATA'=_, Options) ),
+	!.
+check_writedata(Options, ['WRITEDATA'=true | Options]).
+
 
 export do_curl/1.
 do_curl(Options)
@@ -86,16 +118,6 @@ adjust_opts([Opt | Options], [AdjOpt | AdjOptions])
 adjust_req(file(F), 'WRITEDATA'=F)
 	:-!.
 adjust_req(file = F, 'WRITEDATA'=F)
-	:-!.
-
-adjust_req(postfields(FF), 'POSTFIELDS'=FF)
-	:-!.
-adjust_req(postfields=FF, 'POSTFIELDS'=FF)
-	:-!.
-
-adjust_req(postdata(FF), 'READDATA'=FF)
-	:-!.
-adjust_req(postdata=FF, 'READDATA'=FF)
 	:-!.
 
 adjust_req(L=R, AdjOpt=R)
@@ -118,7 +140,6 @@ adjust_req(Opt, _)
 	Ball = error(curl_error(unknown_option(Opt))),
 	throw(Ball).
 	
-
 adj_opt('UIA', 'RESULT') :-!.
 adj_opt('RES', 'RESULT') :-!.  
 adj_opt(Opt, Opt).
@@ -160,7 +181,7 @@ yes.
 
 yes.
 
-Note: The local file ./my_local_file.txt is created an contains:
+Note: The local file ./my_local_file.txt is created and contains:
 '<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
 
 ?- curl('https://postman-echo.com/post', [postfields('name=admin&shoesize=12'),result=RR],_).
@@ -169,11 +190,11 @@ RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"hea
 
 yes.
 
-?- curl('https://postman-echo.com/post', [postdata='lorem ipsum doler',response_code(RC),total_time(TT)],X).
+?- curl('https://postman-echo.com/post', [readdata='lorem ipsum doler',response_code(RC),total_time(TT)],X).
 
 RC=200 
-TT=2.970517 
-X='{"args":{},"data":"","files":{},"form":{"lorem ipsum doler":""},"headers":{"host":"postman-echo.com","content-length":"17","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum doler":""},"url":"https://postman-echo.com/post"}'
+TT=1.816543 
+X='{"args":{},"data":"","files":{},"form":{"lorem ipsum doler":""},"headers":{"host":"postman-echo.com","content-length":"17","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum doler":""},"url":"https://postman-echo.com/post"}' 
 
 Note: Above, "accept":"* / *" should not have any spaces, but that conflicts with being in a comment.
  * ============================================ */
