@@ -170,7 +170,7 @@ int
 curl_c_builtin(void)
 {
     PWord oplist, error, head, tail, arg1, arg2, result_var;
-    int oplist_t, error_t, head_t, tail_t, arg1_t, arg2_t, result_var_t, i; // arity;
+    int oplist_t, error_t, head_t, tail_t, arg1_t, arg2_t, result_var_t, i, have_result_var=1; 
     PWord uia_var;
     int uia_var_t;
     int opt_action;
@@ -246,6 +246,7 @@ curl_c_builtin(void)
 
 	    if (0==strcmp("RESULT", a1buf)){
 		/* save the prolog result var */
+		have_result_var = 0;
 		result_var = arg2;
 		result_var_t = arg2_t;
 	    } else 
@@ -520,7 +521,7 @@ curl_c_builtin(void)
 
 	    else if (opt_action == CURLOPT_POSTFIELDS || opt_action == CURLOPT_READDATA)
 	    {
-	        if (result_var_t == 0){
+	        if (have_result_var == 0){
                     PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
 	            if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
                         PI_SUCCEED;

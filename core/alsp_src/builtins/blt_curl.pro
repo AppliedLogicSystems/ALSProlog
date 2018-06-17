@@ -3,153 +3,169 @@
  |	Copyright (c) 2018 Applied Logic Systems, Inc.
  |
  |	Direct to curl interface
+ |	REST-inspired user level
  |
  | Author: Chuck Houpt, Ken Bowen
  *=====================================================================*/
 
-module curl.
+module inet.
 
-export curl/2.
-curl(URL, Target)
+/* ---------------------------------------*
+ |    inet(RESTVerb, URL, Options)
+ * ---------------------------------------*/
+export inet/3.
+inet(RESTVerb, URL, Options)
 	:-
-	Options = ['URL'=URL],
-	cont_curl(Options, Target).
-
-export curl/3.
-curl(URL, [], Target)
-	:-!,
-	cont_curl(['URL'=URL], Target).
-curl(URL, Opts, Target)
-	:-
-	functor(Opts, '.', 2),
+	member(RESTVerb, [get,post]),
 	!,
-	add_url(URL, Opts, Options),
-	cont_curl(Options, Target).
-curl(URL, Opts, Target)
-	:-
-	printf('Arg %t must be a list!\n',[Opts]),
-	fail.
-
-add_url(URL, SourceOptions, SourceOptions)
-	:-
-	(member( url =_, SourceOptions); member( 'URL' =_, SourceOptions)),
-	!.
-add_url(URL, SourceOptions, ['URL'=URL | SourceOptions]).
+	uppercase_unwind(Options, UUOptions),
+	refine_opts(RESTVerb, URL, UUOptions, ROptions),
+	do_curl(ROptions).
 	
-cont_curl(Options, Target)
+inet(RESTVerb, URL, Options)
 	:-
-	uc_unw(Options, MOptions),
-	handle_target(Target, MOptions, TOptions),
-	do_curl(TOptions).
+	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
 
-uc_unw([], []).
-uc_unw([Opt | Options], [MOpt | MOptions])
+uppercase_unwind([], []).
+uppercase_unwind([Opt | Options], [MOpt | MOptions])
 	:-
-	mod_uc_unw(Opt, MOpt),
-	uc_unw(Options, MOptions).
+	uc_unw(Opt, MOpt),
+	uppercase_unwind(Options, MOptions).
 
-mod_uc_unw(Opt, AdjTag=A)
+uc_unw(Opt, UC_F=A)
 	:-
 	functor(Opt, F, 1),
-	make_uc_sym(F, UC_F),
-	adj_opt(UC_F, AdjTag),
 	!,
+	make_uc_sym(F, UC_F),
 	arg(1, Opt, A).
 
-mod_uc_unw(L=R, AdjOpt=R)
+uc_unw(L=R, UC_L=R)
 	:-
 	atom(L),
-	make_uc_sym(L, UC_L),
-	adj_opt(UC_L, AdjOpt),
-	!.
+	!,
+	make_uc_sym(L, UC_L).
 
-mod_uc_unw(Exp, _)
+uc_unw(Exp, _)
 	:-
 	printf('Unknown curl option: %t\n', [Exp]),
 	!,
 	fail.
 	
-adj_opt('UIA', 'RESULT') :-!.
-adj_opt('FILE', 'WRITEDATA') :-!.
-adj_opt('RES', 'RESULT') :-!.  
-adj_opt(Opt, Opt).
-
-handle_target(Target, Options, WTOptions)
+refine_opts(get, URL, Options, ['URL'=URL | ROptions])
 	:-
-	var(Target), 
-	!,
-	check_uia_target(Target, Options, TOptions),
-	check_writedata(TOptions, WTOptions).
+	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
+	delete_from(Options, 'FILE', Options1, FILEExprs),
+	delete_from(Options1, 'WRITEDATA', Options2, WRITEDATAExprs),
+	get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions).
 
-handle_target(Target, Options, ['RESULT' = Target | WOptions])
+refine_opts(post, URL, Options, ['URL'=URL |ROptions])
 	:-
-	check_writedata(Options, WOptions).
+	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
+	delete_from(Options, 'FILE', Options1, FILEExprs),
+	delete_from(Options1, 'FIELDS', Options2, FIELDSExprs),
+	delete_from(Options2, 'DATA', Options3, DATAExprs),
+	post_ck_file_fd(FILEExprs, FIELDSExprs, DATAExprs, Options3, ROptions).
 
-check_uia_target(Target, Options, Options)
+	/* ------------------------------------------------------------------ *
+	 |    get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions)
+	 * ------------------------------------------------------------------ */
+	%% No 'FILE'= and no 'WRITEDATA' =
+	%% so for 'get', we need to specify 'WRITEDATA'=true
+get_ck_file_wrd([], [], Options2, ['WRITEDATA'=true | Options2]) 
+	:-!.
+
+	%% There is a 'FILE'=FileExpr but no 'WRITEDATA' =
+	%% Assume FileExpr is an atom naming a file, 
+	%% and so for 'get', we need to specify 'WRITEDATA'=FileExpr
+get_ck_file_wrd([FileExpr | _], [], Options2, ['WRITEDATA'=FileExpr |  Options2]) 
+	:-!.
+
+	%% There are both a 'FILE'=FileExpr and a 'WRITEDATA' = WRITEDATAExpr
+	%% Assume FileExpr is an atom naming a file, 
+	%% Let the 'FILE'=FileExpr trump the 'WRITEDATA' = WRITEDATAExpr, but
+	%% warn the user if the two expressions are different
+get_ck_file_wrd([FileExpr | _], [WRITEDATAExpr | _], Options2, ['WRITEDATA'=FileExpr |  Options2])
 	:-
-	(member('UIA'=Target, Options) ; 
-		member('RESULT'=Target, Options) ),
-	!.
+	(FileExpr \== WRITEDATAExpr ->
+		printf('Warning: CURL conflict between options ''FILE''=%t and ''WRITEDATA''=%t\n',
+			[FileExpr, WRITEDATAExpr]),
+		printf('Using: ''WRITEDATA''=%t\n', [FileExpr])
+		;
+		true
+	).
+		
+	/* ---------------------------------------------------------------------- *
+	 | post_ck_file_fd(FILEExprs, FIELDSExprs, DATAExprs, Options3, ROptions)
+	 * ---------------------------------------------------------------------- */
+	%% No 'FILE'= and no 'FIELDS' = and no 'DATA'=
+	%% For 'post', we need some sort of fields or data to send;
+	%% So this is an error:
+post_ck_file_fd([], [], [], _, _) 
+	:-!,
+	printf('Error: No fields or data supplied for POST\n'),
+	fail.
 
-check_uia_target(Target, Options, ['RESULT' = Target | Options]).
+	%% No 'FILE'= and no 'DATA'= but there is a 'FIELDS'=
+post_ck_file_fd([], [FIELDSExpr | _], [], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
+	:-!.
 
-check_writedata(Options, Options)
+	%% No 'FILE'= and no 'FIELDS'= but there is a 'DATA'=
+post_ck_file_fd([], [], [DATAExpr | _], Options3, ['READDATA'=DATAExpr |  Options3]) 
+	:-!.
+
+	%% No 'FILE'= but there is a 'FIELDS'= and there is a 'DATA'=
+	%% Let the 'FIELDS'=FF trump the 'DATA'=DD:
+post_ck_file_fd([], [FIELDSExpr | _], [DATAExpr | _], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
+	:-!.
+
+	%% There is a 'FILE'=fields(...), but no 'FIELDS'='', and no 'DATA'= 
+post_ck_file_fd([fields(SourceFile) | _], [], [], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
+	:-!,
+	grab_as_atom(SourceFile, FIELDSExpr).
+
+	%% There is a 'FILE'=data(...), but no 'FIELDS'=, and no 'DATA'=
+post_ck_file_fd([data(SourceFile) | _], [], [], Options3, ['READDATA'=DATAExpr |  Options3]) 
+	:-!,
+	grab_as_atom(SourceFile, DATAExpr).
+
+post_ck_file_fd([FileExpr | _], [FieldsExpr | _], [DataExpr | _], _, _) 
 	:-
-	( member('WRITEDATA'=true, Options) ;
-	  member('POSTFIELDS'=_, Options) ;
-	  member('READDATA'=_, Options) ),
-	!.
-check_writedata(Options, ['WRITEDATA'=true | Options]).
+	printf('Error: Can''t resolve CURL conflict between options ''FILE''=%t, ''FIELDS''=%t, ''DATA''=%t\n',
+		[FileExpr, FieldsExpr, DataExpr]),
+	fail.
 
+export delete_from/4.
+delete_from([], _, [], []).
+
+delete_from([Tag=Val | RestList], Tag, RestResult, [Val | RestDel])
+	:-!,
+	delete_from(RestList, Tag, RestResult, RestDel).
+
+delete_from([Eq | RestList], Tag, [Eq | RestResult], RestDel)
+	:-!,
+	delete_from(RestList, Tag, RestResult, RestDel).
+	
+export grab_as_atom/2.
+grab_as_atom(File, Atom)
+        :-
+        grab_lines(File, Lines),
+        open(string(String), write, S),
+        write_lines_to_string(Lines, S),
+        close(S),
+	atom_codes(Atom, String).
+
+export write_lines_to_string/2.
+write_lines_to_string([], _).
+write_lines_to_string([Line | Lines], S)
+        :-
+        write(S, Line),
+        write_lines_to_string(Lines, S).
 
 export do_curl/1.
 do_curl(Options)
 	:-
-	adjust_opts(Options, AdjOptions),
-	cont_do_curl(AdjOptions).
-
-adjust_opts([], []).
-adjust_opts([Opt | Options], [AdjOpt | AdjOptions])
-	:-
-	adjust_req(Opt, AdjOpt),
-	adjust_opts(Options, AdjOptions).
-
-
-adjust_req(file(F), 'WRITEDATA'=F)
-	:-!.
-adjust_req(file = F, 'WRITEDATA'=F)
-	:-!.
-
-adjust_req(L=R, AdjOpt=R)
-	:-
-	atom(L),
-	make_uc_sym(L, UC_L),
-	adj_opt(UC_L, AdjOpt),
-	!.
-
-adjust_req(Opt, AdjOpt=A)
-	:-
-	functor(Opt, F, 1),
-	make_uc_sym(F, UC_F),
-	adj_opt(UC_F, AdjOpt),
-	!,
-	arg(1, Opt, A).
-
-adjust_req(Opt, _)
-	:-
-	Ball = error(curl_error(unknown_option(Opt))),
-	throw(Ball).
-	
-adj_opt('UIA', 'RESULT') :-!.
-adj_opt('RES', 'RESULT') :-!.  
-adj_opt(Opt, Opt).
-
-
-cont_do_curl(Options)
-	:-
 	curl_c_builtin(Options, Error),
 	finish_curl_c(Error, Options).
-
 
 finish_curl_c(Error, Options)
 	:-
@@ -162,39 +178,49 @@ finish_curl_c(Error, Options)
 
 endmod.
 
+
 /* ================= SAMPLES ================== *
-?- curl('http://example.com', X).
 
-X='<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
+?- inet(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
+
+RR='<!doctype html>\n<html>\n<head>\n    <title>Example Domain .... More information...</a></p>\n</div>\n</body>\n</html>\n' 
+RC=200 
+TTT=0.693073 
 
 yes.
+--------------
 
-?- curl('http://example.com', ['RESPONSE_CODE'=RC,total_time=TT], X).
+?- inet(get,'http://example.com', [response_code(RC),total_time(TTT),file='./myfile.txt'])
 
 RC=200 
-TT=1.172075 
-X='<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
+TTT=1.172075 
 
 yes.
+--------------
 
-?- curl('http://example.com', [writedata='./my_local_file.txt'], _).
+NOTE: Local file ./myfile.txt was created and now contains the same response as TT in the sample above.
 
-yes.
 
-Note: The local file ./my_local_file.txt is created and contains:
-'<!doctype html>\n<html>\n<head>\n    <title>......</a></p>\n</div>\n</body>\n</html>\n'
+?- inet(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
 
-?- curl('https://postman-echo.com/post', [postfields('name=admin&shoesize=12'),result=RR],_).
-
-RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"headers":{"host":"postman-echo.com","content-length":"22","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"name":"admin","shoesize":"12"},"url":"https://postman-echo.com/post"}'
+RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"headers":{"host":"postman-echo.com","content-length":"22","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"name":"admin","shoesize":"12"},"url":"https://postman-echo.com/post"}' 
 
 yes.
-
-?- curl('https://postman-echo.com/post', [readdata='lorem ipsum doler',response_code(RC),total_time(TT)],X).
-
-RC=200 
-TT=1.816543 
-X='{"args":{},"data":"","files":{},"form":{"lorem ipsum doler":""},"headers":{"host":"postman-echo.com","content-length":"17","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum doler":""},"url":"https://postman-echo.com/post"}' 
 
 Note: Above, "accept":"* / *" should not have any spaces, but that conflicts with being in a comment.
+--------------
+
+Let file ./lorem.txt contain:
+
+lorem ipsum doler
+zip zap zing
+
+?- inet(post, 'https://postman-echo.com/post', [file=data('./lorem.txt'), result=RR]).
+
+RR='{"args":{},"data":"","files":{},"form":{"lorem ipsum dolerzip zap zing":""},"headers":{"host":"postman-echo.com","content-length":"29","accept":"*/*","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum dolerzip zap zing":""},"url":"https://postman-echo.com/post"}' 
+
+yes.
+
+Note: Above, "accept":"* / *" should not have any spaces, but that conflicts with being in a comment.
+--------------
  * ============================================ */
