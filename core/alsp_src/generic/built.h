@@ -448,3 +448,4 @@ extern	int	pbi_pos_atom	PARAMS(( void ));
 #endif /* SUBTYPES */
 
 extern	int	curl_c_builtin	PARAMS(( void ));
+extern	int	lookup_opt_info	PARAMS(( void ));

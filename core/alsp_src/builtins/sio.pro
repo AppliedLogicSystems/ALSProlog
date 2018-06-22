@@ -15,6 +15,7 @@
 module sio.
 use windows.
 use tcltk.
+use inet.
 
 :- auto_use(sio).
 
@@ -644,13 +645,14 @@ export open/4.
 open(Source_sink,Mode,Stream,Options) 
 	:-
 	check_source_sink_and_mode(Source_sink,Mode),
-	check_open_options(Options),
-	check_alias(Options, Source_sink, Alias),
-	alias_extend_opts(Alias, Options, XOptions),
+	xtd_check_open_options4(Options,Source_sink, NonURLOptions, URLOptions),
+%	check_open_options(Options),
+	check_alias(NonURLOptions, Source_sink, Alias),
+	alias_extend_opts(Alias, NonURLOptions, XNonURLOptions),
 
-	check_repositionability(Source_sink,Mode,Options,Positionability),
+	check_repositionability(Source_sink,Mode,NonURLOptions,Positionability),
 	var_ok(Stream),
-	open_stream(Source_sink,Mode,XOptions,Stream),
+	open_stream(Source_sink,Mode,XNonURLOptions,URLOptions,Stream),
 	(Alias = no(alias) -> true ; set_alias(Alias, Stream)),
 	stream_identifier(Stream,Id),
 	set_stream_table(Id,Stream),
@@ -722,6 +724,10 @@ check_source_sink_and_mode(tcl_transfer(_,_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 
+check_source_sink_and_mode(url(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+
 check_source_sink_and_mode(Source_sink,Mode) :-
 	domain_error(source_sink, Source_sink, 2).
 
@@ -753,7 +759,59 @@ check_mode(Mode,_) :-
  *
  *	Examines the Options argument for validity and triggers an exception
  *	if not valid.
+
+xtd_check_open_options(Options,Source_sink)
+	:-
+	Source_sink \=  url(_),
+	!,
+	check_open_options(Options).
+
+xtd_check_open_options(Options,url(_))
+	:-
+	okOpenOptions(OKOptions),
+	xtd_check_list_options(Options, OKOptions, url(_)).
+%write('**AFTER_xtd_check_list_options'),nl.
  */
+
+
+%%%%%%%%%%%%%%
+
+xtd_check_open_options4(Options,Source_sink, Options, [])
+	:-
+%pbi_write(enter_check_open_options4_1=Source_sink),pbi_nl,
+	Source_sink \=  url(_),
+	!,
+	check_open_options(Options).
+
+xtd_check_open_options4(Options,url(_), NonURLOptions, URLOptions)
+	:-
+%pbi_write(enter_check_open_options4_2),pbi_nl,
+	okOpenOptions(OKOptions),
+	xtd_check_list_options(Options, OKOptions, url(_), NonURLOptions, URLOptions).
+%pbi_write('**AFTER_xtd_check_list_options'),pbi_nl.
+
+okOpenOptions(
+		[type(text),type(binary),
+		 alias(_),
+		 reposition(true), reposition(false),
+		 eof_action(error), eof_action(eof_code), eof_action(reset),
+		 buffering(byte),buffering(line),buffering(block),
+		 snr_action(wait), snr_action(error),
+		 snr_action(snr_code),
+		 bufsize(_),
+		 '$stream_identifier'(_),	%% ALS internal use only
+         	 prompt_goal(_),
+		 maxdepth(_), line_length(_), depth_computation(_),
+		 blocking(_),
+		 perms(_), perms(_,_,_),
+		 connects(_), 				%% sockets
+		 address(_),address(_,_),
+		 write_eoln_type(cr), write_eoln_type(lf), write_eoln_type(crlf),
+		 read_eoln_type(cr), read_eoln_type(lf), read_eoln_type(crlf),
+		 read_eoln_type(universal)
+%		 result=_				%% url/curl
+		]
+).
 
 check_open_options(Options) :-
 	check_list_options(Options,
@@ -801,6 +859,64 @@ check_list_option(M,ML) :-
 check_list_option(M,ML) :-
 	domain_error(stream_option,M,3).
 
+/*
+ | xtd_check_list_options(Options, OKOptions, url(_), NonURLOptions, URLOptions),
+ */
+xtd_check_list_options(V, ML, S_s, _, _) :-
+	var(V),
+	!,
+	instantiation_error(2).
+xtd_check_list_options([], ML, S_s, [], []) :-
+	!.
+xtd_check_list_options([H|T], ML, S_s, NonURLOptions, URLOptions) :-
+	xtd_check_list_option(H,ML, S_s,NonURLOptions, NUOTail, URLOptions, UOTail),
+	!,
+	xtd_check_list_options(T,ML,S_s, NUOTail, UOTail).
+xtd_check_list_options(Culprit,ML,S_s,_,_) :-
+	type_error(list, Culprit,2).
+
+xtd_check_list_option(V,ML,S_s,_,_,_,_) :-
+	var(V),
+	!,
+	instantation_error(3).
+
+xtd_check_list_option(M,ML,S_s,[M | NUOTail], NUOTail, URLOT, URLOT) :-
+	dmember(M,ML),
+	!.
+
+xtd_check_list_option(M,ML,url(_),NUOT, NUOT, [Tag=TVal | URLOTail], URLOTail) :-
+	xtract_curl_tag(M, Tag, TVal),
+	(Tag='RESULT'; lookup_opt_info(Tag)),
+	!.
+xtd_check_list_option(M,ML,S_s,_,_,_,_) :-
+	domain_error(stream_option,M,3).
+
+
+xtract_curl_tag(ITag=TVal, Tag, TVal) 
+	:-!,
+	make_uc_sym(ITag, Tag).
+xtract_curl_tag(M, Tag, TVal) 
+	:-!,
+	functor(M, ITag, 1),
+	arg(1, M, TVal),
+	make_uc_sym(ITag, Tag).
+
+%% Copied & improved on: from library/strings.pro:
+make_uc_sym(InSym, UCSym)
+        :-
+        atom_codes(InSym, ISCs),
+        make_uc(ISCs, UCCs),
+        atom_codes(UCSym, UCCs).
+
+%% Copied from library/strings.pro:
+make_uc([], []).
+make_uc([C | Cs], [UC | UCs])
+        :-
+        0'a =< C, C =< 0'z, !, UC is C - 32,
+        make_uc(Cs, UCs).
+make_uc([C | Cs], [C | UCs])
+        :-
+        make_uc(Cs, UCs).
 
 /*----------------------------------------------------------*
  | check_alias/3
@@ -890,73 +1006,77 @@ is_repositionable(FileName,_) :-
  *	Performs the open of Source_sink.
  */
 
-open_stream(null_stream(Name),Mode,Options,Stream) 
+open_stream(null_stream(Name),Mode,Options,_,Stream) 
 	:-!,
 	open_null_stream(Name,Mode,Options,Stream).
 
-open_stream(Source_sink,Mode,Options,Stream) 
+open_stream(Source_sink,Mode,Options,_,Stream) 
 	:-
 	atom(Source_sink),
 	!,
 	open_file_stream(Source_sink,Mode,Options,Stream).
 
-open_stream(sysV_queue(Key),Mode,Options,Stream) 
+open_stream(sysV_queue(Key),Mode,Options,_,Stream) 
 	:-!,
 	open_sysVq_stream(Key,Mode,Options,Stream).
 
-open_stream(ssbq(Q_Name),Mode,Options,Stream) 
+open_stream(ssbq(Q_Name),Mode,Options,_,Stream) 
 	:- !,
 	open_ssbq_stream(Q_Name,Mode,Options,Stream).
 
-open_stream(nsocket(Socket),Mode,Options,Stream) 
+open_stream(nsocket(Socket),Mode,Options,_,Stream) 
 	:- !,
 	open_nsocket_stream(Socket, Mode, Options, Stream).
 	
-open_stream(Socket,Mode,Options,Stream) 
+open_stream(Socket,Mode,Options,_,Stream) 
 	:-
 	functor(Socket,socket,_),
 	!,
 	open_socket_stream(Socket,Mode,Options,Stream).
 
-open_stream(string(String),Mode,Options,Stream) 
+open_stream(string(String),Mode,Options,_,Stream) 
 	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
 
-open_stream(code_list(String),Mode,Options,Stream) 
+open_stream(code_list(String),Mode,Options,_,Stream) 
 	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_string_stream(String,Mode,Options,Stream).
 
-open_stream(char_list(String),Mode,Options,Stream) 
+open_stream(char_list(String),Mode,Options,_,Stream) 
 	:- !,
 	(nonvar(String),!, String = [_|_]; true),
 	open_char_list_stream(String,Mode,Options,Stream).
 
-open_stream(atom(Atom),Mode,Options,Stream) 
+open_stream(atom(Atom),Mode,Options,_,Stream) 
 	:- !,
 	(nonvar(Atom),!,atom(Atom); true),
 	open_atom_stream(Atom,Mode,Options,Stream).
 
-open_stream(window(WinName),Mode,Options,Stream) 
+open_stream(window(WinName),Mode,Options,_,Stream) 
 	:- !,
 	open_window_stream(WinName,Mode,Options,Stream).
 
-open_stream(tk_win(Interp,WinName),Mode,Options,Stream) 
+open_stream(tk_win(Interp,WinName),Mode,Options,_,Stream) 
 	:- !,
 	open_tk_window_stream(WinName,Interp,Mode,Options,Stream).
 
-open_stream(console(Name), Mode, Options, Stream) 
+open_stream(console(Name), Mode, Options, _,Stream) 
 	:- !,
 	open_console_stream(Name, Mode, 0, Options, Stream).
 	
-open_stream(console_error(Name), Mode, Options, Stream) 
+open_stream(console_error(Name), Mode, Options, _,Stream) 
 	:- !,
 	open_console_stream(Name, Mode, 1, Options, Stream).
 
-open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,Stream) 
+open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,_,Stream) 
 	:- !,
 	open_tcl_transfer_stream(CmdTemplate,Interp,Mode,Options,Stream).
+
+open_stream(url(URL),Mode,NonURLOptions,URLOptions,Stream) 
+	:- !,
+	open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams
@@ -1669,6 +1789,27 @@ open_console_stream(Source_sink, Mode, ErrorMode, Options, Stream)
 open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
 
+/* ------------------------------- *
+	URL Streams
+ * ------------------------------- */
+
+open_url_stream(Source_sink,read,NonURLOptions,URLOptions,Stream)
+	:-
+	inet:delete_from(URLOptions, 'RESULT', RemURLOptions, Vals),
+	(Vals = [VV] -> WW = VV ; true),
+
+	inet(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
+	open(atom(WW), read, Stream, NonURLOptions).
+
+open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream)
+	:-
+	open(string(StreamString), write, Stream, NonURLOptions),
+	freeze(StreamString, 
+	    (atom_codes(StringAtom, StreamString),
+%pbi_write(ss=StringString),pbi_nl,
+%pbi_write(sa=StringAtom),pbi_nl,
+	     inet(post, URL, [data=StringAtom | URLOptions])  )
+	).
 
 		/*-----------*
 		 |  WINDOWS  |

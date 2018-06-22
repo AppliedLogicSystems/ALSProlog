@@ -152,6 +152,36 @@ lookup_code(const char *opt_name) {
     return 1;
 }
 
+int 
+lookup_opt_info(void)
+{
+    PWord op_str;
+    int op_str_t;
+    char op_strbuf[BUFSIZE];
+
+    PI_getan(&op_str, &op_str_t, 1);
+
+    if (op_str_t == PI_SYM){
+	PI_getsymname(op_strbuf,op_str,BUFSIZE);
+    } else if (op_str_t == PI_UIA ){
+	PI_getuianame(op_strbuf,op_str,BUFSIZE);
+    } 
+
+	    /* check CURLINFO first */
+	char *xstr = normalize_info(op_strbuf);
+	int opt_val = lookup_code(xstr);
+	if (opt_val > 1){
+		PI_SUCCEED;
+	} else {
+	    *xstr = normalize_opt(op_strbuf);
+	    opt_val = lookup_code(xstr);
+	    if (opt_val > 1)
+		PI_SUCCEED;
+	    else
+		PI_FAIL;
+	}
+}
+
 	/* struct in which to save info about incoming CURLINFO equations, for
 	   processing after     curl_easy_perform(easyhandle)     call  */
 	   
