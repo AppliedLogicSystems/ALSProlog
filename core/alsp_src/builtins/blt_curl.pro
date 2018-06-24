@@ -38,12 +38,14 @@ http(RESTVerb, URL, Options)
 	:-
 	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
 
+export uppercase_unwind/2.
 uppercase_unwind([], []).
 uppercase_unwind([Opt | Options], [MOpt | MOptions])
 	:-
 	uc_unw(Opt, MOpt),
 	uppercase_unwind(Options, MOptions).
 
+export uc_unw/2.
 uc_unw(Opt, UC_F=A)
 	:-
 	functor(Opt, F, 1),
@@ -176,7 +178,8 @@ write_lines_to_string([Line | Lines], S)
 export do_curl/1.
 do_curl(Options)
 	:-
-	curl_c_builtin(Options, Error),
+	uppercase_unwind(Options, UCOptions),
+	curl_c_builtin(UCOptions, Error),
 	finish_curl_c(Error, Options).
 
 finish_curl_c(Error, Options)
@@ -255,7 +258,7 @@ endmod.
 
 /* ================= SAMPLES ================== *
 
-?- inet(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
+?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
 
 RR='<!doctype html>\n<html>\n<head>\n    <title>Example Domain .... More information...</a></p>\n</div>\n</body>\n</html>\n' 
 RC=200 
@@ -264,7 +267,7 @@ TTT=0.693073
 yes.
 --------------
 
-?- inet(get,'http://example.com', [response_code(RC),total_time(TTT),file='./myfile.txt'])
+?- http(get,'http://example.com', [response_code(RC),total_time(TTT),file='./myfile.txt'])
 
 RC=200 
 TTT=1.172075 
@@ -275,7 +278,7 @@ yes.
 NOTE: Local file ./myfile.txt was created and now contains the same response as TT in the sample above.
 
 
-?- inet(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
+?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
 
 RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"headers":{"host":"postman-echo.com","content-length":"22","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"name":"admin","shoesize":"12"},"url":"https://postman-echo.com/post"}' 
 
@@ -289,7 +292,7 @@ Let file ./lorem.txt contain:
 lorem ipsum doler
 zip zap zing
 
-?- inet(post, 'https://postman-echo.com/post', [file=data('./lorem.txt'), result=RR]).
+?- http(post, 'https://postman-echo.com/post', [file=data('./lorem.txt'), result=RR]).
 
 RR='{"args":{},"data":"","files":{},"form":{"lorem ipsum dolerzip zap zing":""},"headers":{"host":"postman-echo.com","content-length":"29","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum dolerzip zap zing":""},"url":"https://postman-echo.com/post"}' 
 
