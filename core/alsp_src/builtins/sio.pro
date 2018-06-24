@@ -15,7 +15,7 @@
 module sio.
 use windows.
 use tcltk.
-use inet.
+use curl.
 
 :- auto_use(sio).
 
@@ -1795,10 +1795,11 @@ open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
 
 open_url_stream(Source_sink,read,NonURLOptions,URLOptions,Stream)
 	:-
-	inet:delete_from(URLOptions, 'RESULT', RemURLOptions, Vals),
+	delete_from(URLOptions, 'RESULT', RemURLOptions, Vals),
 	(Vals = [VV] -> WW = VV ; true),
 
-	inet(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
+%	inet(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
+	http(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
 	open(atom(WW), read, Stream, NonURLOptions).
 
 open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream)
@@ -1808,7 +1809,8 @@ open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream)
 	    (atom_codes(StringAtom, StreamString),
 %pbi_write(ss=StringString),pbi_nl,
 %pbi_write(sa=StringAtom),pbi_nl,
-	     inet(post, URL, [data=StringAtom | URLOptions])  )
+%	     inet(post, URL, [data=StringAtom | URLOptions])  )
+	     http(post, URL, [data=StringAtom | URLOptions])  )
 	).
 
 		/*-----------*

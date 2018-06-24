@@ -8,11 +8,12 @@
  | Author: Chuck Houpt, Ken Bowen
  *=====================================================================*/
 
-module inet.
+module curl.
 
 /* ---------------------------------------*
  |    inet(RESTVerb, URL, Options)
  * ---------------------------------------*/
+/*
 export inet/3.
 inet(RESTVerb, URL, Options)
 	:-
@@ -21,8 +22,19 @@ inet(RESTVerb, URL, Options)
 	uppercase_unwind(Options, UUOptions),
 	refine_opts(RESTVerb, URL, UUOptions, ROptions),
 	do_curl(ROptions).
+*/
+
+export http/3.
+http(RESTVerb, URL, Options)
+	:-
+	member(RESTVerb, [get,post]),
+	!,
+	uppercase_unwind(Options, UUOptions),
+	refine_opts(RESTVerb, URL, UUOptions, ROptions),
+	do_curl(ROptions).
 	
-inet(RESTVerb, URL, Options)
+	
+http(RESTVerb, URL, Options)
 	:-
 	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
 
@@ -175,6 +187,68 @@ finish_curl_c(Error, Options)
 	:-
 	Ball = curl_error(Error),
 	throw(Ball).
+
+
+%%% ===================== curl/1-3 ===================================== +++
+%%%	Similarly built over do_curl(Options).
+
+export curl/1.
+curl(Options)
+	:-
+  	do_curl(Options).
+
+export curl/2.
+curl(URL, Target)
+  	:-
+ 	Options = ['URL'=URL],
+  	cont_curl(Options, Target).
+  
+export curl/3.
+curl(URL, [], Target)
+ 	:-!,
+ 	cont_curl(['URL'=URL], Target).
+
+curl(URL, Opts, Target)
+  	:-
+  	functor(Opts, '.', 2),
+	!,
+  	add_url(URL, Opts, Options),
+  	cont_curl(Options, Target).
+
+curl(URL, Opts, Target)
+	:-
+	printf('Arg %t must be a list!\n',[Opts]),
+	fail.
+  
+add_url(URL, SourceOptions, SourceOptions)
+  	:-
+ 	(member( url =_, SourceOptions); member( 'URL' =_, SourceOptions)),
+  	!.
+add_url(URL, SourceOptions, ['URL'=URL | SourceOptions]).
+
+cont_curl(Options, Target)
+  	:-
+  	handle_target(Target, Options, TOptions),
+  	do_curl(TOptions).
+
+handle_target(Target, Options, FTOptions)
+  	:-
+  	var(Target), 
+  	!,
+ 	((member( result =_, Options); member( 'RESULT' =_, Options)) ->
+  		TOptions = Options 
+		;
+ 		TOptions = ['RESULT'=Target | Options] ),
+ 	((member(writedata=_, TOptions); member('WRITEDATA'=_, TOptions)) -> 
+ 		FTOptions = TOptions
+ 		;
+ 		FTOptions = ['WRITEDATA'=true | TOptions]
+ 	).
+
+
+
+
+
 
 endmod.
 
