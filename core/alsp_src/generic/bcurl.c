@@ -535,11 +535,13 @@ curl_c_builtin(void)
                  	* bytes big and contains the remote file.
                  	*/
 				/* turn the returned chunk.memory into a uia */
-                	PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
-	        	if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
-                    	    PI_SUCCEED;
-                	else
-                    	    PI_FAIL;
+	        	if (have_result_var == 0){
+                	    PI_makeuia(&uia_var, &uia_var_t, (char *)chunk.memory);
+	        	    if (PI_unify(result_var, result_var_t, uia_var, uia_var_t))
+                    	        PI_SUCCEED;
+                	    else
+                    	        PI_FAIL;
+			}
 		} else /* downtype == 1 */
 		{
                         /* close the header file */
