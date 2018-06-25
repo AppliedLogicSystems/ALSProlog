@@ -1,5 +1,5 @@
 /*
-Tests for curl/1, /2, /3
+Tests for http/3 and curl/1, /2, /3
 
 Run simple PHP echo server in tsuite dir script:
 
@@ -8,13 +8,50 @@ tsuite/echo/serve
 */
 
 test :-
-	test_porceline,
+	test_http,
+	test_curl_porceline,
 %%	test_plumbing,
 %%	test_errors,
 	
 	true.
 
-test_porceline :-
+test_http :-
+
+	%% Test basic get
+	http(get, 'http://localhost:8888/', [ result='' ]),
+	http(get, 'http://localhost:8888/abc', [ result=abc ]),
+	http(get, 'http://localhost:8888/abc', [ result='abc' ]),
+	not http(get, 'http://localhost:8888/abc', [ result=xyz ]),
+	http(get, 'http://localhost:8888/abc', [ result=X1 ]), X1 = abc,
+	http(get, 'http://localhost:8888/?REQUEST_METHOD', [ result='GET' ]),
+
+	%% test option variations
+	http(get, 'http://localhost:8888/?HTTP_USER_AGENT', [useragent='007', result='007']),
+	http(get, 'http://localhost:8888/?HTTP_USER_AGENT', ['CURLOPT_USERAGENT'='007', result='007']),
+	http(get, 'http://localhost:8888/?HTTP_USER_AGENT', ['USERAGENT'='007', result='007']),
+	http(get, 'http://localhost:8888/?HTTP_USER_AGENT', ['UsErAgEnT'='007', result='007']),
+
+	%% test int option
+	http(get, 'http://localhost/abc', [port=8888, result=abc]),
+
+	%% test info string, int, float
+	http(get, 'http://localhost:8888/abc', [effective_url='http://localhost:8888/abc', result=abc]),
+	http(get, 'http://localhost:8888/abc', [response_code=200, result=abc]),
+	http(get, 'http://localhost:8888/abc', [size_download=3.0, result=abc]),
+
+	%% test post
+	http(post, 'http://localhost:8888/?REQUEST_METHOD', [result='POST']),
+
+	%% test postfields
+	http(post, 'http://localhost:8888/abc', [fields='data', result=abc]),
+	not http(post, 'http://localhost:8888/abc', [fields='data', result=xyz]),
+
+	true.
+test_http :-
+	write('test_http failed'), nl,
+	fail.
+
+test_curl_porceline :-
 
 	%% curl/1 with url atom
 	nyi( curl('http://localhost:8888') ),
@@ -58,7 +95,7 @@ test_porceline :-
 	true.
 	
 test_porceline :-
-	write('test_porceline failed'), nl,
+	write('test_curl_porceline failed'), nl,
 	fail.
 
 nyi(X) :- write('Not Yet Implemented: '), write(X), nl.

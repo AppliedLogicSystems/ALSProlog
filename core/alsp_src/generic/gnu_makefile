@@ -115,7 +115,10 @@ TEST_DIR = $(SOURCE_DIR)/tests
 
 test: testrun
 
-testrun : command_line_test iso_test_suite test_suite
+testrun : curl_test command_line_test iso_test_suite test_suite
+
+curl_test: alspro
+	$(TEST_DIR)/tsuite/curl_test.sh ./alspro
 
 command_line_test: alspro
 	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
