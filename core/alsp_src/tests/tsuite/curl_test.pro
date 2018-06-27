@@ -24,7 +24,8 @@ test([], true) :- !.
 test([], fail).
 test([true | Tail], Result) :- !, test(Tail, Result).
 test([Goal | Tail], Result) :-
-	(Goal, write('  OK: ') ; Result=fail, write('FAIL: ') ), write(Goal), nl,
+	(Goal, write('  OK: ') ; Result=fail, write('FAIL: ') ),
+	write_term(Goal, [quoted(true), line_length(180)]), nl,
 	!, test(Tail, Result).
 
 test_http :- test([
