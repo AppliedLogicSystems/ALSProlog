@@ -10,8 +10,7 @@ tsuite/echo/serve
 test :- test([
 	test_http,
 	test_curl_porceline,
-%%	test_plumbing,
-%%	test_errors,
+	test_errors,
 	
 	true
 ]).
@@ -123,14 +122,10 @@ test_curl_porceline :- test([
 ]).
 
 
-test_errors :-
+test_errors :- test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
-	catch(curl(_), error(existence_error(procedure,user:curl),[user:curl]), true),
-	catch(curl(1), error(existence_error(procedure,user:curl),[user:curl]), true),
-	catch(curl(functor(a)), error(existence_error(procedure,user:curl),[user:curl]), true),
-	true.
-
-
-test_plumbing :-
-	catch(curl([]), error(existence_error(procedure,user:asdfas),[user:asdfas]), true),
-	true.	
+	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
+	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
+	catch(curl(functor(a)), error(domain_error(tbd,tbd),[user:curl(tbd)]), true),
+	true
+]).
