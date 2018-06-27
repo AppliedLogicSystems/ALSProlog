@@ -24,8 +24,15 @@ test([], true) :- !.
 test([], fail).
 test([true | Tail], Result) :- !, test(Tail, Result).
 test([Goal | Tail], Result) :-
-	(Goal, write('\033[32m  OK: ') ; Result=fail, write('\033[31mFAIL: ') ),
-	write_term(Goal, [quoted(true), line_length(180)]),
+	(
+		catch(Goal, Error, (write('Uncaught Error: '), write(Error), nl, fail)),
+		write('\033[32m  OK: ')
+		;
+		Result=fail,
+		write('\033[31mFAIL: ')
+	),
+	write_term(Goal, [quoted(true), line_length(180)]
+	),
 	write('\033[0m'), nl,
 	!, test(Tail, Result).
 
