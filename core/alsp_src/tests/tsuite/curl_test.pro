@@ -24,7 +24,8 @@ test([], fail).
 test([true | Tail], Result) :- !, test(Tail, Result).
 test([Goal | Tail], Result) :-
 	(
-		catch(Goal, Error, (write('Uncaught Error: '), write(Error), nl, fail)),
+		copy_term(Goal, RGoal),
+		catch(RGoal, Error, (write('Uncaught Error: '), write(Error), nl, fail)),
 		write('\033[32m  OK: ')
 		;
 		Result=fail,
