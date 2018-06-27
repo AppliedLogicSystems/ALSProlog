@@ -40,7 +40,7 @@ test_http :- test([
 	http(get, 'http://localhost:8888/abc', [ result=abc ]),
 	http(get, 'http://localhost:8888/abc', [ result='abc' ]),
 	not http(get, 'http://localhost:8888/abc', [ result=xyz ]),
-	(http(get, 'http://localhost:8888/abc', [ result=X1 ]), X1 = abc),
+	(http(get, 'http://localhost:8888/abc', [ result=X1 ]), X1 == abc),
 	http(get, 'http://localhost:8888/?REQUEST_METHOD', [ result='GET' ]),
 
 	%% test option variations
@@ -80,13 +80,13 @@ test_curl_porceline :- test([
 	curl('http://localhost:8888/abc', abc),
 	curl('http://localhost:8888/abc', 'abc'),
 	not curl('http://localhost:8888/abc', 'xyz'),
-	(curl('http://localhost:8888/abc', X1), X1 = abc),
+	(curl('http://localhost:8888/abc', X1), X1 == abc),
 	curl('http://localhost:8888/?REQUEST_METHOD', 'GET'),
 
 	%% curl/3
 	curl('http://localhost:8888/abc', [], 'abc'),
 	not curl('http://localhost:8888/abc', [], 'xyz'),
-	(curl('http://localhost:8888/abc', [], X2), X2 = abc),
+	(curl('http://localhost:8888/abc', [], X2), X2 == abc),
 	curl('http://localhost:8888/', [], ''),
 	curl('http://localhost:8888/?REQUEST_METHOD', [], 'GET'),
 
