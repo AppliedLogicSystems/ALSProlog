@@ -7,22 +7,34 @@ tsuite/echo/serve
 
 */
 
-test :-
+test :- test([
 	test_http,
 	test_curl_porceline,
 %%	test_plumbing,
 %%	test_errors,
 	
-	true.
+	true
+]).
 
-test_http :-
+test(List) :-
+	test(List, Result),
+	Result.
+	
+test([], true) :- !.
+test([], fail).
+test([true | Tail], Result) :- !, test(Tail, Result).
+test([Goal | Tail], Result) :-
+	(Goal, write('  OK: ') ; Result=fail, write('FAIL: ') ), write(Goal), nl,
+	!, test(Tail, Result).
 
-	%% Test basic get
+test_http :- test([
+
+	%% test basic get results
 	http(get, 'http://localhost:8888/', [ result='' ]),
 	http(get, 'http://localhost:8888/abc', [ result=abc ]),
 	http(get, 'http://localhost:8888/abc', [ result='abc' ]),
 	not http(get, 'http://localhost:8888/abc', [ result=xyz ]),
-	http(get, 'http://localhost:8888/abc', [ result=X1 ]), X1 = abc,
+	(http(get, 'http://localhost:8888/abc', [ result=X1 ]), X1 = abc),
 	http(get, 'http://localhost:8888/?REQUEST_METHOD', [ result='GET' ]),
 
 	%% test option variations
@@ -45,29 +57,27 @@ test_http :-
 	%% test postfields
 	http(post, 'http://localhost:8888/abc', [fields='data', result=abc]),
 	not http(post, 'http://localhost:8888/abc', [fields='data', result=xyz]),
+	true
+]).
 
-	true.
-test_http :-
-	write('test_http failed'), nl,
-	fail.
 
-test_curl_porceline :-
+test_curl_porceline :- test([
 
 	%% curl/1 with url atom
-	nyi( curl('http://localhost:8888') ),
+	curl('http://localhost:8888'),
 
 	%% curl/2
 	curl('http://localhost:8888/', ''),
 	curl('http://localhost:8888/abc', abc),
 	curl('http://localhost:8888/abc', 'abc'),
 	not curl('http://localhost:8888/abc', 'xyz'),
-	curl('http://localhost:8888/abc', X1), X1 = abc,
+	(curl('http://localhost:8888/abc', X1), X1 = abc),
 	curl('http://localhost:8888/?REQUEST_METHOD', 'GET'),
 
 	%% curl/3
 	curl('http://localhost:8888/abc', [], 'abc'),
 	not curl('http://localhost:8888/abc', [], 'xyz'),
-	curl('http://localhost:8888/abc', [], X2), X2 = abc,
+	(curl('http://localhost:8888/abc', [], X2), X2 = abc),
 	curl('http://localhost:8888/', [], ''),
 	curl('http://localhost:8888/?REQUEST_METHOD', [], 'GET'),
 
@@ -91,14 +101,8 @@ test_curl_porceline :-
 	%% test postfields
 	curl('http://localhost:8888/abc', [postfields='data'], abc),
 	not curl('http://localhost:8888/abc', [postfields='data'], xyz),
-	
-	true.
-	
-test_porceline :-
-	write('test_curl_porceline failed'), nl,
-	fail.
-
-nyi(X) :- write('Not Yet Implemented: '), write(X), nl.
+	true
+]).
 
 
 test_errors :-
