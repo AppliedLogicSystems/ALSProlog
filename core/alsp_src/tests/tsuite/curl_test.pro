@@ -29,6 +29,12 @@ test([Goal | Tail], Result) :-
 
 test_http :- test([
 
+	%% test minimal REST requests
+	http(get, 'http://localhost:8888/', []),
+	http(post, 'http://localhost:8888/', []),
+	http(put, 'http://localhost:8888/', []),
+	http(delete, 'http://localhost:8888/', []),
+
 	%% test basic get results
 	http(get, 'http://localhost:8888/', [ result='' ]),
 	http(get, 'http://localhost:8888/abc', [ result=abc ]),
@@ -51,8 +57,11 @@ test_http :- test([
 	http(get, 'http://localhost:8888/abc', [response_code=200, result=abc]),
 	http(get, 'http://localhost:8888/abc', [size_download=3.0, result=abc]),
 
-	%% test post
+	%% test methods
+	http(get, 'http://localhost:8888/?REQUEST_METHOD', [result='GET']),
 	http(post, 'http://localhost:8888/?REQUEST_METHOD', [result='POST']),
+	http(put, 'http://localhost:8888/?REQUEST_METHOD', [result='PUT']),
+	http(delete, 'http://localhost:8888/?REQUEST_METHOD', [result='DELETE']),
 
 	%% test postfields
 	http(post, 'http://localhost:8888/abc', [fields='data', result=abc]),
