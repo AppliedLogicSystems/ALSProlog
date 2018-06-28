@@ -14,7 +14,6 @@
 #define HAVE_STDARG_H		1
 #define HAVE_STDDEF_H		1
 #define HAVE_STDLIB_H		1
-#define HAVE_STRING_H		1
 #define HAVE_SYS_PARAM_H	1
 #define HAVE_SYS_STAT_H		1
 #define HAVE_SYS_TIME_H		1

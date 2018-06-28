@@ -213,10 +213,6 @@
 #include <stddef.h>
 
 #include <string.h>
-#if HAVE_STRINGS_H
-#include <strings.h>
-  /* memory.h and strings.h conflict on some systems */
-#endif		/* HAVE_STRINGS_H */
 
 #endif /* PURE_ANSI */
 
