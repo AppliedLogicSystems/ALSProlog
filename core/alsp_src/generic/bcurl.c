@@ -11,7 +11,7 @@
 
 #include "alspi.h"
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 #include <curl/curl.h>
 

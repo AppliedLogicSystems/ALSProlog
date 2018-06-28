@@ -178,6 +178,7 @@ noshowmod(utilities).
 noshowmod(windows).
 noshowmod(tcltk).
 noshowmod(tk_alslib).
+noshowmod(curl).
 
 nonsemi(P) :-
 	isgensym(semi,P),

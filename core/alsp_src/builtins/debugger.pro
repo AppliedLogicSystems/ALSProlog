@@ -834,6 +834,7 @@ noshow_module(syscfg).
 noshow_module(ttyshlmk).
 noshow_module(utilities).
 noshow_module(windows).
+noshow_module(curl).
 
 
 /****
