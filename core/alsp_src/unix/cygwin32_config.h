@@ -63,10 +63,6 @@
 #define HAVE_SRAND	1
 #define HAVE_SRAND48	1
 #define HAVE_SRANDOM	1
-#define HAVE_STRCSPN	1
-#define HAVE_STRDUP	1
-#define HAVE_STRSPN	1
-#define HAVE_STRTOK	1
 #define HAVE_SYMLINK	1
 #define HAVE_SYSCONF	1
 #define HAVE_TEMPNAM	1

@@ -46,10 +46,5 @@
 #define HAVE_MEMMOVE	1
 
 
-#define HAVE_STRCSPN	1
-#define HAVE_STRSPN	1
-#define HAVE_STRTOK	1
-
-
 #define HAVE_VFPRINTF	1
 #endif

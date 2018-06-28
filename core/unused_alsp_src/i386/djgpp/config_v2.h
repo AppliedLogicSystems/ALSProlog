@@ -42,10 +42,6 @@
 #define HAVE_SIGACTION		1
 #define HAVE_SRAND		1
 #define HAVE_BSD_RANDOM		1
-#define HAVE_STRCSPN		1
-#define HAVE_STRDUP		1
-#define HAVE_STRSPN		1
-#define HAVE_STRTOK		1
 #define HAVE_SYSCONF		1
 #define HAVE_TEMPNAM		1
 #define HAVE_TIME		1
