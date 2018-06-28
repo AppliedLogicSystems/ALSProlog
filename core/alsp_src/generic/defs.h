@@ -214,7 +214,7 @@
 
 #include <string.h>
 #if HAVE_STRINGS_H
-#include <string.h>
+#include <strings.h>
   /* memory.h and strings.h conflict on some systems */
 #endif		/* HAVE_STRINGS_H */
 
