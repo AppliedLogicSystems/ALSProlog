@@ -195,9 +195,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <string.h>
-#define HAVE_STRCSPN
-#define HAVE_STRTOK
-#define HAVE_STRSPN
 #else
 #include <limits.h>
 #include <stdlib.h>
@@ -213,10 +210,6 @@
 #include <stddef.h>
 
 #include <string.h>
-#if HAVE_STRINGS_H
-#include <strings.h>
-  /* memory.h and strings.h conflict on some systems */
-#endif		/* HAVE_STRINGS_H */
 
 #endif /* PURE_ANSI */
 
@@ -357,23 +350,6 @@
 #include "engine.h"
 #include "cexception.h"
 #include "cassert.h"
-
-/*---------------------------------------------------------------------*
- | If string.h doesn't exist or is lacking certain functions, we provide
- | our own replacements for the functions declared therein...
- *---------------------------------------------------------------------*/
-#ifndef HAVE_STRTOK
-extern char *strtok PARAMS(( char *s1, const char *s2 ));
-#endif 		/* HAVE_STRTOK */
-#ifndef HAVE_STRDUP
-extern char *strdup PARAMS(( const char *s1 ));
-#endif 		/* HAVE_STRDUP */
-#ifndef HAVE_STRSPN
-extern size_t strspn PARAMS(( const char *s1, const char *s2 ));
-#endif 		/* HAVE_STRSPN */
-#ifndef HAVE_STRCSPN
-extern size_t strcspn PARAMS(( const char *s1, const char *s2 ));
-#endif 		/* HAVE_STRCSPN */
 
 /*---------------------------------------------------------------------*
  | Declare the als memory allocation function and associated helpers
