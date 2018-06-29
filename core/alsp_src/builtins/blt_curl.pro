@@ -10,24 +10,48 @@
 
 module curl.
 
-/* ---------------------------------------*
- |    inet(RESTVerb, URL, Options)
- * ---------------------------------------*/
-/*
-export inet/3.
-inet(RESTVerb, URL, Options)
-	:-
-	member(RESTVerb, [get,post]),
-	!,
-	uppercase_unwind(Options, UUOptions),
-	refine_opts(RESTVerb, URL, UUOptions, ROptions),
-	do_curl(ROptions).
-*/
+/* ------------------------------------------------------------------------------*
+ |    http(RESTVerb, URL, Options)
+ |
+ | http(get, URL, [RESULT=VAR | <other CURLOPT/CURLINFO options>])
+ |	Performs GET from URL, makes result into a UIA, and unifies with VAR.
+ |	
+ | http(get, URL, [FILE=FF | <other CURLOPT/CURLINFO options>])
+ |	Performs GET from URL, and writes result into local file FF.
+ |	
+ |	Below: if RESULT=VAR is on the options list, any result returned from
+ |		 the server is made into a UIA and unified with VAR:
+ | http(post, URL, [FIELDS=FF | <other CURLOPT/CURLINFO options>])
+ |	Performs POST to URL, using option CURLOPT_POSTFIELDS=FF; assumes that
+ |	FF is an atom expressing fields values.
+ |		
+ | http(post, URL, [FIELDS='', FILE=FF | <other CURLOPT/CURLINFO options>])
+ |	Reads local file FF to obtain an atom AFF expressing fields values, and
+ |	then performs POST to URL, using option CURLOPT_POSTFIELDS=AFF; 
+ |		
+ | http(post, URL, [DATA=DD | <other CURLOPT/CURLINFO options>])
+ |	Performs POST to URL, using option CURLOPT_READDATA=FF; assumes that
+ |	DD is an atom.
+ |		
+ | http(post, URL, [DATA='', FILE=FF | <other CURLOPT/CURLINFO options>])
+ |	Reads local file FF to obtain an atom AFF, and then performs POST to URL, 
+ |	using option CURLOPT_READDATA=AFF.
+ |		
+ | http(put, URL, [DATA=DD | <other CURLOPT/CURLINFO options>])
+ |	Performs a PUT to URL, using option CURLOPT_UPLOAD together with
+ |	CURLOPT_READDATA=FF; assumes that DD is an atom.
+ |		
+ | http(put, URL, [DATA='', FILE=FF | <other CURLOPT/CURLINFO options>])
+ |	Reads local file FF to obtain an atom AFF, and then performs a PUT to URL, 
+ |	using option CURLOPT_UPLOAD together with CURLOPT_READDATA=FF; 
+ |	assumes that DD is an atom.
+ |		
+ * ------------------------------------------------------------------------------*/
 
 export http/3.
 http(RESTVerb, URL, Options)
 	:-
-	member(RESTVerb, [get,post]),
+	member(RESTVerb, [get,post,put,delete]),
 	!,
 	uppercase_unwind(Options, UUOptions),
 	refine_opts(RESTVerb, URL, UUOptions, ROptions),
@@ -65,20 +89,34 @@ uc_unw(Exp, _)
 	!,
 	fail.
 	
-refine_opts(get, URL, Options, ['URL'=URL | ROptions])
+refine_opts(get, URL, Options, ['HTTPGET'=1,'URL'=URL | ROptions])
 	:-
 	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
 	delete_from(Options, 'FILE', Options1, FILEExprs),
 	delete_from(Options1, 'WRITEDATA', Options2, WRITEDATAExprs),
 	get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions).
 
-refine_opts(post, URL, Options, ['URL'=URL |ROptions])
+refine_opts(post, URL, Options, ['POST'=1, 'URL'=URL |ROptions])
 	:-
 	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
 	delete_from(Options, 'FILE', Options1, FILEExprs),
 	delete_from(Options1, 'FIELDS', Options2, FIELDSExprs),
 	delete_from(Options2, 'DATA', Options3, DATAExprs),
 	post_ck_file_fd(FILEExprs, FIELDSExprs, DATAExprs, Options3, ROptions).
+
+refine_opts(put, URL, Options, ['PUT'=1, 'URL'=URL, 'UPLOAD'=1 | ROptions])
+	:-
+	delete_from(Options, 'PUT', Options0, _),
+	delete_from(Options0, 'UPLOAD', Options1, _),
+	delete_from(Options1, 'FILE', Options2, FILEExprs),
+	delete_from(Options2, 'DATA', Options3, DATAExprs),
+	put_ck_file_fd(FILEExprs, DATAExprs, Options3, ROptions).
+
+refine_opts(delete, URL, Options, _)
+	:-
+	printf('HTTP DELETE not yet implemented.\n', []),
+	!,
+	fail.
 
 	/* ------------------------------------------------------------------ *
 	 |    get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions)
@@ -92,6 +130,12 @@ get_ck_file_wrd([], [], Options2, ['WRITEDATA'=true | Options2])
 	%% Assume FileExpr is an atom naming a file, 
 	%% and so for 'get', we need to specify 'WRITEDATA'=FileExpr
 get_ck_file_wrd([FileExpr | _], [], Options2, ['WRITEDATA'=FileExpr |  Options2]) 
+	:-!.
+
+	%% There is no 'FILE'=FILEExpr but there is a 'WRITEDATA' =
+	%% Assume WRITEDATAExpr is 'true' or is an atom naming a file, 
+	%% and so for 'get', we need to specify 'WRITEDATA'=FileExpr
+get_ck_file_wrd([], [WRITEDATAExpr | _], Options2, ['WRITEDATA'=WRITEDATAExpr |  Options2]) 
 	:-!.
 
 	%% There are both a 'FILE'=FileExpr and a 'WRITEDATA' = WRITEDATAExpr
@@ -114,10 +158,8 @@ get_ck_file_wrd([FileExpr | _], [WRITEDATAExpr | _], Options2, ['WRITEDATA'=File
 	%% No 'FILE'= and no 'FIELDS' = and no 'DATA'=
 	%% For 'post', we need some sort of fields or data to send;
 	%% So this is an error:
-post_ck_file_fd([], [], [], _, _) 
-	:-!,
-	printf('Error: No fields or data supplied for POST\n'),
-	fail.
+post_ck_file_fd([], [], [], Options, Options).
+	:-!.
 
 	%% No 'FILE'= and no 'DATA'= but there is a 'FIELDS'=
 post_ck_file_fd([], [FIELDSExpr | _], [], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
@@ -147,6 +189,33 @@ post_ck_file_fd([FileExpr | _], [FieldsExpr | _], [DataExpr | _], _, _)
 	printf('Error: Can''t resolve CURL conflict between options ''FILE''=%t, ''FIELDS''=%t, ''DATA''=%t\n',
 		[FileExpr, FieldsExpr, DataExpr]),
 	fail.
+
+
+	/* ---------------------------------------------------------------------- *
+	 | put_ck_file_fd(FILEExprs, DATAExprs, Options3, ROptions)
+	 * ---------------------------------------------------------------------- */
+	%% No 'FILE'= and no 'DATA'=
+	%% For 'put', we need some sort of fields or data to send;
+	%% So this is an error:
+put_ck_file_fd([], [],  _, _) 
+	:-!,
+	fail.
+
+	%% No 'FILE'= but there is a 'DATA'=
+put_ck_file_fd([], [DATAExpr | _], Options3, ['READDATA'=DATAExpr |  Options3]) 
+	:-!.
+
+	%% There is a 'FILE'=data(...), but no 'DATA'=
+put_ck_file_fd([data(SourceFile) | _],  [], Options3, ['READDATA'=DATAExpr |  Options3]) 
+	:-!,
+	grab_as_atom(SourceFile, DATAExpr).
+
+put_ck_file_fd([FileExpr | _], [DataExpr | _], _, _) 
+	:-
+	printf('Error: Can''t resolve CURL conflict between options ''FILE''=%t, ''FIELDS''=%t, ''DATA''=%t\n',
+		[FileExpr, FieldsExpr, DataExpr]),
+	fail.
+
 
 export delete_from/4.
 delete_from([], _, [], []).
@@ -179,6 +248,7 @@ export do_curl/1.
 do_curl(Options)
 	:-
 	uppercase_unwind(Options, UCOptions),
+pbi_write('>>UCO'=UCOptions),pbi_nl,
 	curl_c_builtin(UCOptions, Error),
 	finish_curl_c(Error, Options).
 
