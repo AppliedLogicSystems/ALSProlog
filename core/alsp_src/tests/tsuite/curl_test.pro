@@ -41,9 +41,9 @@ test_sio_url :- test([
 	( open(url('http://localhost:8888/abc'), read, S), get_line(S, abc), close(S) ),
 	( open(url('http://localhost:8888/abc', []), read, S), get_line(S, abc), close(S) ),
 	( open(url('http://localhost:8888/?REQUEST_METHOD'), read, S), get_line(S, 'GET'), close(S) ),
-	( open(url('http://localhost:8888/'), write, S), put_line(S, abc), close(S) ),
-	( open(url('http://localhost:8888/', [ result=abc ]), write, S), put_line(S, abc), close(S) ),
-	( open(url('http://localhost:8888/', [ result=R ]), write, S), put_line(S, abc), close(S), abc == R ),
+	( open(url('http://localhost:8888/'), write, S), write(S, abc), close(S) ),
+	( open(url('http://localhost:8888/', [ result=abc ]), write, S), write(S, abc), close(S) ),
+	( open(url('http://localhost:8888/', [ result=R ]), write, S), write(S, abc), close(S), abc == R ),
 	true
 ]).
 
