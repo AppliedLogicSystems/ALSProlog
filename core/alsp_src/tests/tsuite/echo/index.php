@@ -1,4 +1,34 @@
 <?php
+/*
+Echo Server for Testing
+
+Launch:
+
+php --server localhost:8888
+
+Usage:
+
+By default input (put/post/etc data) is echoed, of if empty the path is echoed:
+
+curl --data abc http://localhost:8888/ --> abc
+curl http://localhost:8888/abc --> abc
+
+PHP $_SERVER or $_REQUEST (post/get params) values are echoed,
+if query param matches one of their keys:
+
+curl http://localhost:8888/?REQUEST_METHOD --> GET
+curl http://localhost:8888/?HTTP_USER_AGENT --> curl
+curl --data foo=bar http://localhost:8888/?foo --> bar
+curl http://localhost:8888/?foo=bar --> bar
+
+Response code can be set with the r parameter:
+
+$ curl --include http://localhost:8888/abc?r=404
+HTTP/1.1 404 Not Found
+...
+abc
+
+*/
 
 // Set custom response code, if requested
 if (isset($_GET["r"])) {
