@@ -8,6 +8,7 @@ tsuite/echo/serve
 */
 
 test :- test([
+	test_sio_url,
 	test_http,
 	test_curl_porceline,
 	test_errors,
@@ -35,6 +36,16 @@ test([Goal | Tail], Result) :-
 	),
 	write('\033[0m'), nl,
 	!, test(Tail, Result).
+
+test_sio_url :- test([
+	( open(url('http://localhost:8888/abc'), read, S), get_line(S, abc), close(S) ),
+	( open(url('http://localhost:8888/abc', []), read, S), get_line(S, abc), close(S) ),
+	( open(url('http://localhost:8888/?REQUEST_METHOD'), read, S), get_line(S, 'GET'), close(S) ),
+	( open(url('http://localhost:8888/'), write, S), put_line(S, abc), close(S) ),
+	( open(url('http://localhost:8888/', [ result=abc ]), write, S), put_line(S, abc), close(S) ),
+	( open(url('http://localhost:8888/', [ result=R ]), write, S), put_line(S, abc), close(S), abc == R ),
+	true
+]).
 
 test_http :- test([
 
