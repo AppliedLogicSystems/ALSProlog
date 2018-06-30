@@ -983,9 +983,8 @@ open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,Stream)
 
 open_stream(url(URL),Mode,NonURLOptions,Stream) 
 	:- !,
-		%% Integrate into error system:
-	printf('Error: source_sink %t requires 2 args: url(%t, <curl options list>)\n',[url(URL),URL]),
-	!, fail.
+	open_stream(url(URL,[]),Mode,NonURLOptions,Stream).
+
 open_stream(url(URL,URLOptions),Mode,NonURLOptions,Stream) 
 	:- !,
 	open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream).
