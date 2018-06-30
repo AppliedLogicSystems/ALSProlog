@@ -10,7 +10,8 @@ if (count($_GET)) {
 		echo isset($_SERVER[$key]) ? $_SERVER[$key] : $_REQUEST[$key];
 	}
 } else {
-	echo ltrim($_SERVER["PATH_INFO"], "/");
+	$input = file_get_contents('php://input');
+	if ($input) echo $input; else echo ltrim($_SERVER["PATH_INFO"], "/");
 }
 
 //phpinfo();
