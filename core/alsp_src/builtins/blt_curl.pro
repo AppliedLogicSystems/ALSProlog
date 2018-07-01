@@ -248,7 +248,6 @@ export do_curl/1.
 do_curl(Options)
 	:-
 	uppercase_unwind(Options, UCOptions),
-pbi_write('>>UCO'=UCOptions),pbi_nl,
 	curl_c_builtin(UCOptions, Error),
 	finish_curl_c(Error, Options).
 
