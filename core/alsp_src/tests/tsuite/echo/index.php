@@ -8,9 +8,10 @@ php --server localhost:8888
 
 Usage:
 
-By default input (put/post/etc data) is echoed, of if empty the path is echoed:
+By default input (put/post/etc data) is echoed, or if empty, the path is echoed:
 
 curl --data abc http://localhost:8888/ --> abc
+curl --upload-file abcfile http://localhost:8888/ --> abc
 curl http://localhost:8888/abc --> abc
 
 PHP $_SERVER or $_REQUEST (post/get params) values are echoed,
@@ -27,6 +28,14 @@ $ curl --include http://localhost:8888/abc?r=404
 HTTP/1.1 404 Not Found
 ...
 abc
+
+Notes:
+
+Due to PHP limitations, input isn't echoed for multipart/form-data,
+So an empty string is output. However, individual fields can be requested:
+
+curl --form key=abc http://localhost:8888/ --> ""
+curl --form key=abc http://localhost:8888/?key --> abc
 
 */
 
