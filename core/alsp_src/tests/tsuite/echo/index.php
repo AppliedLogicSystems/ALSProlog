@@ -39,6 +39,8 @@ curl --form key=abc http://localhost:8888/?key --> abc
 
 */
 
+header("Content-Type: text/plain");
+
 // Set custom response code, if requested
 if (isset($_GET["r"])) {
 	http_response_code($_GET["r"]);
