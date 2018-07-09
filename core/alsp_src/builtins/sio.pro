@@ -3944,8 +3944,7 @@ get_line0(Alias,Line,EndFlag) :-
 get_line0(Stream_or_alias,Line,EndFlag) :-
 	input_stream_or_alias_ok(Stream_or_alias, Stream),
 	sio_errcode(Stream, FailCode),
-	get_failure(FailCode,Stream,
-					get_line0(Stream_or_alias,Line,EndFlag)).
+	get_failure(FailCode,Stream, get_line0(Stream_or_alias,Line,EndFlag)).
 
 
 /*

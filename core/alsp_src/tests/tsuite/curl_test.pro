@@ -37,7 +37,9 @@ test([Goal | Tail], Result) :-
 	write('\033[0m'), nl,
 	!, test(Tail, Result).
 
-test_sio_url :- test([
+test_sio_url :- 
+	printf('>>>> BEGIN test_sio_url <<<<\n', []),
+	test([
 	( open(url('http://localhost:8888/abc'), read, S), get_line(S, abc), close(S) ),
 	( open(url('http://localhost:8888/abc', []), read, S), get_line(S, abc), close(S) ),
 
@@ -53,7 +55,9 @@ test_sio_url :- test([
 	true
 ]).
 
-test_http :- test([
+test_http :- 
+	printf('>>>> BEGIN test_http <<<<\n', []),
+	test([
 
 	%% test minimal REST requests
 	http(get, 'http://localhost:8888/', []),
@@ -96,10 +100,13 @@ test_http :- test([
 ]).
 
 
-test_curl_porceline :- test([
+test_curl_porceline :- 
+	printf('>>>> BEGIN test_curl_porceline <<<<\n', []),
+	test([
 
 	%% curl/1 with url atom
-	curl('http://localhost:8888'),
+%	curl('http://localhost:8888'),
+	not curl('http://localhost:8888'),
 
 	%% curl/2
 	(curl('http://localhost:8888/',R), '' == R),
@@ -141,7 +148,9 @@ test_curl_porceline :- test([
 ]).
 
 
-test_errors :- test([
+test_errors :- 
+	printf('>>>> BEGIN test_errors <<<<\n', []),
+	test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
 	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
 	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
