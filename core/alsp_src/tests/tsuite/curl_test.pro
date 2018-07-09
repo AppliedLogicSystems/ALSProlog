@@ -40,7 +40,13 @@ test([Goal | Tail], Result) :-
 test_sio_url :- test([
 	( open(url('http://localhost:8888/abc'), read, S), get_line(S, abc), close(S) ),
 	( open(url('http://localhost:8888/abc', []), read, S), get_line(S, abc), close(S) ),
+
+	%% Test term reading
+	( open(url('http://localhost:8888/myatom.'), read, S), read(S, myatom), close(S) ),
+	( open(url('http://localhost:8888/myfunc(a,b,[l1,l2]).'), read, S), read(S, myfunc(a, b, [l1, l2])), close(S) ),
+
 	( open(url('http://localhost:8888/?REQUEST_METHOD'), read, S), get_line(S, 'GET'), close(S) ),
+
 	( open(url('http://localhost:8888/'), write, S), write(S, abc), close(S) ),
 	( open(url('http://localhost:8888/', [ result=abc ]), write, S), write(S, abc), close(S) ),
 	( open(url('http://localhost:8888/', [ result=R ]), write, S), write(S, abc), close(S), abc == R ),
