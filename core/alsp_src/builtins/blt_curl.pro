@@ -13,39 +13,55 @@ module curl.
 /* ------------------------------------------------------------------------------*
  |    http(RESTVerb, URL, Options)
  |
- | http(get, URL, [RESULT=VAR | <other CURLOPT/CURLINFO options>])
- |	Performs GET from URL, makes result into a UIA, and unifies with VAR.
+ | In all of the following:
+ | * if result=V is present in the options list, make a UIA out the incoming data 
+ |   returned from the URL server, and unify that UIA with VAL;
+ | * if resultfile=FF is present in the options list, and if FF is a path to a local 
+ |   file, write any incoming data returned from the URL server into the file FF;
+ | * it is possible/permitted to have both result=VAL and resultfile=FF present in 
+ |   the options list.
+ |
+ | http(get, URL, [result=V | <other CURLOPT/CURLINFO options>])
+ |	Performs a GET to obtain data from server URL, makes that data into a UIA, 
+ |	and unifies that UIA with V (typically an uninstantiated variable).
  |	
- | http(get, URL, [FILE=FF | <other CURLOPT/CURLINFO options>])
- |	Performs GET from URL, and writes result into local file FF.
+ | http(get, URL, [resultfile=FF | <other CURLOPT/CURLINFO options>])
+ |	Performs a GET to obtain data from server URL, and writes that data into 
+ |	local file FF.
  |	
- |	Below: if RESULT=VAR is on the options list, any result returned from
- |		 the server is made into a UIA and unified with VAR:
- | http(post, URL, [FIELDS=FF | <other CURLOPT/CURLINFO options>])
- |	Performs POST to URL, using option CURLOPT_POSTFIELDS=FF; assumes that
- |	FF is an atom expressing fields values.
- |		
- | http(post, URL, [FIELDS='', FILE=FF | <other CURLOPT/CURLINFO options>])
+ | http(post, URL, [fields=FF | <other CURLOPT/CURLINFO options>])
+ |	Performs a POST to URL, uploading explicit formatted field data encoded
+ |	by an atom FF (e.g. 'name=admin&shoesize=12'); the user is responsible for 
+ |	formatting FF in a manner appropriate for server URL.
+ |	
+ | http(post, URL, [fieldsfile=FF, (**)  | <other CURLOPT/CURLINFO options>])
  |	Reads local file FF to obtain an atom AFF expressing fields values, and
- |	then performs POST to URL, using option CURLOPT_POSTFIELDS=AFF; 
+ |	then performs POST to URL. 
  |		
- | http(post, URL, [DATA=DD | <other CURLOPT/CURLINFO options>])
- |	Performs POST to URL, using option CURLOPT_READDATA=FF; assumes that
- |	DD is an atom.
+ | http(post, URL, [data=DD | <other CURLOPT/CURLINFO options>])
+ |	Performs POST to URL, where DD is an atom.
  |		
- | http(post, URL, [DATA='', FILE=FF | <other CURLOPT/CURLINFO options>])
- |	Reads local file FF to obtain an atom AFF, and then performs POST to URL, 
- |	using option CURLOPT_READDATA=AFF.
+ | http(post, URL, [datafile=FF, (**) | <other CURLOPT/CURLINFO options>])
+ |	Reads local file FF to obtain an atom AFF, and then performs POST to URL.
  |		
- | http(put, URL, [DATA=DD | <other CURLOPT/CURLINFO options>])
- |	Performs a PUT to URL, using option CURLOPT_UPLOAD together with
- |	CURLOPT_READDATA=FF; assumes that DD is an atom.
+ | http(put, URL, [data=DD | <other CURLOPT/CURLINFO options>])
+ |	Performs a PUT to URL, where DD is an atom.
  |		
- | http(put, URL, [DATA='', FILE=FF | <other CURLOPT/CURLINFO options>])
- |	Reads local file FF to obtain an atom AFF, and then performs a PUT to URL, 
- |	using option CURLOPT_UPLOAD together with CURLOPT_READDATA=FF; 
- |	assumes that DD is an atom.
+ | http(put, URL, [datafile=FF, (**) | <other CURLOPT/CURLINFO options>])
+ |	Reads local file FF to obtain an atom AFF, and then performs a PUT to URL.
  |		
+ | (**) One of the two optional expressions 
+ |		eol=C or eolcode=N
+ |	may be included in the Options list to indicate the end-of-line character
+ |	to be used in reading file FF.  If neither eol=C nor eolcode=N is included,
+ |	the file FF is read without end-of-line characters and all the lines are 
+ |	concatenated into a single UIA. If eol=C is included (say,
+ |		 eol='\n' or eol=' ' or eol='&')
+ |	or if eolcode=N (say,
+ |		eolcode=10 or eolcode=32 or eolcode=38)
+ |	then the indicated character is used as a line ending for every line 
+ | 	except the last line of the file (i.e., the character is used as a line
+ |	separator for each pair of lines read.
  * ------------------------------------------------------------------------------*/
 
 export http/3.
@@ -89,132 +105,112 @@ uc_unw(Exp, _)
 	!,
 	fail.
 	
-refine_opts(get, URL, Options, ['HTTPGET'=1,'URL'=URL | ROptions])
+refine_opts(RESTVerb, URL, Options, [PrimeOpt=1,'URL'=URL | RefinedOptions])
 	:-
-	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
-	delete_from(Options, 'FILE', Options1, FILEExprs),
-	delete_from(Options1, 'WRITEDATA', Options2, WRITEDATAExprs),
-	get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions).
+	primary_option(RESTVerb, PrimeOpt),
+	allowed_options(RESTVerb, OkOptions),
+	check_options(Options, OkOptions, Options, RefinedOptions).
 
-refine_opts(post, URL, Options, ['POST'=1, 'URL'=URL |ROptions])
-	:-
-	    % In all cases of duplicate tags, we'll use the outermost (first encountered):
-	delete_from(Options, 'FILE', Options1, FILEExprs),
-	delete_from(Options1, 'FIELDS', Options2, FIELDSExprs),
-	delete_from(Options2, 'DATA', Options3, DATAExprs),
-	post_ck_file_fd(FILEExprs, FIELDSExprs, DATAExprs, Options3, ROptions).
+primary_option(get, 'HTTPGET').
+primary_option(post, 'POST').
+primary_option(put, 'PUT').
 
-refine_opts(put, URL, Options, ['PUT'=1, 'URL'=URL, 'UPLOAD'=1 | ROptions])
-	:-
-	delete_from(Options, 'PUT', Options0, _),
-	delete_from(Options0, 'UPLOAD', Options1, _),
-	delete_from(Options1, 'FILE', Options2, FILEExprs),
-	delete_from(Options2, 'DATA', Options3, DATAExprs),
-	put_ck_file_fd(FILEExprs, DATAExprs, Options3, ROptions).
+allowed_options(get,  ['RESULT', 'RESULTFILE', 'URL', 'HTTPGET']).
+allowed_options(post, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
 
-refine_opts(delete, URL, Options, _)
+check_options([], _, _, []).
+	%% 'EOL' and 'EOLCODE' are ok in InitOptions, but strip them out of the final RefinedOptions
+check_options(['EOL'=Val | Options], OkOptions, InitOptions, RefinedOptions)
+	:-!,
+	check_options(Options, OkOptions, InitOptions, RefinedOptions).
+check_options(['EOLCODE'=Val | Options], OkOptions, InitOptions, RefinedOptions)
+	:-!,
+	check_options(Options, OkOptions, InitOptions, RefinedOptions).
+
+check_options([Opt=Val | Options], OkOptions, InitOptions, [RefinedOpt | RefinedOptions])
 	:-
-	printf('HTTP DELETE not yet implemented.\n', []),
+		%% if Opt is explicitly listed as OK, then refine it:
+	member(Opt, OkOptions),
 	!,
-	fail.
+	refine_opt(Opt=Val, InitOptions, RefinedOpt),
+	check_options(Options, OkOptions, InitOptions, RefinedOptions).
 
-	/* ------------------------------------------------------------------ *
-	 |    get_ck_file_wrd(FILEExprs, WRITEDATAExprs, Options2, ROptions)
-	 * ------------------------------------------------------------------ */
-	%% No 'FILE'= and no 'WRITEDATA' =
-	%% so for 'get', we need to specify 'WRITEDATA'=true
-get_ck_file_wrd([], [], Options2, ['WRITEDATA'=true | Options2]) 
-	:-!.
-
-	%% There is a 'FILE'=FileExpr but no 'WRITEDATA' =
-	%% Assume FileExpr is an atom naming a file, 
-	%% and so for 'get', we need to specify 'WRITEDATA'=FileExpr
-get_ck_file_wrd([FileExpr | _], [], Options2, ['WRITEDATA'=FileExpr |  Options2]) 
-	:-!.
-
-	%% There is no 'FILE'=FILEExpr but there is a 'WRITEDATA' =
-	%% Assume WRITEDATAExpr is 'true' or is an atom naming a file, 
-	%% and so for 'get', we need to specify 'WRITEDATA'=FileExpr
-get_ck_file_wrd([], [WRITEDATAExpr | _], Options2, ['WRITEDATA'=WRITEDATAExpr |  Options2]) 
-	:-!.
-
-	%% There are both a 'FILE'=FileExpr and a 'WRITEDATA' = WRITEDATAExpr
-	%% Assume FileExpr is an atom naming a file, 
-	%% Let the 'FILE'=FileExpr trump the 'WRITEDATA' = WRITEDATAExpr, but
-	%% warn the user if the two expressions are different
-get_ck_file_wrd([FileExpr | _], [WRITEDATAExpr | _], Options2, ['WRITEDATA'=FileExpr |  Options2])
+check_options([Opt=Val | Options], OkOptions, InitOptions, [RefinedOpt | RefinedOptions])
 	:-
-	(FileExpr \== WRITEDATAExpr ->
-		printf('Warning: CURL conflict between options ''FILE''=%t and ''WRITEDATA''=%t\n',
-			[FileExpr, WRITEDATAExpr]),
-		printf('Using: ''WRITEDATA''=%t\n', [FileExpr])
-		;
-		true
-	).
-		
-	/* ---------------------------------------------------------------------- *
-	 | post_ck_file_fd(FILEExprs, FIELDSExprs, DATAExprs, Options3, ROptions)
-	 * ---------------------------------------------------------------------- */
-	%% No 'FILE'= and no 'FIELDS' = and no 'DATA'=
-	%% For 'post', we need some sort of fields or data to send;
-	%% So this is an error:
-post_ck_file_fd([], [], [], Options, Options).
-	:-!.
+	is_curl_opt_or_info(Opt),
+	!,
+	    %Do we want to blacklist things like WRITEDATA, READDATA here?
+	RefinedOpt = (Opt=Val),
+	check_options(Options, OkOptions, InitOptions, RefinedOptions).
 
-	%% No 'FILE'= and no 'DATA'= but there is a 'FIELDS'=
-post_ck_file_fd([], [FIELDSExpr | _], [], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
-	:-!.
-
-	%% No 'FILE'= and no 'FIELDS'= but there is a 'DATA'=
-post_ck_file_fd([], [], [DATAExpr | _], Options3, ['READDATA'=DATAExpr |  Options3]) 
-	:-!.
-
-	%% No 'FILE'= but there is a 'FIELDS'= and there is a 'DATA'=
-	%% Let the 'FIELDS'=FF trump the 'DATA'=DD:
-post_ck_file_fd([], [FIELDSExpr | _], [DATAExpr | _], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
-	:-!.
-
-	%% There is a 'FILE'=fields(...), but no 'FIELDS'='', and no 'DATA'= 
-post_ck_file_fd([fields(SourceFile) | _], [], [], Options3, ['POSTFIELDS'=FIELDSExpr |  Options3]) 
-	:-!,
-	grab_as_atom(SourceFile, FIELDSExpr).
-
-	%% There is a 'FILE'=data(...), but no 'FIELDS'=, and no 'DATA'=
-post_ck_file_fd([data(SourceFile) | _], [], [], Options3, ['READDATA'=DATAExpr |  Options3]) 
-	:-!,
-	grab_as_atom(SourceFile, DATAExpr).
-
-post_ck_file_fd([FileExpr | _], [FieldsExpr | _], [DataExpr | _], _, _) 
+check_options([Opt | _], OkOptions, _, _)
 	:-
-	printf('Error: Can''t resolve CURL conflict between options ''FILE''=%t, ''FIELDS''=%t, ''DATA''=%t\n',
-		[FileExpr, FieldsExpr, DataExpr]),
+		%% Make into prolog error, throwing exception:
+	printf('Unrecognized or unsupported http/3 option: %t\nExpect one of: %t\n',[Opt,OkOptions]),
 	fail.
 
+refine_opt('DATA'=Data, InitOptions, 'UPLOADDATA'=Data) :-!.
 
-	/* ---------------------------------------------------------------------- *
-	 | put_ck_file_fd(FILEExprs, DATAExprs, Options3, ROptions)
-	 * ---------------------------------------------------------------------- */
-	%% No 'FILE'= and no 'DATA'=
-	%% For 'put', we need some sort of fields or data to send;
-	%% So this is an error:
-put_ck_file_fd([], [],  _, _) 
+refine_opt('DATAFILE'=FilePath, InitOptions, 'UPLOADDATA'=FileData)
 	:-!,
-	fail.
+	handle_from_file(FilePath, InitOptions, FileData).
 
-	%% No 'FILE'= but there is a 'DATA'=
-put_ck_file_fd([], [DATAExpr | _], Options3, ['READDATA'=DATAExpr |  Options3]) 
-	:-!.
+refine_opt('FIELDS'=FormData, InitOptions, 'POSTFIELDS'=FormData) :-!.
 
-	%% There is a 'FILE'=data(...), but no 'DATA'=
-put_ck_file_fd([data(SourceFile) | _],  [], Options3, ['READDATA'=DATAExpr |  Options3]) 
+refine_opt('FIELDSFILE'=FilePath, InitOptions, 'POSTFIELDS'=FileData)
 	:-!,
-	grab_as_atom(SourceFile, DATAExpr).
+	handle_from_file(FilePath, InitOptions, FileData).
 
-put_ck_file_fd([FileExpr | _], [DataExpr | _], _, _) 
+refine_opt(Opt=Val, _, Opt=Val).
+
+is_curl_opt_or_info(Opt)
 	:-
-	printf('Error: Can''t resolve CURL conflict between options ''FILE''=%t, ''FIELDS''=%t, ''DATA''=%t\n',
-		[FileExpr, FieldsExpr, DataExpr]),
-	fail.
+	    %% builtin, defined in generic/bcurl.c
+	lookup_opt_info(Opt).
+
+handle_from_file(FilePath, InitOptions, FileData)
+	:-
+	determine_char(InitOptions, Char),
+	grab_lines(FilePath, RawLines),
+	concat_lines_char(RawLines, Char, FileData).
+	
+determine_char(InitOptions, Char)
+	:-
+	member('EOL'=Char, InitOptions), !.
+determine_char(InitOptions, Char)
+	:-
+	member('EOLCODE'=Num, InitOptions), 
+	!,
+	open(atom(Char), write, S), put_code(S, Num), close(S).
+determine_char(InitOptions, '').
+
+concat_lines_char([], _, '') :-!.
+
+concat_lines_char([Line], Char, Line) :-!.
+
+concat_lines_char([RawLine1 | RestRawLines], Char, FileData)
+	:-
+	do_concat_lines_char(RestRawLines, Char, RawLine1, FileData).
+
+	%% for testing -- delete when dev finished:
+export tt/0.
+tt :- open('./testfile.txt', write, SS), write(SS, abcde),nl(SS),write(SS,ghtyr),nl(SS),close(SS).
+export tf/0.
+tf :- open('./testfile.txt', write, SS), write(SS, 'name=admin'),nl(SS),write(SS,'shoesize=12'),nl(SS),close(SS).
+
+do_concat_lines_char([], _, Inter, Inter) :-!.
+
+do_concat_lines_char([RawLine], Char, Inter, FinalLine)
+	:-!,
+	'$atom_concat'(Char, RawLine, L2),
+	'$atom_concat'(Inter, L2, FinalLine).
+
+do_concat_lines_char([RawLine | RestRawLines], Char, Inter, FileData)
+	:-
+	'$atom_concat'(Char, RawLine, L2),
+	'$atom_concat'(Inter, L2, Inter2),
+	do_concat_lines_char(RestRawLines, Char, Inter2, FileData).
 
 
 export delete_from/4.
@@ -239,6 +235,7 @@ grab_as_atom(File, Atom)
 
 export write_lines_to_string/2.
 write_lines_to_string([], _).
+
 write_lines_to_string([Line | Lines], S)
         :-
         write(S, Line),
@@ -247,8 +244,8 @@ write_lines_to_string([Line | Lines], S)
 export do_curl/1.
 do_curl(Options)
 	:-
-	uppercase_unwind(Options, UCOptions),
-	curl_c_builtin(UCOptions, Error),
+%%printf('do_curl: Options=%t\n',[Options]),
+	curl_c_builtin(Options, Error),
 	finish_curl_c(Error, Options).
 
 finish_curl_c(Error, Options)
@@ -301,26 +298,14 @@ add_url(URL, SourceOptions, ['URL'=URL | SourceOptions]).
 cont_curl(Options, Target)
   	:-
   	handle_target(Target, Options, TOptions),
-  	do_curl(TOptions).
+	uppercase_unwind(TOptions, UUOptions),
+	curl_refine_opts(UUOptions, ROptions),
+  	do_curl(ROptions).
 
-handle_target(Target, Options, FTOptions)
-  	:-
-  	var(Target), 
-  	!,
- 	((member( result =_, Options); member( 'RESULT' =_, Options)) ->
-  		TOptions = Options 
-		;
- 		TOptions = ['RESULT'=Target | Options] ),
- 	((member(writedata=_, TOptions); member('WRITEDATA'=_, TOptions)) -> 
- 		FTOptions = TOptions
- 		;
- 		FTOptions = ['WRITEDATA'=true | TOptions]
- 	).
+handle_target(Target, Options, [result=Target | Options]).
 
-
-
-
-
+	%% A stub in case we want to do some refining on direct curl options
+curl_refine_opts(UUOptions, UUOptions).
 
 endmod.
 
