@@ -4,4 +4,4 @@ set -eux
 
 cd $(dirname "$0")
 
-php --server localhost:8888
+exec php --server localhost:8888 index.php

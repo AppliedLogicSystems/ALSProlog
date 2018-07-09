@@ -4,7 +4,7 @@ Echo Server for Testing
 
 Launch:
 
-php --server localhost:8888
+php --server localhost:8888 index.php
 
 Usage:
 
@@ -55,7 +55,8 @@ if (count($_GET)) {
 } else {
 	// echo non-empty input, or path
 	$input = file_get_contents('php://input');
-	if ($input) echo $input; else echo ltrim($_SERVER["PATH_INFO"], "/");
+	$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+	if ($input) echo $input; else echo ltrim($path, "/");
 }
 
-//phpinfo();
+//phpinfo(INFO_VARIABLES);
