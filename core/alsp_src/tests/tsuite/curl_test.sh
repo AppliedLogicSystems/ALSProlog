@@ -17,5 +17,5 @@ if (( $debug ))
 then
 "$ALSPRO" "$TESTDIR"/curl_test.pro -g 'test ; true'
 else
-"$ALSPRO" "$TESTDIR"/curl_test.pro -g test
+"$ALSPRO" "$TESTDIR"/curl_test.pro -g test < /dev/null
 fi
