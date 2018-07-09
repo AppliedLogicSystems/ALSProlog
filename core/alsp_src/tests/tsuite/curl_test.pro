@@ -88,10 +88,8 @@ test_http :-
 	http(delete, 'http://localhost:8888/?REQUEST_METHOD', [result='DELETE']),
 
 	%% test postfields
-%	http(post, 'http://localhost:8888/abc', [fields='data', result=abc]),
-	not http(post, 'http://localhost:8888/abc', [fields='data', result=abc]),
-	http(post, 'http://localhost:8888/abc', [fields='data', result=data]),
-	not http(post, 'http://localhost:8888/abc', [fields='data', result=xyz]),
+	http(post, 'http://localhost:8888/', [fields=abc, result=abc]),
+	not http(post, 'http://localhost:8888/', [fields=abc, result=xyz]),
 	true
 ]).
 
@@ -138,9 +136,8 @@ test_curl_porceline :-
 	curl('http://localhost:8888/?REQUEST_METHOD', [post=1], 'POST'),
 
 	%% test postfields
-%	curl('http://localhost:8888/abc', [postfields='data'], abc),
-	not curl('http://localhost:8888/abc', [postfields='data'], abc),
-	not curl('http://localhost:8888/abc', [postfields='data'], xyz),
+	curl('http://localhost:8888/', [postfields=abc], abc),
+	not curl('http://localhost:8888/', [postfields=abc], xyz),
 	true
 ]).
 

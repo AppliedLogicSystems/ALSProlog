@@ -10,7 +10,7 @@ TESTDIR=$(dirname "$0")
 
 trap 'pkill -P $$' EXIT
 
-php --server localhost:8888 --docroot "$TESTDIR"/echo &
+"$TESTDIR"/echo/serve &
 sleep 1
 
 if (( $debug ))
