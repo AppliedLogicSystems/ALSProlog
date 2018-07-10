@@ -11,6 +11,7 @@ test :- test([
 	test_sio_url,
 	test_http,
 	test_curl_porceline,
+	test_curl_plumbing,
 	test_errors,
 	
 	true
@@ -102,10 +103,6 @@ test_http :-
 test_curl_porceline :- 
 	test([
 
-	%% curl/1 with url atom
-%	curl('http://localhost:8888'),
-	not curl('http://localhost:8888'),
-
 	%% curl/2
 	(curl('http://localhost:8888/',R), '' == R),
 	curl('http://localhost:8888/', ''),
@@ -142,6 +139,20 @@ test_curl_porceline :-
 	%% test postfields
 	curl('http://localhost:8888/', [postfields=abc], abc),
 	not curl('http://localhost:8888/', [postfields=abc], xyz),
+	true
+]).
+
+test_curl_plumbing :- test([
+
+	%% curl/1 with url atom, for debugging
+	curl('http://localhost:8888'),
+	
+	%% curl/1 with options list
+	curl([url='http://localhost:8888']),
+	(curl([url='http://localhost:8888', result=R]), '' == R),
+	curl([url='http://localhost:8888', result='']),
+	curl([url='http://localhost:8888/abc', result=abc]),
+
 	true
 ]).
 
