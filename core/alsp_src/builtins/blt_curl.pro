@@ -433,7 +433,7 @@ endmod.
 
 /* ================= SAMPLES ================== *
 
-?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
+?- http(get,'http://example.com', [result=RR,response_code=RC,total_time=TTT]).
 
 RR='<!doctype html>\n<html>\n<head>\n    <title>Example Domain .... More information...</a></p>\n</div>\n</body>\n</html>\n' 
 RC=200 
@@ -442,7 +442,7 @@ TTT=0.693073
 yes.
 --------------
 
-?- http(get,'http://example.com', [response_code(RC),total_time(TTT),file='./myfile.txt'])
+?- http(get,'http://example.com', [response_code=RC,total_time=TTT,file='./myfile.txt'])
 
 RC=200 
 TTT=1.172075 
@@ -453,7 +453,7 @@ yes.
 NOTE: Local file ./myfile.txt was created and now contains the same response as TT in the sample above.
 
 
-?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
+?- http(post, 'https://postman-echo.com/post', [postfields='name=admin&shoesize=12', result=RR]).
 
 RR='{"args":{},"data":"","files":{},"form":{"name":"admin","shoesize":"12"},"headers":{"host":"postman-echo.com","content-length":"22","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"name":"admin","shoesize":"12"},"url":"https://postman-echo.com/post"}' 
 
@@ -467,7 +467,7 @@ Let file ./lorem.txt contain:
 lorem ipsum doler
 zip zap zing
 
-?- http(post, 'https://postman-echo.com/post', [file=data('./lorem.txt'), result=RR]).
+?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', result=RR]).
 
 RR='{"args":{},"data":"","files":{},"form":{"lorem ipsum dolerzip zap zing":""},"headers":{"host":"postman-echo.com","content-length":"29","accept":"* / *","content-type":"application/x-www-form-urlencoded","x-forwarded-port":"443","x-forwarded-proto":"https"},"json":{"lorem ipsum dolerzip zap zing":""},"url":"https://postman-echo.com/post"}' 
 

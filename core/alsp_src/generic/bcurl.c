@@ -93,7 +93,8 @@ WriteMemWithFileCallback(void *contents, size_t size, size_t nmemb, void *userp)
     char *ff;
     ff = memf->filename;
     FILE *pf;
-    pf = fopen(ff, "wb");
+//    pf = fopen(ff, "wb");
+    pf = fopen(ff, "ab");
     if (pf){
         size_t written2file = fwrite(contents, size, nmemb, (FILE *)pf);
         fclose(pf);
