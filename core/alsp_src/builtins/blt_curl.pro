@@ -104,6 +104,14 @@ check_url(URL)
 	var(URL),
 	!,
 	instantiation_error(2).
+check_url(URL)
+	:-
+	atom(URL),
+	!.
+check_url(URL)
+	:-
+	domain_error(atom,URL,2).
+
 check_url(_).
 
 check_http_options(Options)
@@ -330,31 +338,32 @@ export curl/1.
 curl(Options)
 	:-
 	check_curl_options(Options),
+	!,
   	do_curl(Options).
 
 export curl/2.
 curl(URL, Target)
   	:-
+	check_url(URL),
  	Options = ['URL'=URL],
+	!,
   	cont_curl(Options, Target).
   
 export curl/3.
 curl(URL, [], Target)
  	:-!,
+	check_url(URL),
+	!,
  	cont_curl(['URL'=URL], Target).
 
 curl(URL, Opts, Target)
   	:-
-  	functor(Opts, '.', 2),
-	!,
+	check_url(URL),
   	add_url(URL, Opts, Options),
+	check_curl_options(Options),
+	!,
   	cont_curl(Options, Target).
 
-curl(URL, Opts, Target)
-	:-
-	printf('Arg %t must be a list!\n',[Opts]),
-	fail.
-  
 add_url(URL, SourceOptions, SourceOptions)
   	:-
  	(member( url =_, SourceOptions); member( 'URL' =_, SourceOptions)),
@@ -366,6 +375,7 @@ cont_curl(Options, Target)
   	handle_target(Target, Options, TOptions),
 	uppercase_unwind(TOptions, UUOptions),
 	curl_refine_opts(UUOptions, ROptions),
+	!,
   	do_curl(ROptions).
 
 handle_target(Target, Options, [result=Target | Options]).
