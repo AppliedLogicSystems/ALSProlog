@@ -347,6 +347,12 @@ decode_error(domain_error(stream_option,Culprit),_,
 decode_error(domain_error(stream_option_url,Culprit),_,
 		'Stream generic (open) option expected instead of %t.\n''%t'' appears to be a Curl option.\nIt should be in the options list in url(__,[<curl options>]).\n\n', [Culprit,Culprit]).
 
+decode_error(domain_error(http_rest_verb,Culprit),_,
+		'http rest verb expected instead of %t.\n',[Culprit]).
+
+decode_error(domain_error(curl_option,Culprit),_,
+		'curl option expected instead of %t.\n',[Culprit]).
+
 decode_error(domain_error(stream_position,Culprit),_,
 		'Stream position expected instead of %t.\n',[Culprit]).
 

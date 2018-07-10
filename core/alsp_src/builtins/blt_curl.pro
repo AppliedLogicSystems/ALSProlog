@@ -67,7 +67,9 @@ module curl.
 export http/3.
 http(RESTVerb, URL, Options)
 	:-
-	member(RESTVerb, [get,post,put,delete]),
+	check_verb(RESTVerb),
+	check_url(URL),
+	check_http_options(Options),
 	!,
 	uppercase_unwind(Options, UUOptions),
 	refine_opts(RESTVerb, URL, UUOptions, ROptions),
@@ -76,7 +78,70 @@ http(RESTVerb, URL, Options)
 	
 http(RESTVerb, URL, Options)
 	:-
+	nonvar(RESTVerb),
 	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
+
+http(RESTVerb, URL, Options)
+	:-
+	var(RESTVerb),
+	instantiation_error(2).
+
+check_verb(RESTVerb)
+	:-
+	var(RESTVerb),
+	!,
+	instantiation_error(2).
+check_verb(RESTVerb)
+	:-
+	atom(RESTVerb),
+	not(member(RESTVerb, [get,post,put,delete])),
+	!,
+	domain_error(http_rest_verb,RESTVerb,2).
+check_verb(_).
+
+check_url(URL)
+	:-
+	var(URL),
+	!,
+	instantiation_error(2).
+check_url(_).
+
+check_http_options(Options)
+	:-
+	var(Options),
+	!,
+	instantiation_error(2).
+check_http_options([]).
+check_http_options([Opt | Options])
+	:-
+	check_http_opt(Opt),
+	!,    
+	check_http_options(Options).
+check_http_options(CurlOptions)
+	:-
+	type_error(list,CurlOptions,2).
+
+check_http_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+
+check_http_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	not(lookup_opt_info(UC_Tag)),
+	!,
+        domain_error(curl_option,(Tag=_),3).
+
+check_http_opt(Tag=_) :-!.
+
+check_http_opt(Opt) 
+	:-
+	type_error('equation (_=_)', Opt,3).
+	
+
+
+
 
 export uppercase_unwind/2.
 uppercase_unwind([], []).
@@ -264,6 +329,7 @@ finish_curl_c(Error, Options)
 export curl/1.
 curl(Options)
 	:-
+	check_curl_options(Options),
   	do_curl(Options).
 
 export curl/2.
@@ -306,6 +372,50 @@ handle_target(Target, Options, [result=Target | Options]).
 
 	%% A stub in case we want to do some refining on direct curl options
 curl_refine_opts(UUOptions, UUOptions).
+
+
+check_curl_options(Options)
+	:-
+	var(Options),
+	!,
+	instantiation_error(2).
+
+check_curl_options([]).
+check_curl_options([Opt | Options])
+	:-
+	check_curl_opt(Opt),
+	!,    
+	check_curl_options(Options).
+check_curl_options(CurlOptions)
+	:-
+	type_error(list,CurlOptions,2).
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	not(lookup_opt_info(UC_Tag)),
+	!,
+        domain_error(curl_option,(Tag=_),3).
+
+check_curl_opt(Tag=_) :-!.
+
+check_curl_opt(Opt) 
+	:-
+	type_error('equation (_=_)', Opt,3).
+	
+
+
+
+
+
+
+
+
 
 endmod.
 

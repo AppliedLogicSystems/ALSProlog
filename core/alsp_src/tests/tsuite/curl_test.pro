@@ -106,7 +106,8 @@ test_curl_porceline :-
 
 	%% curl/1 with url atom
 %	curl('http://localhost:8888'),
-	not curl('http://localhost:8888'),
+%	not curl('http://localhost:8888'),
+% SEE test_errors: catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
 
 	%% curl/2
 	(curl('http://localhost:8888/',R), '' == R),
@@ -153,7 +154,9 @@ test_errors :-
 	test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
 	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
-	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
-	catch(curl(functor(a)), error(domain_error(tbd,tbd),[user:curl(tbd)]), true),
+%	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
+	catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
+%	catch(curl(functor(a)), error(domain_error(tbd,tbd),[user:curl(tbd)]), true),
+	catch(curl(functor(a)), error(type_error(list,functor(a)),[curl:curl(functor(a))]), true),
 	true
 ]).

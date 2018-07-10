@@ -726,8 +726,9 @@ check_source_sink_and_mode(tcl_transfer(_,_),Mode) :-
 check_source_sink_and_mode(url(_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
-check_source_sink_and_mode(url(_,_),Mode) :-
+check_source_sink_and_mode(url(_,CurlOptions),Mode) :-
 	!,
+	check_curl_options(CurlOptions),
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 
 check_source_sink_and_mode(Source_sink,Mode) :-
@@ -806,24 +807,37 @@ check_list_option(V,ML) :-
 check_list_option(M,ML) :-
 	dmember(M,ML),
 	!.
-
-check_list_option(Tag=_,ML) 
+check_list_option(M,ML) :-
+        domain_error(stream_option,M,3).
+	
+check_curl_options([]) :-!.
+check_curl_options([Opt | CurlOptions])
 	:-
-	make_uc_sym(Tag, 'RESULT'),
+	check_curl_opt(Opt),
 	!,
-	domain_error(stream_option_url,(Tag=_),3).
+	check_curl_options(CurlOptions).
 
-check_list_option(Tag=_,ML) 
+check_curl_options(CurlOptions)
+	:-
+	type_error(list,CurlOptions,2).
+
+
+check_curl_opt(Tag=_) 
 	:-
 	make_uc_sym(Tag, UC_Tag),
-	lookup_opt_info(UC_Tag),
-	!,
-	domain_error(stream_option_url,(Tag=_),3).
-	
-	
-check_list_option(M,ML) 
+	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+
+check_curl_opt(Tag=_) 
 	:-
-	domain_error(stream_option,M,3).
+	make_uc_sym(Tag, UC_Tag),
+	not lookup_opt_info(UC_Tag),
+	!,
+        domain_error(curl_option,Tag=_,4).
+
+check_curl_opt(Opt) 
+	:-
+	type_error('equation (_=_)', Opt,4).
+	
 
 /*----------------------------------------------------------*
  | check_alias/3
