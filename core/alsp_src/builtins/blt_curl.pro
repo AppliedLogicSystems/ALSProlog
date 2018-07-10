@@ -338,8 +338,9 @@ export curl/1.
 curl(Options)
 	:-
 	check_curl_options(Options),
+	uppercase_unwind(Options, UUOptions),
 	!,
-  	do_curl(Options).
+  	do_curl(UUOptions).
 
 export curl/2.
 curl(URL, Target)
