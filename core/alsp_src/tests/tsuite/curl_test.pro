@@ -11,6 +11,7 @@ test :- test([
 	test_sio_url,
 	test_http,
 	test_curl_porceline,
+	test_curl_plumbing,
 	test_errors,
 	
 	true
@@ -24,6 +25,7 @@ test([], true) :- !.
 test([], fail).
 test([true | Tail], Result) :- !, test(Tail, Result).
 test([Goal | Tail], Result) :-
+	(atom(Goal) -> printf('>>>> BEGIN %t <<<<\n', [Goal]) ; true ),
 	(
 		copy_term(Goal, RGoal),
 		catch(RGoal, Error, (write('Uncaught Error: '), write(Error), nl, fail)),
@@ -38,7 +40,6 @@ test([Goal | Tail], Result) :-
 	!, test(Tail, Result).
 
 test_sio_url :- 
-	printf('>>>> BEGIN test_sio_url <<<<\n', []),
 	test([
 	( open(url('http://localhost:8888/abc'), read, S), get_line(S, abc), close(S) ),
 	( open(url('http://localhost:8888/abc', []), read, S), get_line(S, abc), close(S) ),
@@ -56,7 +57,6 @@ test_sio_url :-
 ]).
 
 test_http :- 
-	printf('>>>> BEGIN test_http <<<<\n', []),
 	test([
 
 	%% test minimal REST requests
@@ -101,13 +101,7 @@ test_http :-
 
 
 test_curl_porceline :- 
-	printf('>>>> BEGIN test_curl_porceline <<<<\n', []),
 	test([
-
-	%% curl/1 with url atom
-%	curl('http://localhost:8888'),
-%	not curl('http://localhost:8888'),
-% SEE test_errors: catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
 
 	%% curl/2
 	(curl('http://localhost:8888/',R), '' == R),
@@ -148,9 +142,23 @@ test_curl_porceline :-
 	true
 ]).
 
+test_curl_plumbing :- test([
+
+	%% curl/1 with url atom, for debugging
+%	curl('http://localhost:8888'),
+% SEE test_errors: catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
+	
+	%% curl/1 with options list
+	curl([url='http://localhost:8888']),
+	(curl([url='http://localhost:8888', result=R]), '' == R),
+	curl([url='http://localhost:8888', result='']),
+	curl([url='http://localhost:8888/abc', result=abc]),
+
+	true
+]).
+
 
 test_errors :- 
-	printf('>>>> BEGIN test_errors <<<<\n', []),
 	test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
 	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
