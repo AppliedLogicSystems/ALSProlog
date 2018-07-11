@@ -162,9 +162,26 @@ test_errors :-
 	test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
 	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
-%	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
 	catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
-%	catch(curl(functor(a)), error(domain_error(tbd,tbd),[user:curl(tbd)]), true),
 	catch(curl(functor(a)), error(type_error(list,functor(a)),[curl:curl(functor(a))]), true),
+
+	catch(curl([]), error(curl_error(_tbd)), true),
+	
+	%% test string option type errors (url and useragent should behave identically)
+	catch(curl([url=_]), error(instantiation_error, _), true),
+	catch(curl([url=1]), error(type_error(atom,1), _), true),
+	catch(curl([url=[]]), error(type_error(atom,[]), _), true),
+	catch(curl([url=functor(a)]), error(type_error(atom,functor(a)), _), true),
+	catch(curl([useragent=_]), error(instantiation_error, _), true),
+	catch(curl([useragent=1]), error(type_error(atom,1), _), true),
+	catch(curl([useragent=[]]), error(type_error(atom,[]), _), true),
+	catch(curl([useragent=functor(a)]), error(type_error(atom,functor(a)), _), true),
+	
+	%% test int option type errors
+	catch(curl([port=_]), error(instantiation_error, _), true),
+	catch(curl([port=a]), error(type_error(integer,1), _), true),
+	catch(curl([port=[]]), error(type_error(integer,[]), _), true),
+	catch(curl([port=functor(a)]), error(type_error(integer,functor(a)), _), true),
+	
 	true
 ]).
