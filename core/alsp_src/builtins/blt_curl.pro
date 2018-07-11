@@ -186,9 +186,11 @@ setup_primary_option(RESTVerb, PrimeOpt=1)
 	:-
 	primary_option(RESTVerb, PrimeOpt),
 	!.
-setup_primary_option(RESTVerb, 'CUSTOMREQUEST'=RESTVerb)
+setup_primary_option(RESTVerb, 'CUSTOMREQUEST'=UC_RESTVerb)
 	:-
-	simple_option(RESTVerb).
+	simple_option(RESTVerb),
+	make_uc_sym(RESTVerb, UC_RESTVerb).
+	
 
 primary_option(get, 'HTTPGET').
 primary_option(post, 'POST').
@@ -281,11 +283,13 @@ concat_lines_char([RawLine1 | RestRawLines], Char, FileData)
 	:-
 	do_concat_lines_char(RestRawLines, Char, RawLine1, FileData).
 
+
 	%% for testing -- delete when dev finished:
 export tt/0.
 tt :- open('./testfile.txt', write, SS), write(SS, abcde),nl(SS),write(SS,ghtyr),nl(SS),close(SS).
 export tf/0.
 tf :- open('./testfile.txt', write, SS), write(SS, 'name=admin'),nl(SS),write(SS,'shoesize=12'),nl(SS),close(SS).
+
 
 do_concat_lines_char([], _, Inter, Inter) :-!.
 
