@@ -75,11 +75,12 @@ http(RESTVerb, URL, Options)
 	refine_opts(RESTVerb, URL, UUOptions, ROptions),
 	do_curl(ROptions).
 	
-	
+/*
 http(RESTVerb, URL, Options)
 	:-
 	nonvar(RESTVerb),
 	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
+*/
 
 http(RESTVerb, URL, Options)
 	:-
@@ -94,7 +95,7 @@ check_verb(RESTVerb)
 check_verb(RESTVerb)
 	:-
 	atom(RESTVerb),
-	not(member(RESTVerb, [get,post,put,delete])),
+	not(member(RESTVerb, [get,post,put,delete,head,options,patch])),
 	!,
 	domain_error(http_rest_verb,RESTVerb,2).
 check_verb(_).
@@ -146,10 +147,6 @@ check_http_opt(Tag=_) :-!.
 check_http_opt(Opt) 
 	:-
 	type_error('equation (_=_)', Opt,3).
-	
-
-
-
 
 export uppercase_unwind/2.
 uppercase_unwind([], []).
@@ -178,19 +175,37 @@ uc_unw(Exp, _)
 	!,
 	fail.
 	
-refine_opts(RESTVerb, URL, Options, [PrimeOpt=1,'URL'=URL | RefinedOptions])
+%refine_opts(RESTVerb, URL, Options, [PrimeOpt=1,'URL'=URL | RefinedOptions])
+refine_opts(RESTVerb, URL, Options, [PrimeOption,'URL'=URL | RefinedOptions])
 	:-
-	primary_option(RESTVerb, PrimeOpt),
+	setup_primary_option(RESTVerb, PrimeOption),
 	allowed_options(RESTVerb, OkOptions),
 	check_options(Options, OkOptions, Options, RefinedOptions).
+
+setup_primary_option(RESTVerb, PrimeOpt=1)
+	:-
+	primary_option(RESTVerb, PrimeOpt),
+	!.
+setup_primary_option(RESTVerb, 'CUSTOMREQUEST'=RESTVerb)
+	:-
+	simple_option(RESTVerb).
 
 primary_option(get, 'HTTPGET').
 primary_option(post, 'POST').
 primary_option(put, 'PUT').
+primary_option(head, 'NOBODY').
+
+simple_option(delete).
+simple_option(options).
+simple_option(patch).
 
 allowed_options(get,  ['RESULT', 'RESULTFILE', 'URL', 'HTTPGET']).
 allowed_options(post, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
 allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+allowed_options(delete,  ['URL','RESULT','RESULTFILE']).
+allowed_options(head,  ['URL','RESULT','RESULTFILE']).
+allowed_options(options,  ['URL','RESULT','RESULTFILE']).
+allowed_options(patch,  ['URL','RESULT','RESULTFILE']).
 
 check_options([], _, _, []).
 	%% 'EOL' and 'EOLCODE' are ok in InitOptions, but strip them out of the final RefinedOptions
