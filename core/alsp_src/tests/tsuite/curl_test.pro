@@ -103,6 +103,9 @@ test_http :-
 test_curl_porceline :- 
 	test([
 
+	%%curl/1
+	not curl([]),
+
 	%% curl/2
 	(curl('http://localhost:8888/',R), '' == R),
 	curl('http://localhost:8888/', ''),
@@ -165,21 +168,24 @@ test_errors :-
 	catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
 	catch(curl(functor(a)), error(type_error(list,functor(a)),[curl:curl(functor(a))]), true),
 
-	catch(curl([]), error(curl_error(_tbd)), true),
+%	catch(curl([]), error(curl_error(_tbd)), true),
+% see test_curl_porceline: not(curl([])): curl_c_builtin([],_8521) fails.
 	
 	%% test string option type errors (url and useragent should behave identically)
 	catch(curl([url=_]), error(instantiation_error, _), true),
-	catch(curl([url=1]), error(type_error(atom,1), _), true),
-	catch(curl([url=[]]), error(type_error(atom,[]), _), true),
-	catch(curl([url=functor(a)]), error(type_error(atom,functor(a)), _), true),
+	catch(curl([url=1]), error(type_error('atom_non-[]',1), _), true),
+	catch(curl([url=[]]), error(type_error('atom_non-[]',[]), _), true),
+	catch(curl([url=functor(a)]), error(type_error('atom_non-[]',functor(a)), _), true),
 	catch(curl([useragent=_]), error(instantiation_error, _), true),
-	catch(curl([useragent=1]), error(type_error(atom,1), _), true),
-	catch(curl([useragent=[]]), error(type_error(atom,[]), _), true),
-	catch(curl([useragent=functor(a)]), error(type_error(atom,functor(a)), _), true),
+	catch(curl([useragent=1]), error(type_error('atom_non-[]',1), _), true),
+%	catch(curl([useragent=[]]), error(type_error('atomic_or_[]',[]), _), true),
+	catch(curl([useragent=[]]), error(type_error('atom_non-[]',[]), _), true),
+%	catch(curl([useragent=functor(a)]), error(type_error('atomic_or_[]',functor(a)), _), true),
+	catch(curl([useragent=functor(a)]), error(type_error('atom_non-[]',functor(a)), _), true),
 	
 	%% test int option type errors
 	catch(curl([port=_]), error(instantiation_error, _), true),
-	catch(curl([port=a]), error(type_error(integer,1), _), true),
+	catch(curl([port=a]), error(type_error(integer,a), _), true),
 	catch(curl([port=[]]), error(type_error(integer,[]), _), true),
 	catch(curl([port=functor(a)]), error(type_error(integer,functor(a)), _), true),
 	

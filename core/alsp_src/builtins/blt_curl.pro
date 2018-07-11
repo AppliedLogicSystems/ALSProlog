@@ -420,17 +420,98 @@ check_curl_options(CurlOptions)
 	:-
 	type_error(list,CurlOptions,2).
 
+/*
 check_curl_opt(Tag=_) 
 	:-
 	make_uc_sym(Tag, UC_Tag),
 	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
 
-check_curl_opt(Tag=_) 
+check_curl_opt(Tag=Val) 
 	:-
 	make_uc_sym(Tag, UC_Tag),
 	not(lookup_opt_info(UC_Tag)),
 	!,
         domain_error(curl_option,(Tag=_),3).
+*/
+check_curl_opt(Tag=Val) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	check_uc_tag(UC_Tag),
+	!,
+	check_val(UC_Tag, Val).
+
+check_uc_tag(UC_Tag)
+	:-
+	not(member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST'])),
+	not(lookup_opt_info(UC_Tag)),
+	!,
+        domain_error(curl_option,(Tag=_),3).
+check_uc_tag(UC_Tag).
+	
+
+	%% 'ins' indicates 'instantiated'; unins indicates 'uninstantiated':
+	%% 'nl' indicates 'non-list':
+expects_ins_integer('PORT').
+
+expects_ins_atom_nl('URL').
+expects_ins_atom_nl('USERAGENT').
+
+check_val(UC_Tag, Val)
+	:-
+	expects_ins_integer(UC_Tag),
+	!,
+	check_ins_integer_val(Val).
+
+check_ins_integer_val(Val)
+	:-
+	var(Val),
+	!,
+	instantiation_error(2).
+
+check_ins_integer_val(Val)
+	:-
+	not(integer(Val)),
+	!,
+        type_error(integer,Val,3).
+check_ins_integer_val(_).
+
+check_val(UC_Tag, Val)
+	:-
+	expects_ins_atom_nl(UC_Tag),
+	!,
+	check_ins_atom_nl(Val).
+
+check_ins_atom_nl(Val)
+	:-
+	var(Val),
+	!,
+	instantiation_error(3).
+check_ins_atom_nl([])
+	:-!,
+        type_error('atom_non-[]',[],3).
+check_ins_atom_nl(Val)
+	:-
+	not(atom(Val)),
+	!,
+        type_error('atom_non-[]',Val,3).
+check_ins_atom_nl(_).
+
+
+check_val(UC_Tag, Val)
+	:-
+	nonvar(Val),
+	(not(atomic(Val)); Val==[]),
+	!,
+        type_error('atomic_or_[]',Val,3).
+check_val(UC_Tag, Val).
+
+/*
+check_curl_opt(Tag=Val) 
+	:-
+	(not(atomic(Val)); Val==[]),
+	!,
+        type_error(atom,Val,3).
+*/
 
 check_curl_opt(Tag=_) :-!.
 
