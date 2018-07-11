@@ -162,9 +162,7 @@ test_errors :-
 	test([
 	catch(curl, error(existence_error(procedure,user:curl),[user:curl]), true),
 	catch(curl(_), error(instantiation_error,[curl:curl(tbd)]), true),
-%	catch(curl(1), error(domain_error(tbd,tbd),[curl:curl(tbd)]), true),
 	catch(curl(1), error(type_error(list,1),[curl:curl(1)]), true),
-%	catch(curl(functor(a)), error(domain_error(tbd,tbd),[user:curl(tbd)]), true),
 	catch(curl(functor(a)), error(type_error(list,functor(a)),[curl:curl(functor(a))]), true),
 
 	catch(curl([]), error(curl_error(_tbd)), true),
