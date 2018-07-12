@@ -5,7 +5,7 @@ OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = dll
 OS_SL_LINK = $(CC) -shared
-LIBS = -lwsock32 -lcomdlg32
+LIBS = -lwsock32 -lcomdlg32 -lcurl
 SL_LINK_LIBS = $(LIBS)
 TCLVER=86
 
