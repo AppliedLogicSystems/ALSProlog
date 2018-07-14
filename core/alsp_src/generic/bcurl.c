@@ -26,6 +26,11 @@
 #define PI_DOUBLE       6
 */
 
+int	curl_c_builtin	PARAMS(( void ));
+int	lookup_opt_info	PARAMS(( void ));
+char* 	normalize_opt(char* option_str);
+char* normalize_info(char* option_str);
+int lookup_code(const char *opt_name);
 
 #define BUFSIZE 1024
 
@@ -270,11 +275,10 @@ curl_c_builtin(void)
     int uia_var_t;
     int opt_action;
     int ret = 0;
-    int downtype = 0; /* 0 = uia, 1 = file target */
     char *filename;
     FILE *pagefile;
 
-    struct stat file_info;
+//    struct stat file_info;
     
     struct CurlInfoIn CIIArray[30];
     int ciiCtr = 1;
@@ -282,6 +286,9 @@ curl_c_builtin(void)
     char *curlinfo_string;
     long curlinfo_long;
     double curlinfo_double;
+
+	/* This should be an incoming uninstantiated var, used for returning error info to prolog */
+    PI_getan(&error, &error_t, 2);
 
         /* In windows, this will init the winsock stuff */
     ret = curl_global_init(CURL_GLOBAL_ALL);
@@ -297,8 +304,6 @@ curl_c_builtin(void)
             PI_FAIL;
     }
 
-	/* This should be an uninstantiated var, used for returning error info to prolog */
-    PI_getan(&error, &error_t, 2);
 
     PI_makesym(&nil_sym,&niltype,"[]");
     PI_getan(&oplist, &oplist_t, 1);
