@@ -420,19 +420,6 @@ check_curl_options(CurlOptions)
 	:-
 	type_error(list,CurlOptions,2).
 
-/*
-check_curl_opt(Tag=_) 
-	:-
-	make_uc_sym(Tag, UC_Tag),
-	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
-
-check_curl_opt(Tag=Val) 
-	:-
-	make_uc_sym(Tag, UC_Tag),
-	not(lookup_opt_info(UC_Tag)),
-	!,
-        domain_error(curl_option,(Tag=_),3).
-*/
 check_curl_opt(Tag=Val) 
 	:-
 	make_uc_sym(Tag, UC_Tag),
@@ -504,14 +491,6 @@ check_val(UC_Tag, Val)
 	!,
         type_error('atomic_or_[]',Val,3).
 check_val(UC_Tag, Val).
-
-/*
-check_curl_opt(Tag=Val) 
-	:-
-	(not(atomic(Val)); Val==[]),
-	!,
-        type_error(atom,Val,3).
-*/
 
 check_curl_opt(Tag=_) :-!.
 
