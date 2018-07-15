@@ -15,8 +15,12 @@ before_install: |
     sudo apt-get -yq install gcc-multilib
     sudo aptitude -yq install tcl-dev:i386
     sudo aptitude -yq install libtk8.6:i386
+    sudo aptitude -yq install libcurl4-openssl-dev:i386
+    sudo apt-get -yq install php5-cli
     apt-get download tk8.6-dev:i386 tk-dev:i386
     sudo dpkg -i --force-all *.deb
+    export CFLAGS=--std=gnu99
+    export PHP=php5
   fi
 
 script:

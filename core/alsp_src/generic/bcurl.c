@@ -464,7 +464,7 @@ curl_c_builtin(void)
   		    	        curl_easy_setopt(easyhandle, opt_code, opt_long);
 		    	        break;
 			    }
-			    case CURLOPTTYPE_STRINGPOINT: 
+			    case CURLOPTTYPE_OBJECTPOINT: 
 			    {
 				char g2buf[BUFSIZE];    /* if a2buf is used below, var filename gets overwritten */
 	    	    		if (arg2_t == PI_SYM){

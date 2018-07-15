@@ -203,6 +203,7 @@ static struct {char *name; long value;} option_name_value_list[] = {
 	name2value(CURLOPT_DNS_LOCAL_IP4),
 	name2value(CURLOPT_DNS_LOCAL_IP6),
 	name2value(CURLOPT_LOGIN_OPTIONS),
+#if LIBCURL_VERSION_NUM > 0x072400
 	name2value(CURLOPT_SSL_ENABLE_NPN),
 	name2value(CURLOPT_SSL_ENABLE_ALPN),
 	name2value(CURLOPT_EXPECT_100_TIMEOUT_MS),
@@ -224,6 +225,8 @@ static struct {char *name; long value;} option_name_value_list[] = {
 	name2value(CURLOPT_CONNECT_TO),
 	name2value(CURLOPT_TCP_FASTOPEN),
 	name2value(CURLOPT_KEEP_SENDING_ON_ERROR),
+#endif
+	
 	name2value(CURLINFO_EFFECTIVE_URL),
 	name2value(CURLINFO_RESPONSE_CODE),
 	name2value(CURLINFO_TOTAL_TIME),
@@ -267,7 +270,9 @@ static struct {char *name; long value;} option_name_value_list[] = {
 	name2value(CURLINFO_LOCAL_IP),
 	name2value(CURLINFO_LOCAL_PORT),
 	name2value(CURLINFO_TLS_SESSION),
+#if LIBCURL_VERSION_NUM > 0x072400
 	name2value(CURLINFO_ACTIVESOCKET),
 	name2value(CURLINFO_TLS_SSL_PTR),
 	name2value(CURLINFO_HTTP_VERSION)
+#endif
 };
