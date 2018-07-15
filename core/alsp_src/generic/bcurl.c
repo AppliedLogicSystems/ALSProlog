@@ -98,26 +98,16 @@ WriteMemWithFileCallback(void *contents, size_t size, size_t nmemb, void *userp)
     char *ff;
     ff = memf->filename;
     FILE *pf;
-//    pf = fopen(ff, "wb");
     pf = fopen(ff, "ab");
     if (pf){
-        size_t written2file = fwrite(contents, size, nmemb, (FILE *)pf);
+//        should coordinate written2file # with realsize:
+//        size_t written2file = fwrite(contents, size, nmemb, (FILE *)pf);
+        fwrite(contents, size, nmemb, (FILE *)pf);
         fclose(pf);
     }
 
     return realsize;
 }    
-
-/* -------------------------------------------------------------------------------
- | Based on https://curl.haxx.se/libcurl/c/url2file.html 
- * ------------------------------------------------------------------------------*/
-
-static size_t 
-write_data2file(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-  size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
-  return written;
-}
 
 /* -------------------------------------------------------------------------------
  | Based on https://curl.haxx.se/libcurl/c/post-callback.html
@@ -146,22 +136,6 @@ static size_t read_callback(void *dest, size_t size, size_t nmemb, void *userp)
   }
  
   return 0; /* no more data left to deliver */ 
-}
-
-/* -------------------------------------------------------------------------------
- | Based on https://curl.haxx.se/libcurl/c/httpput.html
- * ------------------------------------------------------------------------------*/
-
-static size_t read_callback_file(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-    size_t retcode;
-    curl_off_t nread;
- 
-    retcode = fread(ptr, size, nmemb, stream);
- 
-    nread = (curl_off_t)retcode;
- 
-    return retcode;
 }
 
 static PWord nil_sym;
@@ -268,8 +242,8 @@ struct CurlInfoIn {
 int
 curl_c_builtin(void)
 {
-    PWord oplist, error, head, tail, arg1, arg2, result_var, result_file;
-    int oplist_t, error_t, head_t, tail_t, arg1_t, arg2_t, result_var_t, result_file_t;
+    PWord oplist, error, head, tail, arg1, arg2, result_var;
+    int oplist_t, error_t, head_t, tail_t, arg1_t, arg2_t, result_var_t;
     int i, have_result_var=1, have_result_file=1; 
     PWord uia_var;
     int uia_var_t;

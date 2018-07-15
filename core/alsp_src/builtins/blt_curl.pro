@@ -75,13 +75,6 @@ http(RESTVerb, URL, Options)
 	refine_opts(RESTVerb, URL, UUOptions, ROptions),
 	do_curl(ROptions).
 	
-/*
-http(RESTVerb, URL, Options)
-	:-
-	nonvar(RESTVerb),
-	printf('Unsupported or unknown REST verb: %t\n', [RESTVerb]).
-*/
-
 http(RESTVerb, URL, Options)
 	:-
 	var(RESTVerb),
@@ -175,7 +168,6 @@ uc_unw(Exp, _)
 	!,
 	fail.
 	
-%refine_opts(RESTVerb, URL, Options, [PrimeOpt=1,'URL'=URL | RefinedOptions])
 refine_opts(RESTVerb, URL, Options, [PrimeOption,'URL'=URL | RefinedOptions])
 	:-
 	setup_primary_option(RESTVerb, PrimeOption),
@@ -282,14 +274,6 @@ concat_lines_char([Line], Char, Line) :-!.
 concat_lines_char([RawLine1 | RestRawLines], Char, FileData)
 	:-
 	do_concat_lines_char(RestRawLines, Char, RawLine1, FileData).
-
-
-	%% for testing -- delete when dev finished:
-export tt/0.
-tt :- open('./testfile.txt', write, SS), write(SS, abcde),nl(SS),write(SS,ghtyr),nl(SS),close(SS).
-export tf/0.
-tf :- open('./testfile.txt', write, SS), write(SS, 'name=admin'),nl(SS),write(SS,'shoesize=12'),nl(SS),close(SS).
-
 
 do_concat_lines_char([], _, Inter, Inter) :-!.
 
@@ -498,15 +482,6 @@ check_curl_opt(Opt)
 	:-
 	type_error('equation (_=_)', Opt,3).
 	
-
-
-
-
-
-
-
-
-
 endmod.
 
 
