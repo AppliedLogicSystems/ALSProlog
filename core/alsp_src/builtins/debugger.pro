@@ -815,7 +815,7 @@ noshow(Mod, _)
 noshow_module(builtins).
 noshow_module(debugger).
 noshow_module(rel_arith).
-%noshow_module(sio).
+noshow_module(sio).
 noshow_module(tcltk).
 noshow_module(tk_alslib).
 noshow_module(xconsult).
@@ -834,7 +834,7 @@ noshow_module(syscfg).
 noshow_module(ttyshlmk).
 noshow_module(utilities).
 noshow_module(windows).
-%noshow_module(curl).
+noshow_module(curl).
 
 
 /****
