@@ -97,13 +97,15 @@ WriteMemWithFileCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
     char *ff;
     ff = memf->filename;
-    FILE *pf;
-    pf = fopen(ff, "ab");
-    if (pf){
-//        should coordinate written2file # with realsize:
-//        size_t written2file = fwrite(contents, size, nmemb, (FILE *)pf);
-        fwrite(contents, size, nmemb, (FILE *)pf);
-        fclose(pf);
+    if (ff != '\0'){
+        FILE *pf;
+        pf = fopen(ff, "ab");
+        if (pf){
+//            should coordinate written2file # with realsize:
+//            size_t written2file = fwrite(contents, size, nmemb, (FILE *)pf);
+            fwrite(contents, size, nmemb, (FILE *)pf);
+            fclose(pf);
+    }
     }
 
     return realsize;
@@ -285,6 +287,7 @@ curl_c_builtin(void)
     CURL *easyhandle = curl_easy_init();
 
     struct MemoryWithFileStruct chunk;
+    chunk.filename = '\0';
 
     struct WriteThis wt;
     wt.sizeleft = 0;
