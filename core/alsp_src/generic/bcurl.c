@@ -287,7 +287,7 @@ curl_c_builtin(void)
     CURL *easyhandle = curl_easy_init();
 
     struct MemoryWithFileStruct chunk;
-    chunk.filename = '\0';
+    chunk.filename = NULL;
 
     struct WriteThis wt;
     wt.sizeleft = 0;
