@@ -4,4 +4,4 @@ CPPFLAGS += -DUNIX_LINUX -I /usr/include/tcl
 # it to avoid problems.
 CCOMP=gcc
 CFLAGS+= -rdynamic
-OS_LIBS = -lm -ldl -lcrypt
+OS_LIBS = -lm -ldl -lcrypt -lcurl

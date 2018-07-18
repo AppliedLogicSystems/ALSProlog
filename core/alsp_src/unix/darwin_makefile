@@ -8,7 +8,7 @@ OS_SL_EXT=dylib
 # for intruction dispatch. The -Wl,-no_pie flag (PIE is Position Independent Executable),
 # suppresses ASLR.
 OS_SL_LINK=$(CC) -dynamiclib -Wl,-no_pie
-OS_LIBS= -Wl,-no_pie
+OS_LIBS= -lcurl -Wl,-no_pie
 #CFLAGS+= -rdynamic
 #OS_LIBS = -lm -ldl -lcrypt
 #OS_LIBS = -lcompat

@@ -15,6 +15,7 @@
 module sio.
 use windows.
 use tcltk.
+use curl.
 
 :- auto_use(sio).
 
@@ -722,6 +723,14 @@ check_source_sink_and_mode(tcl_transfer(_,_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 
+check_source_sink_and_mode(url(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(url(_,CurlOptions),Mode) :-
+	!,
+	check_curl_options(CurlOptions),
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+
 check_source_sink_and_mode(Source_sink,Mode) :-
 	domain_error(source_sink, Source_sink, 2).
 
@@ -799,8 +808,36 @@ check_list_option(M,ML) :-
 	dmember(M,ML),
 	!.
 check_list_option(M,ML) :-
-	domain_error(stream_option,M,3).
+        domain_error(stream_option,M,3).
+	
+check_curl_options([]) :-!.
+check_curl_options([Opt | CurlOptions])
+	:-
+	check_curl_opt(Opt),
+	!,
+	check_curl_options(CurlOptions).
 
+check_curl_options(CurlOptions)
+	:-
+	type_error(list,CurlOptions,2).
+
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	not lookup_opt_info(UC_Tag),
+	!,
+        domain_error(curl_option,Tag=_,4).
+
+check_curl_opt(Opt) 
+	:-
+	type_error('equation (_=_)', Opt,4).
+	
 
 /*----------------------------------------------------------*
  | check_alias/3
@@ -957,6 +994,14 @@ open_stream(console_error(Name), Mode, Options, Stream)
 open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,Stream) 
 	:- !,
 	open_tcl_transfer_stream(CmdTemplate,Interp,Mode,Options,Stream).
+
+open_stream(url(URL),Mode,NonURLOptions,Stream) 
+	:- !,
+	open_stream(url(URL,[]),Mode,NonURLOptions,Stream).
+
+open_stream(url(URL,URLOptions),Mode,NonURLOptions,Stream) 
+	:- !,
+	open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams
@@ -1669,6 +1714,26 @@ open_console_stream(Source_sink, Mode, ErrorMode, Options, Stream)
 open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
 
+/* ------------------------------- *
+	URL Streams
+ * ------------------------------- */
+
+open_url_stream(Source_sink,read,NonURLOptions,URLOptions,Stream)
+	:-
+	uppercase_unwind(URLOptions, UCOptions),
+	delete_from(UCOptions, 'RESULT', RemURLOptions, Vals),
+	(Vals = [VV] -> WW = VV ; true),
+
+	http(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
+	open(atom(WW), read, Stream, NonURLOptions).
+
+open_url_stream(URL,write,NonURLOptions,URLOptions,Stream)
+	:-
+	open(string(StreamString), write, Stream, NonURLOptions),
+	freeze(StreamString, 
+	    (atom_codes(StringAtom, StreamString),
+	     http(post, URL, [data=StringAtom | URLOptions])  )
+	).
 
 		/*-----------*
 		 |  WINDOWS  |
@@ -3893,8 +3958,7 @@ get_line0(Alias,Line,EndFlag) :-
 get_line0(Stream_or_alias,Line,EndFlag) :-
 	input_stream_or_alias_ok(Stream_or_alias, Stream),
 	sio_errcode(Stream, FailCode),
-	get_failure(FailCode,Stream,
-					get_line0(Stream_or_alias,Line,EndFlag)).
+	get_failure(FailCode,Stream, get_line0(Stream_or_alias,Line,EndFlag)).
 
 
 /*

@@ -32,7 +32,7 @@ ALSDEV_SOURCE = $(ALSDEV_OS_SOURCE) tcl_interface.c
 
 ALSDEV_OBJECTS = $(ALSDEV_SOURCE:.c=.o)
 
-GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
+GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bcurl.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
 	bmisc.c bos.c bparser.c bpckg.c \
 	bsio.c bsystem.c built.c butil.c \
@@ -115,7 +115,10 @@ TEST_DIR = $(SOURCE_DIR)/tests
 
 test: testrun
 
-testrun : command_line_test iso_test_suite test_suite
+testrun : curl_test command_line_test iso_test_suite test_suite
+
+curl_test: alspro
+	$(TEST_DIR)/tsuite/curl_test.sh ./alspro
 
 command_line_test: alspro
 	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
