@@ -168,7 +168,10 @@ cl_test "$prolog -stack 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,20480
 
 # Test empty environment
 
+if [[ $(uname -o) != 'Cygwin' ]]
+then
 cl_test "env -i $prolog -q -b -g true" 0
+fi
 
 # test error handling of invalid ALS_OPTIONS
 # Currently they don't fail, but should:

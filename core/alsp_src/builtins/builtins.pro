@@ -1165,6 +1165,8 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_cslt),			
 	consult_builtins(BDir, blt_shl),
 
+	consult_builtins(BDir, blt_curl),
+
 %	consult_builtins(BDir, blt_dvsh),
 %	consult_builtins(BDir, dbg_class),
 %	consult_builtins(BDir, projects),

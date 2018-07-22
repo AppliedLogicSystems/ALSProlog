@@ -595,7 +595,10 @@ static struct blt_struct {
 #endif /* SUBTYPES */
 
 	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name"),
-	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory")
+	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory"),
+
+	BLT("curl_c_builtin", 2, curl_c_builtin, "_curl_c_builtin"),
+	BLT("lookup_opt_info", 1, lookup_opt_info, "_lookup_opt_info")
 
 };
 	/* blt_tab[] */
