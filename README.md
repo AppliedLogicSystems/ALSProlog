@@ -39,11 +39,11 @@ Build Dependencies
 
 ### Linux
 
-Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, and Tcl/Tk. Packages for popular distributions:
+Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, Libcurl, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo pkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib tk-dev:i386`
+Debian/Ubuntu: `sudo pkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 libcurl.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
 ### Mac OS X
 
@@ -55,5 +55,6 @@ CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install gl
 
 - Devel (git make gcc-core mingw64-i686-gcc-core libcrypt-devel mingw64-i686-libgcrypt)
 - Tcl-Tk (tcl-tk-devel mingw64-i686-tcl mingw64-i686-tk)
+- Libcurl (mingw64-i686-curl php procps)
 - Archive (zip)
 - X11 (optional to run X11 alsdev)
