@@ -12,6 +12,7 @@
  |
  | Author : Kevin Buettner - Version B
  | Date:    06/01/93
+ |      cf. ~core/alsp_src/doc/als-mics.faq in the source tree.
  *=====================================================================*/
 
 module builtins.
