@@ -398,14 +398,14 @@ would result in the following fact being asserted in module builtins:
 
 This assertion is always made, even when -p is not used, in which case
 the argument of command_line/1 is the empty list. It is important to
-note that command_line/1 is not exported from module builtins, so
-that accesses to it from other modules must be prefixed with ‘builtins:’ as in
+note that command_line/1 is not exported from module builtins, so that
+accesses to it from other modules must be prefixed with ‘builtins:’ as in
 
     ...,builtins:command_line(Cmds),...
 
-The option -P is just like option -p, except that the name of the running image 
-(alspro, alsdev, or possibly an application image built from them) is
-pushed onto the front of the list returned by command_line/1.  So if 
+The option -P is just like option -p, except that the name of the running 
+image (alspro, alsdev, or possibly an application image built from them)
+is pushed onto the front of the list returned by command_line/1.  So if 
 my_appl_img is the name of an image built from alspro, then
 
     my_appl_img -heap 100 -q -no_dot_alspro -P -icecream -special_deal
