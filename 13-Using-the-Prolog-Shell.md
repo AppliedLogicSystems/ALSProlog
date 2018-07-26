@@ -332,8 +332,9 @@ Under Windows NT, one uses the Environment section of the System
 Properties control panel.]
 ````
 ````
-For the following five switches, note that consulting <path><file>.pro suppresses creation 
-of <file>.obp, while consulting <path><file> without '.pro' requests creation of <file>.obp.
+For the following five switches, note that consulting <path><file>.pro 
+suppresses creation of <file>.obp, while consulting <path><file> without 
+'.pro' requests creation of <file>.obp.
 ````
 ````
 -obp The option -obp causes the *.obp files which are generated for 
