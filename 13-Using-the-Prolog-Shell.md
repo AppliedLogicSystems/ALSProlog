@@ -378,7 +378,7 @@ solaris2.4, etc.
 .alspro or alspro.pro.
 ````
 ````
--p The option -p is used by ALS Prolog to distinguish between command line
+-p -P The option -p is used by ALS Prolog to distinguish between command line
 switches intended for the system and those switches intended for an application
 (whether invoked with the -g command line switch or from the Prolog shell). 
 The -p divides the command line into two portions: All switches to 
@@ -402,6 +402,18 @@ note that command_line/1 is not exported from module builtins, so
 that accesses to it from other modules must be prefixed with ‘builtins:’ as in
 
     ...,builtins:command_line(Cmds),...
+
+The option -P is just like option -p, except that the name of the running image 
+(alspro, alsdev, or possibly an application image built from them) is
+pushed onto the front of the list returned by command_line/1.  So if 
+my_appl_img is the name of an image built from alspro, then
+
+    my_appl_img -heap 100 -q -no_dot_alspro -P -icecream -special_deal
+
+would result in the following fact being asserted in module builtins:
+
+    command_line([my_appl_img, '-icecream', '-special_deal']).
+
 ````
 ````
 -nwd The -nwd option instructs the debugger to only use the system console for
