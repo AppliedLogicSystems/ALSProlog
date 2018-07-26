@@ -368,6 +368,9 @@ solaris2.4, etc.
 -no_obp The option -no_obp causes alspro to suppress all generation of *.obp files.
 ````
 ````
+-no_dot_alspro The -no_dot_alspro option causes alspro to avoid loading .alspro or alspro.pro.
+````
+````
 -p The option -p is used by ALS Prolog to distinguish between command line
 switches intended for the system and those switches intended for an application
 (whether invoked with the -g command line switch or from the Prolog shell). 
@@ -392,4 +395,16 @@ note that command_line/1 is not exported from module builtins, so
 that accesses to it from other modules must be prefixed with ‘builtins:’ as in
 
     ...,builtins:command_line(Cmds),...
+````
+````
+-nwd The -nwd option instructs the debugger to only use the system console for display (Only meaningful in alsdev).
+````
+````
+-shell <shell> This option causes alspro to use the non-default <shell> after processing the command line; currently, the only known other <shell> is alsdev.
+````
+````
+-h This option causes alspro to display the help info on the console.
+````
+````
+--help This option causes alspro to display the help info on the console.
 ````
