@@ -243,6 +243,15 @@ possible customizations of your environment such as the modifications to the sta
 There are a number of options that can be included on the operating system shell
 command line when starting ALS Prolog. The following is a list of the options:
 ````
+-s This switch must be followed by a space and a path to a directory. The path
+is added to the searchdir/1 sequence. Multiple occurrences of -s with
+a path may occur on the command line; the associated paths are processed
+and added to the searchdir/1 facts in order corresponding to their left-toright
+occurrence on the command line. All paths occurring with -s on the
+command line are added to the searchdir/1 facts before any paths obtained
+from the ALSPATH environment variable.
+````
+````
 -g The option -g followed by an arbitrary Prolog goal, instructs ALS Prolog
 to run the goal when it starts up as if it was the first goal typed to the 
 Prolog shell after the system is started. The goal might have to be quoted 
@@ -321,15 +330,6 @@ note that command_line/1 is not exported from module builtins, so
 that accesses to it from other modules must be prefixed with ‘builtins:’ as in
 
     ...,builtins:command_line(Cmds),...
-````
-````
--s This switch must be followed by a space and a path to a directory. The path
-is added to the searchdir/1 sequence. Multiple occurrences of -s with
-a path may occur on the command line; the associated paths are processed
-and added to the searchdir/1 facts in order corresponding to their left-toright
-occurrence on the command line. All paths occurring with -s on the
-command line are added to the searchdir/1 facts before any paths obtained
-from the ALSPATH environment variable.
 ````
 ````
 -A, -a This switch must be followed by a space and a Prolog Goal ( enclosed in 
