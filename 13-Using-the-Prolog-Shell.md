@@ -241,7 +241,10 @@ possible customizations of your environment such as the modifications to the sta
 
 ## 13.7 ALS Prolog Command Line Options
 There are a number of options that can be included on the operating system shell
-command line when starting ALS Prolog. The following is a list of the options:
+command line when starting ALS Prolog. Any Prolog goals and terms appearing on
+the command line may need to be quoted (with OS shell quotes) to avoid 
+interpretation by the OS shell.  All switches which take an argument must be
+separated from that argument by a space.  The following is a list of the options:
 ````
 -s This switch must be followed by a space and a path to a directory. The path
 is added to the searchdir/1 sequence. Multiple occurrences of -s with
@@ -425,7 +428,4 @@ processing the command line; currently, the only known other <shell> is alsdev.
 ````
 ````
 -h This option causes alspro to display the help info on the console.
-````
-````
---help This option causes alspro to display the help info on the console.
 ````
