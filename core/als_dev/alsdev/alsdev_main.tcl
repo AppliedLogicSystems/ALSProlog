@@ -126,10 +126,10 @@ proc vTclWindow.dyn_flags {base} {
 	frame $base.buttons \
 		-borderwidth 1 -relief raised 
     button $base.buttons.dismiss \
-		-padx 2 -text Dismiss \
+		-padx 11 -text Dismiss \
         -command {wm withdraw .dyn_flags}
-    button $base.
-		-padx 2 -text {Save as Defaults} \
+    button $base.buttons.save \
+		-padx 11 -text {Save as Defaults} \
         -command {prolog call alsdev save_prolog_flags ; wm withdraw .dyn_flags}
 
     ###################
@@ -139,11 +139,12 @@ proc vTclWindow.dyn_flags {base} {
     pack $base.buttons \
         -anchor center -expand 0 -fill x -side bottom 
     pack $base.buttons.dismiss \
-        -anchor center -expand 0 -fill none -padx 2 -side left 
+        -anchor center -expand 0 -fill none -padx 11 -side left 
     pack $base.buttons.save \
-        -anchor center -expand 0 -fill none -padx 2 -side right 
+        -anchor center -expand 0 -fill none -padx 11 -side right 
 
 	prolog call builtins changable_flags_info -var InfoList
+# Find in alsdev.tcl:
 	foreach info $InfoList {
 		create_dyn_flag_entry $info
 	}
@@ -152,37 +153,37 @@ proc vTclWindow.dyn_flags {base} {
 	wm deiconify $base
 }
 
-proc create_dyn_flag_entry { info } {
-	global array proenv
-
-	set FlagName [lindex $info 0]
-	set PosVals [lindex $info 1]
-	set CurVal [lindex $info 2]
-
-	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
-	label $ff.label -borderwidth 0 \
-        -relief flat -width 18 -justify right \
-        -text $FlagName
-
-	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
-	set proenv($FlagName) $CurVal  
-	set MM [eval $Cmd]
-
-	pack $ff  \
-        -anchor center -expand 0 -fill x -side top 
-	pack $ff.label  \
-        -anchor center -expand 0 -fill none -side left 
-	pack $ff.opts_menu  \
-        -anchor center -expand 0 -fill x -side left 
-
-	set Last [$MM index end]
-	for {set ii 0} {$ii <= $Last} {incr ii} {
-		set Cmd [list prolog call builtins \
-			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
-		$MM entryconfigure $ii -command $Cmd
-	}
-
-}
+#proc create_dyn_flag_entry { info } {
+#	global array proenv
+#
+#	set FlagName [lindex $info 0]
+#	set PosVals [lindex $info 1]
+#	set CurVal [lindex $info 2]
+#
+#	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
+#	label $ff.label -borderwidth 0 \
+#        -relief flat -width 18 -justify right \
+#        -text $FlagName
+#
+#	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
+#	set proenv($FlagName) $CurVal  
+#	set MM [eval $Cmd]
+#
+#	pack $ff  \
+#        -anchor center -expand 0 -fill x -side top 
+#	pack $ff.label  \
+#        -anchor left -expand 0 -fill none -side left 
+#	pack $ff.opts_menu  \
+#        -anchor right -expand 0 -fill none -side right 
+#
+#	set Last [$MM index end]
+#	for {set ii 0} {$ii <= $Last} {incr ii} {
+#		set Cmd [list prolog call builtins \
+#			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
+#		$MM entryconfigure $ii -command $Cmd
+#	}
+#
+#}
 
 proc change_prolog_flags {} {
 	global array proenv

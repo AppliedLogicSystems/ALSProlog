@@ -1041,9 +1041,9 @@ proc create_dyn_flag_entry { info } {
 	pack $ff  \
         -anchor center -expand 0 -fill x -side top 
 	pack $ff.label  \
-        -anchor center -expand 0 -fill none -side left 
+        -anchor w -expand 0 -fill none -side left 
 	pack $ff.opts_menu  \
-        -anchor center -expand 0 -fill x -side left 
+        -anchor e -expand 0 -fill none -side right 
 
 	set Last [$MM index end]
 	for {set ii 0} {$ii <= $Last} {incr ii} {
