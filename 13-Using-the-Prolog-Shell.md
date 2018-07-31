@@ -303,18 +303,21 @@ makefiles.)
 ````
 ````
 -heap The option -heap followed immediately by space and a number w sets
-the size of the ALS Prolog heap to w *1024, where w is the number of K bytes 
-to allocate. Heap overflow will cause exit to the operating system.
+the size of the ALS Prolog heap to w *1024, where w is the number of Kilobytes 
+to allocate, if w is large.  For small w, the size of the heap is set to
+the base heap size incremented by w *1024.  Heap overflow will cause exit 
+to the operating system.  Cf. statistics/0.
 ````
 ````
 -stack The option -stack followed immediately by a space and a number w sets 
-the size of the ALS Prolog stack to w *1024, where w is the number of K bytes 
+the size of the ALS Prolog stack to w *1024, where w is the number of Kilobytes 
 to allocate. Stack overflow will cause exit to the operating system.
+Cf. statistics/0.
 
-These two options were formerly only controlled by the use of an environment 
-variable, ALS_OPTIONS. Now, either or both the command-line and environment
-variable method can be used. Use of one of the command-line options overrides
-use of the corresponding option with the environment variable.
+These two options (-heap, -stack) were formerly only controlled by the use of 
+an environment variable, ALS_OPTIONS. Now, either or both the command-line 
+and environment variable method can be used. Use of one of the command-line 
+options overrides use of the corresponding option with the environment variable.
 The ALS_OPTIONS environment variable is used as follows. If w1 and w2 are
 similar to the value w described above for -h and -s, then:
 Under Bourne shell, Korn shell, and Bash:
