@@ -271,6 +271,8 @@ ss_cl_assert1(AX, Mod)
 
 show_help
 	:-
+not(alsdev_running),
+!,
 	write('    Help for alspro'),nl,
 	write('    ==============='),nl,
 	write('    alspro [options] [source [sources]]'),nl,
@@ -313,6 +315,7 @@ show_help
 	write('    See also Wiki Section 13.7 and the alspro man page.'),nl,
 	nl,nl,
 	halt.
+show_help.
 
 
 	%%%%%%%

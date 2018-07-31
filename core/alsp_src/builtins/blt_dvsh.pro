@@ -94,10 +94,23 @@ start_alsdev :-
 
 start_alsdev0
 	:-
-
 		%% Used by some routines in builtins
 		%% to  detect presence  of alsdev:
 	assert(alsdev_running),
+	builtins:sys_searchdir(ALSDIRPath),
+	split_path(ALSDIRPath, ALSDIRPathList),
+
+	setup_init_ide_classes(ALS_IDE_Mgr),
+
+	join_path([ALSDIRPath,shared], Shared),
+	tk_new(shl_tcli),
+
+	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
+	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
+
+	join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
+	tcl_call(shl_tcli, [source, ALSTKLIB], _),
+
 	abolish(save_clinfo,1),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
@@ -106,13 +119,6 @@ start_alsdev0
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
 
-	builtins:sys_searchdir(ALSDIRPath),
-	split_path(ALSDIRPath, ALSDIRPathList),
-	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
-	join_path(ObjPathList, ObjectsPath),
-
-	setup_init_ide_classes(ALS_IDE_Mgr),
-
 	library_setup(CLInfo),
 
 /* WHY IS THIS MISSING?
@@ -120,18 +126,6 @@ start_alsdev0
 		rel_arith:set_ics(cs(0,0,0))
 #endif
 */
-	sys_env(OS, _, _),
-	join_path([ALSDIRPath,shared], Shared),
-	tk_new(shl_tcli),
-
-	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
-	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
-	(OS = macos ->
-		tcl_call(shl_tcli, 'source -rsrc als_tklib', _)
-		;
-		join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
-		tcl_call(shl_tcli, [source, ALSTKLIB], _)
-	),
 	append(ALSDIRPathList, [shared], ImagesList),
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
@@ -1009,7 +1003,7 @@ als_ide_mgrAction(open_edit_win(FileName), State)
 	:-
 	path_directory_tail(FileName, _, TF),
 	file_extension(TF, BaseFileName, Ext),
-	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
+	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext, false), State).
 
 als_ide_mgrAction(open_edit_win_by_root(RootFileName,SearchList), State)
 	:-
