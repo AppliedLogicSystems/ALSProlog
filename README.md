@@ -41,7 +41,7 @@ Build Dependencies
 
 Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, Libcurl, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo pkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386`
+Debian/Ubuntu: `sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386`
 
 CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 libcurl.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
