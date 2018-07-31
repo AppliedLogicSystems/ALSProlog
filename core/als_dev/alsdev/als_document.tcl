@@ -519,8 +519,7 @@ proc document.close {w} {
 	if {$proenv($w,src_handler) == 0} then {
 		dispose_document_window $w
 		return true
-	}
-	else if {[save_check $w]} then {
+	} elseif {[save_check $w]} then {
 		prolog call $proenv(dflt_mod) send -number $proenv($w,src_handler) -atom close_edit_win
 			## the prolog side used to do this, but moved back here:
 		unset proenv($w,is_example)
