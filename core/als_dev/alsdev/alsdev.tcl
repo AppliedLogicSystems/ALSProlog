@@ -24,6 +24,7 @@
 # the AttachOpenDocumentHandler procedure which should be called when
 # .topals is fully opened.
 
+
 switch [tk windowingsystem] {
 	win32   { load {} OpenDocument }
 	default {}

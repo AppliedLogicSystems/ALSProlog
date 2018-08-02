@@ -111,6 +111,9 @@ start_alsdev0
 	join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
 	tcl_call(shl_tcli, [source, ALSTKLIB], _),
 
+	join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
+	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
+
 	abolish(save_clinfo,1),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
@@ -133,7 +136,7 @@ start_alsdev0
 	process_cl_asserts(CLInfo),
 	!,
 	abolish(start_alsdev/0),
-	alsdev(Shared,ALS_IDE_Mgr).
+	alsdev(ALS_IDE_Mgr).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%       ALS_IDE  ObjectPro CLASS DEFINITIONS    %%%%%
@@ -299,18 +302,9 @@ alsdev
 
 :- dynamic(dvf/0).
 
-export alsdev/2.
-alsdev(Shared, ALS_IDE_Mgr)
+export alsdev/1.
+alsdev(ALS_IDE_Mgr)
 	:-
-	sys_env(OS, _, _),
-	(OS = macos ->
-		tcl_call(shl_tcli, 'source -rsrc alsdev', _)
-	  ;
-	  (
-		join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
-	        tcl_call(shl_tcli, [source, ALSDEVTCL], _)
-	  )
-	),
 		%% At this point, the windows have been created;
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
