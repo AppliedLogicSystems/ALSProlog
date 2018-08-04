@@ -1934,3 +1934,6 @@ However, you can signal end-of-file from the console on various operating system
 * On UNIX: Control-D
 * On DOS and Win32: Control-Z followed by a return
 * On the Macintosh: Control-D, or Control-Z.
+
+## 10.11 REST-inspired Internet Connections.
+
