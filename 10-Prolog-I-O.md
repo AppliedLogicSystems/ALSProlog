@@ -248,6 +248,26 @@ where Name is an atom (which is not taken as an alias for the stream). Then arbi
 
 where Name is an atom. Then any input operations from stream S will always encounter the end_of_file condition without errors.
 
+#### URLs: Internet Streams.
+
+URLs may be used as a source or sink for a stream. When <URL> is a proper url, and <CurlOptionList> is a list of Curl options as described in Section 10.11,
+
+url(<URL>, <CurlOptionList>)
+
+is a sourcesink term.  The expression url(<URL>) is equivalent to url(<URL>, []).
+
+A stream S opened with
+
+open(url(<URL>, <CurlOptionList>), read, S, <possible generic stream options>)
+
+will contain the characters returned by a GET to <URL>, conditioned by <CurlOptionList> and <possible generic stream options>.  A stream S opened with
+
+open(url(<URL>, <CurlOptionList>), write, S, <possible  generic stream options>)
+
+will capture all characters written to S (write,nl,printf, etc.), and when S is closed, the sequence of characters in S will be POSTed to <URL>, conditioned by <CurlOptionList>.  WARNING: The implementation of open(url(<URL>, <CurlOptionList>), write, S, …) utilizes the freeze construct.  Everything will work correctly so long as no gc (garbage collection) takes place; otherwise, Issue #87 will cause incorrect and unpredictable behavior.
+
+For both read and write url streams, the Curl options available are exactly the same as for http/3 or curl/1-3 in Section 10.11.
+
 ### 10.2.3 Immediate versu Delayed Streams.
 
 A file sourcesink is said to be immediate in the sense that (normally) all of the characters (data) which will make up the stream are immediately available once the
