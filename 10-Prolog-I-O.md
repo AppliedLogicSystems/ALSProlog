@@ -1956,3 +1956,86 @@ However, you can signal end-of-file from the console on various operating system
 
 ## 10.11 REST-inspired Internet Connections.
 
+Inspired by the REST approach to internet file transfer,
+
+    http/3
+    http(RESTVerb, URL, Options)
+
+provides REST-inspired transfer services.  At present, the following RESTVerbs are implemented:
+
+    get, post put, delete, head, options, patch.
+
+The available options depend on the RESTVerb.
+
+First, a comment about implementation.  At the bottom of the plumbing, the so-called <a href="https://curl.haxx.se/libcurl/c/libcurl-easy.html">“Easy interface”</a> of the <a href="https://curl.haxx.se/libcurl/">Curl library</a> is used to build the implementation.  In this approach, everything about a call http(RESTVerb, URL, Options) is converted into a single list of Easy-oriented Curl option equations, and that list is then passed to a C program built over the CURL Easy interface API.
+
+For all equations on the list passed to the C program, the left side of every equation is first converted to uppercase.  With the exception of the special equation tags ‘RESULT’, ‘RESULTFILE’, and 'UPLOADDATA' (see below), the left side L of every equation L=R passed to the C plumbing is prefixed with either ‘CURLOPT_’ or ‘CURLINFO_’.  The result of this prefixing must be either an <a href=“https://curl.haxx.se/libcurl/c/curl_easy_setopt.html”>easy option</a> (cf. an <a href=“https://curl.haxx.se/libcurl/c/easy_setopt_options.html”>alphabetical listing</a>) or an <a href=“https://curl.haxx.se/libcurl/c/easy_getinfo_options.html”>info option</a>.
+
+Several simple transformations are applied to the elements of the list:
+
+i) Unary prolog expressions <F>(A) are allowed on the Options list.  These are converted to equations FF = A, where FF is the uppercase version of <F>.
+
+ii) Equations E = A are converted to EE = A where EE is the uppercase version of E.
+
+Common options:
+==============
+
+* The special equation 
+	‘RESULT’ = Expr    [or, result = Expr]
+can appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET or POST or whatever) is turned into a UIA, and is unified with Expr, which can be any prolog expression, including an unbound variable.
+
+*) The special equation
+	'RESULTFILE' = '<local file path>'  [or resultfile = '<local file path>']
+can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at <local file path>.  Note that both result = Expr and resultfile = '<local file path>' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at <local file path>.
+
+* Given the call http(RESTVerb, URL, Options), the equation ‘URL’ = URL is placed on the ultimate Easy options list passed to the Curl-based C program.  This URL is the other end of the RESTVerb transaction (typically get or post, but also any of put, delete, head, options, or patch).
+
+* Appropriate CURLINFO options can be used with any RESTVerb.  For example, including response_code(RC) on Options will bind RC to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including total_time(TTT) will bind TTT to the number of seconds expended in the transaction.
+
+Examples:
+?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
+?- http(get,'http://example.com', [response_code(RC),total_time=TTT,file='./myfile.txt']).
+
+For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12’) and 2) free-form text data (e.g., ‘lorem ipsum doler’).  Either type of data can be supplied either directly in an equation on the options lisit, or in a file specified on the options list.  
+
+* If data = <atom> (’DATA’=<atom>) (where <atom> is a symbol or uia) occurs on the options the, then the underlying CURL program will POST the text of <atom> via the equation 'READDATA'=<atom>.
+ 
+* If datefile=FilePathName(‘DATAFILE’=FilePathName) occurs on the options list, then the complete text occurring in FilePathName is read into a single UIA DT, and the information is POSTED as if ‘DATA’=DT had been included on Options.  The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA DT.  For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines.  If the equation eol = <char> (or, 'EOL'=<char>) is present on the options list, when FilePathName is read, the character <char> will be used as a separator between the concatenated lines.  Equivalently, if eolcode=<charcode> (or, 'EOLCODE'=<charcode>) is present on the list, the character with code <charcode> will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
+
+* If fields = <atom> / ‘FIELDS’=<atom> occurs on Options, then <atom> should represent a structured fields expression (e.g., 'name=admin&shoesize=12’).  The underlying CURL program will POST the text of <atom> via 'POSTFIELDS'=<atom>.
+
+* If fieldsfile = FilePathName (or, ‘FIELDSFILE’= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if ‘FIELDS’=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = <char> ('EOL'=<char>) or eolcode=<charcode> ('EOLCODE'=<charcode>) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
+
+Examples:
+
+?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
+?- http(post, 'https://postman-echo.com/post', [fieldsfile='./foofields.txt', result=RR, eol='&']).
+?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', eolcode=32,result=RR]).
+
+
+
+An alternate, more direct, way of curl/1-3 invoking the immediate interface from prolog to Curl is
+provided by the predicates curl/1-3.  Below, options must be list of Curl options as described above.
+
+curl/1:
+curl(Options)
+    Cleans up capitalization of options and invokes the low-level interface to Curl.
+
+curl/2:
+Effectively:
+curl(URL, Target)
+    :-
+    curl(URL, Options, Target).
+
+curl/3:
+Effectively:
+curl(URL, Options, Target)
+    :-
+    XOptions = [url=URL, result=Target | Options],
+    curl(XOptions).
+
+Examples:
+
+?- curl('http://example.com', [response_code=RC], RR).
+?- curl('http://example.com', RR).
+?- curl([url='http://example.com', response_code(RC), result=RR]).
