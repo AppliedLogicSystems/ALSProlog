@@ -262,7 +262,7 @@ A stream S opened with
 
 will contain the characters returned by a GET to <URL>, conditioned by <CurlOptionList> and <possible generic stream options>.  A stream S opened with
 
-    open(url(<URL>, <CurlOptionList>), write, S, <possible  generic stream options>)
+    open(url(<URL>, <CurlOptionList>), write, S, <possible generic stream options>)
 
 will capture all characters written to S (write,nl,printf, etc.), and when S is closed, the sequence of characters in S will be POSTed to <URL>, conditioned by <CurlOptionList>.  WARNING: The implementation of open(url(<URL>, <CurlOptionList>), write, S, …) utilizes the freeze construct.  Everything will work correctly so long as no gc (garbage collection) takes place; otherwise, Issue #87 will cause incorrect and unpredictable behavior.
 
