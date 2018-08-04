@@ -1996,14 +1996,15 @@ can also appear on Options.  Whatever HTTP result is produced from the underlyin
 * Appropriate CURLINFO options can be used with any RESTVerb.  For example, including response_code(RC) on Options will bind RC to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including total_time(TTT) will bind TTT to the number of seconds expended in the transaction.
 
 #### Examples:
+````
 ?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
 ?- http(get,'http://example.com', [response_code(RC),total_time=TTT,file='./myfile.txt']).
-
+````
 For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12’) and 2) free-form text data (e.g., ‘lorem ipsum doler’).  Either type of data can be supplied either directly in an equation on the options lisit, or in a file specified on the options list.  
 
-* If data = <atom> (’DATA’=<atom>) (where <atom> is a symbol or uia) occurs on the options the, then the underlying CURL program will POST the text of <atom> via the equation 'READDATA'=<atom>.
+* If data = &lt;atom&gt; (’DATA’=&lt;atom&gt;) (where &lt;atom&gt; is a symbol or uia) occurs on the options list, then the underlying CURL program will POST the text of &lt;atom&gt; via the equation 'READDATA'=&lt;atom&gt;.
  
-* If datefile=FilePathName(‘DATAFILE’=FilePathName) occurs on the options list, then the complete text occurring in FilePathName is read into a single UIA DT, and the information is POSTED as if ‘DATA’=DT had been included on Options.  The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA DT.  For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines.  If the equation eol = <char> (or, 'EOL'=<char>) is present on the options list, when FilePathName is read, the character <char> will be used as a separator between the concatenated lines.  Equivalently, if eolcode=<charcode> (or, 'EOLCODE'=<charcode>) is present on the list, the character with code <charcode> will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
+* If datefile=FilePathName(‘DATAFILE’=FilePathName) occurs on the options list, then the complete text occurring in FilePathName is read into a single UIA DT, and the information is POSTED as if ‘DATA’=DT had been included on Options.  The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA DT.  For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines.  If the equation eol = &lt;char&gt; (or, 'EOL'=&lt;char&gt;) is present on the options list, when FilePathName is read, the character &lt;char&gt; will be used as a separator between the concatenated lines.  Equivalently, if eolcode=&lt;charcode&gt; (or, 'EOLCODE'=&lt;charcode&gt;) is present on the list, the character with code &lt;charcode&gt; will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
 
 * If fields = <atom> / ‘FIELDS’=<atom> occurs on Options, then <atom> should represent a structured fields expression (e.g., 'name=admin&shoesize=12’).  The underlying CURL program will POST the text of <atom> via 'POSTFIELDS'=<atom>.
 
