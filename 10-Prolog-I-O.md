@@ -1958,3 +1958,487 @@ However, you can signal end-of-file from the console on various operating system
 
 ## 10.11 REST-inspired Internet Connections.
 
+Last login: Tue Jul 24 15:11:23 on ttys003
+KB-SSD > dar
+KB-SSD > cd core/alsp_src/generic/
+KB-SSD > pwd
+/Users/ken/ALS/GitHub/ALSProlog/core/alsp_src/generic
+KB-SSD > grep '-obp' *
+grep: generate: Is a directory
+KB-SSD > grep switch *
+grep: Doc: Is a directory
+alloc.c:    switch (TYPEOF(p)) {
+alloc.c:    switch (TYPEOF(p)) {
+alspi.h:#define FE_BAD_SWITCH	31	/* bad command line switch */
+alspi.h:#define FE_BAD_NSWITCH	32	/* bad numeric switch */
+arith.c:    switch (t) {
+arith.c:	    switch (v) {
+arith.c:		switch ((int) functor) {
+arith.c:		switch ((int) functor) {
+arith.c:    switch (status) {
+arith.c:	switch ((int)cnst) {
+arith.c:		switch ((int)Val) {
+bcinter.c:	switch (type) {
+bcinter.c:	switch (type) {
+bcurl.c:		switch (opt_code) {
+bcurl.c:  	    	        switch (val_type) {
+bcurl.c:  	    	    	}  /* switch on val_type */
+bcurl.c: 		    }   /* default case in opt_code switch */
+bcurl.c:		}    	/* option-specific setup: finish switch on opt_code */
+bcurl.c:		    switch(cii.info_type) {
+bcurl.c:		    }		/* end switch on cii.info_type */
+bdb.c:    switch (ent->flags & NMSK_USAGE) {
+bio.c:    switch (t) {
+bmeta.c:    switch (t1) {
+bmeta.c:    switch (t2) {
+bmeta.c:    switch (t2) {
+bmeta.c:	switch (t3) {
+bmeta.c:  switch (t2) {
+bmeta.c:    switch (t3) {
+bmeta.c:      switch (oldargt) {
+bmeta.c:    switch (t1) {
+bmeta.c:    switch (ta1) {
+bmisc.c:    switch (t1) {
+bmisc.c:    switch (t2) {
+bmisc.c:    /* The big compare switch */
+bmisc.c:    switch (t1) {
+bmisc.c:    	switch (t2) {
+bmisc.c:    	switch (t2) {
+bmisc.c:    	switch (t2) {
+bmisc.c:    	switch (t2) {
+bmisc.c:    	switch (t2) {
+bmisc.c:	switch (t1) {
+bmisc.c:	switch (t1) {
+bmisc.c:	switch (t) {
+bos.c:      int switching=1, switched=0;
+bos.c:	switch (*cp)
+bos.c:	  if (switched)
+bos.c:	    switching = 0;
+bos.c:	  switching = 1;
+bos.c:	  switched = 0;
+bos.c:	  if (switching)
+bos.c:	  switched = 1;
+bparser.c:	    switch (assoc) {
+bparser.c:	    switch (assoc) {
+bparser.c:		switch (v2) {
+bparser.c:	switch (C_list_to_string(&vr,&tr,v2,t2,C_list_char)) {
+bparser.c:	switch (C_list_to_string(&vr,&tr,v2,t2,C_list_code)) {
+bpckg.c:    switch (v1) {
+bsio.c:    switch(port) {
+bsio.c:    switch (b & ~SIOB_DONTBLOCK) {
+bsio.c:    switch (m) {
+bsio.c:    switch (v3) {
+bsio.c:    switch (v3) {
+bsio.c:    switch (v3) {
+bsio.c:    switch (NPI_
+bsio.c:    switch (arity) {
+bsio.c:    	switch (NPI_get_int(family)) {
+bsio.c:    	switch (NPI_get_int(type)) {
+bsio.c:    	switch (NPI_get_int(protocol)) {
+bsio.c:    	switch (family) {
+bsio.c:    	switch (type) {
+bsio.c:    	switch (protocol) {
+bsio.c:    switch (address_t) {
+bsio.c:    switch (type) {
+bsio.c:	switch (error_code) {
+bsio.c:	switch (v4) {
+bsio.c:    switch (domain) {
+bsio.c:    switch (socktype) {
+bsio.c:    switch (socktype) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch(SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK) {
+bsio.c:    switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
+bsio.c:    switch (SIO_TYPE(buf)) {
+bsio.c:    switch (v4) {
+bsio.c:    switch (eoln_type) {
+bsio.c:    switch(SIO_EOLNTYPE(buf) & SIOEOLN_READ_MASK) {
+bsio.c:	switch (ctype) {
+bsio.c:    switch (*p) {
+bsio.c:	switch (sio_chtb[*p] & SIOC_TOKENSTART) {
+bsio.c:		switch (*p++) {
+bsio.c:    switch (v2) {
+bsio.c:    switch (v2) {
+bsio.c:    switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
+bsio.c:    switch (v2) {
+bsio.c:	    switch (*a) {
+bsio.c:	switch (*s) {
+bsio.c:    switch (t2) {
+bsio.c:    switch (t1) {
+bsio.c:    switch ((int) v2) {
+bsystem.c:    switch (wm_aborted) {
+butil.c:    switch (TYPEOF(w)) {
+butil.c:    switch (t) {
+butil.c:    switch (t) {
+cexception.c:We use a switch statement to handle the result of setjmp instead of
+cexception.c:	switch (setjmp(__FailRecord.try_env)) {
+cexception.c:It will exit the TRYs switch statment, not the loop. Again this will leave
+cexception.h:/* A _Retry_ label could be added just before the switch, so that a RETRY
+cexception.h:		switch (setjmp(__FailRecord.try_env)) { \
+cexception.h:/* Note that ALWAYS relies on the fact that switch allows control to fall
+chpt.h: | 	mechanism used to implement switch_on_const and switch_on_struct).
+Binary file chpt.h.frame matches
+cinterf.c:    switch (type) {
+cinterf.c:		switch (SYMTYPE(i)) {
+cinterf.c:    switch (type) {
+cinterf.c:		switch (SYMTYPE(i)) {
+cinterf.c:    switch (SYMTYPE(i)) {
+cinterf.c:    switch (SYMTYPE(i)) {
+cinterf.c:    switch (nargs) {
+compile.c:	switch (tp) {
+compile.c:    switch (tp) {
+compile.c:    switch (TYPEOF(arg)) {
+compile.c:	switch (TYPEOF(arg)) {
+compile.c:    switch (TYPEOF(arg)) {
+compile.c:    switch (TYPEOF(arg)) {
+compile.c:	switch (TYPEOF(arg)) {
+compile.c:	    switch (INT_VAL(arg)) {
+compmath.c:	    switch (functor) {
+compmath.c:    switch (TYPEOF(e)) {
+compmath.c:		switch (id) {
+compmath.c:		switch (id) {
+compmath.c:	switch (functor) {
+compmath.c:    switch (TYPEOF(e)) {
+dump_wam.c:	switch (MTP_TAG(*c)) {
+dump_wam.c:		switch (MTP_CONSTTAG(*c)) {
+dump_wam.c:	switch (MTP_TAG(*c)) {
+dump_wam.c:		switch (MTP_CONSTTAG(*c)) {
+engine.c:	switch (MTP_TAG(p->sint)) {
+engine.c:		switch (MTP_CONSTTAG(p->sint)) {
+engine.c:	switch (MTP_TAG(p->sint)) {
+engine.c:	switch (MTP_TAG(p->sint)) {
+engine.c:		switch (MTP_CONSTTAG(p->sint)) {
+expand.c:    switch (tp) {
+expand.c:	switch (FUNCTOR_TOKID(TERM_FUNCTOR(t))) {
+expand.c:		switch (TERM_ARITY(t)) {
+expand.c:    switch (t) {
+fatal.c:  "Unrecognized command line switch (%c)",				/* FE_BAD_SWITCH */
+fpbasis.c:	switch (fpclass(v)) {
+freeze.c:    	switch (Tagg) {
+freeze.c:			switch (CTagg) {
+fsmac.c:	switch (*pattern) {
+gc.c:    switch (tag) {
+gc.c:    }	/* switch */
+gc.c:    switch (tag) {
+Binary file gc.c.frame matches
+grep: generate: Is a directory
+gv.c:    switch (t) {
+icodegen.h:extern	void	ic_install_switch_on_term
+icom.h:#define IC_CHANGEMOD	-7		/* switch modules		*/
+index.c:} switchTableEntry;
+index.c:static	switchTableEntry * walk_tree PARAMS(( index_node *, switchTableEntry *,
+index.c:static	void	installtreeoverhead PARAMS(( int, int, switchTableEntry ** ));
+index.c:	switch (tp) {
+index.c:    /* Output switch_on_term if at least one type can gain from indexing. */
+index.c:	/* Install the switch */
+index.c:	ic_install_switch_on_term(ent,
+index.c:	 * clauses of the given type.  The switch
+index.c:    switchTableEntry *tree_ptr;
+index.c:	tree_ptr = (switchTableEntry *) buf_ptr;
+index.c:		tree_ptr = (switchTableEntry *) buf_ptr;
+index.c: * swith_on_const or switch_on_term instructions. The table is currently
+index.c:switchTableEntry *
+index.c:    switchTableEntry *tp;	/* address of roving tree pointer */
+index.c: * installtreeoverhead installs code for the switch_on_constant and
+index.c: * switch_on_structure sequences.
+index.c:    switchTableEntry **lptr;	/* address of pointer to where the tree
+index.c:    switch (tp) {
+index.c:    *lptr = (switchTableEntry *) 
+index.c:    switch (k & MTP_TAGMASK) {
+lexan.c:    switch (CType((*bp))) {
+lexan.c:		    break;	/* out of the switch */
+lexan.c:		    break;	/* out of the switch */
+lexan.c:		switch (*bp) {
+lexan.c:    switch (**bpp) {
+lforeign.c:    	switch (err) {
+lforeign.c:    	switch (err) {
+lforeign.c:    	switch (err) {
+loadfile.c:    switch (opcode) {
+loadfile.c:	switch (format & 0xf) {
+loadfile.c:	    switch (format & 0xf) {
+main.c:    switch (fdwCtrlType) {
+main.c:  switch(mode & 3) {
+main.c:    switch (messtype) {
+main.c:    switch (messtype) {
+new_alspi.c:	switch (obj.t) {
+new_alspi.c:	switch (obj.t) {
+new_alspi.c:	switch (error_type) {
+new_alspi.c:	switch (error_type) {
+new_alspi.c:	switch (arity) {
+new_alspi.c:	switch (arity) {
+newpckgcoff.c:    switch (sym_def_flag) {
+paction.c:	switch (rc) {
+pckgcoff.c:    switch (sym_def_flag) {
+pckgcoff.c:		switch (r->pr_type) {
+pckgcoff.c:		switch (r->pr_type) {
+pckgcoff.c:	switch (r->pr_type) {
+pckgload.c:	    switch ((ent->flags) & NMSK_USAGE) {
+pckgmake.c:    switch (ent->flags & NMSK_USAGE) {
+pckgmake.c:	    switch (ent->flags & NMSK_BLT_TYPE) {
+pckgmake.c:	    switch (RELOC_TYPE(ri)) {
+pimain.c:    	    switch (state) {
+pimain.c:    	switch (state) {
+pimain.c:    switch (success) {
+pimain.c:    switch (theInitBlock->fragLocator.where) {
+relocate_code.c:	    switch (ic_array[instr].arg[i]) {
+relocate_code.c:	    switch (ic_array[instr].arg[i]) {
+winpimain.c:    switch(port) {
+wintcode.c:	switch (newstate) {
+wintcode.c:    switch (ent->flags & NMSK_USAGE) {
+wintcode.c:		 * patch from a switch_on instruction. This current one, the
+wintcode.c:		 * one that put the code into the switch_on patch must be
+wintcode.c:	    switch (ent->flags & NMSK_USAGE) {
+wintcode.c:    switch (ent->flags & NMSK_USAGE) {
+wintcode.c:	switch ((int) MTP_TAG(*h)) {
+winter.c:	switch (MTP_TAG(p)) {
+winter.c:    switch ((int) MTP_TAG(in)) {
+winter.c:	    switch (MTP_CONSTTAG(in)) {
+winter.c:    switch (tag) {
+KB-SSD > vi alspi.h
+KB-SSD > grep FE_BAD_SWITCH *
+grep: Doc: Is a directory
+alspi.h:#define FE_BAD_SWITCH	31	/* bad command line switch */
+fatal.c:  "Unrecognized command line switch (%c)",				/* FE_BAD_SWITCH */
+grep: generate: Is a directory
+KB-SSD > vi fatal.c
+KB-SSD > ls
+Doc/             bdbg.c           chpt.h.frame     engine.h         generate/        mem.c            pckgmake.c       version.h
+alloc.c          bgv.c            cinterf.c        expand.c         generic.mkf      module.c         pckgmake.h       vprintf.c
+alloc.doc        bio.c            cinterf.h        fatal.c          gnu_makefile     module.h         pi_cfg.in        wamops.h
+alloc.h          bmeta.c          coerce.h         fatal.h          gv.c             new_alspi.c      pi_init.c        wamops0.h
+alsmem.h         bmisc.c          compile.c        fileio.c         hztypes.h        new_alspi.h      pi_init.h        wci.h
+alspi.h          bos.c            compile.h        fileio.h         icode.h          newlexinit.h     pimain.c         wd_size.h
+alspi_slib.c     bparser.c        compmath.c       foreign.c        icodedef.h       newpckgcoff.c    property.tags    wdisp.c
+alspi_slib.exp   bpckg.c          curlopt_list.h   fpbasis.c        icodegen.h       newsiolex.h      random.c         winpimain.c
+alspi_slib.h     bsio.c           cutmacro.c       fpbasis.h        icom.h           newtokens.h      random.h         wintcode.c
+alspi_stub.c     bsio.h           cutmacro.h       freeze.c         index.c          newtokini.h      relocate_code.c  wintcode.h
+alspro.exp       bsystem.c        debug.txt        freeze.h         istr.h           nopckg.c         rinfo.c          winter.c
+alspro_dll.exp   built.c          debugsys.c       fsdos.c          lexan.c          paction.c        rinfo.h          winter.h
+alssig.h         built.h          debugsys.h       fsmac.c          lexan.h          parser.c         sig.c            wintidx.h
+alstypes.h       butil.c          defs.h           fsunix.c         lforeign.c       parser.h         sig.h            wntbl.h
+ansi_engine.c    cassert.c        dfltsys.h        fsvms.c          loadfile.c       parsstak.h       sioux_stub.c
+arith.c          cassert.h        dll_test.c       fswin32.c        magic.h          pckg.h           symtab.c
+bcinter.c        cexception.c     dump_wam.c       fswin32.h        main.c           pckgcoff.c       topmain.c
+bcurl.c          cexception.h     dump_wam.h       gc.c             main.h           pckgcoff.h       varproc.c
+bdb.c            chpt.h           engine.c         gc.c.frame       mapsym.c         pckgload.c       varproc.h
+KB-SSD > vi alspro.exp
+KB-SSD > vi gc.c.frame
+KB-SSD > vi gc.c.frame
+KB-SSD > vi dump_wam.c
+KB-SSD > ci pimain.c
+-bash: ci: command not found
+KB-SSD > vi pimain.c 
+KB-SSD > grep PI_main *
+grep: Doc: Is a directory
+alspi.h:extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));
+alspi_stub.c:ALSPI_API(int)	PI_main		(int argc, char *argv[], void (*init)(void))
+alspro.exp:PI_main
+}   PI_getan(NULL, NULL, 1);v, NULL);
+grep: generate: Is a directory
+pimain.c:EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
+topmain.c:    return PI_main(argc, argv, NULL);
+KB-SSD > vi topmain.c
+KB-SSD > grep topmain.c
+^C
+KB-SSD > grep topmain.c *
+grep: Doc: Is a directory
+grep: generate: Is a directory
+gnu_makefile:MAIN_SOURCE = topmain.c
+KB-SSD > pwd
+/Users/ken/ALS/GitHub/ALSProlog/core/alsp_src/generic
+KB-SSD > grep save_image *
+grep: Doc: Is a directory
+bio.c:int pbi_save_image_with_state_to_file(void)
+bio.c:    if (getstring(&name, v1, t1) && ss_save_image_with_state((char *)name))
+built.c:	BLT("save_image_with_state_to_file", 1,
+built.c:	    pbi_save_image_with_state_to_file,
+built.c:	    "_pbi_save_image_with_state_to_file"),
+built.h:extern	int	pbi_save_image_with_state_to_file	PARAMS(( void ));
+defs.h:extern	int	ss_save_image_with_state PARAMS((CONST char * ));
+grep: generate: Is a directory
+gnu_makefile:	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro.pro -g 'save_image(alspro,[])'
+gnu_makefile:	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
+gnu_makefile:#	$(ALSDEVDIR)/ldr_studalsdev.pro -g "bldit('$(CORE)',save_image(studalsdev,[start_goal((builtins:start_alsdev))]))"
+gnu_makefile:#	-g 'builtins:abolish(save_image,1), \
+gnu_makefile:#	save_image(studalsdev,[start_goal((builtins:start_alsdev)), \
+gnu_makefile:#	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g "bldit('$(CORE)',save_image(alspro_demo,[]))"
+gnu_makefile:#	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
+mem.c:int ss_save_image_with_state(const char * new_image_name)
+mem.c:    	printf("ss_save_image: Couldn't get module name.\n");
+mem.c:    	printf("ss_save_image: Couldn't copy %s to %s\n", image_name, new_image_name);
+mem.c:    	printf("ss_save_image: Couldn't open %s\n", image_name);
+mem.c:    	printf("ss_save_image: Couldn't find end of PE/COFF file %s\n", image_name);
+mem.c:int ss_save_image_with_state(const char * new_image_name)
+mem.c:	printf("ss_save_image: Couldn't copy %s to %s\n", executable_path, new_image_name);
+mem.c:int ss_save_image_with_state(const char * new_image_name)
+mem.c:	printf("ss_save_image: Couldn't copy %s to %s\n", executable_path, new_image_name);
+mem.c:    	printf("ss_save_image: Couldn't open %s\n", image_name);
+mem.c:    	printf("ss_save_image: Couldn't find end of image file %s\n", image_name);
+KB-SSD > vi built.c
+KB-SSD > ls *.mkf
+generic.mkf
+KB-SSD > vi generic.mkf 
+KB-SSD > pwd
+/Users/ken/ALS/GitHub/ALSProlog/core/alsp_src/generic
+KB-SSD > pwd
+/Users/ken/ALS/GitHub/ALSProlog/core/alsp_src/generic
+KB-SSD > grep '-obp' *
+grep: generate: Is a directory
+KB-SSD > grep '\-obp' *
+grep: Doc: Is a directory
+grep: generate: Is a directory
+generic.mkf:	./alspro -b -obp $(srcdir)/tests/snrev -g snrev >> nrev_rcd
+gnu_makefile:	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro.pro -g 'save_image(alspro,[])'
+gnu_makefile:	./alspro_b -q -b -obp -g "attach_image('libalspro.$(OS_SL_EXT)')"
+gnu_makefile:	./alsdev_b -q -b -obp -no_dot_alspro $(ALSDEVDIR)/ldr_alsdev.pro -g "bldit('$(CORE)',save_image(alsdev,[start_goal((builtins:start_alsdev))]))"
+gnu_makefile:#	./alsdev_b -q -b -obp -no_dot_alspro \
+gnu_makefile:#	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g "bldit('$(CORE)',save_image(alspro_demo,[]))"
+gnu_makefile:#	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
+KB-SSD > grep commandline *
+grep: Doc: Is a directory
+grep: generate: Is a directory
+KB-SSD > dar
+KB-SSD > ls
+ALS Prolog.xcodeproj/ core/                 foreign_sdk/          version*
+LICENSE.txt           examples/             manual/               win32/
+README.md             extensions/           unix/
+KB-SSD > cd ..
+KB-SSD > ls
+ALSProlog/                       Historical-Documention/          WikiALSPro/
+AlsdevEnhance/                   HowALS-Builds&Works/             alsman_sources/
+Bugs-BreakDebugIssues/           HowTo-GitHub/                    brew-als-cmd.txt
+CL-editing/                      IssuesGroups.txt                 cmd_line_switches_doc_issue.txt
+CLPBNR_Redux/                    OBPs_Issue92/                    downloads/
+CMake-Task/                      Old-Alt-ALSProBuilds/            g2frc.txt
+CurlDesign/                      PeopleToBeNotified.txt           homebrew-als-prolog/
+FreezeAndGC/                     TkProblems/                      lib2help/
+GitHub_ALSWebPage/               ToBeChecked/
+GitHub_PrologWebPage/            WebStuff-branch-extract/
+KB-SSD > grep '=================== ' cmd_line_switches_doc_issue.txt 
+=================== From alspro -h ================
+=================== From the old als_man.pdf ================
+=================== From the Wiki ================
+=================== From ~alsp_src/doc/alspro.1 ===================
+=================== From ~alsp_src/builtins/blt_shlc.pro ===================
+KB-SSD > ls
+ALSProlog/                       Historical-Documention/          WikiALSPro/
+AlsdevEnhance/                   HowALS-Builds&Works/             alsman_sources/
+Bugs-BreakDebugIssues/           HowTo-GitHub/                    brew-als-cmd.txt
+CL-editing/                      IssuesGroups.txt                 cmd_line_switches_doc_issue.txt
+CLPBNR_Redux/                    OBPs_Issue92/                    downloads/
+CMake-Task/                      Old-Alt-ALSProBuilds/            g2frc.txt
+CurlDesign/                      PeopleToBeNotified.txt           homebrew-als-prolog/
+FreezeAndGC/                     TkProblems/                      lib2help/
+GitHub_ALSWebPage/               ToBeChecked/                     master_als_cmdline_switches.txt
+GitHub_PrologWebPage/            WebStuff-branch-extract/
+KB-SSD > cd CurlDesign/
+KB-SSD > ls
+2chuck-webstuff.txt  CurlDesign-2.txt     CurlDesign-4.txt     CurlDesign.txt
+CurlDesign copy.txt  CurlDesign-3.txt     CurlDesign-5.txt     New_Curl_spec.txt
+KB-SSD > ls -ld *
+-rw-r--r--@ 1 ken  staff  13338 Apr 10  2017 2chuck-webstuff.txt
+-rw-r--r--@ 1 ken  staff   3148 Jun 16 10:30 CurlDesign copy.txt
+-rw-r--r--@ 1 ken  staff   5624 Jul  3 21:24 CurlDesign-2.txt
+-rw-r--r--@ 1 ken  staff   5255 Jul  6 15:11 CurlDesign-3.txt
+-rw-r--r--@ 1 ken  staff   2466 Jul  7 09:42 CurlDesign-4.txt
+-rw-r--r--@ 1 ken  staff   1089 Jul 11 10:15 CurlDesign-5.txt
+-rw-r--r--@ 1 ken  staff   3739 Jun 16 10:41 CurlDesign.txt
+-rw-r--r--@ 1 ken  staff   5128 Jul  2 10:54 New_Curl_spec.txt
+KB-SSD > vi CurlDesign-5.txt 
+KB-SSD > vi 2chuck-webstuff.txt 
+KB-SSD > vi CurlDesign-4.txt 
+KB-SSD > vi CurlDesign-3
+KB-SSD > vi CurlDesign-3.txt 
+KB-SSD > vi CurlDesign-2.txt 
+KB-SSD > vi New_Curl_spec.txt 
+KB-SSD > ls
+2chuck-webstuff.txt  CurlDesign-2.txt     CurlDesign-4.txt     CurlDesign.txt
+CurlDesign copy.txt  CurlDesign-3.txt     CurlDesign-5.txt     New_Curl_spec.txt
+KB-SSD > cd ..
+KB-SSD > ls
+ALSProlog/                       Historical-Documention/          WikiALSPro/
+AlsdevEnhance/                   HowALS-Builds&Works/             alsman_sources/
+Bugs-BreakDebugIssues/           HowTo-GitHub/                    brew-als-cmd.txt
+CL-editing/                      IssuesGroups.txt                 cmd_line_switches_doc_issue.txt
+CLPBNR_Redux/                    OBPs_Issue92/                    downloads/
+CMake-Task/                      Old-Alt-ALSProBuilds/            g2frc.txt
+CurlDesign/                      PeopleToBeNotified.txt           homebrew-als-prolog/
+FreezeAndGC/                     TkProblems/                      lib2help/
+GitHub_ALSWebPage/               ToBeChecked/                     master_als_cmdline_switches.txt
+GitHub_PrologWebPage/            WebStuff-branch-extract/
+KB-SSD > ls -d *Cur*
+CurlDesign/
+KB-SSD > cd ..
+KB-SSD > ls
+ALSProProjects/       GitHub/               Misc_ALSProlog/       movie-ALS-2015.mov
+Archive-ALS-Open/     Gmail/                ParallelsWindowsInfo/ ref_man.pdf*
+DH-run-ALS/           ImagesIcons/          Prolog-In-General/
+Domains/              JHodgson-ISO Suite/   Trademark/
+Finance - ALS/        Legal/                XcodeTutorial.pdf
+KB-SSD > cd GitHub/ALSProlog/
+KB-SSD > ls
+ALS Prolog.xcodeproj/ core/                 foreign_sdk/          version*
+LICENSE.txt           examples/             manual/               win32/
+README.md             extensions/           unix/
+KB-SSD > pwd
+/Users/ken/ALS/GitHub/ALSProlog
+KB-SSD > cd ..
+KB-SSD > ls
+ALSProlog/                       Historical-Documention/          WikiALSPro/
+AlsdevEnhance/                   HowALS-Builds&Works/             alsman_sources/
+Bugs-BreakDebugIssues/           HowTo-GitHub/                    brew-als-cmd.txt
+CL-editing/                      IssuesGroups.txt                 cmd_line_switches_doc_issue.txt
+CLPBNR_Redux/                    OBPs_Issue92/                    downloads/
+CMake-Task/                      Old-Alt-ALSProBuilds/            g2frc.txt
+CurlDesign/                      PeopleToBeNotified.txt           homebrew-als-prolog/
+FreezeAndGC/                     TkProblems/                      lib2help/
+GitHub_ALSWebPage/               ToBeChecked/                     master_als_cmdline_switches.txt
+GitHub_PrologWebPage/            WebStuff-branch-extract/
+KB-SSD > ls WikiALSPro/
+10.11-Internet_HTTP_File_Transfer.txt  ALSProlog.wiki/
+22-FurtherExtensions.txt
+KB-SSD > cd WikiALSPro/
+KB-SSD > vi 10.11-Internet_HTTP_File_Transfer.txt 
+KB-SSD > vi 10.11-Internet_HTTP_File_Transfer.txt 
+
+
+* If fields = <atom> / ‘FIELDS’=<atom> occurs on Options, then <atom> should represent a structured fields expression (e.g., 'name=admin&shoesize=12’).  The underlying CURL program will POST the text of <atom> via 'POSTFIELDS'=<atom>.
+
+* If fieldsfile = FilePathName (or, ‘FIELDSFILE’= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if ‘FIELDS’=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = <char> ('EOL'=<char>) or eolcode=<charcode> ('EOLCODE'=<charcode>) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
+
+Examples:
+
+?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
+?- http(post, 'https://postman-echo.com/post', [fieldsfile='./foofields.txt', result=RR, eol='&']).
+?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', eolcode=32,result=RR]).
+
+
+
+An alternate, more direct, way of curl/1-3 invoking the immediate interface from prolog to Curl is
+provided by the predicates curl/1-3.  Below, options must be list of Curl options as described above.
+
+curl/1:
+curl(Options)
+    Cleans up capitalization of options and invokes the low-level interface to Curl.
+
+curl/2:
+Effectively:
+curl(URL, Target)
+    :-
+    curl(URL, Options, Target).
+
+curl/3:
+Effectively:
+curl(URL, Options, Target)
+    :-
+    XOptions = [url=URL, result=Target | Options],
+    curl(XOptions).
+
+Examples:
+
+?- curl('http://example.com', [response_code=RC], RR).
+?- curl('http://example.com', RR).
+?- curl([url='http://example.com', response_code(RC), result=RR]).
