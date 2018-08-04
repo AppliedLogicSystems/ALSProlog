@@ -1973,7 +1973,7 @@ For all equations on the list passed to the C program, the left side of every eq
 
 Several simple transformations are applied to the elements of the list:
 
-i) Unary prolog expressions <F>(A) are allowed on the Options list.  These are converted to equations FF = A, where FF is the uppercase version of <F>.
+i) Unary prolog expressions &lt;F&gt;(A) are allowed on the Options list.  These are converted to equations FF = A, where FF is the uppercase version of <F>.
 
 ii) Equations E = A are converted to EE = A where EE is the uppercase version of E.
 
