@@ -2013,7 +2013,7 @@ Examples:
 ?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', eolcode=32,result=RR]).
 
 
-##curl/1-3 
+## curl/1-3 
 
 An alternate, more direct, way of invoking the immediate interface from prolog to Curl is
 provided by the predicates curl/1-3.  Below, options must be list of Curl options as described above.
@@ -2035,7 +2035,7 @@ curl(URL, Options, Target)
     XOptions = [url=URL, result=Target | Options],
     curl(XOptions).
 ````
-Examples:
+#### Examples:
 ````
 ?- curl('http://example.com', [response_code=RC], RR).
 ?- curl('http://example.com', RR).
