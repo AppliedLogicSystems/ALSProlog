@@ -2020,7 +2020,7 @@ provided by the predicates curl/1-3.  Below, options must be list of Curl option
 ````
 curl/1:
 curl(Options)
-    Cleans up capitalization of options and invokes the low-level interface to Curl.
+Cleans up option capitalization and invokes the low-level interface to Curl.
 
 curl/2:
 Effectively:
