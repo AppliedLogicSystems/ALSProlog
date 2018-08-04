@@ -1977,15 +1977,18 @@ i) Unary prolog expressions <F>(A) are allowed on the Options list.  These are c
 
 ii) Equations E = A are converted to EE = A where EE is the uppercase version of E.
 
-Common options:
-==============
+#### Common options:
 
 * The special equation 
-	‘RESULT’ = Expr    [or, result = Expr]
+    
+    ‘RESULT’ = Expr    [or, result = Expr]
+
 can appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET or POST or whatever) is turned into a UIA, and is unified with Expr, which can be any prolog expression, including an unbound variable.
 
-*) The special equation
-	'RESULTFILE' = '<local file path>'  [or resultfile = '<local file path>']
+* The special equation
+
+    'RESULTFILE' = '<local file path>'  [or resultfile = '<local file path>']
+
 can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at <local file path>.  Note that both result = Expr and resultfile = '<local file path>' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at <local file path>.
 
 * Given the call http(RESTVerb, URL, Options), the equation ‘URL’ = URL is placed on the ultimate Easy options list passed to the Curl-based C program.  This URL is the other end of the RESTVerb transaction (typically get or post, but also any of put, delete, head, options, or patch).
