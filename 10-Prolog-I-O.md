@@ -1973,7 +1973,7 @@ For all equations on the list passed to the C program, the left side of every eq
 
 Several simple transformations are applied to the elements of the list:
 
-i) Unary prolog expressions &lt;F&gt;(A) are allowed on the Options list.  These are converted to equations FF = A, where FF is the uppercase version of <F>.
+i) Unary prolog expressions &lt;F&gt;(A) are allowed on the Options list.  These are converted to equations FF = A, where FF is the uppercase version of &lt;F&gt;.
 
 ii) Equations E = A are converted to EE = A where EE is the uppercase version of E.
 
@@ -1989,13 +1989,13 @@ can appear on Options.  Whatever HTTP result is produced from the underlying Cur
 
     'RESULTFILE' = '<local file path>'  [or resultfile = '<local file path>']
 
-can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at <local file path>.  Note that both result = Expr and resultfile = '<local file path>' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at <local file path>.
+can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at <local file path>.  Note that both result = Expr and resultfile = '&lt;local file path&gt;' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at &lt;local file path&gt;.
 
 * Given the call http(RESTVerb, URL, Options), the equation ‘URL’ = URL is placed on the ultimate Easy options list passed to the Curl-based C program.  This URL is the other end of the RESTVerb transaction (typically get or post, but also any of put, delete, head, options, or patch).
 
 * Appropriate CURLINFO options can be used with any RESTVerb.  For example, including response_code(RC) on Options will bind RC to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including total_time(TTT) will bind TTT to the number of seconds expended in the transaction.
 
-Examples:
+#### Examples:
 ?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
 ?- http(get,'http://example.com', [response_code(RC),total_time=TTT,file='./myfile.txt']).
 
