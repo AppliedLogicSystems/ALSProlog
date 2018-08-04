@@ -1987,9 +1987,9 @@ can appear on Options.  Whatever HTTP result is produced from the underlying Cur
 
 * The special equation
 
-    'RESULTFILE' = '<local file path>'  [or resultfile = '<local file path>']
+    'RESULTFILE' = '&lt;local file path&gt;'  [or resultfile = '&lt;local file path&gt;']
 
-can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at <local file path>.  Note that both result = Expr and resultfile = '&lt;local file path&gt;' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at &lt;local file path&gt;.
+can also appear on Options.  Whatever HTTP result is produced from the underlying Curl call (GET, POST or whatever) is written into the file at &lt;local file path&gt;.  Note that both result = Expr and resultfile = '&lt;local file path&gt;' can occur together on an Options list: the HTTP result will be unified (as a UIA) with Expr and also written into the file at &lt;local file path&gt;.
 
 * Given the call http(RESTVerb, URL, Options), the equation ‘URL’ = URL is placed on the ultimate Easy options list passed to the Curl-based C program.  This URL is the other end of the RESTVerb transaction (typically get or post, but also any of put, delete, head, options, or patch).
 
@@ -2006,18 +2006,18 @@ For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) st
  
 * If datefile=FilePathName(‘DATAFILE’=FilePathName) occurs on the options list, then the complete text occurring in FilePathName is read into a single UIA DT, and the information is POSTED as if ‘DATA’=DT had been included on Options.  The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA DT.  For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines.  If the equation eol = &lt;char&gt; (or, 'EOL'=&lt;char&gt;) is present on the options list, when FilePathName is read, the character &lt;char&gt; will be used as a separator between the concatenated lines.  Equivalently, if eolcode=&lt;charcode&gt; (or, 'EOLCODE'=&lt;charcode&gt;) is present on the list, the character with code &lt;charcode&gt; will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
 
-* If fields = <atom> / ‘FIELDS’=<atom> occurs on Options, then <atom> should represent a structured fields expression (e.g., 'name=admin&shoesize=12’).  The underlying CURL program will POST the text of <atom> via 'POSTFIELDS'=<atom>.
+* If fields = &lt;atom&gt; (‘FIELDS’=&lt;atom&gt; occurs on Options, then &lt;atom&gt; should represent a structured fields expression (e.g., 'name=admin&shoesize=12’).  The underlying CURL program will POST the text of &lt;atom&gt; via 'POSTFIELDS'=&lt;atom&gt;.
 
-* If fieldsfile = FilePathName (or, ‘FIELDSFILE’= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if ‘FIELDS’=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = <char> ('EOL'=<char>) or eolcode=<charcode> ('EOLCODE'=<charcode>) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
+* If fieldsfile = FilePathName (or, ‘FIELDSFILE’= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if ‘FIELDS’=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = &lt;char&gt; ('EOL'=&lt;char&gt;) or eolcode=&lt;charcode&gt; ('EOLCODE'=&lt;charcode&gt;) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
 
-Examples:
-
+#### Examples:
+````
 ?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
 ?- http(post, 'https://postman-echo.com/post', [fieldsfile='./foofields.txt', result=RR, eol='&']).
 ?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', eolcode=32,result=RR]).
+````
 
-
-## curl/1-3 
+### curl/1-3 
 
 An alternate, more direct, way of invoking the immediate interface from prolog to Curl is
 provided by the predicates curl/1-3.  Below, options must be list of Curl options as described above.
