@@ -268,6 +268,27 @@ will capture all characters written to S (write,nl,printf, etc.), and when S is 
 
 For both read and write url streams, the Curl options available are exactly the same as for http/3 or curl/1-3 in Section 10.11.
 
+Examples:
+
+Examples:
+========
+
+?- open(url('http://example.com/',[response_code(RC),total_time(TTT),result=_]), read, _,[alias(myStream)]), get_line(myStream,L),close(myStream).
+
+RC=200
+TTT=2.542704
+L='<!doctype html>'
+
+yes.
+
+?- open(url('https://postman-echo.com/post', []), write, S, []), write(S, abcdef), close(S).
+
+S=stream_descriptor('',closed,string,string("abcdef"),[noinput|output],false,
+    43,"abcdef","f",0,0,true,0,wt_opts(78,400,flat),[],wait,text,eof_code,
+    true,0)
+
+yes.
+
 ### 10.2.3 Immediate versu Delayed Streams.
 
 A file sourcesink is said to be immediate in the sense that (normally) all of the characters (data) which will make up the stream are immediately available once the
