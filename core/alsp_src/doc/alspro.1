@@ -104,14 +104,18 @@ module ice, and alspro -A 'tasty(vanilla)' will cause the fact tasty(vanilla) to
 be asserted in module user.
 .TP
 .B \-heap \fInumber\fR
-sets the initial heap size to \fInumber\fR Kilobytes. The
+For large \fInumber\fR, sets the initial heap size to \fInumber\fR Kilobytes. 
+For small \fInumber\fR, sets the initial heap size to the base heap size, incremented
+by \fInumber\fR Kilobytes.  The
 .B \-heap
 option overrides the ALS_OPTIONS environment varaible's heap_size option. 
+Cf. statistics/0.
 .TP
 .B \-stack \fInumber\fR
-sets the initial stack size to \fInumber\fR Kilobytes. The
+sets the stack size to \fInumber\fR Kilobytes. The
 .B \-stack
 options overrides the ALS_OPTIONS enviromnent variable's stack_size option.
+Cf. statistics/0.
 .TP
 Below note that consulting <path><file>.pro suppresses creation 
 .ti -7n
@@ -161,9 +165,6 @@ instructs the debugger under alsdev to only use the system console for display.
 causes alspro to use the non-default <shell> after processing the command line; currently, the only known other <shell> is alsdev.
 .TP
 .B \-h 
-Displays the help info on the console.
-.TP
-.B \--help
 Displays the help info on the console.
 .TP
 See also Wiki Section 13.7.

@@ -271,26 +271,31 @@ ss_cl_assert1(AX, Mod)
 
 show_help
 	:-
+not(alsdev_running),
+!,
 	write('    Help for alspro'),nl,
 	write('    ==============='),nl,
 	write('    alspro [options] [source [sources]]'),nl,
 	write('        [source:: <path/to/file>filename.ext]'),nl,
 	write('    [options::]'),nl,
-	write('    Prolog expressions and goals as switch arguments may need to be '),nl,
-	write('        in single quotes to defeat the os shell'),nl,
+	write('    Prolog expressions and goals may need to be quoted (with OS '),nl,
+	write('        shell quotes) to avoid interpretation by the OS shell'),nl,
 	write('    -s <path>   Adds <path(/to/dir)> to system search dirs.'),nl,
 	write('    -g <goal>   <goal> is an arbitrary prolog goal (no :-,?-);'),nl,
 	write('                    Causes alspro to run <goal> after startup.') ,nl,
 	write('    -b          Prevents default shell from running, after'),nl,
-	write('                    executing -g<goal> if present.') ,nl,
+	write('                    executing -g <goal> if present.') ,nl,
 	write('    -q          Suppress all standard system loading messages.'),nl,
 	write('    -v          Causes all standard system loading messages to be printed.'),nl,
-	write('    -a,-A<goal> <goal> an arbitrary prolog goal (incl. an atom); '),nl,
+	write('    -a,-A <goal> <goal> an arbitrary prolog goal (incl. an atom); '),nl,
 	write('                    causes <goal> to be asserted;'),nl,
 	write('                    <goal> may also be: ''(<g1>,<g2>,...)'' '),nl,
 	write('                    -- all of the <gi> are asserted.'),nl,
-	write('    -heap num   Sets heap to num * 1024 bytes.'),nl,
-	write('    -stack num  Sets stack to num * 1024 bytes.'),nl,
+	write('    -heap num   For large num, sets initial heap size to num Kilobytes; '),nl,
+	write('                    For small num, sets the initial heap to the base value '),nl,
+	write('                    of heap incremented by num Kilobytes.  Cf. statistics/0.'),nl,
+	write('    -stack num  Sets stack size to num Kilobytes. Cf. statistics/0.'),nl,
+	write('    '),nl,
 	write('        Below note that consulting <path><file>.pro suppresses creation '),nl,
 	write('        of <file>.obp, while consulting <path><file> without ''.pro'' '),nl,
 	write('        requests creation of <file>.obp.'),nl,
@@ -310,10 +315,10 @@ show_help
 	write('                    is Only meaningful for alsdev).'),nl,
 	write('    -shell <shell> Use non-default <shell>(Only known one is alsdev).'),nl,
 	write('    -h          Print help info (this display).'),nl,
-	write('    --help      Print help info (this display).'),nl,
 	write('    See also Wiki Section 13.7 and the alspro man page.'),nl,
 	nl,nl,
 	halt.
+show_help.
 
 
 	%%%%%%%

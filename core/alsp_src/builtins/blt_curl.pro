@@ -15,10 +15,10 @@ module curl.
  |
  | In all of the following:
  | * if result=V is present in the options list, make a UIA out the incoming data 
- |   returned from the URL server, and unify that UIA with VAL;
+ |   returned from the URL server, and unify that UIA with V;
  | * if resultfile=FF is present in the options list, and if FF is a path to a local 
  |   file, write any incoming data returned from the URL server into the file FF;
- | * it is possible/permitted to have both result=VAL and resultfile=FF present in 
+ | * it is possible/permitted to have both result=V and resultfile=FF present in 
  |   the options list.
  |
  | http(get, URL, [result=V | <other CURLOPT/CURLINFO options>])
@@ -36,13 +36,16 @@ module curl.
  |	
  | http(post, URL, [fieldsfile=FF, (**)  | <other CURLOPT/CURLINFO options>])
  |	Reads local file FF to obtain an atom AFF expressing fields values, and
- |	then performs POST to URL. 
+ |	then performs POST to URL.  Reading of FF can be conditioned by the
+ |	use of eol('EOL') or eolcode('EOLCODE') equations on the options list.
  |		
  | http(post, URL, [data=DD | <other CURLOPT/CURLINFO options>])
- |	Performs POST to URL, where DD is an atom.
+ |	Performs a POST to URL, where DD is an atom.
  |		
  | http(post, URL, [datafile=FF, (**) | <other CURLOPT/CURLINFO options>])
- |	Reads local file FF to obtain an atom AFF, and then performs POST to URL.
+ |	Reads local file FF to obtain an atom AFF, and then performs a POST to URL.
+ |	Reading of FF can be conditioned by the use of eol('EOL') or 
+ |	eolcode('EOLCODE') equations on the options list.
  |		
  | http(put, URL, [data=DD | <other CURLOPT/CURLINFO options>])
  |	Performs a PUT to URL, where DD is an atom.
@@ -69,10 +72,9 @@ http(RESTVerb, URL, Options)
 	:-
 	check_verb(RESTVerb),
 	check_url(URL),
-	check_http_options(Options),
+	check_http_options(Options, ChkdOptions),
 	!,
-	uppercase_unwind(Options, UUOptions),
-	refine_opts(RESTVerb, URL, UUOptions, ROptions),
+	refine_opts(RESTVerb, URL, ChkdOptions, ROptions),
 	do_curl(ROptions).
 	
 http(RESTVerb, URL, Options)
@@ -108,25 +110,41 @@ check_url(URL)
 
 check_url(_).
 
-check_http_options(Options)
+check_http_options(Options, ChkdOptions)
 	:-
 	var(Options),
 	!,
 	instantiation_error(2).
-check_http_options([]).
-check_http_options([Opt | Options])
+check_http_options([], []).
+check_http_options([Opt | Options], [CkdOpt | ChkdOptions])
 	:-
-	check_http_opt(Opt),
+	check_http_opt(Opt, CkdOpt),
 	!,    
-	check_http_options(Options).
-check_http_options(CurlOptions)
+	check_http_options(Options, ChkdOptions).
+check_http_options(CurlOptions,_)
 	:-
 	type_error(list,CurlOptions,2).
 
-check_http_opt(Tag=_) 
+check_http_opt(Opt, UC_F=A) 
+	:-
+	functor(Opt, F, 1),
+	!,
+	make_uc_sym(F, UC_F),
+	arg(1, Opt, A),
+	(member(UC_F, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']), 
+		! ;
+	(not(lookup_opt_info(UC_F)) ->
+		domain_error(curl_option,(Opt=_),3)
+		;
+		true
+	) ).
+
+check_http_opt(Tag=X, UC_Tag=X) 
 	:-
 	make_uc_sym(Tag, UC_Tag),
-	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+	(member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']),
+		! ;
+		lookup_opt_info(UC_Tag)  ).
 
 check_http_opt(Tag=_) 
 	:-
@@ -135,9 +153,9 @@ check_http_opt(Tag=_)
 	!,
         domain_error(curl_option,(Tag=_),3).
 
-check_http_opt(Tag=_) :-!.
+check_http_opt(Tag=X, Tag=X) :-!.
 
-check_http_opt(Opt) 
+check_http_opt(Opt,_) 
 	:-
 	type_error('equation (_=_)', Opt,3).
 
@@ -195,9 +213,9 @@ simple_option(patch).
 
 allowed_options(get,  ['RESULT', 'RESULTFILE', 'URL', 'HTTPGET']).
 allowed_options(post, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
-allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'PUT']).
 allowed_options(delete,  ['URL','RESULT','RESULTFILE']).
-allowed_options(head,  ['URL','RESULT','RESULTFILE']).
+allowed_options(head,  ['URL','RESULT','RESULTFILE','NOBODY']).
 allowed_options(options,  ['URL','RESULT','RESULTFILE']).
 allowed_options(patch,  ['URL','RESULT','RESULTFILE']).
 

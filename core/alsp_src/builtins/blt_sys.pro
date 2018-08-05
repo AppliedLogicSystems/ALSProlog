@@ -426,18 +426,22 @@ statistics :-
 display_stats(Stream) :-
 	statistics(Stat),		% C - builtin
 	dmember(stack(Sleft,Sused,Stotal),Stat),
+	KStotal is Stotal / 1024,
 	dmember(heap(Hleft,Hused,Tused,GValloced,Halloced),Stat),
+	KHused is Hused / 1024,
+	KHalloced is Halloced / 1024,
 	dmember(code_area(Cused,Ctotal),Stat),
+	KCtotal is Ctotal / 1024,
 	dmember(wm_regs(SP,E,SPB,HB,H,TR,B),Stat),
 	printf(Stream,'------------ statistics (in bytes) -----------------\n\n',[]),
-	printf(Stream,'Heap used    \t: %d\n',[Hused],[]),
-	printf(Stream,'Trail used   \t: %d\n',[Tused],[]),
-	printf(Stream,'Heap & Trail \t: %d / %d (remaining/total)\n',[Hleft,Halloced],[]),
-	printf(Stream,'Stack        \t: %d / %d / %d (used/remaining/total)\n',[Sused,Sleft,Stotal],[]),
-	printf(Stream,'Code         \t: %d / %d (used/total)\n',[Cused,Ctotal],[]),
-	printf(Stream,'Global Vars  \t: %d\n',[GValloced],[]),
-	printf(Stream,'WAM regs     \t: SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB],[]),
-	printf(Stream,'                 \t: HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B],[]),
+	printf(Stream,'Heap used    \t: %d [%dK]\n',[Hused,KHused]),
+	printf(Stream,'Trail used   \t: %d\n',[Tused]),
+	printf(Stream,'Heap & Trail \t: %d / %d [%dK] (remaining/total alloc)\n',[Hleft,Halloced,KHalloced]),
+	printf(Stream,'Stack        \t: %d / %d / %d [%dK] (used/remaining/total)\n',[Sused,Sleft,Stotal,KStotal]),
+	printf(Stream,'Code         \t: %d / %d [%dK] (used/total)\n',[Cused,Ctotal,KCtotal],[]),
+	printf(Stream,'Global Vars  \t: %d\n',[GValloced]),
+	printf(Stream,'WAM regs     \t: SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB]),
+	printf(Stream,'                 \t: HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B]),
 	flush_output(Stream).
 
 export heap_status/1.

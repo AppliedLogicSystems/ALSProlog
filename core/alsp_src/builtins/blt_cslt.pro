@@ -488,13 +488,17 @@ consult_msg(_, FCOpts)
 
 consult_msg(start_consult, FCOpts)
 	:-!,
-	access_cslt_opts(origfile, FCOpts, OrigFileDesc), 
-	printf(user_output, 'Attempting to consult %t...\n', [OrigFileDesc]).
+	(builtins:global_verbosity(quiet) -> true;
+		access_cslt_opts(origfile, FCOpts, OrigFileDesc), 
+		printf(user_output, 'Attempting to consult %t...\n', [OrigFileDesc])
+	).
 
 consult_msg(end_consult, FCOpts)
 	:-!,
-	access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
-	printf(user_output, '... consulted %t\n', [LoadedPath]).
+	(builtins:global_verbosity(quiet) -> true;
+		access_cslt_opts(loadedpath, FCOpts, LoadedPath), 
+		printf(user_output, '... consulted %t\n', [LoadedPath])
+	).
 
 consult_msg(partial_consult, FCOpts)
 	:-!,

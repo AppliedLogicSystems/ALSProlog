@@ -26,8 +26,17 @@
  |      Enter stop to exit the program.
  *----------------------------------------------------------------*/
 
-
 diff :-
+   nl,write('Simple shell for a Symbolic Differentiator'),nl,
+   write('    By Keith Hughes'),nl,nl,
+   write('Type Expressions in the form'),nl,
+   write('           V:Xpr.'),nl,
+   write('where V is a variable occurring in Xpr, e.g.,'),nl,
+   write('           x:(4*x + tan(x)).'),nl,
+   write('Type   stop.   to exit.'),nl,nl,
+   diff0.
+
+diff0 :-
    write('Expression: '),
    read(T),
    diff(T).
@@ -37,10 +46,10 @@ diff(X:Expr) :-
    diff(X,Expr,T),!,
    simplify(T,Ans),
    nl,write(Ans),nl,nl,
-   diff.
+   diff0.
 diff(_) :-
    write('Illegal expression. Type stop to exit.'),nl,
-   diff.
+   diff0.
 
 diff(X,X,1) :- !.
 diff(_,Y,0) :-
@@ -66,6 +75,12 @@ diff(X,cos(Y),-sin(Y)*DY) :- !,
 diff(X,sin(Y),cos(Y)*DY) :- !,
    diff(X,Y,DY).
 diff(X,tan(Y),DY/(cos(Y)^2)) :- !,
+   diff(X,Y,DY).
+diff(X,X^Z0,X^Z1) :- !,
+   integer(Z0),
+   Z0 > 1,
+   !,
+   Z1 is Z0-1,
    diff(X,Y,DY).
 
 % simplify an expression to a very limited extent

@@ -42,13 +42,39 @@ export identify/0.
 :- dynamic(does_not_hold/1).
 :- dynamic(trait/2).
  
- identify :-
+ identify :- 
+	header,
+	identify0.
+
+header :- nl,
+ 	write('Generic Identification by Properties shell'),nl,
+	write('   applied to Hickory Trees'),nl,
+	write('       by Ken Bowen'),nl,nl,
+	write('Enter properties characteristics of hicory trees (see hickory.pro)'),nl,
+	write('Type ''done.'' to finish inputting initial observations'),nl,nl,
+	write('Type ''exit.'' to exit the shell.'),nl,nl.
+
+ identify0 :-
         obtain_description,
         entertain_hypothesis(Identification),  	% these 2 goals are a generate
         validate(Identification),              	% and test loop
         report(Identification),
         abolish(user_observed,1),              	% clear the database of recorded
-        abolish(does_not_hold,1).          	% observations
+        abolish(does_not_hold,1),          	% observations
+	loop_or_quit.
+
+loop_or_quit
+	:-
+	nl, write('Identify another (yes. or no. ):'),
+	read(Ans),
+	loop_or_quit(Ans).
+
+loop_or_quit(yes)
+	:-
+	identify0.
+loop_or_quit(_) 
+	:- 
+	write('Bye.'),nl.
 
  obtain_description :-
         write('Observation: '),			% requires a term which occurs

@@ -8,7 +8,7 @@ ALSPRO=$1
 
 TESTDIR=$(dirname "$0")
 
-trap 'pkill -P $$' EXIT
+trap 'pkill -P $$ || true' EXIT
 
 "$TESTDIR"/echo/serve &
 sleep 1

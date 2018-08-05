@@ -94,10 +94,26 @@ start_alsdev :-
 
 start_alsdev0
 	:-
-
 		%% Used by some routines in builtins
 		%% to  detect presence  of alsdev:
 	assert(alsdev_running),
+	builtins:sys_searchdir(ALSDIRPath),
+	split_path(ALSDIRPath, ALSDIRPathList),
+
+	setup_init_ide_classes(ALS_IDE_Mgr),
+
+	join_path([ALSDIRPath,shared], Shared),
+	tk_new(shl_tcli),
+
+	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
+	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
+
+	join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
+	tcl_call(shl_tcli, [source, ALSTKLIB], _),
+
+	join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
+	tcl_call(shl_tcli, [source, ALSDEVTCL], _),
+
 	abolish(save_clinfo,1),
 	make_clinfo(CLInfo, alsdev, true), 	% verbosity = quiet
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsdev,CLInfo),
@@ -106,13 +122,6 @@ start_alsdev0
 	setup_search_dirs(CLInfo),
 	assert(save_clinfo(CLInfo)),
 
-	builtins:sys_searchdir(ALSDIRPath),
-	split_path(ALSDIRPath, ALSDIRPathList),
-	dappend(ALSDIRPathList, [library,'objects.pro'], ObjPathList),
-	join_path(ObjPathList, ObjectsPath),
-
-	setup_init_ide_classes(ALS_IDE_Mgr),
-
 	library_setup(CLInfo),
 
 /* WHY IS THIS MISSING?
@@ -120,18 +129,6 @@ start_alsdev0
 		rel_arith:set_ics(cs(0,0,0))
 #endif
 */
-	sys_env(OS, _, _),
-	join_path([ALSDIRPath,shared], Shared),
-	tk_new(shl_tcli),
-
-	tcl_call(shl_tcli, [wm,withdraw,'.'], _),
-	tcl_call(shl_tcli, [set,'ALSTCLPATH',Shared], _),
-	(OS = macos ->
-		tcl_call(shl_tcli, 'source -rsrc als_tklib', _)
-		;
-		join_path([Shared,'als_tklib.tcl'],ALSTKLIB),
-		tcl_call(shl_tcli, [source, ALSTKLIB], _)
-	),
 	append(ALSDIRPathList, [shared], ImagesList),
 	join_path(ImagesList, ImagesPath),
 	alsdev_splash(ImagesPath),
@@ -139,7 +136,7 @@ start_alsdev0
 	process_cl_asserts(CLInfo),
 	!,
 	abolish(start_alsdev/0),
-	alsdev(Shared,ALS_IDE_Mgr).
+	alsdev(ALS_IDE_Mgr).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%       ALS_IDE  ObjectPro CLASS DEFINITIONS    %%%%%
@@ -305,18 +302,9 @@ alsdev
 
 :- dynamic(dvf/0).
 
-export alsdev/2.
-alsdev(Shared, ALS_IDE_Mgr)
+export alsdev/1.
+alsdev(ALS_IDE_Mgr)
 	:-
-	sys_env(OS, _, _),
-	(OS = macos ->
-		tcl_call(shl_tcli, 'source -rsrc alsdev', _)
-	  ;
-	  (
-		join_path([Shared, 'alsdev.tcl'], ALSDEVTCL),
-	    tcl_call(shl_tcli, [source, ALSDEVTCL], _)
-	  )
-	),
 		%% At this point, the windows have been created;
 	tcl_call(shl_tcli, [destroy,'.als_splash_screen'], _),
 
@@ -330,6 +318,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 	set_associated_output_alias(shl_tk_in_win, shl_tk_out_win),
 	catenate('WaitForLine','.topals.text',WaitVar),
 	catenate('DataLine','.topals.text',DataVar),
+
 
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
@@ -349,6 +338,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
+
     %% Establish additional aliases
 
 	cancel_alias(warning_input),
@@ -358,6 +348,7 @@ alsdev(Shared, ALS_IDE_Mgr)
 
 	sio:reset_user(ISS,OSS),
 	set_prolog_flag(windows_system, tcltk),
+
 
 		%% For ALS IDE Project system:
 	alsdev:setup_ide_project_globals(ALS_IDE_Mgr),
@@ -879,37 +870,36 @@ find_alsdev_ini(Items)
 	:-
 	sys_env(unix,_,_),
 	!,
-	finish_alsdev_ini(unix,Items).
+	getPrefsFilePath(unix,PrefsFilePath),
+	finish_alsdev_ini(unix,PrefsFilePath,Items).
 
 find_alsdev_ini(Items)
 	:-   %% not in unix:
 	sys_env(mswin32,_,_),
 	!,
-	finish_alsdev_ini(mswin32,Items).
-
-finish_alsdev_ini(unix,Items)
-	:-
-	getPrefsFilePath(unix,PrefsFilePath),
-	exists_file(PrefsFilePath),
-	!,
-	assert(alsdev_ini_path(PrefsFilePath)),
-	grab_terms(PrefsFilePath, Items).
-
-finish_alsdev_ini(mswin32,Items)
-	:-
 	getPrefsFilePath(mswin32,PrefsFilePath),
+	finish_alsdev_ini(mswin32,PrefsFilePath,Items).
+
+finish_alsdev_ini(unix,PrefsFilePath,Items)
+	:-
 	exists_file(PrefsFilePath),
 	!,
 	assert(alsdev_ini_path(PrefsFilePath)),
 	grab_terms(PrefsFilePath, Items).
 
-finish_alsdev_ini(PrefsFilePath,[])
+finish_alsdev_ini(mswin32,PrefsFilePath,Items)
+	:-
+	exists_file(PrefsFilePath),
+	!,
+	assert(alsdev_ini_path(PrefsFilePath)),
+	grab_terms(PrefsFilePath, Items).
+
+finish_alsdev_ini(_, PrefsFilePath,[])
 	:-
 	open(PrefsFilePath, write, S, []),
 	put_code(S, 0' ),
 	close(S),
 	assert(alsdev_ini_path(PrefsFilePath)).
-
 
 change_window_settings(WinSettingsVals, WinGroup)
 	:-
@@ -1007,7 +997,7 @@ als_ide_mgrAction(open_edit_win(FileName), State)
 	:-
 	path_directory_tail(FileName, _, TF),
 	file_extension(TF, BaseFileName, Ext),
-	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext), State).
+	als_ide_mgrAction(open_edit_win(FileName, BaseFileName, Ext, false), State).
 
 als_ide_mgrAction(open_edit_win_by_root(RootFileName,SearchList), State)
 	:-
