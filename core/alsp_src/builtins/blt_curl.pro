@@ -213,9 +213,9 @@ simple_option(patch).
 
 allowed_options(get,  ['RESULT', 'RESULTFILE', 'URL', 'HTTPGET']).
 allowed_options(post, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
-allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+allowed_options(put,  ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'RESULT', 'RESULTFILE', 'URL', 'PUT']).
 allowed_options(delete,  ['URL','RESULT','RESULTFILE']).
-allowed_options(head,  ['URL','RESULT','RESULTFILE']).
+allowed_options(head,  ['URL','RESULT','RESULTFILE','NOBODY']).
 allowed_options(options,  ['URL','RESULT','RESULTFILE']).
 allowed_options(patch,  ['URL','RESULT','RESULTFILE']).
 
