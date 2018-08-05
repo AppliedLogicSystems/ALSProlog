@@ -1965,7 +1965,7 @@ provides REST-inspired transfer services.  At present, the following RESTVerbs a
 
     get, post put, delete, head, options, patch.
 
-The available options depend on the RESTVerb.
+The available Options depend on the RESTVerb.
 
 First, a comment about implementation.  At the bottom of the plumbing, the so-called <a href="https://curl.haxx.se/libcurl/c/libcurl-easy.html">“Easy interface”</a> of the <a href="https://curl.haxx.se/libcurl/">Curl library</a> is used to build the implementation.  In this approach, everything about a call http(RESTVerb, URL, Options) is converted into a single list of Easy-oriented Curl option equations, and that list is then passed to a C program built over the CURL Easy interface API.
 
