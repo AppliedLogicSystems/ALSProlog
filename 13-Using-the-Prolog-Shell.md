@@ -1,7 +1,7 @@
 13 TTY Development Environment
 The TTY Development interface for ALS Prolog is similar to the original DEC-10
 system constructed in Edinburgh.
-###13.0.1 Starting up ALS Prolog
+### 13.0.1 Starting up ALS Prolog
 Starting up ALS Prolog varies from system to system. Under some systems such
 as ordinary Unix shells or DOS, one starts ALS Prolog by typing a shell command
 such as
@@ -24,7 +24,7 @@ Copyright (c) 1987-95 Applied Logic Systems
 ?-
 ````
 
-###13.0.2 Exiting Prolog
+### 13.0.2 Exiting Prolog
 There are several ways to exit ALS Prolog. The normal way to exit is to submit the
 goal
 ````
@@ -34,7 +34,7 @@ from the Prolog shell or from a Prolog program. The second way to exit can only
 be accomplished from the top level of the Prolog shell. There, you can type a character (such as Control-D on Unix) or sequence. of characters (such as Control-Z
 followed by a return on DOS. or # at the beginning of a line on the Mac) which signifies closing the default input stream. See halt/0 in the reference section. Finally, under the GUI or windowed interfaces, one can select an Exit menu button.
 
-##13.1 Asking Prolog to Do Something
+## 13.1 Asking Prolog to Do Something
 The most common way of telling Prolog what you want it to do is to submit a goal.
 If you are in the Prolog shell, and ?- is the prompt, then anything you type is considered to be a goal. A goal must end with a period, ‘ . ’, followed by a white space
 character (carriage return, blank, etc.). This is called a full stop. Goals must be correct Prolog terms. See Chapter 1 of the User Guide for a discussion concerning the
@@ -82,12 +82,12 @@ goals from files:
 Commands are specified by the :- prefix, while queries are specified by the ?-prefix. The only difference between the two is that queries write the message
 ‘yes.’ to the screen if the goal succeeds, and ‘no.’ if the goal fails, while commands do not write any result on the screen.
 
-##13.1.2 Command Line Editing and History
+## 13.1.2 Command Line Editing and History
 The ALS Prolog TTY shell supports command line editing and history similar to that for the Linux Bash shell.  One can move left or right on the line using the left or right arrow keys, can delete characters using the delete key, can insert characters by typing or by selecting some text and using the ^V (control-v) key.  If the command history is turned on, the up arrow key allows you to walk backward through previously submitted commands.
 
 The command line history keeping is turned on by placing 
 ````
-	history_file_locn(LOCN).
+	alspro_history_file_locn(LOCN).
 ````
 in the .alspro startup file, in either the current directory, or in the HOME directory.  The history
 file is named 
@@ -103,7 +103,7 @@ By default, the history for previous sessions is loaded at the start of each ses
 occurs in the .alspro startup file, then the existing history file is NOT loaded when alspro starts.
 
 
-##13.2 How to Load Prolog Programs
+## 13.2 How to Load Prolog Programs
 There are basically two ways of loading Prolog programs into the ALS Prolog system:
 1.  When you start alspro from the command line you can give a list of
 files for the Prolog system to load as programs.
@@ -120,13 +120,13 @@ Finally, one can use the top-level list-as-reconsult construct:
 For more information on how to use the consulting predicates, see {ADD LINK}Section 9.2.1
 (Consulting Program Files) in the User Guide.
 
-##13.3 Stopping a Running Prolog Program
+## 13.3 Stopping a Running Prolog Program
 If you wish to interrupt a running ALS Prolog program, simply press the interrupt
 key for your system (e.g., the Control-C key on Linux, including Mac OS X, or the Control-Break key on DOS). You will be returned to the top level of the ALS Prolog shell.
 
-##13.4 How ALS Prolog Finds Prolog Files
+## 13.4 How ALS Prolog Finds Prolog Files
 When a request that a file be loaded is made (such as reconsult(myfile) ), ALS Prolog looks for the file in the following manner:  
-###13.4.1 Complex Pathnames
+### 13.4.1 Complex Pathnames
 If the file is not a simple pathname, that is, any file with a ‘file-slash’ character (‘/
 ’) in it (on Unix or DOS), or the ’file-color’ character (":") (on the Mac), the file
 will be loaded as specified. Some examples are:
@@ -136,7 +136,7 @@ Consulting /usr/gorilla/banana.pro...
 .../usr/gorilla/banana.pro consulted.
 yes.
 ````
-###13.4.2 Simple Pathnames
+### 13.4.2 Simple Pathnames
 If the file name is a simple pathname, then the file will be searched for in several
 directories, as follows:  
 1.  The current directory is searched first;
@@ -187,7 +187,7 @@ would cause the sibling subdirectory widget of the current directory to be searc
 immediately after the current directory and before any other directories. Assertions
 such as these can be placed in the ALS Prolog startup file (described below) to customize search paths for particular directries. See the User Guide for more information concerning loading files.
 
-##13.5 Controlling the Search Path
+## 13.5 Controlling the Search Path
 If you want to be able to consult some of your files that are not in your current directory, and you don’t want to use absolute pathnames, you can put the directories
 where those files reside on a path searchlist called ALSPATH. In additon, you can
 add directories using the comannd-line switch -S at start-up time ({ADD LINK}see Section 13.7
@@ -232,16 +232,28 @@ work like this:
 Such a call can be placed in the Prolog startup file or in one of your source files to
 occur automatically, as descirbed in the next section.
 
-##13.6 Using the Prolog Startup File
+## 13.6 Using the Prolog Startup File
 When ALS Prolog starts up, it looks first in the current directory and then in your
 home directory for a file named either .alspro (on Unix or the Mac) or alspro.pro
 (on DOS). After the Prolog builtins are loaded the .alspro (or alspro.pro) file is
 consulted if it exists. The purpose of the Prolog startup file is to allow you to automatically load various predicates and files which you routinely use, and to carry out
 possible customizations of your environment such as the modifications to the standard search path described in the previous section.
 
-##13.7 ALS Prolog Command Line Options
+## 13.7 ALS Prolog Command Line Options
 There are a number of options that can be included on the operating system shell
-command line when starting ALS Prolog. The following is a list of the options:
+command line when starting ALS Prolog. Any Prolog goals and terms appearing on
+the command line may need to be quoted (with OS shell quotes) to avoid 
+interpretation by the OS shell.  All switches which take an argument must be
+separated from that argument by a space.  The following is a list of the options:
+````
+-s This switch must be followed by a space and a path to a directory. The path
+is added to the searchdir/1 sequence. Multiple occurrences of -s with
+a path may occur on the command line; the associated paths are processed
+and added to the searchdir/1 facts in order corresponding to their left-toright
+occurrence on the command line. All paths occurring with -s on the
+command line are added to the searchdir/1 facts before any paths obtained
+from the ALSPATH environment variable.
+````
 ````
 -g The option -g followed by an arbitrary Prolog goal, instructs ALS Prolog
 to run the goal when it starts up as if it was the first goal typed to the 
@@ -271,67 +283,6 @@ by the Prolog shell.
 messages,  including some which are normally suppressed, to be printed.
 ````
 ````
--gic The option -gic (“generated in current”) causes the *.obp files which are
-generated for consulted files to be created in the current working directory
-of the running image when the files are consulted.
-````
-````
--gis The option -gis causes the *.obp files which are created for consulted
-files to be created in the same directory as the source file from which they
-were generated.
-````
-````
--giac The option -giac causes the *.obp files which are created for consulted
-files to be stored in a subdirectory of the current working directory of the
-running image when the files are consulted; the subdirectory corresponds to
-the architecture of the running ALS Prolog image. Thus, for example, *.obp
-files generated by a Solaris2.4 image will be stored in a subdirectory named
-solaris2.4, etc.
-````
-````
--gias The option -gias causes the *.obp files which are created for consulted
-files to be stored in a subdirectory of the directory containing the source
-*.pro files when the files are consulted; the subdirectory corresponds to the
-architecture of the running ALS Prolog image. Thus, for example, *.obp
-files generated by a Solaris2.4 image will be stored in a subdirectory named
-solaris2.4, etc.
-````
-````
--p The option -p is used by ALS Prolog to distinguish between command line
-switches intended for the system and those switches intended for an application
-(whether invoked with the -g command line switch or from the Prolog shell). 
-The -p divides the command line into two portions: All switches to 
-the left of the -p are interpreted as being for the ALS Prolog system,
-while all switches to the right of the -p are interpreted as being intended for
-a Prolog application. To make the latter available to Prolog applications,
-when ALS Prolog is initialized, a list SWITCHES of atoms and UIAs representing
-the items to the right of the -p is created, and a fact
-command_line(SWITCHES) is asserted in module builtins. For example, the command
-line
-
-    alspro -g my_appl -b applfile -p -k fast -s initstate foofile
-
-would result in the following fact being asserted in module builtins:
-
-    command_line([’-k’,fast,’-s’,initstate,foofile]).
-
-This assertion is always made, even when -p is not used, in which case
-the argument of command_line/1 is the empty list. It is important to
-note that command_line/1 is not exported from module builtins, so
-that accesses to it from other modules must be prefixed with ‘builtins:’ as in
-
-    ...,builtins:command_line(Cmds),...
-````
-````
--s This switch must be followed by a space and a path to a directory. The path
-is added to the searchdir/1 sequence. Multiple occurrences of -s with
-a path may occur on the command line; the associated paths are processed
-and added to the searchdir/1 facts in order corresponding to their left-toright
-occurrence on the command line. All paths occurring with -s on the
-command line are added to the searchdir/1 facts before any paths obtained
-from the ALSPATH environment variable.
-````
-````
 -A, -a This switch must be followed by a space and a Prolog Goal ( enclosed in 
 single quotes if necessary to defeat the OS shell) and is used to force one or
 more assertions, as follows:  
@@ -352,18 +303,21 @@ makefiles.)
 ````
 ````
 -heap The option -heap followed immediately by space and a number w sets
-the size of the ALS Prolog heap to w *1024, where w is the number of K bytes 
-to allocate. Heap overflow will cause exit to the operating system.
+the size of the ALS Prolog heap to w *1024, where w is the number of Kilobytes 
+to allocate, if w is large.  For small w, the size of the heap is set to
+the base heap size incremented by w *1024.  Heap overflow will cause exit 
+to the operating system.  Cf. statistics/0.
 ````
 ````
 -stack The option -stack followed immediately by a space and a number w sets 
-the size of the ALS Prolog stack to w *1024, where w is the number of K bytes 
+the size of the ALS Prolog stack to w *1024, where w is the number of Kilobytes 
 to allocate. Stack overflow will cause exit to the operating system.
+Cf. statistics/0.
 
-These two options were formerly only controlled by the use of an environment 
-variable, ALS_OPTIONS. Now, either or both the command-line and environment
-variable method can be used. Use of one of the command-line options overrides
-use of the corresponding option with the environment variable.
+These two options (-heap, -stack) were formerly only controlled by the use of 
+an environment variable, ALS_OPTIONS. Now, either or both the command-line 
+and environment variable method can be used. Use of one of the command-line 
+options overrides use of the corresponding option with the environment variable.
 The ALS_OPTIONS environment variable is used as follows. If w1 and w2 are
 similar to the value w described above for -h and -s, then:
 Under Bourne shell, Korn shell, and Bash:
@@ -382,4 +336,99 @@ Under MS Windows:
 [Under MS Windows 95, such a line is placed in the AUTOEXEC.BAT file. 
 Under Windows NT, one uses the Environment section of the System 
 Properties control panel.]
+````
+````
+For the following five switches, note that consulting <path><file>.pro 
+suppresses creation of <file>.obp, while consulting <path><file> without 
+'.pro' requests creation of <file>.obp.
+````
+````
+-obp The option -obp causes the *.obp files which are generated for 
+consulted files to be created in the current working directory
+of the running image when the files are consulted.
+````
+````
+-gic The option -gic (Generated In Current”) causes the *.obp files which are
+generated for consulted files to be created in the current working directory
+of the running image when the files are consulted.
+````
+````
+-gis The option -gis (“Generated In Source”) causes the *.obp files which are 
+created for consulted files to be created in the same directory as the source 
+file from which they were generated.
+````
+````
+-giac The option -giac ("Generated In Architecture sub-directory of 
+Current directory") causes the *.obp files which are created for consulted
+files to be stored in a subdirectory of the current working directory of the
+running image when the files are consulted; the subdirectory corresponds to
+the architecture of the running ALS Prolog image. Thus, for example, *.obp
+files generated by a Solaris2.4 image will be stored in a subdirectory named
+solaris2.4, etc.
+````
+````
+-gias The option -gias ("Generated In Architecture sub-directory of 
+Sources directory") causes the *.obp files which are created for consulted
+files to be stored in a subdirectory of the directory containing the source
+*.pro files when the files are consulted; the subdirectory corresponds to the
+architecture of the running ALS Prolog image. Thus, for example, *.obp
+files generated by a Solaris2.4 image will be stored in a subdirectory named
+solaris2.4, etc.
+````
+````
+-no_obp The option -no_obp causes alspro to suppress all generation of 
+*.obp files.
+````
+````
+-no_dot_alspro The -no_dot_alspro option causes alspro to avoid loading 
+.alspro or alspro.pro.
+````
+````
+-p -P The option -p is used by ALS Prolog to distinguish between command line
+switches intended for the system and those switches intended for an application
+(whether invoked with the -g command line switch or from the Prolog shell). 
+The -p divides the command line into two portions: All switches to 
+the left of the -p are interpreted as being for the ALS Prolog system,
+while all switches to the right of the -p are interpreted as being intended for
+a Prolog application. To make the latter available to Prolog applications,
+when ALS Prolog is initialized, a list SWITCHES of atoms and UIAs representing
+the items to the right of the -p is created, and a fact
+command_line(SWITCHES) is asserted in module builtins. For example, the command
+line
+
+    alspro -g my_appl -b applfile -p -k fast -s initstate foofile
+
+would result in the following fact being asserted in module builtins:
+
+    command_line([’-k’,fast,’-s’,initstate,foofile]).
+
+This assertion is always made, even when -p is not used, in which case
+the argument of command_line/1 is the empty list. It is important to
+note that command_line/1 is not exported from module builtins, so that
+accesses to it from other modules must be prefixed with ‘builtins:’ as in
+
+    ...,builtins:command_line(Cmds),...
+
+The option -P is just like option -p, except that the name of the running 
+image (alspro, alsdev, or possibly an application image built from them)
+is pushed onto the front of the list returned by command_line/1.  So if 
+my_appl_img is the name of an image built from alspro, then
+
+    my_appl_img -heap 100 -q -no_dot_alspro -P -icecream -special_deal
+
+would result in the following fact being asserted in module builtins:
+
+    command_line([my_appl_img, '-icecream', '-special_deal']).
+
+````
+````
+-nwd The -nwd option instructs the debugger to only use the system console for
+display (Only meaningful in alsdev).
+````
+````
+-shell <shell> This option causes alspro to use the non-default <shell> after 
+processing the command line; currently, the only known other <shell> is alsdev.
+````
+````
+-h This option causes alspro to display the help info on the console.
 ````

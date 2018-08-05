@@ -1,7 +1,7 @@
 The ALS library includes a growing collection of routines designed to make it easy
 to utilize various GUI constructs easly from ALS Prolog.
 
-##19.1 Initializing the GUI library.
+## 19.1 Initializing the GUI library.
 In order to make use of these routines, one must first initialize the library. This is
 accomplished with the predicate init_tk_alslib/0. This initializes a Tcl/
 Tk interpreter named tcli (see the next Chapter), and sources (loads) the associated Tcl/Tk code into that interpreter. This call is really defined as
@@ -14,22 +14,22 @@ Interp.
 All of the calls in the library are organized in a similar style: there is a default version which references the default interpreter tcli, and there is a general version
 allowing one to use the same functionality with any other interpreter.
 
-##19.2 Dialogs.
-###19.2.1 Information dialogs.
+## 19.2 Dialogs.
+### 19.2.1 Information dialogs.
 ````
 info_dialog(Msg) :info_dialog(Msg, ‘Info’).
 info_dialog(Msg, Title) :info_dialog(tcli, Msg, Title).
 
 ````
-####info_dialog(Interp, Msg, Title)
+#### info_dialog(Interp, Msg, Title)
 The call
     ?-info_dialog(‘Message for the User’, ‘Dialog Box Title’).
 produces the following information dialog:
 
 ![](images/info_dialog_box.gif)
 
-###19.2.2 Yes-no dialogs.
-####yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
+### 19.2.2 Yes-no dialogs.
+#### yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
 ````
 yes_no_dialog(Msg, Answer)
 :yes_no_dialog(Msg, ‘Info’, Answer).
@@ -60,7 +60,7 @@ Clicking “OK” yields
 while clicking “Cancel” yeilds
     Answer = Cancel.
 
-##19.3 Choices from lists.
+## 19.3 Choices from lists.
 ````
 popup_select_items(SourceList, ChoiceList)
 popup_select_items(SourceList, Options, ChoiceList)
@@ -118,9 +118,9 @@ extends the selection to include all the
 ele ments between the anchor and the
 element under the mouse, inclusive.
 
-##19.4 Inputting atoms (answering questions).
+## 19.4 Inputting atoms (answering questions).
 
-####atomic_input_dialog(Interp, Msg, Title, Atom)
+#### atomic_input_dialog(Interp, Msg, Title, Atom)
 ````
 atomic_input_dialog(Msg, Atom)
     :- atomic_input_dialog(Msg, ‘Input’, Atom).
@@ -140,8 +140,8 @@ If the user types: Logic is wonderful
 then the output result would be
     Atom = Logic is wonderful
 
-##19.5 File selection dialogs
-####file_select_dialog(Interp, Options, FileName)
+## 19.5 File selection dialogs
+#### file_select_dialog(Interp, Options, FileName)
 ````
 file_select_dialog(FileName)
     :- file_select_dialog(tcli, [title=’Select File’], FileName).
@@ -166,14 +166,14 @@ would produce
 
 ![](images/file-sel-2.gif)
 
-##19.6 Displaying Images.
+## 19.6 Displaying Images.
 
 These routines provide simple access from ALS Prolog to the image routines of Tk.
 They will be extended. The current versions support gif images, but the routines
 can be extended to any of the types Tk supports. 
 
-####create_image(Interp, ImagePath, ImageName)
-####display_image(Interp, ImageName, Options)
+#### create_image(Interp, ImagePath, ImageName)
+#### display_image(Interp, ImageName, Options)
 To display images, one must specify a path to the image file, and must first produce an internal Tk form of the image.
 This is done with:
 ````
@@ -196,7 +196,7 @@ produces
 ![](images/pow_wow_dancer.gif)
 
 
-##19.7 Adding to the ALS IDE main menubar.
+## 19.7 Adding to the ALS IDE main menubar.
 
 Simple additions to the main menubar are often useful. The general call to accomplish this is:
     extend_main_menubar(Label, MenuEntriesList)
@@ -255,7 +255,7 @@ allows one to create menu entries which are themselves cascades. In this case, S
 (recursively) a list of menu entry descriptors.
 
 Here are several useful predicates for working with menus and menu entries:
-####menu_entries_list(Interp, MenuPath, EntriesList)
+#### menu_entries_list(Interp, MenuPath, EntriesList)
 ````
 menu_entries_list(MenuPath, EntriesList)
     :- menu_entries_list(tcli, MenuPath, EntriesList).
@@ -268,7 +268,7 @@ will be the list of labels for the entries on that menu, in order. For example,
 EntriesList = [File, Edit, Prolog, Tools, Help].
 ````
 
-####path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
+#### path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
 When one indexes menu entries, the indicies are integers beginning at 0.
 ````
 path_to_main_menu_entry(Index, SubMenuPath)

@@ -9,9 +9,9 @@ Chapter 14 (Using the Four-Port Debugger) ) with a source-code trace debugger.
 The details of the debugger action and the source trace will be described below.
 First we will examine the menus and buttons on the debugger window.
 
-##18.1 Debugger Window Menus.
+## 18.1 Debugger Window Menus.
 The first two debugger menus, File and Edit, provide the same facilities as discussed for all other windows in Chapter 13 (ALS Integrated Development Environment) .
-###18.1.1 Prolog Menu.
+### 18.1.1 Prolog Menu.
 The top two items of the Prolog menu are also the same as earlier:
 
 ![](images/dbg_prolog_menu.gif)
@@ -24,7 +24,7 @@ Break Shell -- choosing this causes a secondary break shell to be started withou
 disturbing the current computation being traced.
 If no computation is being traced, the Abort and Break choices have no effect.
 
-###18.1.2 Tools Menu
+### 18.1.2 Tools Menu
 The Tools Menu
 
 ![](images/dbg_tools_menu.gif)
@@ -39,7 +39,7 @@ Figure. Debug Settings Control
 
 These settings control which debugger ports are shown, and also control the appearance of the lines printed for the ports which are show.
 
-##18.2 Tracing with the IDE Debugger.
+## 18.2 Tracing with the IDE Debugger.
 Suppose we have raised the debugger, consulted the mission.pro example from
 the supplied example programs. Then begin tracing by typing
 trace plan in the main listener window, as show below:
@@ -87,7 +87,7 @@ Figure. Another step into the trace
 
 And so forth.
 
-##18.3 Spying with the ALS IDE
+## 18.3 Spying with the ALS IDE
 Choosing Spy... from the Debugger Tools menu raises the following dialog:
 
 ![](images/4port.gif)

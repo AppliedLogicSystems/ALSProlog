@@ -1,19 +1,19 @@
 The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called ’builtin’ and those which are called ’library’ is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
-###[Overview](#121-overview-of-the-als-library-mechanism-and-tools)
-###[Algebraic List Predicates](#122-lists-algebraic-list-predicates-listutl1pro)
-###[Positional List Predicates](#positional-list-predicates)
-###[Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
-###[Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
-###[Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
-###[I/O Predicates](#127-io-predicates-iolayerpro)
-###[Control Predicates](#128-control-predicates-lib_ctlpro)
-###[Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
-###[Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
-###[Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
-###[String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
-###[Extensible List Utilities](#1213-extensible-list-utilities-xlistspro)
-###[CREF: Cross-Referencer](#1214-cref-cross-referencer-crefpro)
+### [Overview](#121-overview-of-the-als-library-mechanism-and-tools)
+### [Algebraic List Predicates](#122-lists-algebraic-list-predicates-listutl1pro)
+### [Positional List Predicates](#positional-list-predicates)
+### [Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
+### [Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
+### [Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
+### [I/O Predicates](#127-io-predicates-iolayerpro)
+### [Control Predicates](#128-control-predicates-lib_ctlpro)
+### [Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
+### [Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
+### [Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
+### [String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
+### [Extensible List Utilities](#1213-extensible-list-utilities-xlistspro)
+### [CREF: Cross-Referencer](#1214-cref-cross-referencer-crefpro)
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools.
 
@@ -139,7 +139,7 @@ any items from B-A; equivalent to:
 If both lists have the property that each element occurs no more than once, then the
 union also has this property.
 
-##[12.3 Lists: Positional List Predicates (listutl2.pro)](id:positional-list-predicates)
+## [12.3 Lists: Positional List Predicates (listutl2.pro)](id:positional-list-predicates)
 ````
 at_most_n/3
 at_most_n(List, N, Head)
@@ -676,7 +676,7 @@ xlist_unit_l(+, -)
 
 ## 12.14 CREF: Cross-Referencer (cref.pro)
 
-CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, library predicates used, toplevel (uncalled) predicates, and undefined predicates.
+CREF operates on suites of one or more prolog files, and outputs a report describing the program structure found, including modules, calls between predicates, numbers of clauses and facts for a predicate, facts and rules asserted, operator declarations, ALS Library files used, top-level (uncalled) predicates, and undefined predicates.
 
 The main entry points, cref(SuiteName) {- runs "nonstop", with no cref shell} and cref(SuiteName, Opts)) {- can enter interactive cref shell after the initial analysis}.  Both of these calls are library calls, auto-loading the cref analysis files.
 
@@ -704,7 +704,18 @@ suite_info(suite,tc,
 suite_info(suite,tc2,'alsdir/library/tests'+['cref_test_lib1.crf'],'tc2.xrf').
 suite_info(suite,chat80,'examples/chat80'+['als_chat.pro','*.pl'],'chat80.xrf').
  ````
- These can be invoked by cref(hickory), cref(tc), cref(tc2), and cref(chat80), respectively.
+These can be invoked by cref(hickory), cref(tc), cref(tc2), and cref(chat80), respectively. 
+
+When cref finishes writing the report, it also asserts
+ 
+  ````
+ 	cref:lib_files_used(SuiteName, LibFilesList) 
+  ````
+  
+ (in module cref, as indicated), where LibFilesList is the list of library files used by SuiteName.  This is then available for use by other tools, such as packaging.
+
+
+
  
  When cref finishes writing the report, it also asserts
  
