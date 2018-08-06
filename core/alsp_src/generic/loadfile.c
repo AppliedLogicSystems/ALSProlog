@@ -762,6 +762,12 @@ load_file(fname, options)
 #endif /* OBP */
     int   errorcount;
 
+    int special_makeobp = 0;
+if (options == 2){
+    special_makeobp = 1;
+    options = 0;
+}
+
 #ifdef OBP
     /*
      * Assume we are not creating .obp files until we
@@ -769,7 +775,7 @@ load_file(fname, options)
      */
     makeobp = 0;
 #endif /* OBP */
-
+/* printf("\nload_file options=%d makeobp=%d %s OBP=%d\n",options,makeobp, fname,(int)OBP); */
     /*
      * Are we reconsulting?
      */
@@ -891,12 +897,24 @@ load_file(fname, options)
 	 */
 #ifdef OBP
 	strcpy(ext, "obp");
+
+/* When special_makeobp == 1, suppress checking whether the obp can be opened,
+   and suppress makeopb=1: 
+*/
+if (special_makeobp == 0){
 	if (obp_open(new_fname) == 0) {
 	    fprintf(stderr, "Warning: Unable to create %s \n", new_fname);
 	}
 	else {
 	    makeobp = 1;
 	}
+}
+if (special_makeobp == 1){
+	makeobp = 0;
+}
+
+/* special_makeobp == 1 if incoming options was 2: */
+
 #endif /* OBP */
 
 	/*

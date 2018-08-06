@@ -658,11 +658,15 @@ autoload(f)
     strcat(fext, ".obp");
 #endif 
 */
+
+/* printf("autoload: f=%s\n",f); */
+
 #ifdef MacOS
     status = obpres_load(fext);
     if (status != 1) status = load_file(fext, 0); 
 #else
-    status = load_file(fext, 0);  
+/*    status = load_file(fext, 0);  */
+    status = load_file(fext, 2);  
 #endif
     if (!status) {
 /*

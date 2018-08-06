@@ -1050,7 +1050,7 @@ load_builtins(BDir, File)
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
 	obp_push_stop,
-	'$load'(FileAndPath, 0),
+	'$load'(FileAndPath, 2), 	% '$load'(FileAndPath, 0),
 	obp_pop,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
