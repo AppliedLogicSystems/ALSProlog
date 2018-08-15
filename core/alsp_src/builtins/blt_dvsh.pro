@@ -319,22 +319,20 @@ alsdev(ALS_IDE_Mgr)
 	catenate('WaitForLine','.topals.text',WaitVar),
 	catenate('DataLine','.topals.text',DataVar),
 
-
 	tcl_call(shl_tcli, [set,WaitVar,0],_),
 	tcl_call(shl_tcli, [set,DataVar,""],_),
 
-
 	tcl_call(shl_tcli, [set_top_bindings,'.topals.text',shl_tk_in_win,WaitVar,DataVar],_),
 
-    sio:set_input(ISS),
-    sio:set_output(OSS),
+    	sio:set_input(ISS),
+    	sio:set_output(OSS),
 
 	setup_debugger_streams(ISS,OSS),
 
     %% Error stream
 		%	open(console_error('error output'),write,OutEStream,
 	cancel_alias(error_stream),
-    open(tk_win(shl_tcli, '.topals.text'),write,OutEStream,
+    	open(tk_win(shl_tcli, '.topals.text'),write,OutEStream,
 	 ['$stream_identifier'(-5), alias(error_stream),
 	 	buffering(line),type(text)]),
 
@@ -342,9 +340,9 @@ alsdev(ALS_IDE_Mgr)
     %% Establish additional aliases
 
 	cancel_alias(warning_input),
-    sio:set_alias(warning_input, ISS),
+    	sio:set_alias(warning_input, ISS),
 	cancel_alias(warning_output),
-    sio:set_alias(warning_output, OSS),
+    	sio:set_alias(warning_output, OSS),
 
 	sio:reset_user(ISS,OSS),
 	set_prolog_flag(windows_system, tcltk),
@@ -382,7 +380,7 @@ alsdev(ALS_IDE_Mgr)
 	get_cwd(CurDir),
 	tcl_call(shl_tcli, [show_dir_on_main, CurDir], _),
 %	(clause(dvf,_) -> demo_init ; true),
-tdvf,
+	tdvf,
 		%% for use by clear_workspace:
 	findall(GVID, global_gv_info:gvi(GVID,_,_,_),SysGlobals),
 	alsdev:assert(system_global_vars(SysGlobals)),

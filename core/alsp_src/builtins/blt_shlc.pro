@@ -213,7 +213,7 @@ output_system_banner(CLInfo)
 	arg(2,CLInfo,ConsultNoise),
 	OutputStream = user_output,
 	als_system(SysList),
-	(ConsultNoise = true -> 
+	(ConsultNoise = true ->  % be quiet
 		true ; 
 		print_banner(OutputStream,SysList)
 	).
@@ -347,7 +347,7 @@ library_setup(CLInfo)
 	:-
 	arg(2,CLInfo,ConsultNoise),
 	OutputStream = user_output,
-	(ConsultNoise = true -> true ;
+	(ConsultNoise = true -> true ; % be quiet
 		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
 	(ConsultNoise = true -> true ; 

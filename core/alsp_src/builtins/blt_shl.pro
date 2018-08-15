@@ -175,16 +175,16 @@ setup_debugger_stubs
 
 make_clinfo( CLInfo, DefaultShellCall, Verbosity)
 	:-
-	CLInfo = clinfo(true,				/* -g: goal to run */
-					Verbosity,			/* -v/-q: verbosity */
-					[],					/* files to consult */
-					ImageName,
-					default,			/* -nwd: debugger to set up */
-					[],					/* -s init search list */
-					DefaultShellCall,	/* shell/or not */
-					[], 				/* Command-line asserts */
-					true				/* Load .alspro: true = do it */
-					). 				
+	CLInfo = clinfo(true,			/* -g: goal to run */
+				Verbosity,	/* -v (false) /-q (true): verbosity */
+				[],		/* files to consult */
+				ImageName,
+				default,	/* -nwd: debugger to set up */
+				[],		/* -s init search list */
+				DefaultShellCall, /* shell/or not */
+				[], 		/* Command-line asserts */
+				true		/* Load .alspro: true = do it */
+			). 				
 
 
 /*---------------------------------------
