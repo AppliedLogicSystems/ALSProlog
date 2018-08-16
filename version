@@ -2,30 +2,45 @@
 
 # Automagically calculate project version number from git tags
 
-# Archive hash and description set by git-archive via export-subst in .gitattributes
-ARCHIVE='$Format:%h%d$'
+# Archive hash and refs set by git-archive via export-subst in .gitattributes
+
+# Note: the refs (%d) are truncated to only show the version tag, thus avoiding
+# variability caused by moving branch references (like master). This makes archives
+# build from tags stable for downstream package distribution. However, versons tags
+# are limited to a maximum 9 chars (i.e. v00.00.00) and must start with "v".
+
+ARCHIVED='$Format:archived$'
+HASH='$Format:%h$'
+REFS='$Format:%<(13,ltrunc)%d$'
 
 # Examples expansions:
-#ARCHIVE='09f863b (tag: v3.2.0)'
-#ARCHIVE='2ea0e4a (HEAD -> master)'
+#ARCHIVED='archived'
+#HASH='09f863b'
+#REFS='..g: v1.2.3)'
 
-# Use archive tag, if found
-if [[ $ARCHIVE =~ tag:\ ([^\)]+)\) ]]
-then
-	VERSION=${BASH_REMATCH[1]}
+VERSION='unknown'
+
+case $ARCHIVED in
+
+# When archiving is detected, extract version from refs, or fall back to hash.
+archived)
+	if [[ $REFS =~ (v[^\)]+)\)$ ]]
+	then
+		VERSION=${BASH_REMATCH[1]}
+	else
+		VERSION=$HASH
+	fi
+	;;		
+
+# Default to using git to generate version number in working tree
+*)
+	if [[ $(git rev-parse --is-inside-work-tree) == 'true' ]]
+	then
+		VERSION=$(git describe --tags --dirty)
+	fi
+	;;
 	
-# Use archive branch and hash, if found
-elif [[ $ARCHIVE =~ ([^ ]+)\ \(.*-\>\ ([^\),]+).*\) ]]
-then
-	VERSION=${BASH_REMATCH[2]}-${BASH_REMATCH[1]}
-
-# Use git-describe for working trees
-elif [[ $(git rev-parse --is-inside-work-tree) == 'true' ]]
-then
-	VERSION=$(git describe --tags --dirty)
-else
-	VERSION='unknown'
-fi
+esac
 
 # Strip leading 'v' if found
 if [[ ${VERSION:0:1} == 'v' ]]
