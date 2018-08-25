@@ -1,3 +1,5 @@
+---
+---
 Like most symbolic programming langauges, ALS Prolog implements atoms in
 two different ways:
 * Atoms can be interned which means that they have been installed in the Prolog symbol table. Atoms which have been interned are called symbols.

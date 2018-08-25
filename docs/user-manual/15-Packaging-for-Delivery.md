@@ -1,3 +1,5 @@
+---
+---
 A typical complex ALS Prolog application involves the following elements:
 * the ALS Prolog system
 * various ALS Prolog source files

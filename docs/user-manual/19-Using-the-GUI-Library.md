@@ -1,3 +1,5 @@
+---
+---
 The ALS library includes a growing collection of routines designed to make it easy
 to utilize various GUI constructs easly from ALS Prolog.
 

@@ -1,3 +1,5 @@
+---
+---
 ALS Prolog provides a method of globally associating values with arbitrary terms
 (which occur on the heap).  The associations are immune to backtracking. That is,
 once an association is installed, backtracking to a point prior to creation of the association does not undo the association. (However, see the discussion below for fine

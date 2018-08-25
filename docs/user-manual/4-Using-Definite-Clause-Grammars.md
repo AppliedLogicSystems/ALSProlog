@@ -1,3 +1,5 @@
+---
+---
 Prolog is a very powerful tool for implementing parsers and compilers. The Definite Clause Grammar (DCG) notation provides a convenient means of exploiting
 this power by automatically translating grammar rules into Prolog clauses. ALS
 Prolog translates DCG rules occurring in source files into their equivalent Prolog

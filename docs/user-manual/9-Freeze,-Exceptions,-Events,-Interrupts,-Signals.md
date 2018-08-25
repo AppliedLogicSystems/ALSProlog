@@ -1,3 +1,5 @@
+---
+---
 ## 9.1 Freeze
 
 ALS Prolog supports a ‘freeze’ control construct similar to those that appear in
