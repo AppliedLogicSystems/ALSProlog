@@ -496,11 +496,17 @@ cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
+		% try to get info on Module:P/A from the libary hash table (_libinfo):
 	get_libinfo(Module:P/A,FileName),
 %functor(Call,CF,CA),write( lib_load(Module,CF/CA, FileName) ),nl,flush_output,
+		% Delete all _libinfo entries with value FileName:
+		% pdel_libinfo(_,FileName), fail keeps backtracking until all
+		% hits with value FileName have been removed; that is, all
+		% entries for predicates from FileName have been removed from _libinfo:
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
+/*
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	is_absolute_path(FileName),
@@ -510,6 +516,7 @@ lib_load(FileName, Module, P,A, Module,Call)
 	!,
 	record_lib_load(FileName),
 	Module:call(Call).
+*/
 
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
@@ -518,20 +525,22 @@ lib_load(FileName, Module, P,A, Module,Call)
 	split_path(ALSLibPathHead, PathHeadElts),
 	dappend(PathHeadElts, [FileName], FFNElts),
 	join_path(FFNElts, FullFileName),
+/*
 	sys_env(OS,_,_),
 	(   OS = macos, !, Sepr = ':'
 		;   OS = mswin32, !, Sepr = '\\'
 		;   Sepr = '/'
 	),
+*/
     '$atom_concat'(FullFileName,'.pro',FilePathPro),
     '$atom_concat'(FullFileName,'.obp',FilePathObp),
-	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
-		; 
-		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
-	),
-	!,
-	record_lib_load(FileName),
-	Module:call(Call).
+    (cslt_lib_ld(FileName, FilePathPro,FilePathObp)
+    	; 
+    	existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
+    ),
+    !,
+    record_lib_load(FileName),
+    Module:call(Call).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Force one or more library files to be 
