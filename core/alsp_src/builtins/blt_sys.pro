@@ -506,7 +506,6 @@ lib_load(Module,Call)
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
-/*
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	is_absolute_path(FileName),
@@ -516,7 +515,6 @@ lib_load(FileName, Module, P,A, Module,Call)
 	!,
 	record_lib_load(FileName),
 	Module:call(Call).
-*/
 
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
