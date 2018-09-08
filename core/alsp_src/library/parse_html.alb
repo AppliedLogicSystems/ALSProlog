@@ -1,0 +1,3 @@
+libactivate(pml,[library,parse_html],
+    [ parse_html_toks_to_pml/6, grab_pml/2, read_pml_term/3, read_pml_comment/3 ],
+    []).
