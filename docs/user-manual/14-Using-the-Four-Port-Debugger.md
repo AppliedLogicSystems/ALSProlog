@@ -1,5 +1,8 @@
 ---
 ---
+
+# 14 Using the Four Port Debugger
+
 The ALS Prolog Debugger allows you to debug a faulty program with the standard
 four-port model of Prolog execution. You can use the debugger to find where your
 program is faulty by looking at how procedures are being called, what values they

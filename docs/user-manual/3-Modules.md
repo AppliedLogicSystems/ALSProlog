@@ -1,5 +1,8 @@
 ---
 ---
+
+# 3 Modules
+
 ALS Prolog provides a module system to facilitate the creation and maintenance of
 large programs. The main purpose of the module system is to partition procedures
 into separate groups to avoid naming conflicts between those groups. The module

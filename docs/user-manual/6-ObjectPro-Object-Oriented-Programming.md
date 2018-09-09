@@ -1,5 +1,8 @@
 ---
 ---
+
+# 6 ObjectPro: Object Oriented Programming
+
 ALS ObjectPro is an object-oriented programming toolkit fully integrated with
 ALS Prolog. Unlike some other approaches to object-oriented programming in
 Prolog, it is not implemented as a system on top of Prolog. Instead, it is seamlessly

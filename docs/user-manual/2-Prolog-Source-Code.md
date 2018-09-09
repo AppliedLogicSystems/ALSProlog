@@ -1,5 +1,8 @@
 ---
 ---
+
+# 2 Prolog Source Code
+
 Just like most other computer languages, Prolog allows you to store programs and
 data in text files. The builtin predicates consult/1, reconsult/1, read/1,
 and their variants will translate the textual representation for programs and data into

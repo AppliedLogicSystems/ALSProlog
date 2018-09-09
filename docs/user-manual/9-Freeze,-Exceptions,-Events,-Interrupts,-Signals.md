@@ -1,5 +1,8 @@
 ---
 ---
+
+# 9 Freeze, Exceptions, Events, Interrupts, Signals
+
 ## 9.1 Freeze
 
 ALS Prolog supports a ‘freeze’ control construct similar to those that appear in

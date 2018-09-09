@@ -1,5 +1,8 @@
 ---
 ---
+
+# 10 Prolog I/O
+
 Most programs need to communicate with the outside world. There are a wide variety of outside entities with which a program can communicate, ranging from the
 screen, keyboard, and files to other programs over networks. This section describes
 the facilities which ALS Prolog provides for input/output (I/O) communication.

@@ -1,5 +1,8 @@
 ---
 ---
+
+# 18 Using the ALS IDE Debugger
+
 Selecting the Debugger entry from the Tools menu causes the primary debugger
 window to appear::
 
