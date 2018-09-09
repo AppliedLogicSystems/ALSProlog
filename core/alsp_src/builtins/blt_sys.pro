@@ -496,8 +496,13 @@ cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
+		% try to get info on Module:P/A from the libary hash table (_libinfo):
 	get_libinfo(Module:P/A,FileName),
 %functor(Call,CF,CA),write( lib_load(Module,CF/CA, FileName) ),nl,flush_output,
+		% Delete all _libinfo entries with value FileName:
+		% pdel_libinfo(_,FileName), fail keeps backtracking until all
+		% hits with value FileName have been removed; that is, all
+		% entries for predicates from FileName have been removed from _libinfo:
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
@@ -514,24 +519,18 @@ lib_load(FileName, Module, P,A, Module,Call)
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	als_lib_lcn(ALSLibPathHead),
-%	extendPath(ALSLibPathHead, FileName, FullFileName),
 	split_path(ALSLibPathHead, PathHeadElts),
 	dappend(PathHeadElts, [FileName], FFNElts),
 	join_path(FFNElts, FullFileName),
-	sys_env(OS,_,_),
-	(   OS = macos, !, Sepr = ':'
-		;   OS = mswin32, !, Sepr = '\\'
-		;   Sepr = '/'
-	),
-    '$atom_concat'(FullFileName,'.pro',FilePathPro),
-    '$atom_concat'(FullFileName,'.obp',FilePathObp),
-	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
-		; 
-		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
-	),
-	!,
-	record_lib_load(FileName),
-	Module:call(Call).
+    	'$atom_concat'(FullFileName,'.pro',FilePathPro),
+    	'$atom_concat'(FullFileName,'.obp',FilePathObp),
+    	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
+    		; 
+    		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
+    	),
+    	!,
+    	record_lib_load(FileName),
+    	Module:call(Call).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Force one or more library files to be 
@@ -559,7 +558,6 @@ force_libload_all(Files)
 force_libload_all_lib(Files,Library) 
 	:-
 	sys_searchdir(ALSDIR),
-%	extendPath(ALSDIR,Library,LibPath),
 	split_path(ALSDIR, ALSDIRElts),
 	dappend(ALSDIRElts, [Library], LPElts),
 	join_path(LPElts, LibPath),
@@ -573,7 +571,6 @@ force_libload_all([File|Files],DirDC)
 
 force_libload_file(File,DirDC)
 	:-
-%	extendPath(DirDC,File,FileName),
 	split_path(DirDC, DirDCElts),
 	dappend(DirDCElts, [File], FNElts),
 	join_path(FNElts, FileName),

@@ -2,8 +2,7 @@
  |			parse_html.pro
  |		Copyright (c) 1999-2004 Applied Logic Systems, Inc.
  |	
- |		Parse tokenized html into pxml prolog terms
- |		  -- assumes the html was originally cleaned up by HTMLTidy
+ |		Parse tokenized html into pml prolog terms
  |
  |	Authors: Ken Bowen & Chuck Houpt
  |
@@ -36,122 +35,181 @@
  |	MODIFICATIONS.
  *=================================================================*/
 
-module pxml.
+module pml.
+
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%% Parser:  HTML --> PXML
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-export grab_pxml/2.
-export parse_pxml/2.
-export read_pxml_term/3.
-export read_pxml_comment/3.
+export parse_html_toks_to_pml/6.
+export grab_pml/2.
+export read_pml_term/3.
+export read_pml_comment/3.
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
-grab_pxml(Path, PXML)
+
+grab_pml(Path, PXML)
     :-
-/*
-    grab_lines(Path, RawLines),
-    cut_cmts_js(RawLines, ScriptlessLines),
-    read_tokens_lines(ScriptlessLines, Tokens),
-    parse_pxml(Tokens, PXML).
-*/
     grab_html_tokens(Path, Tokens),
-    parse_pxml(Tokens, PXML).
-
-
-/*
-export grab_pxml/2.
-grab_pxml(Path, PXML)
-	:-
-	open(Path, read, IS, [write_eoln_type(lf)]),
-	unwind_protect(r_pxml(IS, PXML), 
-	close(IS)).
-
-export r_pxml/2.
-r_pxml(S, L)
-	:-
-	read_tokens(S, Tokens),
-	parse_pxml(Tokens, L).
-*/
-
+    parse_html_toks_to_pml(Tokens, PXML, [], _, [], _).
 
 	%%------------------------------------------
 	%% Parse the token stream
-        %%  -- assumes the html was originally 
-	%%     cleaned up by HTMLTidy; in particular,
-	%%     <p> is a binary tag, so it must always
-	%%     be matched by </p>
 	%%------------------------------------------
-/*---------------------------------------------------------------------
- *--------------------------------------------------------------------*/
-parse_pxml([], []).
-parse_pxml(Tokens, [Term | RestTerms])
-	:-
-	read_pxml_term(Tokens, Term, RestTokens),
-	parse_pxml(RestTokens, RestTerms).
 
-read_pxml_term([string(StringAtom) | RestTokens], StringAtom, RestTokens)
+/*------------------------------------------------------------------------------
+ |	parse_html_toks_to_pml(Tokens, Terms, MTags, RestMTags, MTagVals, ResultMTagVals).
+ |
+ |  Parses a list of HTML-tokens, as produced by 
+ | 		read_tokens/5
+ |  in html_tokens.pro, into a collection of Prolog Terms consituting a
+ |  PXML representation of the source.
+ |
+ |  	MTags, RestMTags, MTagVals, ResultMTagVals
+ |
+ |  provide a means of capturing components of the PXML output.
+ |  Below, MTags is a list of non-comment tags.  
+ |  Often, MTags = [body].
+ |  MTagVals is the list of corresponding PXML terms found, if any.
+ |  So if MTags = [body, table], we might have MTagVals = [body=Body], if
+ |  there were no table, and 
+ |	MTagVals = [body=Body, table=[list of PXML table terms] ]
+ |  if there was more than one table.
+ |
+ |  If MTags and MTagVals was to be big, it could be carried as
+ |  an AVL tree.  But I think the examples above will be typical.
+ *-----------------------------------------------------------------------------*/
+parse_html_toks_to_pml([], [], MTags, MTags, MTagVals, MTagVals).
+parse_html_toks_to_pml(Tokens, [Term | RestTerms], MTags, RestMTags, MTagVals, RestMTagVals)
+	:-
+	read_pml_term(Tokens, Term, RestTokens, MTags, InterMTags, MTagVals, InterMTagVals),
+	parse_html_toks_to_pml(RestTokens, RestTerms, InterMTags, RestMTags, InterMTagVals, RestMTagVals).
+
+read_pml_term([string(StringAtom) | RestTokens], StringAtom, RestTokens, 
+							MTags, MTags, MTagVals, MTagVals)
 	:-!.
 
-read_pxml_term(['<', InTag,'>','<', InTag,'>' | Tokens], Term, RestTokens)
+/*
+%%??: Is this needed??
+read_pml_term(['<', InTag,'>','<', InTag,'>' | Tokens], Term, RestTokens)
 	:-
 	make_lc_sym(InTag, html),
 	!,
-	read_pxml_term(['<', InTag,'>' | Tokens], Term, RestTokens).
+	read_pml_term(['<', InTag,'>' | Tokens], Term, RestTokens).
+*/
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
-read_pxml_term(['<', InTag | Tokens], Term, RestTokens)
+read_pml_term(['<', InTag | Tokens], Term, RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals)
 	:-
 	make_lc_sym(InTag, Tag),
 	unary_tag(Tag),
 	!,
-	read_pxml_eqs_to(Tokens, '>', Features, RestTokens),
-	Term  =.. [Tag, Features, []].
+	read_pml_eqs_to(Tokens, '>', Features, RestTokens),
 
-read_pxml_term(['<', '!--' | Tokens], Term, RestTokens)
+	Term  =.. [Tag, Features, []],
+	handle_tag(Tag, Term, MTags, InterMTags, MTagVals, InterMTagVals).
+
+read_pml_term(['{', InTag | Tokens], Term, RestTokens,
+				MTags, MTags, MTagVals, MTagVals)
+	:-!,
+	read_pml_eqs_to(Tokens, '}', Features, RestTokens),
+	Term  =.. ['{}', Features].
+
+read_pml_term(['<', '!--' | Tokens], Term, RestTokens,
+				MTags, MTags, MTagVals, MTagVals)
 	:-
-	read_pxml_comment(Tokens, Features, RestTokens),
+	read_pml_comment(Tokens, Features, RestTokens),
+	!,
 	Term  =.. [comment, Features, []].
 
-read_pxml_term(['<', InTag | Tokens], Term, RestTokens)
+read_pml_term(['<', script | Tokens], _, RestTokens,
+				MTags, MTags, MTagVals, MTagVals)
+	:-!,
+	cross_toks_to(Tokens, ['<','/',script,'>'], RestTokens).
+
+read_pml_term(['<', InTag | Tokens], Term, RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals)
 	:-!,
 	make_lc_sym(InTag, Tag),
-	read_pxml_eqs_to(Tokens, '>', Features, InterTokens),
-	read_to_close_html(InterTokens, SubTerms, Tag, RestTokens),
-	Term  =.. [Tag, Features, SubTerms].
+	read_pml_eqs_to(Tokens, '>', Features, InterTokens),
+	!,
+	read_to_close_html(InterTokens, SubTerms, Tag, RestTokens,
+				MTags, InterMTagsA, MTagVals, InterMTagValsA),
+	Term  =.. [Tag, Features, SubTerms],
+	handle_tag(Tag, Term, InterMTagsA, InterMTags, InterMTagValsA, InterMTagVals).
 
-read_pxml_term(Tokens, List, ['<' | RestTokens])
+cross_toks_to(Tokens, TerminList, RestTokens)
 	:-
-	read_pxml_terms_to(Tokens, '<', List, RestTokens).
+	TerminList = [Termin1 | RestTermins],
+	do_cross_toks_to(Tokens, Termin1, RestTermins, RestTokens).
 
-read_pxml_terms_to([], Terminator, [], []).
-read_pxml_terms_to([Terminator | Tokens], Terminator, [], Tokens)
-	:-!.
-read_pxml_terms_to(['/','>' | Tokens], _, [], Tokens)
-	:-!.
-read_pxml_terms_to([T0 | Tokens], Terminator, [T0 | Terms], RestTokens)
+do_cross_toks_to([Termin1 | InitRestTokens], Termin1, RestTermins, RestTokens)
 	:-
-	read_pxml_terms_to(Tokens, Terminator, Terms, RestTokens).
+	do_match(RestTermins, InitRestTokens, RestTokens),
+	!.
 
-read_pxml_eqs_to([], Terminator, [], []).
-read_pxml_eqs_to([Terminator | Tokens], Terminator, [], Tokens)
+do_cross_toks_to([X | TokensTail], Termin1, RestTermins, RestTokens)
+	:-
+	do_cross_toks_to(TokensTail, Termin1, RestTermins, RestTokens).
+
+do_match([], RestTokens, RestTokens).
+
+do_match([Termin | RestTermins], [Termin | InitRestTokens], RestTokens)
+	:-!,
+	do_match(RestTermins, InitRestTokens, RestTokens).
+
+read_pml_term(Tokens, List, ['<' | RestTokens],
+				MTags, InterMTags, MTagVals, InterMTagVals)
+	:-
+	read_pml_terms_to(Tokens, '<', List, RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals).
+
+read_pml_terms_to([], Terminator, [], [],
+				MTags, MTags, MTagVals, MTagVals).
+
+read_pml_terms_to([Terminator | Tokens], Terminator, [], Tokens,
+				MTags, MTags, MTagVals, MTagVals).
 	:-!.
-read_pxml_eqs_to(['/','>' | Tokens], _, [], ['/','>' | Tokens])
+
+read_pml_terms_to(['/','>' | Tokens], _, [], Tokens,
+				MTags, MTags, MTagVals, MTagVals).
 	:-!.
-read_pxml_eqs_to(['<' | Tokens], '>', [], ['<' | Tokens])
+
+read_pml_terms_to(['{' | Tokens], Terminator, [Grp | Terms], RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals)
+	:-!,
+	read_pml_terms_to(Tokens, '}', GrpSubTerms, InterRestTokens,
+				MTags, InterMTagsA, MTagVals, InterMTagValsA),
+	Grp =..['{}' | GrpSubTerms],
+	read_pml_terms_to(InterRestTokens, Terminator, Terms, RestTokens,
+				InterMTagsA, InterMTags, InterMTagValsA, InterMTagVals).
+
+read_pml_terms_to([T0 | Tokens], Terminator, [T0 | Terms], RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals)
+	:-
+	read_pml_terms_to(Tokens, Terminator, Terms, RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals).
+
+read_pml_eqs_to([], Terminator, [], []).
+read_pml_eqs_to([Terminator | Tokens], Terminator, [], Tokens)
 	:-!.
-read_pxml_eqs_to([T0, '=', T1 | Tokens], Terminator, 
+read_pml_eqs_to(['/','>' | Tokens], '>', [], Tokens)
+	:-!.
+read_pml_eqs_to(['<' | Tokens], '>', [], ['<' | Tokens])
+	:-!.
+read_pml_eqs_to([T0, '=', T1 | Tokens], Terminator, 
 				 [(Tag = Value) | Terms], RestTokens)
 	:-!,
 	make_lc_sym(T0, Tag),
 	read_tag_value(T1, Tokens, Value, InterTokens),
-	read_pxml_eqs_to(InterTokens, Terminator, Terms, RestTokens).
-read_pxml_eqs_to([T0 | Tokens], Terminator, [T0 | Terms], RestTokens)
+	read_pml_eqs_to(InterTokens, Terminator, Terms, RestTokens).
+read_pml_eqs_to([T0 | Tokens], Terminator, [T0 | Terms], RestTokens)
 	:-
-	read_pxml_eqs_to(Tokens, Terminator, Terms, RestTokens).
+	read_pml_eqs_to(Tokens, Terminator, Terms, RestTokens).
 
 read_tag_value('"', Tokens, Value, InterTokens)
 	:-
@@ -161,8 +219,6 @@ read_tag_value('"', Tokens, Value, InterTokens)
 read_tag_value(Value, Tokens, Value, Tokens).
 
 consume_tokens_to_q2([], Head, []) :-!, fail.
-%consume_tokens_to_q2(['"' | InterTokens], [Tok], InterTokens)
-%	:-!.
 consume_tokens_to_q2(['"' | InterTokens], ['""'], InterTokens)
 	:-!.
 consume_tokens_to_q2([Item | Tokens], [Tok], InterTokens)
@@ -178,49 +234,55 @@ consume_tokens_to_q2([Item | Tokens], [Tok], InterTokens)
 		InterTokens = [RTok | Tokens]
 	).
 
-
 consume_tokens_to_q2([Item | Tokens], [Item | Head], InterTokens)
 	:-
 	consume_tokens_to_q2(Tokens, Head, InterTokens).
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
-read_pxml_comment([], [], []).
-read_pxml_comment(['--','>' | Tokens], [], Tokens)
+read_pml_comment([], [], []).
+read_pml_comment(['--','>' | Tokens], [], Tokens)
 	:-!.
-read_pxml_comment(['!--','>' | Tokens], [], Tokens)
+read_pml_comment(['!--','>' | Tokens], [], Tokens)
 	:-!.
-read_pxml_comment(['//--','>' | Tokens], [], Tokens)
+read_pml_comment(['//--','>' | Tokens], [], Tokens)
 	:-!.
-read_pxml_comment([Token | Tokens], [Token | Features], RestTokens)
+read_pml_comment([Token | Tokens], [Token | Features], RestTokens)
 	:-
-	read_pxml_comment(Tokens, Features, RestTokens).
+	read_pml_comment(Tokens, Features, RestTokens).
 
 
-read_to_close_html([], [], _, []).
-read_to_close_html(['/','>' | Tokens], [], Tag, Tokens)
+read_to_close_html([], [], _, [],
+				MTags, MTags, MTagVals, MTagVals).
+read_to_close_html(['/','>' | Tokens], [], Tag, Tokens,
+				MTags, MTags, MTagVals, MTagVals)
 	:-!.
 read_to_close_html(['<','/',InTag0,'>','<','/',InTag1,'>' | Tokens], 
-                       [], Tag, Tokens)
+                       [], Tag, Tokens,
+				MTags, MTags, MTagVals, MTagVals)
 	:-
 	Tag=font,
 	make_lc_sym(InTag0, Tag),
 	make_lc_sym(InTag1, Tag),
 	!.
 read_to_close_html(['<','/',InTag0,'>','<','/',InTag,'>' | Tokens], 
-                       [], Tag, Tokens)
+                       [], Tag, Tokens,
+				MTags, MTags, MTagVals, MTagVals)
 	:-
 	make_lc_sym(InTag0, font),
 	member(Tag,[td,tr,table]),
 	make_lc_sym(InTag, Tag),
 	!.
 
-read_to_close_html(['<','/',InTag,'>' | Tokens], [], Tag, Tokens)
+read_to_close_html(['<','/',InTag,'>' | Tokens], [], Tag, Tokens,
+				MTags, MTags, MTagVals, MTagVals)
 	:-
 	make_lc_sym(InTag, Tag),
 	!.
+
 read_to_close_html(['<',InTag,'>' | Tokens], [], Tag, 
-					['<',ContainingTag,'>' | Tokens])
+					['<',ContainingTag,'>' | Tokens],
+				MTags, MTags, MTagVals, MTagVals)
 	:-
 	make_lc_sym(InTag, ContainingTag),
 	start_can_terminate(ContainingTag, Tag),
@@ -228,7 +290,8 @@ read_to_close_html(['<',InTag,'>' | Tokens], [], Tag,
 
 
 read_to_close_html(['<','/',InTag,'>' | Tokens], [], Tag, 
-					['<','/',ContainingTag,'>' | Tokens])
+					['<','/',ContainingTag,'>' | Tokens],
+				MTags, MTags, MTagVals, MTagVals)
 	:-
 	make_lc_sym(InTag, ContainingTag),
 	end_can_terminate(ContainingTag, Tag),
@@ -249,10 +312,14 @@ read_to_close_html(['<','/',InTag,',','>' | Tokens], [], Tag, Tokens)
 	dmember(Tag, [td,a]),
 	make_lc_sym(InTag, Tag).
 
-read_to_close_html(Tokens, [Term | SubTerms], Tag, RestTokens)
+read_to_close_html(Tokens, [Term | SubTerms], Tag, RestTokens,
+				MTags, InterMTags, MTagVals, InterMTagVals)
 	:-
-	read_pxml_term(Tokens, Term, InterTokens),
-	read_to_close_html(InterTokens, SubTerms, Tag, RestTokens).
+	read_pml_term(Tokens, Term, InterTokens,
+				MTags, InterMTagsA, MTagVals, InterMTagValsA),
+	!,
+	read_to_close_html(InterTokens, SubTerms, Tag, RestTokens,
+				InterMTagsA, InterMTags, InterMTagValsA, InterMTagVals).
 
 
 	%%------------------------------------------
@@ -352,5 +419,83 @@ start_can_terminate(ol, li).
 end_can_terminate(ul, li).
 end_can_terminate(ol, li).
 
+
+	%% assumes unique occurrences of Tag(s) in list:
+xtrctl([], _, _)
+	:-!,
+	fail.
+
+xtrctl([Tag | Tags], Tag, Tags)
+	:-!.
+
+xtrctl([OTag | Tags], Tag, [OTag | OTags])
+	:-
+	xtrctl(Tags, Tag, OTags).
+
+% -------- Tests for xtrctl:
+
+tx1 :-
+	Tags = [table, body, head],
+write(Tags),nl,
+	xtrctl(Tags, body, OTags1),
+write(OTags1),nl,
+	xtrctl(OTags1, table, OTags2),
+write(OTags2),nl.
+
+tx2 :-
+	Tags = [table, body, head],
+write(Tags),nl,
+write('Try extract ''form'':'),nl,
+	xtrctl(Tags, form, OTags1).
+
+% -------- End Tests for xtrctl
+
+
+xtrct_eqn([], _, _, _)
+	:-!,
+	fail.
+
+xtrct_eqn([Tag=Val | Eqns], Tag, Tag=Val, Eqns)
+	:-!.
+
+xtrct_eqn([OTag=OVal | Eqns], Tag, Result, [OTag=OVal | OEqns])
+	:-
+	xtrct_eqn(Eqns, Tag, Result, OEqns).
+
+
+handle_tag(Tag, Term, MTags, InterMTags, MTagVals, InterMTagVals)
+	:-
+	xtrctl(MTags, Tag, InterMTags),
+	!,
+	do_handle_eqn( MTagVals, Tag, InterMTagVals).  
+
+handle_tag(_, _, MTags, MTags, MTagVals, MTagVals).
+
+do_handle_eqn( MTagVals, Tag, InterMTagVals)
+    	:-
+	xtrct_eqn(MTagVals, Tag, Tag=InitTagVals, TmpMTagVals), 
+	!,
+	InterMTagVals = [Tag=[Term | InitTagVals] | TmpMTagVals].
+
+do_handle_eqn( MTagVals, Tag, InterMTagVals)
+    	:-
+	InterMTagVals = [Tag=[Term] | MTagVals].
+
+
+% -------- Tests for xtrct_eqn:
+
+txy1 :-
+	Eqns = [table=[tblTop,bot], body=[bod], head=[hh]],
+	xtrct_eqn(Eqns, body, Result1, OEqns1),
+write(Result1), write('  '), write(OEqns1),nl,
+	xtrct_eqn(OEqns1, table, Result2, OEqns2),
+write(Result2), write('  '), write(OEqns2),nl.
+
+txy2 :-
+	Eqns = [table=[tblTop,bot], body=[bod], head=[hh]],
+	xtrct_eqn(Eqns, form, Result1, OEqns1).
+
+% -------- End Tests for xtrct_eqn
+	
 endmod.
 

@@ -36,7 +36,7 @@ archived)
 *)
 	if [[ $(git rev-parse --is-inside-work-tree) == 'true' ]]
 	then
-		VERSION=$(git describe --tags --dirty)
+		VERSION=$(git describe --always --tags --dirty)
 	fi
 	;;
 	
