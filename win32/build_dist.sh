@@ -20,7 +20,7 @@ ALS_BUILD_SUPPORT=/usr/i686-w64-mingw32/sys-root/mingw/
 LIB=$ALS_PROLOG/core/alsp_src/library
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
-REFS=$ALS_PROLOG/docs/ref-manual
+REFS=$ALS_PROLOG/docs/_site/ref-manual
 
 if test $# -ne 1
 then

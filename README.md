@@ -39,15 +39,15 @@ Build Dependencies
 
 ### Linux
 
-Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, Libcurl, and Tcl/Tk. Packages for popular distributions:
+Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, Ruby, Libcurl, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386`
+Debian/Ubuntu: `sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib ruby ruby-dev php libcurl4-openssl-dev:i386 tk-dev:i386`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 libcurl.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install ruby ruby-dev php glibc-devel.i686 libgcc.i686 libcurl.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
 ### Mac OS X
 
-[Xcode](https://developer.apple.com/xcode/) command line tools.
+[Xcode](https://developer.apple.com/xcode/) command line tools. For version before High Sierra (10.13), a recent version of Ruby is required. [Homebrew Ruby](https://jekyllrb.com/docs/installation/macos/#homebrew) is recommended.
 
 ### Windows
 
@@ -58,3 +58,5 @@ CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install gl
 - Libcurl (mingw64-i686-curl php procps)
 - Archive (zip)
 - X11 (optional to run X11 alsdev)
+
+[Ruby](https://www.ruby-lang.org/en/) installed via [RubyInstaller](https://rubyinstaller.org) (use recommended Ruby+DevKit version). 

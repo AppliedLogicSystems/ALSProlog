@@ -1,7 +1,7 @@
 all: standard
 
 core:
-	$(MAKE) -C ../core/unix
+	$(MAKE) -C ../core/unix all docs
 	cd ../foreign_sdk/unix ; ./build.sh
 
 odbc:
