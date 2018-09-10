@@ -18,6 +18,7 @@ BIN=$ALS_PROLOG/core/unix/$ARCH
 LIB=$ALS_PROLOG/core/alsp_src/library
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
+REFS=$ALS_PROLOG/docs/ref-manual
 
 if test $# -ne 1
 then
@@ -67,10 +68,10 @@ cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
 mkdir "$DISTDIR/alshelp"
-cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
-cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
-cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
-cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
+cp -pr $REFS/$HELP/* "$DISTDIR/alshelp"
+cp -p $REFS/index.html "$DISTDIR/als_help.html"
+cp -p $REFS/alshelp.css "$DISTDIR/alshelp.css"
+cp -p $REFS/package_nav.html "$DISTDIR/package_nav.html"
 cp -p "$ALS_PROLOG/core/alsp_src/doc/alspro.1" "$DISTDIR/alspro.1"
 
 

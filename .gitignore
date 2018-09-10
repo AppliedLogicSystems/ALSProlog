@@ -29,5 +29,8 @@ unix/linux
 unix/cygwin
 win32/win32
 foreign_sdk/*/ALS_Prolog_Foreign_SDK
-build-xcode
+_site
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadatabuild-xcode
 xcuserdata/

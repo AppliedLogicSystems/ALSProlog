@@ -1,0 +1,7 @@
+# Site settings
+title: "ALS Prolog"
+url: "https://alsprolog.com"
+
+# Build settings
+markdown: kramdown
+#permalink: pretty
