@@ -1,7 +1,7 @@
 all: standard 
 
 core:
-	$(MAKE) -C ../core/win32
+	$(MAKE) -C ../core/win32 all docs
 	cd ../foreign_sdk/win32 ; ./make.bat
 
 odbc:

@@ -181,6 +181,10 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 
 #	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
 
+BUNDLE ?= bundle
+
+docs :
+	cd $(CORE)/../docs && $(BUNDLE) install && $(BUNDLE) exec jekyll build
 
 clean :
 	rm -f *.o rm *.d
