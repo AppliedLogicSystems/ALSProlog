@@ -2,6 +2,8 @@
 title: "ALS Prolog"
 url: "https://alsprolog.com"
 
+repository: "AppliedLogicSystems/ALSProlog"
+
 # Build settings
 markdown: kramdown
 theme: minima
