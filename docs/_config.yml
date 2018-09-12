@@ -4,6 +4,7 @@ url: "https://alsprolog.com"
 
 # Build settings
 markdown: kramdown
+theme: minima
 #permalink: pretty
 
 # Enable as many error-checks as possible
@@ -16,6 +17,10 @@ liquid:
 
 exclude:
   - src_help_md
+
+header_pages:
+ - about.md
+ - docs.md
 
 defaults:
   -

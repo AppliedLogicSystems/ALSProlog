@@ -7,8 +7,9 @@ ALS Prolog </H1>
 the--> GitHub organization home for ALS is located
 <a href="https://github.com/AppliedLogicSystems">here .</a>
 
-<h2><a href="user-manual">User Manual</a><h2>
-<h2><a href="ref-manual">Reference Manual</a><h2>
+<h2><a href="https://github.com/AppliedLogicSystems/ALSProlog/releases/latest">Download Latest Release</a><h2>
+
+<h2><a href="Documentation">Documentation</a><h2>
 
 <h3>&#x2606;&nbsp;&nbsp;ALS Prolog</h3>
 <div style="margin-left:3em;margin-top:-0.6em;">
