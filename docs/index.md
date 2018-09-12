@@ -9,7 +9,7 @@ the--> GitHub organization home for ALS is located
 
 <h2><a href="https://github.com/AppliedLogicSystems/ALSProlog/releases/latest">Download Latest Release</a><h2>
 
-<h2><a href="Documentation">Documentation</a><h2>
+<h2><a href="docs.html">Documentation</a><h2>
 
 <h3>&#x2606;&nbsp;&nbsp;ALS Prolog</h3>
 <div style="margin-left:3em;margin-top:-0.6em;">
