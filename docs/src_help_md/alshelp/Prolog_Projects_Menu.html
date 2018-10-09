@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Prolog Projects Menu</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">Prolog Projects Menu</h1>
+</header>
+<p><code>Prolog Projects Menu</code> <code>--</code> Manage prolog projects and settings</p>
+<h2 id="forms">FORMS</h2>
+<h2 id="description">DESCRIPTION</h2>
+<p>The menu for managing Prolog Projects (the 2nd section in the picture below) is combined with the menu controlling aspects of the alsdev prolog system. This page describes how to manage Prolog Projects. The <a href="Prolog_Menu.html">Prolog Menu</a> page describes how to control aspects of the alsdev prolog system.</p>
+<p><img src="images/prolog_menu_notes.gif" /></p>
+<p>The four Project-related buttons in the second section of the menu, as well as the bottom entry on this menu, are used for management of Prolog development projects.</p>
+<p><strong>Load Project…</strong> allows one to load an existing Prolog project into the current workspace, including asserting all appropriate Prolog clauses. Selecting Load Project… brings up a file selection focused on the extension *.ppj. When a project has been selected:</p>
+<ol type="1">
+<li>The project code is loaded into the workspace;</li>
+<li>The project specification panel appears (see below);</li>
+<li>The name of the project is shown at the bottom of the menu, below <em>Active Project:</em>.</li>
+</ol>
+<p><strong>Open Project</strong> brings up a file selection dialog (see below) that allows one to open the specification panel for an existing project <em>without</em> loading code into the workspace.</p>
+<p><strong>Close Project</strong> will close the current project specification panel, whether it was opened using Load Project or Open Project; it will also save the project specification itself, after prompting the user. However, if the panel was opened with Load Project, this will <em>NOT</em> remove any code from the workspace. For this, one should use Clear Workspace from the top section of the menu.</p>
+<p><strong>New Project</strong> will open an empty project specification panel that looks like the following two images:</p>
+<p><img src="images/new_proj.gif" /></p>
+<hr />
+<p><img src="images/new_proj_open.gif" /></p>
+<p>Type in a title for the project in the top text field, and a name for the project file in second text field. Set search directories in the upper toggle field, and select prolog files that are to be part of the project using the lower toggle field. In both cases, either type into the text field, or click the Add button to bring up a selection dialog. Use the up/down arrows to re-arrange the order in which directories are searched, and the order in which files are consulted. The (Re)Load button will load or reload the selected files. The project can be saved by using the File &gt; Save button on the File menu.</p>
+<p>The Addl button on the bottom of the panel brings up a second project-related panel which allows you to specify additional information. (Not all aspects yet implemented - cf. Issue#57).</p>
+</body>
+</html>

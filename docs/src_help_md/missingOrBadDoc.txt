@@ -1,0 +1,21 @@
+
+	[doc missing -- defined in generic/bparser.c]
+atom_length/2
+atom_concat/3
+
+	[at present, page defines: old_bufread/2, not bufread/2]
+bufread24
+
+curl123.md -- needs to be fleshed out
+
+Missing image in Prolog_Menu.md (should show alsdev popup opened window for syntax errors on consult):
+	![](err_win_jobs.gif)
+
+The Development Env. > Tools page contains the following, which needs to be handled:
+
+    Selecting **Debugger** provides access to the GUI Debugger; this will be described     in detail in [Chapter 18(_[Using,the,ALS,IDE,Debugger]_)](href = start.htm).
+
+Also, there is a Visual Tcl button that does nothing: Find out ....
+
+Also, add info about Cref; Also: when Cref is clicked, it is loaded, but there is a syntax error.
+

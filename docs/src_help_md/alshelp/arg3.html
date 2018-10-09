@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>arg/3</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">arg/3</h1>
+</header>
+<p><code>arg/3</code> <code>--</code> access the arguments of a structured term</p>
+<h2 id="forms">FORMS</h2>
+<p>arg(Nth, Structure, Argument)</p>
+<h2 id="description">DESCRIPTION</h2>
+<p>Argument will be unified with the Nth argument of Structure. Nth must be a positive integer. Structure should be a compound term whose arity is greater than or equal to Nth. When these conditions hold, Argument will be unified with the Nth argument of Structure.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- arg(2,stooges(larry,moe,curly),X).
+X=moe
+yes.</code></pre>
+<pre><code>?- arg(2,[a,b,c],X).
+X=[b,c]
+yes.</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>If Nth is not an integer greater than 0 and less than or equal to the arity of Structure, arg/3 will fail. Structure must be instantiated to a structured term.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>functor/3</code><br />
+<code>=../2</code></p></li>
+<li>[Bowen 91, 7.6 ]</li>
+<li>[Sterling 86, 9.2 ]</li>
+<li>[Bratko 86, 7.2 ]</li>
+<li><p>[Clocksin 81, 6.5 ]</p></li>
+</ul>
+</body>
+</html>

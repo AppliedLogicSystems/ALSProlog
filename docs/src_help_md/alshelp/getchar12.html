@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>get_char/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">get_char/[1,2]</h1>
+</header>
+<p><code>get_char/1</code> <code>--</code> read a character from current input stream</p>
+<p><code>get_char/2</code> <code>--</code> read character from a specific stream</p>
+<h2 id="forms">FORMS</h2>
+<p>get_char(Char)</p>
+<p>get_char(Stream_or_Alias, Char)</p>
+<h2 id="description">DESCRIPTION</h2>
+<p>get_char/1 will retrieve a character from the current input stream and unify it with Char.</p>
+<p>get_char/2 will retrieve a character from the input stream associated with Stream_or_Alias and unify it with Char.</p>
+<p>If there are no more data left in the stream to be read and if the stream has the property eof_action(eof_code), then Code will be unified with end_of_file.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- get_char(C1),get_char(C2),get_char(C3),get_char(C4).
+test
+C1=t
+C2=e
+C3=s
+C4=t</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>Stream_or_Alias is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Stream_or_Alias is neither a variable nor a stream descriptor nor an alias</p>
+<p>– – – – &gt; domain_error(stream_or_alias, Stream_or_Alias) .</p>
+<p>Stream_or_Alias is not associated with an open stream</p>
+<p>– – – – &gt; existence_error(stream, Stream_or_Alias) .</p>
+<p>Stream_or_Alias is not an input stream</p>
+<p>– – – – &gt; permission_error(input, stream, Stream_or_Alias) .</p>
+<p>Char is neither a variable nor a character</p>
+<p>– – – – &gt; type_error(character, Char) . [See notes below ]</p>
+<p>The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action(error)</p>
+<p>– – – – &gt; existence_error(past_end_of_stream, Stream_or_Alias) .</p>
+<p>The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action(error)</p>
+<p>– – – – &gt; existence_error(stream_not_ready, Stream_or_Alias) .</p>
+<h2 id="notes">NOTES</h2>
+<p>A character is simply an atom with length 1 get_code/ [1, 2 ] is used to retrieve a character code.</p>
+<p>If get_char/ [1, 2 ] is called with Char instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from char_code/2, not get_char/ [1, 2 ].</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>put_char/2</code><br />
+<code>get_code/2</code><br />
+<code>open/4</code><br />
+<code>close/1</code><br />
+<code>char_code/2</code></p></li>
+<li><p>`UserGuide(PrologI/O).</p></li>
+</ul>
+</body>
+</html>
