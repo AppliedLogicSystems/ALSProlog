@@ -1,12 +1,12 @@
-—-
+---
 title: 'flush_output/[0,1]'
 predicates:
  - 'flush_output/0' : flush current output stream
  - 'flush_output/1' : flush specific output stream
-—-
-`flush_output/0` `—` flush current output stream
+---
+`flush_output/0` `--` flush current output stream
 
-`flush_output/1` `—` flush specific output stream
+`flush_output/1` `--` flush specific output stream
 
 
 ## FORMS
@@ -52,23 +52,23 @@ Yes.
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias)
+-- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias)
 
 Stream_or_Alias is not associated with an open stream
 
-— — -- -- &gt; existence_error(stream, Stream_or_Alias)
+-- -- -- -- &gt; existence_error(stream, Stream_or_Alias)
 
 Stream_or_Alias is not an output stream
 
-— — -- -- &gt; permission_error(output, stream, Stream_or_Alias)
+-- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias)
 
 Stream_or_Alias is a valid output stream, but the flush operation could not be completed due to some other problem detected by the operating system
 
-— — -- -- &gt; system_error
+-- -- -- -- &gt; system_error
 
 
 ## SEE ALSO

@@ -1,18 +1,18 @@
-—-
+---
 title: 'consult/[1,2]'
 predicates:
  - 'consult/1' : load a Prolog file
  - 'consult/2' : load a Prolog file, with options
  - 'consultq/1' : load a Prolog file, without messages
  - 'reconsult/1' : load a Prolog file, updating database
-—-
-`consult/1` `—` load a Prolog file
+---
+`consult/1` `--` load a Prolog file
 
-`consult/2` `—` load a Prolog file, with options
+`consult/2` `--` load a Prolog file, with options
 
-`consultq/1` `—` load a Prolog file, without messages
+`consultq/1` `--` load a Prolog file, without messages
 
-`reconsult/1` `—` load a Prolog file, updating database
+`reconsult/1` `--` load a Prolog file, updating database
 
 
 ## FORMS
@@ -158,7 +158,7 @@ symbol('3').
 
 reconsult/1 is not compatible with the DEC-10 notion of reconsult. DEC-10 reconsult would, upon seeing a procedure not already seen in a file, wipe out or abolish all clauses for that predicate before adding the new clause in question.
 
-The present semantics of reconsult/1 are that all clauses which were previously defined in a file are wiped out with new clauses replacing(positionally in the procedure) any old clauses. Thus, a procedure that is defined by several files will not be entirely wiped out when reconsult/1 is invoked on just one of the files — only those clauses defined by the one file are wiped out and subsequently replaced.
+The present semantics of reconsult/1 are that all clauses which were previously defined in a file are wiped out with new clauses replacing(positionally in the procedure) any old clauses. Thus, a procedure that is defined by several files will not be entirely wiped out when reconsult/1 is invoked on just one of the files -- only those clauses defined by the one file are wiped out and subsequently replaced.
 
 The file
 user
@@ -171,6 +171,6 @@ is consulted or reconsulted, the input clauses will be taken from the user ' s t
 
 ## SEE ALSO
 
-- [Bratko 86, 6.5]
-- [Clocksin 81, 6.1]
+- [Bratko 86, 6.5 ]
+- [Clocksin 81, 6.1 ]
 

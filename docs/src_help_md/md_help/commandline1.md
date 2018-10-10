@@ -1,9 +1,9 @@
-—-
+---
 title: 'command_line/1'
 predicates:
  - 'command_line/1' : provides access to start-up command line
-—-
-`command_line/1` `—` provides access to start-up command line
+---
+`command_line/1` `--` provides access to start-up command line
 
 
 ## FORMS

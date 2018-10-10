@@ -1,4 +1,4 @@
-—-
+---
 title: 'printf/[1,2,3,4]'
 predicates:
  - 'printf/1' : print out a string to the current output
@@ -6,16 +6,16 @@ predicates:
  - 'printf/3' : print out a string with a format and arguments
  - 'printf_opt/3' : print out string with format, arguments, options
  - 'printf/4' : print out string with format, arguments, options
-—-
-`printf/1` `—` print out a string to the current output
+---
+`printf/1` `--` print out a string to the current output
 
-`printf/2` `—` print out a string with arguments
+`printf/2` `--` print out a string with arguments
 
-`printf/3` `—` print out a string with a format and arguments
+`printf/3` `--` print out a string with a format and arguments
 
-`printf_opt/3` `—` print out string with format, arguments, options
+`printf_opt/3` `--` print out string with format, arguments, options
 
-`printf/4` `—` print out string with format, arguments, options
+`printf/4` `--` print out string with format, arguments, options
 
 
 ## FORMS
@@ -35,21 +35,21 @@ printf(Stream_or_Alias, Format, ArgList, WriteOptions)
 
 printf/2 takes a format string and a list of arguments to include in the format string. printf/1 is the same as printf/2 except no argument list is given. The following is a list of the special formatting possible within the format string :
 
-\n — prints a newline(same as nl/0)
+\n -- prints a newline(same as nl/0)
 
-\t — prints a tab character
+\t -- prints a tab character
 
-\\ — prints a backslash
+\\ -- prints a backslash
 
-\% — prints a percent sign
+\% -- prints a percent sign
 
-%c — prints the corresponding Prolog character(atom) in the argument list
+%c -- prints the corresponding Prolog character(atom) in the argument list
 
-%d — prints the corresponding decimal number in the argument list
+%d -- prints the corresponding decimal number in the argument list
 
-%s — prints the corresponding Prolog string in the argument list
+%s -- prints the corresponding Prolog string in the argument list
 
-%t — prints the corresponding Prolog term in the argument list(same as write/1)
+%t -- prints the corresponding Prolog term in the argument list(same as write/1)
 
 All other characters are printed as they appear in the format string.
 

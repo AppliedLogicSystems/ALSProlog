@@ -1,9 +1,9 @@
-—-
+---
 title: 'mangle/3'
 predicates:
  - 'mangle/3' : destructively modify a structure
-—-
-`mangle/3` `—` destructively modify a structure
+---
+`mangle/3` `--` destructively modify a structure
 
 
 ## FORMS

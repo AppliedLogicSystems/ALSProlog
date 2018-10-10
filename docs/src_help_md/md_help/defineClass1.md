@@ -1,9 +1,9 @@
-—-
+---
 title: 'defineClass/1'
 predicates:
  - 'defineClass/1' : specify an ObjectPro class
-—-
-`defineClass/1` `—` specify an ObjectPro class
+---
+`defineClass/1` `--` specify an ObjectPro class
 
 
 ## FORMS
@@ -138,7 +138,7 @@ addl_slots = [theStack, depth ]
 
 instanceOf = stacker,
 
-values = [theStack = [ ], depth = 0]
+values = [theStack = [ ], depth = 0 ]
 
 ]) .
 

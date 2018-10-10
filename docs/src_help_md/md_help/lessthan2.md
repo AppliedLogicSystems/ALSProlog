@@ -1,4 +1,4 @@
-—-
+---
 title: '</2'
 predicates:
  - '</2' : The left expression is less than the right expression
@@ -7,18 +7,18 @@ predicates:
  - '=\=/2' : The left and right expressions are not equal
  - '=</2' : The left expression is less than or equal to the right
  - '>=/2' : The left expression is greater than or equal to the right
-—-
-`</2` `—` The left expression is less than the right expression
+---
+`</2` `--` The left expression is less than the right expression
 
-`>/2` `—` The left expression is greater than the right expression
+`>/2` `--` The left expression is greater than the right expression
 
-`=:=/2` `—` The left and right expressions are equal
+`=:=/2` `--` The left and right expressions are equal
 
-`=\=/2` `—` The left and right expressions are not equal
+`=\=/2` `--` The left and right expressions are not equal
 
-`=</2` `—` The left expression is less than or equal to the right
+`=</2` `--` The left expression is less than or equal to the right
 
-`>=/2` `—` The left expression is greater than or equal to the right
+`>=/2` `--` The left expression is greater than or equal to the right
 
 
 ## FORMS

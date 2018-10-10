@@ -1,9 +1,9 @@
-—-
+---
 title: 'Preferences Dialog'
 predicates:
  - 'Preferences Dialog' : Set various IDE preferences
-—-
-`Preferences Dialog` `—` Set various IDE preferences
+---
+`Preferences Dialog` `--` Set various IDE preferences
 
 
 ## FORMS

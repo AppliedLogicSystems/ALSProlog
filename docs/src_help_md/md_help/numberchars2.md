@@ -1,12 +1,12 @@
-—-
+---
 title: 'number_chars/2'
 predicates:
  - 'number_chars/2' : convert between a number and the list of characters which represent the number
  - 'number_codes/2' : convert between a number and the list of character codes which represent the number
-—-
-`number_chars/2` `—` convert between a number and the list of characters which represent the number
+---
+`number_chars/2` `--` convert between a number and the list of characters which represent the number
 
-`number_codes/2` `—` convert between a number and the list of character codes which represent the number
+`number_codes/2` `--` convert between a number and the list of character codes which represent the number
 
 
 ## FORMS
@@ -70,27 +70,27 @@ Error:Syntaxerror.
 
 Number and CharList are variables(number_chars/3)
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Number and CodeList are variables(number_codes/3)
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Number is neither a number nor a variable
 
-— — -- -- &gt; type_error(number, Number)
+-- -- -- -- &gt; type_error(number, Number)
 
 CharList is neither a variable nor a list of characters
 
-— — -- -- &gt; domain_error(character_list, List)
+-- -- -- -- &gt; domain_error(character_list, List)
 
 CodeList is neither a variable nor a list of character codes
 
-— — -- -- &gt; domain_error(character_code_list, List)
+-- -- -- -- &gt; domain_error(character_code_list, List)
 
 CharList(or CodeList) is not parsable as a number
 
-— — -- -- &gt; syntax_error
+-- -- -- -- &gt; syntax_error
 
 
 ## SEE ALSO

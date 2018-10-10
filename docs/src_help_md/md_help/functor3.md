@@ -1,9 +1,9 @@
-—-
+---
 title: 'functor/3'
 predicates:
  - 'functor/3' : builds structures and retrieves information about them
-—-
-`functor/3` `—` builds structures and retrieves information about them
+---
+`functor/3` `--` builds structures and retrieves information about them
 
 
 ## FORMS
@@ -41,7 +41,7 @@ yes.
 - `arg/3`  
 `mangle/3`
 
-- [Bowen 91, 7.6]
-- [Clocksin 81, 6.5]
-- [Bratko 86, 7.2]
-- [Sterling 86, 9.2]. 
+- [Bowen 91, 7.6 ]
+- [Clocksin 81, 6.5 ]
+- [Bratko 86, 7.2 ]
+- [Sterling 86, 9.2 ]. 

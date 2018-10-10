@@ -1,12 +1,12 @@
-—-
+---
 title: 'peek_char/[1,2]'
 predicates:
  - 'peek_char/1' : obtain char from stream
  - 'peek_char/2' : obtain char from stream
-—-
-`peek_char/1` `—` obtain char from stream
+---
+`peek_char/1` `--` obtain char from stream
 
-`peek_char/2` `—` obtain char from stream
+`peek_char/2` `--` obtain char from stream
 
 
 ## FORMS

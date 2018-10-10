@@ -1,18 +1,18 @@
-—-
+---
 title: 'datetime/2(sys)'
 predicates:
  - 'datetime/2' : gets the local system date and time
  - 'time/1' : gets the local system time
  - 'date/1' : gets the local date
  - 'gm_datetime/2' : gets the Greenwich mean time(UTC)
-—-
-`datetime/2` `—` gets the local system date and time
+---
+`datetime/2` `--` gets the local system date and time
 
-`time/1` `—` gets the local system time
+`time/1` `--` gets the local system time
 
-`date/1` `—` gets the local date
+`date/1` `--` gets the local date
 
-`gm_datetime/2` `—` gets the Greenwich mean time(UTC)
+`gm_datetime/2` `--` gets the Greenwich mean time(UTC)
 
 
 ## FORMS

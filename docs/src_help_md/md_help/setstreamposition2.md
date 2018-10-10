@@ -1,9 +1,9 @@
-—-
+---
 title: 'set_stream_position/2'
 predicates:
  - 'set_stream_position/2' : seek to a new position in a stream
-—-
-`set_stream_position/2` `—` seek to a new position in a stream
+---
+`set_stream_position/2` `--` seek to a new position in a stream
 
 
 ## FORMS
@@ -82,29 +82,29 @@ C2=f
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Position is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt;
+-- -- -- -- &gt;
 
 domain_error(stream_position, Position) .
 
 Position is neither a variable nor a stream position
 
-— — -- -- &gt; domain_error(stream_position, Position) .
+-- -- -- -- &gt; domain_error(stream_position, Position) .
 
 Stream_or_Alias is not associated with an open stream
 
-— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias has stream property reposition(false)
 
-— — -- -- &gt; permission_error(reposition, stream, Stream_or_Alias) .
+-- -- -- -- &gt; permission_error(reposition, stream, Stream_or_Alias) .
 
 
 ## NOTES

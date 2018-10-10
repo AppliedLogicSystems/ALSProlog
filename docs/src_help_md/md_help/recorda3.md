@@ -1,15 +1,15 @@
-—-
+---
 title: 'recorda/3'
 predicates:
  - 'recorda/3' : records item in internal term database
  - 'recordz/3' : records item in internal term database
  - 'recorded/3' : retrieves item from internal term database
-—-
-`recorda/3` `—` records item in internal term database
+---
+`recorda/3` `--` records item in internal term database
 
-`recordz/3` `—` records item in internal term database
+`recordz/3` `--` records item in internal term database
 
-`recorded/3` `—` retrieves item from internal term database
+`recorded/3` `--` retrieves item from internal term database
 
 
 ## FORMS

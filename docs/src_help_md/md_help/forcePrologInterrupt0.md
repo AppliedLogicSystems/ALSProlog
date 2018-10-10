@@ -1,15 +1,15 @@
-—-
+---
 title: 'forcePrologInterrupt/0'
 predicates:
  - 'forcePrologInterrupt/0' : force interrupt on next call
  - 'callWithDelayedInterrupt/1' : call goal, setting delayed interrupt
  - 'callWithDelayedInterrupt/2' : call goal, setting delayed interrupt
-—-
-`forcePrologInterrupt/0` `—` force interrupt on next call
+---
+`forcePrologInterrupt/0` `--` force interrupt on next call
 
-`callWithDelayedInterrupt/1` `—` call goal, setting delayed interrupt
+`callWithDelayedInterrupt/1` `--` call goal, setting delayed interrupt
 
-`callWithDelayedInterrupt/2` `—` call goal, setting delayed interrupt
+`callWithDelayedInterrupt/2` `--` call goal, setting delayed interrupt
 
 
 ## FORMS

@@ -1,9 +1,9 @@
-—-
+---
 title: 'name/2'
 predicates:
  - 'name/2' : converts strings to atoms and atoms to strings
-—-
-`name/2` `—` converts strings to atoms and atoms to strings
+---
+`name/2` `--` converts strings to atoms and atoms to strings
 
 
 ## FORMS
@@ -33,7 +33,7 @@ yes.
 
 ? - name(2018, X) .
 
-X = [50, 48, 49, 56]
+X = [50, 48, 49, 56 ]
 
 yes.
 
@@ -57,10 +57,14 @@ We recommend the use of atom_chars/2 and number_chars/2 over name/2.
 `number_codes/2`  
 `term_chars/2`  
 `term_codes/2`
-
-- `User Guide(Syntax of ALSProlog)`  
-- [Bowen 91, 7.8]  
-- [Clocksin 81, 6.5]  
-- [Bratko 86, 6.4]  
-- [Sterling 86, 12.1].
+- `UserGuide(SyntaxofALSProlog)`  
+``  
+`[Bowen91`  
+`7.8]`  
+`[Clocksin81`  
+`6.5]`  
+`[Bratko86`  
+`6.4]`  
+`[Sterling86`  
+`12.1].
 

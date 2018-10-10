@@ -1,9 +1,9 @@
-—-
+---
 title: 'ALSDev Edit Menu'
 predicates:
  - 'Edit Menu' : Select actions while editing a file
-—-
-`Edit Menu` `—` Select actions while editing a file
+---
+`Edit Menu` `--` Select actions while editing a file
 
 
 ## FORMS

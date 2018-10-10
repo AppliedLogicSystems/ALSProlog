@@ -1,12 +1,12 @@
-—-
+---
 title: 'put_string/[1,2]'
 predicates:
  - 'put_string/1' : output a string to the current output stream
  - 'put_string/2' : output a string to a specific output stream
-—-
-`put_string/1` `—` output a string to the current output stream
+---
+`put_string/1` `--` output a string to the current output stream
 
-`put_string/2` `—` output a string to a specific output stream
+`put_string/2` `--` output a string to a specific output stream
 
 
 ## FORMS
@@ -34,25 +34,25 @@ icecream
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+-- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
-— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an output stream
 
-— — -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
+-- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
 
 String is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 String is neither a variable nor a string
 
-— — -- -- &gt; type_error(string, String) .
+-- -- -- -- &gt; type_error(string, String) .
 

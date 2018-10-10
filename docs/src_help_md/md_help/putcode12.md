@@ -1,12 +1,12 @@
-—-
+---
 title: 'put_code/[1,2]'
 predicates:
  - 'put_code/1' : output a character code to the current output stream
  - 'put_code/2' : output a character code to a specific output stream
-—-
-`put_code/1` `—` output a character code to the current output stream
+---
+`put_code/1` `--` output a character code to the current output stream
 
-`put_code/2` `—` output a character code to a specific output stream
+`put_code/2` `--` output a character code to a specific output stream
 
 
 ## FORMS
@@ -37,27 +37,27 @@ yes.
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+-- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
-— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an output stream
 
-— — -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
+-- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
 
 Code is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Code is neither a variable nor a character
 
-— — -- -- &gt; type_error(character, Code) .
+-- -- -- -- &gt; type_error(character, Code) .
 
 
 ## SEE ALSO

@@ -1,9 +1,9 @@
-—-
+---
 title: 'fail/0'
 predicates:
  - 'fail/0' : always fails
-—-
-`fail/0` `—` always fails
+---
+`fail/0` `--` always fails
 
 
 ## FORMS
@@ -28,5 +28,5 @@ no.
 
 - `true/0`
 
-- [Bowen 91, 7.1]
-- [Clocksin 81, 6.2]. 
+- [Bowen 91, 7.1 ]
+- [Clocksin 81, 6.2 ]. 

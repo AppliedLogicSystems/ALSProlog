@@ -1,9 +1,9 @@
-—-
+---
 title: 'rexec/2'
 predicates:
  - 'rexec/2' : Execute an operating system command, possibly remotely.
-—-
-`rexec/2` `—` Execute an operating system command, possibly remotely.
+---
+`rexec/2` `--` Execute an operating system command, possibly remotely.
 
 
 ## FORMS
@@ -15,17 +15,17 @@ rexec(Command, Options)
 
 rexec/2 is an interface to the rexec system call which may be used to run commands on remote machines. When remote execution is not desired, fork and exec(Unix system calls) are used to run the command on the local machine. Command should be an atom representing the command to run. Options is a list containing zero or more of the following forms :
 
-host(HostName) — execute the command on the machine named by HostName.
+host(HostName) -- execute the command on the machine named by HostName.
 
-username(User) — run the command as user User.
+username(User) -- run the command as user User.
 
-password(Password) — provides the password for authentication purposes. If no password is supplied, you will be prompted for one(by the rexec daemon) .
+password(Password) -- provides the password for authentication purposes. If no password is supplied, you will be prompted for one(by the rexec daemon) .
 
-rstream(Stream, OpenOpts) — designates the input stream to read the output of the command from. This stream will be connected to the standard output of the command. Stream will be bound to a stream descriptor. OpenOpts is a list containing options suitable for a call to open/4.
+rstream(Stream, OpenOpts) -- designates the input stream to read the output of the command from. This stream will be connected to the standard output of the command. Stream will be bound to a stream descriptor. OpenOpts is a list containing options suitable for a call to open/4.
 
-wstream(Stream, OpenOpts) — designates the output stream to write to. This output stream will be connected to standard input of the command.
+wstream(Stream, OpenOpts) -- designates the output stream to write to. This output stream will be connected to standard input of the command.
 
-estream(Stream, OpenOpts) — designates the input stream for use in obtaining error messages from the command. This stream will be connected to standard error for the command.
+estream(Stream, OpenOpts) -- designates the input stream for use in obtaining error messages from the command. This stream will be connected to standard error for the command.
 
 If any of host, username, or password are specified, rexec/2 will attempt to contact the rexec daemon to remotely run the command on the specified machine. The remote execution daemon, rexecd, requires authentication. This means that either a username and password must be supplied in the program(with the username/1 and password/1 forms), interactively, or via the .netrc file. Not all remote execution daemons support authentication via the .netrc file. See your local system documentation for information about the .netrc file.
 

@@ -1,12 +1,12 @@
-—-
+---
 title: 'sort/2'
 predicates:
  - 'sort/2' : sorts a list of terms
  - 'keysort/2' : sorts a list of Key-Data pairs
-—-
-`sort/2` `—` sorts a list of terms
+---
+`sort/2` `--` sorts a list of terms
 
-`keysort/2` `—` sorts a list of Key-Data pairs
+`keysort/2` `--` sorts a list of Key-Data pairs
 
 
 ## FORMS
@@ -56,4 +56,5 @@ yes.
 ## SEE ALSO
 
 - `compare/3`  
-- [Bowen 91, 7.4]
+`[Bowen91`  
+`7.4]

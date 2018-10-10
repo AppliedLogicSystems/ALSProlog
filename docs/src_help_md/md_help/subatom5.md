@@ -1,9 +1,9 @@
-—-
+---
 title: 'sub_atom/5'
 predicates:
  - 'sub_atom/5' : dissect an atom
-—-
-`sub_atom/5` `—` dissect an atom
+---
+`sub_atom/5` `--` dissect an atom
 
 
 ## FORMS
@@ -59,23 +59,23 @@ no.
 
 Atom is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Atom is neither a variable nor an atom
 
-— — -- -- &gt; type_error(atom, Atom)
+-- -- -- -- &gt; type_error(atom, Atom)
 
 SubAtom is neither a variable nor an atom
 
-— — -- -- &gt; type_error(atom, SubAtom)
+-- -- -- -- &gt; type_error(atom, SubAtom)
 
 Start is neither a variable nor an integer
 
-— — -- -- &gt; type_error(integer, Start)
+-- -- -- -- &gt; type_error(integer, Start)
 
 Length is neither a variable nor an integer
 
-— — -- -- &gt; type_error(integer, Length)
+-- -- -- -- &gt; type_error(integer, Length)
 
 
 ## SEE ALSO

@@ -1,4 +1,4 @@
-—-
+---
 title: 'atom/1'
 predicates:
  - 'atom/1' : the term is an atom
@@ -6,16 +6,16 @@ predicates:
  - 'float/1' : the term is a floating point number
  - 'integer/1' : the term is an integer
  - 'number/1' : the term is an integer or a floating point
-—-
-`atom/1` `—` the term is an atom
+---
+`atom/1` `--` the term is an atom
 
-`atomic/1` `—` the term is an atom or a number
+`atomic/1` `--` the term is an atom or a number
 
-`float/1` `—` the term is a floating point number
+`float/1` `--` the term is a floating point number
 
-`integer/1` `—` the term is an integer
+`integer/1` `--` the term is an integer
 
-`number/1` `—` the term is an integer or a floating point
+`number/1` `--` the term is an integer or a floating point
 
 
 ## FORMS
@@ -60,7 +60,7 @@ no.
 
 - `ar/1`  
 `nonvar/1`
-- [Bowen 91, 7.6]
-- [Sterling 86, 9.1]
-- [Bratko 86, 7.1]
-- [Clocksin 81, 6.3]. 
+- [Bowen 91, 7.6 ]
+- [Sterling 86, 9.1 ]
+- [Bratko 86, 7.1 ]
+- [Clocksin 81, 6.3 ]. 

@@ -1,12 +1,12 @@
-—-
+---
 title: 'get_code/[1,2]'
 predicates:
  - 'get_code/1' : read a character code from current input stream
  - 'get_code/2' : read character code from a specific stream
-—-
-`get_code/1` `—` read a character code from current input stream
+---
+`get_code/1` `--` read a character code from current input stream
 
-`get_code/2` `—` read character code from a specific stream
+`get_code/2` `--` read character code from a specific stream
 
 
 ## FORMS
@@ -40,31 +40,31 @@ C4=116
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+-- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
-— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an input stream
 
-— — -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
+-- -- -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
 
 Code is neither a variable nor a character code
 
-— — -- -- &gt; type_error(integer, Code) .
+-- -- -- -- &gt; type_error(integer, Code) .
 
 The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action(error)
 
-— — -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
 
 The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action(error)
 
-— — -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
+-- -- -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
 
 
 ## NOTES

@@ -1,12 +1,12 @@
-—-
+---
 title: 'atom_chars/2'
 predicates:
  - 'atom_chars/2' : convert between atoms and the list of characters representing the atom
  - 'atom_codes/2' : convert between atoms and the list of character codes representing the atom
-—-
-`atom_chars/2` `—` convert between atoms and the list of characters representing the atom
+---
+`atom_chars/2` `--` convert between atoms and the list of characters representing the atom
 
-`atom_codes/2` `—` convert between atoms and the list of character codes representing the atom
+`atom_codes/2` `--` convert between atoms and the list of character codes representing the atom
 
 
 ## FORMS
@@ -55,31 +55,31 @@ yes.
 
 Atom and CharList are variables(atom_chars/2)
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Atom and CodeList are variables(atom_codes/2)
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Atom is neither a variable nor an atom
 
-— — -- -- &gt; type_error(atom, Atom) .
+-- -- -- -- &gt; type_error(atom, Atom) .
 
 CharList is neither a variable nor a list nor a partial list
 
-— — -- -- &gt; type_error(list, CharList) .
+-- -- -- -- &gt; type_error(list, CharList) .
 
 CodeList is neither a variable nor a list nor a partial list
 
-— — -- -- &gt; type_error(list, CodeList) .
+-- -- -- -- &gt; type_error(list, CodeList) .
 
 CharList is a list but there is a sublist L of CharList whose first element is neither a variable nor a character
 
-— — -- -- &gt; domain_error(character_list, L) .
+-- -- -- -- &gt; domain_error(character_list, L) .
 
 CodeList is a list but there is a sublist L of CodeList whose first element is neither a variable nor a character
 
-— — -- -- &gt; domain_error(character_code_list, L) .
+-- -- -- -- &gt; domain_error(character_code_list, L) .
 
 
 ## SEE ALSO

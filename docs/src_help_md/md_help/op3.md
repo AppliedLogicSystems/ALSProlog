@@ -1,9 +1,9 @@
-—-
+---
 title: 'op/3'
 predicates:
  - 'op/3' : define operator associativity and precedence
-—-
-`op/3` `—` define operator associativity and precedence
+---
+`op/3` `--` define operator associativity and precedence
 
 
 ## FORMS
@@ -27,14 +27,14 @@ Prolog Operator Types.
 
 
 Indicator|Interpretation**|
-|——------|---------------|
-| xfy | infix — right associative | 
-| yfx | infix — left associative | 
-| xfx | infix — non-multiple | 
-| fy | prefix — multiple | 
-| fx | prefix — non-multiple | 
-| yf | postfix — multiple | 
-| xf | postfix — non-multiple | 
+|----------|---------------|
+| xfy | infix -- right associative | 
+| yfx | infix -- left associative | 
+| xfx | infix -- non-multiple | 
+| fy | prefix -- multiple | 
+| fx | prefix -- non-multiple | 
+| yf | postfix -- multiple | 
+| xf | postfix -- non-multiple | 
 
 
 If Precedence is uninstantiated, but Associativity and Atom correspond to an existing operator, Precedence will be unified with the previously declared precedence of the operator. The default operator precedences and associativities can be found in
@@ -53,10 +53,10 @@ A number of convenience predicates are declared as prefix operators(fx) of prece
 
 
 Operator(s)|Associativity|Precedence**|
-|——-----------|--------------|-----------|
+|---------------|--------------|-----------|
 | :- | fx and xfx | 1200 | 
 | ? - | fx | 1200 | 
-| — &gt; | xfx | 1200 | 
+| -- &gt; | xfx | 1200 | 
 | ; | xfy | 1100 | 
 | - &gt; | yfx | 1050 | 
 |, | xfy | 1000 | 
@@ -100,7 +100,7 @@ yes.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.9]
-- [Sterling 86, 8.1]
-- [Bratko 86, 3.3]
-- [Clocksin 81, 5.5]. 
+- [Bowen 91, 7.9 ]
+- [Sterling 86, 8.1 ]
+- [Bratko 86, 3.3 ]
+- [Clocksin 81, 5.5 ]. 

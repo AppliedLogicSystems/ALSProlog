@@ -1,9 +1,9 @@
-—-
+---
 title: 'skip/1'
 predicates:
  - 'skip/1' : discard all input characters until specified character
-—-
-`skip/1` `—` discard all input characters until specified character
+---
+`skip/1` `--` discard all input characters until specified character
 
 
 ## FORMS
@@ -28,4 +28,4 @@ yes.
 
 ## SEE ALSO
 
-- [Clocksin 81, 6.9]. 
+- [Clocksin 81, 6.9 ]. 

@@ -1,9 +1,9 @@
-—-
+---
 title: '->/2(arrow)'
 predicates:
  - '->/2' : if-then, and if-then-else
-—-
-`->/2` `—` if-then, and if-then-else
+---
+`->/2` `--` if-then, and if-then-else
 
 
 ## FORMS
@@ -63,7 +63,7 @@ yes.
 - `!/0`  
 `not/1`
 
-- [Bowen 91, 7.1]
-- [Sterling 86, 11]
-- [Bratko 86, 5.1]
-- [Clocksin 81, 4.2]. 
+- [Bowen 91, 7.1 ]
+- [Sterling 86, 11 ]
+- [Bratko 86, 5.1 ]
+- [Clocksin 81, 4.2 ]. 

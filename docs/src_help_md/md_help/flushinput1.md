@@ -1,9 +1,9 @@
-—-
+---
 title: 'flush_input/1'
 predicates:
  - 'flush_input/1' : discard buffer contents of stream
-—-
-`flush_input/1` `—` discard buffer contents of stream
+---
+`flush_input/1` `--` discard buffer contents of stream
 
 
 ## FORMS
@@ -20,15 +20,15 @@ flush_input/1 will cause the buffer contents associated with the input stream St
 
 Stream_or_Alias is a variable
 
-— — -- -- &gt; instantiation_error.
+-- -- -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
-— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias)
+-- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias)
 
 Stream_or_Alias is not an input stream
 
-— — -- -- &gt; permission_error(input, stream, Stream_or_Alias)
+-- -- -- -- &gt; permission_error(input, stream, Stream_or_Alias)
 
 
 ## NOTES

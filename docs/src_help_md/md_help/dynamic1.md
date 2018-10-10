@@ -1,9 +1,9 @@
-—-
+---
 title: 'dynamic/1'
 predicates:
  - 'dynamic/1' : declare a procedure to be dynamic
-—-
-`dynamic/1` `—` declare a procedure to be dynamic
+---
+`dynamic/1` `--` declare a procedure to be dynamic
 
 
 ## FORMS

@@ -1,9 +1,9 @@
-—-
+---
 title: 'compare/3'
 predicates:
  - 'compare/3' : compares two terms in the standard order
-—-
-`compare/3` `—` compares two terms in the standard order
+---
+`compare/3` `--` compares two terms in the standard order
 
 
 ## FORMS
@@ -109,4 +109,4 @@ in the standard order, because the second structure has a greater arity than the
 `@</2`  
 `sort/2`
 
-- [Bowen 91, 7.4]. 
+- [Bowen 91, 7.4 ]. 

@@ -1,9 +1,9 @@
-—-
+---
 title: 'save_image/2'
 predicates:
  - 'save_image/2' : package an application
-—-
-`save_image/2` `—` package an application
+---
+`save_image/2` `--` package an application
 
 
 ## FORMS
@@ -17,13 +17,13 @@ save_image/2 is called to package up the Prolog ' s code areas, symbol table, an
 
 NewImage should be bound to an atom which represents the pathname to the new image to be created. Options is a list of options which control the disposition and startup characteristics for the new image. The forms which may be on an options list to save_image/2 are :
 
-start_goal(SGoal) — SGoal is a goal which is accessible from the user module. This goal is run in place of the current starting goal(usually the Prolog shell) when the application starts up. If the start_goal(SGoal) form is not specified in the options list, then the current starting goal is retained as the starting goal for the new image.
+start_goal(SGoal) -- SGoal is a goal which is accessible from the user module. This goal is run in place of the current starting goal(usually the Prolog shell) when the application starts up. If the start_goal(SGoal) form is not specified in the options list, then the current starting goal is retained as the starting goal for the new image.
 
-init_goals(IGoal) — IGoal is either a single goal or a conjunction of goals to be run prior to the starting goal(see above) . IGoal will be executed after the initialization goals added by previous packages including the ALS Prolog system itself. This form provides a mechanism for performing initializations which the present environment requires and would be required should any packagesbe built upon the newly saved image.
+init_goals(IGoal) -- IGoal is either a single goal or a conjunction of goals to be run prior to the starting goal(see above) . IGoal will be executed after the initialization goals added by previous packages including the ALS Prolog system itself. This form provides a mechanism for performing initializations which the present environment requires and would be required should any packagesbe built upon the newly saved image.
 
-libload(Bool) — Bool is either true or false. If true, the Prolog library is loaded as part of the package. This is necessary since the Prolog library is demand loaded and may not be part of the development environment when the image is saved. If false, the Prolog library is not loaded as part of the package. Once created, however, the library may still be(demand) loaded by the new image, provided the library files are still accessible to the new image. In general, applications which require the Prolog library and will leave the machine on which the development environment exists should specify Bool as true. Applications which may need the library but will be run on the same machine as the development environment can specify Bool as false if it is necessary to keep the space requirements for the new image as small as possible.
+libload(Bool) -- Bool is either true or false. If true, the Prolog library is loaded as part of the package. This is necessary since the Prolog library is demand loaded and may not be part of the development environment when the image is saved. If false, the Prolog library is not loaded as part of the package. Once created, however, the library may still be(demand) loaded by the new image, provided the library files are still accessible to the new image. In general, applications which require the Prolog library and will leave the machine on which the development environment exists should specify Bool as true. Applications which may need the library but will be run on the same machine as the development environment can specify Bool as false if it is necessary to keep the space requirements for the new image as small as possible.
 
-select_lib(FilesList) — FilesList is a list library file names from the Prolog library. Each of the listed library files is loaded as part of the package.
+select_lib(FilesList) -- FilesList is a list library file names from the Prolog library. Each of the listed library files is loaded as part of the package.
 
 The process of creating a new image consists of the following steps :
 

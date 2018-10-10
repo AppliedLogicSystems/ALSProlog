@@ -1,9 +1,9 @@
-—-
+---
 title: 'getenv/2'
 predicates:
  - 'getenv/2' : gets the value of the given os environment variable
-—-
-`getenv/2` `—` gets the value of the given os environment variable
+---
+`getenv/2` `--` gets the value of the given os environment variable
 
 
 ## FORMS
