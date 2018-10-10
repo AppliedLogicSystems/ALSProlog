@@ -1,12 +1,12 @@
----
+—-
 title: 'get_char/[1,2]'
 predicates:
  - 'get_char/1' : read a character from current input stream
  - 'get_char/2' : read character from a specific stream
----
-`get_char/1` `--` read a character from current input stream
+—-
+`get_char/1` `—` read a character from current input stream
 
-`get_char/2` `--` read character from a specific stream
+`get_char/2` `—` read character from a specific stream
 
 
 ## FORMS
@@ -40,38 +40,38 @@ C4=t
 
 Stream_or_Alias is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an input stream
 
--- -- -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
+— — -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
 
 Char is neither a variable nor a character
 
--- -- -- -- &gt; type_error(character, Char) . [See notes below ]
+— — -- -- &gt; type_error(character, Char) . [See notes below ]
 
 The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action(error)
 
--- -- -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
 
 The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action(error)
 
--- -- -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
 
 
 ## NOTES
 
-A character is simply an atom with length 1 get_code/ [1, 2 ] is used to retrieve a character code.
+A character is simply an atom with length 1 get_code/ [1, 2] is used to retrieve a character code.
 
-If get_char/ [1, 2 ] is called with Char instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from char_code/2, not get_char/ [1, 2 ].
+If get_char/ [1, 2] is called with Char instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from char_code/2, not get_char/ [1, 2].
 
 
 ## SEE ALSO

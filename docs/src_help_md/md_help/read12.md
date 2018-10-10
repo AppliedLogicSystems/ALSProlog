@@ -1,18 +1,18 @@
----
+—-
 title: 'read/[1,2]'
 predicates:
  - 'read/1' : read a term from the current input stream
  - 'read/2' : read a term from specified stream
  - 'read_term/2' : read term from current input with options
  - 'read_term/3' : read term from specified stream with options
----
-`read/1` `--` read a term from the current input stream
+—-
+`read/1` `—` read a term from the current input stream
 
-`read/2` `--` read a term from specified stream
+`read/2` `—` read a term from specified stream
 
-`read_term/2` `--` read term from current input with options
+`read_term/2` `—` read term from current input with options
 
-`read_term/3` `--` read term from specified stream with options
+`read_term/3` `—` read term from specified stream with options
 
 
 ## FORMS
@@ -44,21 +44,21 @@ read_term/2 and read_term/3 take the parameter Options which is a list of option
 The following options supported by ALS Prolog are options specified by the March ' 93 ISO Prolog Standard..
 
 li([],
-    [   [ariables,(,Vars,),--,After,reading,a,term,,,Vars,shall,be,a,list,of,
+    [   [ariables,(,Vars,),—,After,reading,a,term,,,Vars,shall,be,a,list,of,
             the,variables,in,the,term,read,,,in,left-to-right,traversal,
             order.],
         p([],[])]) li([],
-    [   [ariable_names,(,VN_list,),--,After,reading,a,term,,,VN_list,will,be,
+    [   [ariable_names,(,VN_list,),—,After,reading,a,term,,,VN_list,will,be,
             unified,with,a,list,of,elements,of,the,form,V,=,A,where,V,is,a,
             variable,in,the,term,and,A,is,an,atom,representing,the,name,of,
             the,variable.,Anonymous,variables,(,variables,whose,name,is,',_,
             ',),will,not,appear,in,this,list.],
         p([],[])])
-singletons(VN_list) -- After reading a term, VN_list will be unified with a list of elements of the form V = A, where V is a variable occurring in the term only once and A is an atom which represents the name of the variable. Anonymous variables will not appear in this list.
+singletons(VN_list) — After reading a term, VN_list will be unified with a list of elements of the form V = A, where V is a variable occurring in the term only once and A is an atom which represents the name of the variable. Anonymous variables will not appear in this list.
 
 The following option does not conform to the standard, but is supported by ALS Prolog.
 
-attach_fullstop(Bool) -- Bool is either true or false. The default is false. When Bool is true, a fullstop is inserted before the end of the stream. This option is most useful for reading single terms from atom, character, and character code streams.
+attach_fullstop(Bool) — Bool is either true or false. The default is false. When Bool is true, a fullstop is inserted before the end of the stream. This option is most useful for reading single terms from atom, character, and character code streams.
 
 
 ## EXAMPLES
@@ -99,37 +99,37 @@ X=foo
 
 Stream_or_Alias is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_Alias, Stream_or_Alias) .
+— — -- -- &gt; domain_error(stream_or_Alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an input stream
 
--- -- -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
+— — -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
 
 Options is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Options is neither a variable nor a list
 
--- -- -- -- &gt; type_error(list, Option) .
+— — -- -- &gt; type_error(list, Option) .
 
 Options is a list an element of which is a variable
 
--- -- -- -- &gt;
+— — -- -- &gt;
 
 instantiation_error.
 
 Options is a list containing an element E which is neithera variable nor a valid read option
 
--- -- -- -- &gt;
+— — -- -- &gt;
 
 domain_error(read_option, E)
 
@@ -137,15 +137,15 @@ domain_error(read_option, E)
 
 One or more characters were read, but they could not be parsed as a term using the current set of operator definitions
 
--- -- -- -- &gt; syntax_error. [This does not happen now; see notebelow ]
+— — -- -- &gt; syntax_error. [This does not happen now; see notebelow ]
 
 The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action(error)
 
--- -- -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(past_end_of_stream, Stream_or_Alias) .
 
 The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action(error)
 
--- -- -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream_not_ready, Stream_or_Alias) .
 
 
 ## NOTES
@@ -155,22 +155,15 @@ The ISO Prolog Standard requires that an error be thrown when there is a syntax 
 
 ## SEE ALSO
 
-- `write/[1`  
-`2]`  
-`write_term/[2`  
-`3]`  
-`open/4`  
-`close/1`  
-`get_char/[1`  
-`2]`  
-`get_code/[1`  
-`2]`  
-`UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Sterling86`  
-`12.2]`  
-`[Bratko86`  
-`6.2.1]`  
-`[Clocksin81`  
-`5.1].
+- `write/[1,2]`  
+- `write_term/[2,3]`  
+- `open/4`  
+- `close/1`  
+- `get_char/[1,2]`  
+- `get_code/[1,2]`  
+
+- User Guide(Prolog I/O)  
+- [Bowen 91, 7.8]  
+- [Sterling 86, 12.2]  
+- [Bratko 86, 6.2.1]  
+- [Clocksin 81, 5.1].

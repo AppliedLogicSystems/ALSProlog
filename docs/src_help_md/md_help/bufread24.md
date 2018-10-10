@@ -1,12 +1,12 @@
----
+—-
 title: 'bufread/[2,4]'
 predicates:
  - 'bufread/2' : runs the Prolog parser on a string of text
  - 'bufread/4' : similiar to bufread/2, giving additional information
----
-`bufread/2` `--` runs the Prolog parser on a string of text
+—-
+`bufread/2` `—` runs the Prolog parser on a string of text
 
-`bufread/4` `--` similiar to bufread/2, giving additional information
+`bufread/4` `—` similiar to bufread/2, giving additional information
 
 
 ## FORMS
@@ -56,7 +56,7 @@ Column : 6
 
 Message = [78, 111, 110, 45, 101, 109, 112, 116, 121, 32, 116, 101,
 
-114, 109, 32, 101, 120, 112, 101, 99, 116, 101, 100, 46 ]
+114, 109, 32, 101, 120, 112, 101, 99, 116, 101, 100, 46]
 
 Column = 6
 
@@ -105,7 +105,7 @@ FullStop = 1
 
 LeftOver = [32, 102, 111, 111, 100, 40, 105, 110, 100, 105, 97, 110, 41, 46, 32,
 
-102, 111, 111, 100, 40, 99, 104, 105, 110, 101, 115, 101, 41, 46, 32 ]
+102, 111, 111, 100, 40, 99, 104, 105, 110, 101, 115, 101, 41, 46, 32]
 
 yes.
 

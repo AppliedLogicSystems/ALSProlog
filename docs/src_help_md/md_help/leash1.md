@@ -1,9 +1,9 @@
----
+—-
 title: 'leash/1'
 predicates:
  - 'leash/1' : set which ports are leashed for the debugger
----
-`leash/1` `--` set which ports are leashed for the debugger
+—-
+`leash/1` `—` set which ports are leashed for the debugger
 
 
 ## FORMS
@@ -24,7 +24,7 @@ The leashing mode of the debugger is set to Mode where Mode is one of the atoms 
 
 
 |**Mode|Function**|
-|-----|---------|
+|——-|---------|
 | all | Prompt at all ports | 
 | call | Prompt at call ports | 
 | exit | Prompt at redo ports | 
@@ -57,6 +57,6 @@ Note that using an empty list as the argument to leash/1, as shown in the exampl
 - `trace/1`  
 `spy/1`
 - `Tools(UsingtheDebugger)`  
-`[Clocksin81`  
+`[Clocksin 81`  
 `8.4]
 

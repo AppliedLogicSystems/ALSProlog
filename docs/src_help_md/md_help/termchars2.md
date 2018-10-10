@@ -1,12 +1,12 @@
----
+—-
 title: 'term_chars/2'
 predicates:
  - 'term_chars/2' : convert between a term and the list of characters which represent the term
  - 'term_codes/2' : convert between a term and the list of character codes which represent the term
----
-`term_chars/2` `--` convert between a term and the list of characters which represent the term
+—-
+`term_chars/2` `—` convert between a term and the list of characters which represent the term
 
-`term_codes/2` `--` convert between a term and the list of character codes which represent the term
+`term_codes/2` `—` convert between a term and the list of character codes which represent the term
 
 
 ## FORMS
@@ -63,15 +63,15 @@ text,eof_code,0,0))])
 
 CharList is bound to a list, but the list does not contain characters
 
--- -- -- -- &gt; domain_error(character_list, CharList)
+— — -- -- &gt; domain_error(character_list, CharList)
 
 CodeList is bound to a list, but the list does not contain character codes
 
--- -- -- -- &gt; domain_error(character_code_list, CodeList)
+— — -- -- &gt; domain_error(character_code_list, CodeList)
 
 CharList(or CodeList) is not parsable as a term
 
--- -- -- -- &gt; syntax_error
+— — -- -- &gt; syntax_error
 
 
 ## SEE ALSO

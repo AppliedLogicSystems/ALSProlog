@@ -1,9 +1,9 @@
----
+—-
 title: 'chdir/1'
 predicates:
  - 'chdir/1' : changes the current directory to the specified directory
----
-`chdir/1` `--` changes the current directory to the specified directory
+—-
+`chdir/1` `—` changes the current directory to the specified directory
 
 
 ## FORMS

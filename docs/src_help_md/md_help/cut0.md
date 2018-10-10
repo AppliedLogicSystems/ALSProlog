@@ -1,9 +1,9 @@
----
+—-
 title: '!/0'
 predicates:
  - '!/0' :(cut) removes choice points
----
-`!/0` `--`(cut) removes choice points
+—-
+`!/0` `—`(cut) removes choice points
 
 
 ## FORMS
@@ -134,7 +134,7 @@ succeeds because the ' ! ' is never reached in the condition of - &gt; . The - &
 - `->/2`  
 `not/1`
 
-- [Bowen 91, 7.1 ]
-- [Sterling 86, 11 ]
-- [Bratko 86, 5.1 ]
-- [Clocksin 81, 4.2 ]. 
+- [Bowen 91, 7.1]
+- [Sterling 86, 11]
+- [Bratko 86, 5.1]
+- [Clocksin 81, 4.2]. 

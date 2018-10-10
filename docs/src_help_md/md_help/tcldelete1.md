@@ -1,12 +1,12 @@
----
+—-
 title: 'tcl_delete/1'
 predicates:
  - 'tcl_delete/1' : delete a Tcl interpreter
  - 'tcl_delete_all/0' : delete all Tcl interpreters
----
-`tcl_delete/1` `--` delete a Tcl interpreter
+—-
+`tcl_delete/1` `—` delete a Tcl interpreter
 
-`tcl_delete_all/0` `--` delete all Tcl interpreters
+`tcl_delete_all/0` `—` delete all Tcl interpreters
 
 
 ## FORMS

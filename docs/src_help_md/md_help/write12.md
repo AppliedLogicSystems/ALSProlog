@@ -1,4 +1,4 @@
----
+—-
 title: 'write/[1,2]'
 predicates:
  - 'write/1' : write term to current output stream
@@ -10,24 +10,24 @@ predicates:
  - 'write_term/2' : write term to current output stream with options
  - 'write_term/3' : write term to specified output stream with options
  - 'display/1' : write term to current output stream in canonical form
----
-`write/1` `--` write term to current output stream
+—-
+`write/1` `—` write term to current output stream
 
-`write/2` `--` write term to specified stream
+`write/2` `—` write term to specified stream
 
-`writeq/1` `--` write term to current output stream so that it may be read back in
+`writeq/1` `—` write term to current output stream so that it may be read back in
 
-`writeq/2` `--` write term to specified stream so that it may be read back in
+`writeq/2` `—` write term to specified stream so that it may be read back in
 
-`write_canonical/1` `--` write term to current output stream in canonical form(no operators)
+`write_canonical/1` `—` write term to current output stream in canonical form(no operators)
 
-`write_canonical/2` `--` write term to specified stream in canonical form
+`write_canonical/2` `—` write term to specified stream in canonical form
 
-`write_term/2` `--` write term to current output stream with options
+`write_term/2` `—` write term to current output stream with options
 
-`write_term/3` `--` write term to specified output stream with options
+`write_term/3` `—` write term to specified output stream with options
 
-`display/1` `--` write term to current output stream in canonical form
+`display/1` `—` write term to current output stream in canonical form
 
 
 ## FORMS
@@ -87,27 +87,27 @@ write_term/3 writes out the term Term to the output stream associated with Strea
 
 The options mandated by the draft standard are :
 
-quoted(Bool) -- Bool is true or false. When Bool is true, atoms and functors are written out in such a manner so that read/ [1, 2 ] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.
+quoted(Bool) — Bool is true or false. When Bool is true, atoms and functors are written out in such a manner so that read/ [1, 2] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.
 
-ignore_ops(Bool) -- Bool may be true or false. When Bool is true, compound terms are output in functional notation.
+ignore_ops(Bool) — Bool may be true or false. When Bool is true, compound terms are output in functional notation.
 
-numbervars(Bool) -- When Bool is true, a term of the form ' $VAR '(N), where N is a non-negative integer, will be output as a variable name consisting of a capital letter possibly followed by an integer. The capital letter is the(i + 1) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N div 26 The integer j is omitted if it is zero.
+numbervars(Bool) — When Bool is true, a term of the form ' $VAR '(N), where N is a non-negative integer, will be output as a variable name consisting of a capital letter possibly followed by an integer. The capital letter is the(i + 1) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N div 26 The integer j is omitted if it is zero.
 
 Other options not mandated by the draft standard but supported by ALS Prolog are :
 
-lettervars(Bool) -- If Bool is true, variables will be printed out as an underscore followed by a letter and digits if necessary. If Bool is false, variables will be printed as _N, where N is computed using the address where the variable lives at. This latter mode is more suited to debugging purposes where correspondences between variables in various calls is required.
+lettervars(Bool) — If Bool is true, variables will be printed out as an underscore followed by a letter and digits if necessary. If Bool is false, variables will be printed as _N, where N is computed using the address where the variable lives at. This latter mode is more suited to debugging purposes where correspondences between variables in various calls is required.
 
-maxdepth(N, Atom1, Atom2) -- N is the maximum depth to print to. Atom1 is the atom to output when this depth has been reached. Atom2 is the atom to output when this depth has been reached at the tail of a list.
+maxdepth(N, Atom1, Atom2) — N is the maximum depth to print to. Atom1 is the atom to output when this depth has been reached. Atom2 is the atom to output when this depth has been reached at the tail of a list.
 
-maxdepth(N) -- same as maxdepth(N, *, ...)
+maxdepth(N) — same as maxdepth(N, *, ...)
 
-depth_computation(Val) -- Val may be either flat or nonflat. This indicates the method of depth computation. If Val is bound to flat, all arguments of a term or list will be treated as being at the same depth. If Val is nonflat, then each subsequent argument in a term(or each subsequent element of a list) will be considered to be at a depth one greater than the preceding structure argument(or list element) .
+depth_computation(Val) — Val may be either flat or nonflat. This indicates the method of depth computation. If Val is bound to flat, all arguments of a term or list will be treated as being at the same depth. If Val is nonflat, then each subsequent argument in a term(or each subsequent element of a list) will be considered to be at a depth one greater than the preceding structure argument(or list element) .
 
-line_length(N) -- N is the length in characters of the output line. The pretty printer will attempt to break lines before they exceed the given line length.
+line_length(N) — N is the length in characters of the output line. The pretty printer will attempt to break lines before they exceed the given line length.
 
-indent(N) -- N specifies the initial indentation in characters to use for the second and subsequent lines output(if any) .
+indent(N) — N specifies the initial indentation in characters to use for the second and subsequent lines output(if any) .
 
-uoted_strings(Bool) -- If Bool is true, lists of suitable character codes will print out as double quoted strings. If false, these lists will print out as lists of small integers.
+uoted_strings(Bool) — If Bool is true, lists of suitable character codes will print out as double quoted strings. If false, these lists will print out as lists of small integers.
 
 ## EXAMPLES
 
@@ -167,60 +167,52 @@ T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
 
 Stream_or_Alias is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an output stream
 
--- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
+— — -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
 
 Options is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Options is neither a variable nor a list
 
--- -- -- -- &gt; type_error(list, Option) .
+— — -- -- &gt; type_error(list, Option) .
 
 Options is a list an element of which is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Options is a list containing an element E which is neither a variable nor a valid write option
 
--- -- -- -- &gt; domain_error(write_option, E) .
+— — -- -- &gt; domain_error(write_option, E) .
 
 
 ## SEE ALSO
 
-- `read_term/[2`  
-`3]`  
-`read/[1`  
-`2]`  
+- `read_term/[2,3]`  
+`read/[1,2]`  
 `open/4`  
 `close/1`  
-`nl/[0`  
-`1]`  
-`put_char/[1`  
-`2]`  
-`put_code/[1`  
-`2]`  
+`nl/[0,1]`  
+`put_char/[1,2]`  
+`put_code/[1,2]`  
 `set_line_length/2`  
 `op/3`  
 `tell/1`
-- `UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Clocksin81`  
-`6.9]`  
-`[Sterling86`  
-`12.1]`  
-`[Bratko86`  
-`6.2.1].
+
+- `User Guide(Prolog I/O)`  
+- [Bowen 91, 7.8]  
+- [Clocksin 81, 6.9]  
+- [Sterling 86, 12.1]  
+- [Bratko 86, 6.2.1].

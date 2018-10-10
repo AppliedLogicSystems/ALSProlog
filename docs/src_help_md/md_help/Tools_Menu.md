@@ -1,9 +1,9 @@
----
+—-
 title: 'Tools Menu'
 predicates:
  - 'Tools Menu' : Invoke various useful tools
----
-`Tools Menu` `--` Invoke various useful tools
+—-
+`Tools Menu` `—` Invoke various useful tools
 
 
 ## FORMS

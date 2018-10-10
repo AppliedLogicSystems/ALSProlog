@@ -1,18 +1,18 @@
----
+—-
 title: '@=</2'
 predicates:
  - '@=</2' : The left argument is not after the right argument
  - '@>=/2' : The left argument is not before the right argument
  - '@</2' : The left argument is before the right argument
  - '@>/2' : The left argument is after the right argument
----
-`@=</2` `--` The left argument is not after the right argument
+—-
+`@=</2` `—` The left argument is not after the right argument
 
-`@>=/2` `--` The left argument is not before the right argument
+`@>=/2` `—` The left argument is not before the right argument
 
-`@</2` `--` The left argument is before the right argument
+`@</2` `—` The left argument is before the right argument
 
-`@>/2` `--` The left argument is after the right argument
+`@>/2` `—` The left argument is after the right argument
 
 
 ## FORMS

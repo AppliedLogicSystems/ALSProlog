@@ -1,9 +1,9 @@
----
+—-
 title: 'char_code/2'
 predicates:
  - 'char_code/2' : convert between characters and codes
----
-`char_code/2` `--` convert between characters and codes
+—-
+`char_code/2` `—` convert between characters and codes
 
 
 ## FORMS
@@ -42,19 +42,19 @@ Error:Argumentoftypecharacterexpectedinsteadoffoo.
 
 Char and Code are variables
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Char is neither a variable nor a character
 
--- -- -- -- &gt; type_error(character) .
+— — -- -- &gt; type_error(character) .
 
 Code is neither a variable nor an integer
 
--- -- -- -- &gt; type_error(integer) .
+— — -- -- &gt; type_error(integer) .
 
 Code is an integer but is not a character code
 
--- -- -- -- &gt; representation_error(character_code) .
+— — -- -- &gt; representation_error(character_code) .
 
 
 ## SEE ALSO

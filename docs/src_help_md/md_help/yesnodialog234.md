@@ -1,9 +1,9 @@
----
+—-
 title: 'yes_no_dialog/[2,3,4]'
 predicates:
- - 'yes_no_dialog/ [2, 3, 4 ]' : present a yes/no dialog
----
-`yes_no_dialog/ [2, 3, 4 ]` `--` present a yes/no dialog
+ - 'yes_no_dialog/ [2, 3, 4]' : present a yes/no dialog
+—-
+`yes_no_dialog/ [2, 3, 4]` `—` present a yes/no dialog
 
 
 ## FORMS

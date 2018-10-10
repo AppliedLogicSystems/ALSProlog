@@ -1,9 +1,9 @@
----
+—-
 title: '$findterm/5'
 predicates:
  - '$findterm/5' : locates the given term on the heap
----
-`$findterm/5` `--` locates the given term on the heap
+—-
+`$findterm/5` `—` locates the given term on the heap
 
 
 ## FORMS

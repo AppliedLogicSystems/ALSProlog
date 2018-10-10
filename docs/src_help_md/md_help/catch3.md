@@ -1,12 +1,12 @@
----
+—-
 title: 'catch/3'
 predicates:
  - 'catch/3' : execute a goal, specifying an exception handler
  - 'throw/1' : give control to exception handler
----
-`catch/3` `--` execute a goal, specifying an exception handler
+—-
+`catch/3` `—` execute a goal, specifying an exception handler
 
-`throw/1` `--` give control to exception handler
+`throw/1` `—` give control to exception handler
 
 
 ## FORMS
@@ -26,33 +26,33 @@ Many of the builtins will cause an error if the types of the arguments to the bu
 
 The ISO Prolog Standard specifies that ErrorTerm be one of the following forms :
 
-instantiation_error -- An argument or one of its components is a variable.
+instantiation_error — An argument or one of its components is a variable.
 
-type_error(ValidType, Culprit) -- An argument or one of its components is of the incorrect type. ValidType may be any one of the following atoms : atom, body, callable, character, compound, constant, integer, list, number, variable. Culprit is the argument or component which was of the incorrect type.
+type_error(ValidType, Culprit) — An argument or one of its components is of the incorrect type. ValidType may be any one of the following atoms : atom, body, callable, character, compound, constant, integer, list, number, variable. Culprit is the argument or component which was of the incorrect type.
 
-domain_error(ValidDomain, Culprit -- The base type of an argument is correct, but the value is outside the domain for which the predicate is defined. The ISO Prolog Standard states that ValidDomain may be any one of the following atoms : character_code_list, character_list, close_option, flag_value, io_mode, not_less_than_zero, operator_priority, operator_specifier, prolog_flag, read_option, source_sink, stream_or_alias, stream_option, stream_position, write_option. ALS Prolog allows ValidDomain to take on these additional values : depth_computation, line_length, positive_integer. Culprit is the argument which caused the error.
+domain_error(ValidDomain, Culprit — The base type of an argument is correct, but the value is outside the domain for which the predicate is defined. The ISO Prolog Standard states that ValidDomain may be any one of the following atoms : character_code_list, character_list, close_option, flag_value, io_mode, not_less_than_zero, operator_priority, operator_specifier, prolog_flag, read_option, source_sink, stream_or_alias, stream_option, stream_position, write_option. ALS Prolog allows ValidDomain to take on these additional values : depth_computation, line_length, positive_integer. Culprit is the argument which caused the error.
 
-existence_error(ObjectType, Culprit) -- An operation is attempted on a certain type of object specified by ObjectType does not exist. Culprit is the nonexistent object on which the operation was attempted. ObjectType may take on the following values : operator, past_end_of_stream, procedure, static_procedure, source_sink, stream.
+existence_error(ObjectType, Culprit) — An operation is attempted on a certain type of object specified by ObjectType does not exist. Culprit is the nonexistent object on which the operation was attempted. ObjectType may take on the following values : operator, past_end_of_stream, procedure, static_procedure, source_sink, stream.
 
-permission_error(Operation, ObjectType, Culprit) -- Operation is an operation not permitted on object type ObjectType. Culprit is the object on which the error occurred. ObjectType is an atom taking on values as described above. Operation may be one of the following atoms : access_clause, create, input, modify, open, output, reposition.
+permission_error(Operation, ObjectType, Culprit) — Operation is an operation not permitted on object type ObjectType. Culprit is the object on which the error occurred. ObjectType is an atom taking on values as described above. Operation may be one of the following atoms : access_clause, create, input, modify, open, output, reposition.
 
-representation_error(Flag) -- The implementation defined limit indicated by Flag has been breached. Flag may be one of the following atoms : character, character_code, exceeded_max_arity, flag.
+representation_error(Flag) — The implementation defined limit indicated by Flag has been breached. Flag may be one of the following atoms : character, character_code, exceeded_max_arity, flag.
 
-calculation_error(CalcFlag) -- An arithmetic operation result in an exceptional value as indicated by the atom CalcFlag. CalcFlag may take on the following values : overflow, underflow, zero_divide, undefined.
+calculation_error(CalcFlag) — An arithmetic operation result in an exceptional value as indicated by the atom CalcFlag. CalcFlag may take on the following values : overflow, underflow, zero_divide, undefined.
 
-resource_error(Resource) -- There are insufficient resources to complete execution. The type of resource exhausted is indicated by the implementation defined term Resource.
+resource_error(Resource) — There are insufficient resources to complete execution. The type of resource exhausted is indicated by the implementation defined term Resource.
 
-syntax_error -- A sequence of characters being read by read_term/4 can not be parsed with the current operator definitions. The reason for the syntax error(in ALS Prolog) is given in the implementation defined ErrorInfo(see below) .
+syntax_error — A sequence of characters being read by read_term/4 can not be parsed with the current operator definitions. The reason for the syntax error(in ALS Prolog) is given in the implementation defined ErrorInfo(see below) .
 
-system_error -- Other sorts of errors. These will commonly be operating system related errors such as being unable to complete a write operation due to the disk being full. Additional details about this type of error might be found in the implementation defined term ErrorInfo.
+system_error — Other sorts of errors. These will commonly be operating system related errors such as being unable to complete a write operation due to the disk being full. Additional details about this type of error might be found in the implementation defined term ErrorInfo.
 
 In ALS Prolog, ErrorInfo is a list providing additional information where the ISO Prolog Standard mandated term ErrorTerm falls short. The terms which may be on this list take the following forms :
 
-M : G -- The predicate in which the error occurred was in module M on goal G. Due to the compiled nature of ALS Prolog, it is not always possible to obtain all of the arguments to the goal G. Those which could not be obtained are indicated as such by the atom ' ? ' . For this reason, the form M : G should be used for informational purposes only.
+M : G — The predicate in which the error occurred was in module M on goal G. Due to the compiled nature of ALS Prolog, it is not always possible to obtain all of the arguments to the goal G. Those which could not be obtained are indicated as such by the atom ' ? ' . For this reason, the form M : G should be used for informational purposes only.
 
-errno(ErrNo) -- This form is used to further elaborate on the reason that a system_error occurred. The errno/1 form indicates that a system call failed. The value of ErrNo is an integer which indicates the nature of the system error. The values that ErrNo take on may vary from system to system. ALS is looking at a symbolic way of providing this information.
+errno(ErrNo) — This form is used to further elaborate on the reason that a system_error occurred. The errno/1 form indicates that a system call failed. The value of ErrNo is an integer which indicates the nature of the system error. The values that ErrNo take on may vary from system to system. ALS is looking at a symbolic way of providing this information.
 
-syntax(Context, ErrorMessage, LineNumber, Stream) -- This form is used to provide additional information about system errors. Context is an atom providing some information about the context in which the error occurred. ErrorMessage is an atom providing the text of the message for the error. LineNumber is the number of the line near which the syntax error occurred. Stream is the stream which was being read when the syntax error occurred.
+syntax(Context, ErrorMessage, LineNumber, Stream) — This form is used to provide additional information about system errors. Context is an atom providing some information about the context in which the error occurred. ErrorMessage is an atom providing the text of the message for the error. LineNumber is the number of the line near which the syntax error occurred. Stream is the stream which was being read when the syntax error occurred.
 
 
 ## EXAMPLES
@@ -117,15 +117,15 @@ yes.
 
 Goal is a variable
 
----- &gt; instantiation_error.
+—— &gt; instantiation_error.
 
 Goal is not a callable term
 
----- &gt; type_error(callable, Goal) . [not yet implemented ]
+—— &gt; type_error(callable, Goal) . [not yet implemented ]
 
 Reason does not unify with Pattern in any call of catch/3
 
----- &gt; system_error. [not yet implemented ]
+—— &gt; system_error. [not yet implemented ]
 
 
 ## NOTES

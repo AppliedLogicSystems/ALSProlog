@@ -1,15 +1,15 @@
----
+—-
 title: 'see/1'
 predicates:
  - 'see/1' : sets the current input stream
  - 'seeing/1' : returns the name of the current input stream
  - 'seen/0' : closes the current input stream
----
-`see/1` `--` sets the current input stream
+—-
+`see/1` `—` sets the current input stream
 
-`seeing/1` `--` returns the name of the current input stream
+`seeing/1` `—` returns the name of the current input stream
 
-`seen/0` `--` closes the current input stream
+`seen/0` `—` closes the current input stream
 
 
 ## FORMS
@@ -70,10 +70,8 @@ see(CurrentInput) .
 `open/4`  
 `close/1`  
 `close/2`  
-`UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Clocksin81`  
-`5.4]`  
-`[Bratko86`  
-`6.1].
+
+- `User Guide(Prolog I/O)`  
+- [Bowen 91, 7.8]  
+- [Clocksin 81, 5.4]  
+- [Bratko 86, 6.1].

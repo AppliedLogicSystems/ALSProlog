@@ -1,15 +1,15 @@
----
+—-
 title: 'trace/[0,1]'
 predicates:
  - 'trace/0' : turn on tracing
  - 'trace/1' : trace the execution of a goal
  - 'notrace/0' : turn off tracing
----
-`trace/0` `--` turn on tracing
+—-
+`trace/0` `—` turn on tracing
 
-`trace/1` `--` trace the execution of a goal
+`trace/1` `—` trace the execution of a goal
 
-`notrace/0` `--` turn off tracing
+`notrace/0` `—` turn off tracing
 
 
 ## FORMS
@@ -48,6 +48,6 @@ In the trace/1 case, the Goal will be single stepped according to the debugger '
 `nospy/0`  
 `leash/0`
 
-- [Bowen 91, 4.5 ]
-- [Bratko 86, 8.4 ]
-- [Clocksin 81, 8.3 ]. 
+- [Bowen 91, 4.5]
+- [Bratko 86, 8.4]
+- [Clocksin 81, 8.3]. 

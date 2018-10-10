@@ -1,12 +1,12 @@
----
+—-
 title: 'current_prolog_flag/2'
 predicates:
  - 'current_prolog_flag/2' : retrieve value(s) of prolog flag(s)
  - 'set_prolog_flag/2' : set value of a Prolog flag
----
-`current_prolog_flag/2` `--` retrieve value(s) of prolog flag(s)
+—-
+`current_prolog_flag/2` `—` retrieve value(s) of prolog flag(s)
 
-`set_prolog_flag/2` `--` set value of a Prolog flag
+`set_prolog_flag/2` `—` set value of a Prolog flag
 
 
 ## FORMS
@@ -184,13 +184,13 @@ For
 CLP(BNR), the iters_max_exceeded flag controls the behavior when then maximum number of constraint narrowing iterations is exceeded, as follows :
 
 
--- succeed(leaves network in place)
+— succeed(leaves network in place)
 
--- fail(quiet; backtracking resets net)
+— fail(quiet; backtracking resets net)
 
--- warning(fails &amp; issues warning; backtracking resets net)
+— warning(fails &amp; issues warning; backtracking resets net)
 
--- exception(backtracking resets net)
+— exception(backtracking resets net)
 
 Settings for prolog flags can be placed in the
 startup file(alspro.pro or .alspro) .
@@ -203,22 +203,22 @@ only
 
 )
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Value is a variable(set_prolog_flag
 only
 
 )
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Flag is neither a variable nor an atom
 
--- -- -- -- &gt; type_error(atom, Flag) .
+— — -- -- &gt; type_error(atom, Flag) .
 
 Value is inappropriate for Flag
 
--- -- -- -- &gt; domain_error(flag_value, Flag + Value)
+— — -- -- &gt; domain_error(flag_value, Flag + Value)
 
 
 ## NOTES

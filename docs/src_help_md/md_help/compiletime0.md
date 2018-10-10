@@ -1,9 +1,9 @@
----
+—-
 title: 'compiletime/0'
 predicates:
  - 'compiletime/0' : Runs the goal only at compile time
----
-`compiletime/0` `--` Runs the goal only at compile time
+—-
+`compiletime/0` `—` Runs the goal only at compile time
 
 
 ## FORMS

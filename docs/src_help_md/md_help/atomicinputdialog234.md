@@ -1,9 +1,9 @@
----
+—-
 title: 'atomic_input_dialog/[2,3,4]'
 predicates:
- - 'atomic_input_dialog/ [2, 3, 4 ]' : input atoms and numbers
----
-`atomic_input_dialog/ [2, 3, 4 ]` `--` input atoms and numbers
+ - 'atomic_input_dialog/ [2, 3, 4]' : input atoms and numbers
+—-
+`atomic_input_dialog/ [2, 3, 4]` `—` input atoms and numbers
 
 
 ## FORMS

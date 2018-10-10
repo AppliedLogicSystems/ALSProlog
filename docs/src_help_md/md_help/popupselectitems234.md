@@ -1,9 +1,9 @@
----
+—-
 title: 'popup_select_items/[2,3,4]'
 predicates:
- - 'popup_select_items/ [2, 3, 4 ]' : present popup selection list
----
-`popup_select_items/ [2, 3, 4 ]` `--` present popup selection list
+ - 'popup_select_items/ [2, 3, 4]' : present popup selection list
+—-
+`popup_select_items/ [2, 3, 4]` `—` present popup selection list
 
 
 ## FORMS
@@ -98,7 +98,7 @@ Selection = [Item three ].
 
 Even though in this case the user was restricted to selection of one item, the
 
-popup_select_items/_ predicate returns a list of the selected items. The Options argument for popup_select_items/ [3, 4 ] allows the programmer to place the popup list box in any of the other standard Tk listbox selection modes. For example, the call
+popup_select_items/_ predicate returns a list of the selected items. The Options argument for popup_select_items/ [3, 4] allows the programmer to place the popup list box in any of the other standard Tk listbox selection modes. For example, the call
 
 ? - popup_select_items(
 

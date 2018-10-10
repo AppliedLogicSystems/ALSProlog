@@ -1,12 +1,12 @@
----
+—-
 title: 'get0/1'
 predicates:
  - 'get0/1' : read the next character
  - 'get/1' : read the next printable character
----
-`get0/1` `--` read the next character
+—-
+`get0/1` `—` read the next character
 
-`get/1` `--` read the next printable character
+`get/1` `—` read the next printable character
 
 
 ## FORMS
@@ -41,7 +41,7 @@ yes.
 `get_char/2`  
 `get_code/2`
 
-- [Bowen 91, 7.8 ]
-- [Clocksin 81, 6.9 ]
-- [Bratko 86, 6.3 ]. 
+- [Bowen 91, 7.8]
+- [Clocksin 81, 6.9]
+- [Bratko 86, 6.3]. 
 

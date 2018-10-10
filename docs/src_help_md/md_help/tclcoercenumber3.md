@@ -1,15 +1,15 @@
----
+—-
 title: 'tcl_coerce_number/3'
 predicates:
  - 'tcl_coerce_number/3' : convert Tcl entity to Prolog number
  - 'tcl_coerce_atom/3' : convert Tcl entity to Prolog atom
  - 'tcl_coerce_list/3' : convert Tcl entity to Prolog list
----
-`tcl_coerce_number/3` `--` convert Tcl entity to Prolog number
+—-
+`tcl_coerce_number/3` `—` convert Tcl entity to Prolog number
 
-`tcl_coerce_atom/3` `--` convert Tcl entity to Prolog atom
+`tcl_coerce_atom/3` `—` convert Tcl entity to Prolog atom
 
-`tcl_coerce_list/3` `--` convert Tcl entity to Prolog list
+`tcl_coerce_list/3` `—` convert Tcl entity to Prolog list
 
 
 ## FORMS
@@ -40,7 +40,7 @@ tcl_coerce_atom(i, 1.4, A) - Succeeds, binding A to ' 1.4 '
 
 tcl_coerce_list(i, ' a b c ', L) - Succeeds, binding L to [a, b, c ]
 
-tcl_coerce_list(i, 1.4, L) - Succeeds, binding L to [1.4 ]
+tcl_coerce_list(i, 1.4, L) - Succeeds, binding L to [1.4]
 
 tcl_coerce_list(i, ' ', L) - Succeeds, binding L to [ ]
 

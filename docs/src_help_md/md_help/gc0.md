@@ -1,9 +1,9 @@
----
+—-
 title: 'gc/0'
 predicates:
  - 'gc/0' : invokes the garbage compactor
----
-`gc/0` `--` invokes the garbage compactor
+—-
+`gc/0` `—` invokes the garbage compactor
 
 
 ## FORMS
@@ -26,4 +26,4 @@ yes.
 
 ## SEE ALSO
 
-- [Sterling 86, 13 ]. 
+- [Sterling 86, 13]. 

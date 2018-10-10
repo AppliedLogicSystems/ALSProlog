@@ -1,12 +1,12 @@
----
+—-
 title: 'set_input/1'
 predicates:
  - 'set_input/1' : set current input stream
  - 'set_output/1' : set current output stream
----
-`set_input/1` `--` set current input stream
+—-
+`set_input/1` `—` set current input stream
 
-`set_output/1` `--` set current output stream
+`set_output/1` `—` set current output stream
 
 
 ## FORMS
@@ -51,23 +51,23 @@ text,eof_code,0,0)
 
 Stream_or_Alias is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Stream_or_Alias is not a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an input stream(for set_input/1)
 
--- -- -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
+— — -- -- &gt; permission_error(input, stream, Stream_or_Alias) .
 
 Stream_or_Alias is not an output stream(for set_output/1)
 
--- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
+— — -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
 
 
 ## NOTES

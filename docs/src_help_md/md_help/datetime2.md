@@ -1,18 +1,18 @@
----
+—-
 title: 'date_time/2'
 predicates:
  - 'date_time/2' : gets current date and time
  - 'date/1' : gets current date
  - 'time/1' : gets the current system time
  - 'gm_date_time/2' : gets current Greenwich mean date and time
----
-`date_time/2` `--` gets current date and time
+—-
+`date_time/2` `—` gets current date and time
 
-`date/1` `--` gets current date
+`date/1` `—` gets current date
 
-`time/1` `--` gets the current system time
+`time/1` `—` gets the current system time
 
-`gm_date_time/2` `--` gets current Greenwich mean date and time
+`gm_date_time/2` `—` gets current Greenwich mean date and time
 
 
 ## FORMS

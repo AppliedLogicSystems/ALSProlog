@@ -1,12 +1,12 @@
----
+—-
 title: 'open/[3,4]'
 predicates:
  - 'open/3' : open a stream
  - 'open/4' : open a stream with options
----
-`open/3` `--` open a stream
+—-
+`open/3` `—` open a stream
 
-`open/4` `--` open a stream with options
+`open/4` `—` open a stream with options
 
 
 ## FORMS
@@ -30,13 +30,13 @@ Name specifies the source/sink to be opened. Whether Name is a source or a sink 
 
 If Name is an atom, then the contents of the stream are the contents of the file with name Name. Mode may take on additional values for file streams. The values which Mode may take on for file streams are :
 
-read -- open the file for read access
+read — open the file for read access
 
-write -- open the file for write access; truncate or create as necessary
+write — open the file for write access; truncate or create as necessary
 
-read_write -- both reading and writing are permitted; file is not truncated on open
+read_write — both reading and writing are permitted; file is not truncated on open
 
-append -- open file with write access and position at end of stream
+append — open file with write access and position at end of stream
 
 If Name has the form atom(A), then Name represents an atom stream. When opened with Mode equal to read, A must be an atom. The contents of the stream are simply the characters comprising the atom A. When opened for write access, A will be unified with the atom formed from the characters written to the stream during the time that the stream was open. The unification is carried out at the time that the stream is closed.
 
@@ -58,7 +58,7 @@ socket(inet_dgram, Host, Port)
 
 socket(clone, Stream_Or_Alias)
 
-Regardless of the mode(read or write), the call to open/ [3, 4 ] will attempt to open the stream as a server(if appropriate) . Failing that, it will attempt to open the stream as a client. If a connection-oriented socket is opened as a server, then prior to the first buffer read or write, the stream will wait for a client to connect. If the stream is opened as a client, the connection(in a connection-oriented socket) is established as part of the open.
+Regardless of the mode(read or write), the call to open/ [3, 4] will attempt to open the stream as a server(if appropriate) . Failing that, it will attempt to open the stream as a client. If a connection-oriented socket is opened as a server, then prior to the first buffer read or write, the stream will wait for a client to connect. If the stream is opened as a client, the connection(in a connection-oriented socket) is established as part of the open.
 
 socket(unix, PathName) : Open a unix domain socket. Addresses in the unix domain are merely path names which are specified by PathName. Unix domain sockets are somewhat limited in that both the server and client process must reside on the same machine. The stream will be opened as a server if the name specified by PathName does not currently exist(and the requisite permissions exist to create a directory entry) . Otherwise, the stream will be opened as a client.
 
@@ -72,27 +72,27 @@ socket(clone, Stream_or_Alias) : This specification will create a new(prolog) st
 
 The behavior and disposition of a stream may be influenced by the Options argument. Options is a list comprising one or more of the following terms :
 
-type(T) -- T may be either text or binary. This defines whether the stream is a text stream or a binary stream. At present, ALS Prolog makes no distinction between these two types.
+type(T) — T may be either text or binary. This defines whether the stream is a text stream or a binary stream. At present, ALS Prolog makes no distinction between these two types.
 
-alias(Alias) -- Alias must be an atom. This option specifies an alias for the stream. If an alias is established, the alias may be passed in lieu of the stream descriptor to predicates requiring a stream handle.
+alias(Alias) — Alias must be an atom. This option specifies an alias for the stream. If an alias is established, the alias may be passed in lieu of the stream descriptor to predicates requiring a stream handle.
 
-reposition(R) -- R is either true or false. reposition(true) indicates that the stream must be repositionable. If it is not, open/3 or open/4 will throw an error. reposition(false) indicates that the stream is not repositionable and any attempt to reposition the stream will result in an error. If neither option is specified, the stream will be opened as repositionable if possible. A program can find out if a stream is repositionable or not by calling stream_property/2.
+reposition(R) — R is either true or false. reposition(true) indicates that the stream must be repositionable. If it is not, open/3 or open/4 will throw an error. reposition(false) indicates that the stream is not repositionable and any attempt to reposition the stream will result in an error. If neither option is specified, the stream will be opened as repositionable if possible. A program can find out if a stream is repositionable or not by calling stream_property/2.
 
-eof_action(Action) -- Action may be one of error, eof_code, or reset. Action instantiated to error indicates that an existence error should be triggered when a stream attempts to read past end-of-file. The default action is eof_code which will cause an input predicate reading past end-of-file to return a distinguished value as the output of the predicate(either end_of_file, or -1) . Finally, Action instantiated to reset indicates that the stream should be reset upon end-of-file.
+eof_action(Action) — Action may be one of error, eof_code, or reset. Action instantiated to error indicates that an existence error should be triggered when a stream attempts to read past end-of-file. The default action is eof_code which will cause an input predicate reading past end-of-file to return a distinguished value as the output of the predicate(either end_of_file, or -1) . Finally, Action instantiated to reset indicates that the stream should be reset upon end-of-file.
 
-snr_action(Action) -- Action may be one of error, snr_code, or wait. As with eof_action, Action instantiated to error will generate an existence error when an input operation attempts to read from a stream for which no input is ready. snr_code will force the input predicate to return a distinguished code when the stream is not ready. This code will be either -2 or the atom stream_not_ready. The default action is wait which will force the input operation to wait until the stream is ready.
+snr_action(Action) — Action may be one of error, snr_code, or wait. As with eof_action, Action instantiated to error will generate an existence error when an input operation attempts to read from a stream for which no input is ready. snr_code will force the input predicate to return a distinguished code when the stream is not ready. This code will be either -2 or the atom stream_not_ready. The default action is wait which will force the input operation to wait until the stream is ready.
 
-buffering(B) -- B is either byte, line, or block. This option applies to streams open for output. If byte buffering is specified, the stream buffer will be flushed(actually written out) after each character. Line buffering is useful for streams which interact with a user; the buffer is flushed when a newline character is put into the buffer. Block buffering is the default; the buffer is not flushed until the block is full or until a call to flush_output/1 is made.
+buffering(B) — B is either byte, line, or block. This option applies to streams open for output. If byte buffering is specified, the stream buffer will be flushed(actually written out) after each character. Line buffering is useful for streams which interact with a user; the buffer is flushed when a newline character is put into the buffer. Block buffering is the default; the buffer is not flushed until the block is full or until a call to flush_output/1 is made.
 
-bufsize(Size) -- Size must be a positive integer. The Size parameter indicates the size of buffer to allocate the associated stream. The default size should be adequate for most streams.
+bufsize(Size) — Size must be a positive integer. The Size parameter indicates the size of buffer to allocate the associated stream. The default size should be adequate for most streams.
 
-prompt_goal(Goal) -- Goal is a ground callable term. This option is used when opening an input stream. Goal will be run each time a new buffer is read. This option is most useful when used in conjunction with opening an output stream where a prompt should be written to whenever new input is required from the input stream.
+prompt_goal(Goal) — Goal is a ground callable term. This option is used when opening an input stream. Goal will be run each time a new buffer is read. This option is most useful when used in conjunction with opening an output stream where a prompt should be written to whenever new input is required from the input stream.
 
-maxdepth(Depth) -- Depth is a positive integer. This option when specified for an output stream sets the default maximum depth used to write out a term with write_term/3, et. al. Explicit options to write_term/3 may be used to override this option.
+maxdepth(Depth) — Depth is a positive integer. This option when specified for an output stream sets the default maximum depth used to write out a term with write_term/3, et. al. Explicit options to write_term/3 may be used to override this option.
 
-depth_computation(DC) -- DC should be either flat or nonflat. This option indicates the default mechanism to be used for write_term to compute the depth of a term. flat indicates that all arguments in a list or structured term should be considered to be at the same depth. nonflat indicates that each successive element of a structured term or list is at depth one greater than its predecessor.
+depth_computation(DC) — DC should be either flat or nonflat. This option indicates the default mechanism to be used for write_term to compute the depth of a term. flat indicates that all arguments in a list or structured term should be considered to be at the same depth. nonflat indicates that each successive element of a structured term or list is at depth one greater than its predecessor.
 
-line_length(Length) -- Length is a positive integer. This option is used to set the default line length associated with the stream. Predicates which deal with term output use this parameter to break the line at appropriate points when outputting a term which will span several lines. Explicit options to write_term/3 may be used to override this option.
+line_length(Length) — Length is a positive integer. This option is used to set the default line length associated with the stream. Predicates which deal with term output use this parameter to break the line at appropriate points when outputting a term which will span several lines. Explicit options to write_term/3 may be used to override this option.
 
 write_eoln_type(Type) - allows control over which end-of-line(eoln) characters are output by nl/1. The values for Type and the corresponding eoln characters are : cr(" \r "), lf(" \n "), and crlf(" \r\n ") . The default
 ![](alshelp00000001.gif)
@@ -153,51 +153,51 @@ permission_error(open,source_sink,foobar),
 
 Name, Mode, or Options is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Name does not refer to either a variable or a source/sink
 
--- -- -- -- &gt; domain_error(source_sink, Name) .
+— — -- -- &gt; domain_error(source_sink, Name) .
 
 Mode is neither a variable nor an atom
 
--- -- -- -- &gt; type_error(atom, Mode) .
+— — -- -- &gt; type_error(atom, Mode) .
 
 Mode is an atom, but not a valid I/O mode for the given source/sink
 
--- -- -- -- &gt; domain_error(io_mode, Mode) .
+— — -- -- &gt; domain_error(io_mode, Mode) .
 
 Stream is not a variable
 
--- -- -- -- &gt; type_error(variable, Stream) .
+— — -- -- &gt; type_error(variable, Stream) .
 
 Options is neither a variable nor a list
 
--- -- -- -- &gt; type_error(list, Options) .
+— — -- -- &gt; type_error(list, Options) .
 
 Options is a list with a variable element
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Options is a list with element E which is not a valid stream option
 
--- -- -- -- &gt; domain_error(stream_option, E) .
+— — -- -- &gt; domain_error(stream_option, E) .
 
 Name specifies a valid source/sink, but can not be opened. If Name
 
 refers to a file, the file may not exist or the protection on the file or containing directory might be set to be incompatible with the open mode
 
--- -- -- -- &gt; permission_error(open, source_sink, Name) .
+— — -- -- &gt; permission_error(open, source_sink, Name) .
 
 Options contains an element alias(A) and A is already associated
 
 with another stream
 
--- -- -- -- &gt; permission_error(open, source_sink, alias(A)) .
+— — -- -- &gt; permission_error(open, source_sink, alias(A)) .
 
 Options contains an element reposition(true) and it is not possible to reposition a stream corresponding to the source/sink Name.
 
--- -- -- -- &gt; permission_error(open, source_sink, reposition(true)) .
+— — -- -- &gt; permission_error(open, source_sink, reposition(true)) .
 
 
 ## NOTES

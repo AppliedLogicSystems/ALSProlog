@@ -1,9 +1,9 @@
----
+—-
 title: 'send/2'
 predicates:
  - 'send/2' : send a message to an object
----
-`send/2` `--` send a message to an object
+—-
+`send/2` `—` send a message to an object
 
 
 ## FORMS

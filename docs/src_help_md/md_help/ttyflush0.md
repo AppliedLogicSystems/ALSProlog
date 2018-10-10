@@ -1,9 +1,9 @@
----
+—-
 title: 'ttyflush/0'
 predicates:
  - 'ttyflush/0' : forces all buffered output to the screen
----
-`ttyflush/0` `--` forces all buffered output to the screen
+—-
+`ttyflush/0` `—` forces all buffered output to the screen
 
 
 ## FORMS
@@ -29,7 +29,7 @@ and then try to write something to the screen before running it :
 ```
 ?- printf(&quot;AprilFool'sDay&quot;),infiniteLoop.
 AprilFool'sDayBreakHandler
-------------------------
+——--------------------
 a-AbortComputation
 b-Breakshell
 c-Continue
@@ -46,7 +46,7 @@ Error:Executionaborted.
 wefindthattheoutputdoesn'tappearuntiltheControl-Cispressed.Wecanavoidthisproblembyputtingacalltottyflush/0afterthemessageprintingpredicate.Thefollowingexampleshowstheresult:
 ?- printf(&quot;AprilFool'sDay&quot;),ttyflush,infiniteLoop.
 AprilFool'sDayBreakHandler
-------------------------
+——--------------------
 a-AbortComputation
 b-Breakshell
 c-Continue
@@ -64,7 +64,7 @@ Error:Executionaborted.
 
 ## NOTES
 
-The ISO Standard mandates that flush_output/ [0, 1 ] is preferred over ttyflush/0.
+The ISO Standard mandates that flush_output/ [0, 1] is preferred over ttyflush/0.
 
 
 ## SEE ALSO

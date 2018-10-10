@@ -1,15 +1,15 @@
----
+—-
 title: 'tell/1'
 predicates:
  - 'tell/1' : sets the standard output stream
  - 'telling/1' : returns the name of the standard output stream
  - 'told/0' : closes the standard output stream
----
-`tell/1` `--` sets the standard output stream
+—-
+`tell/1` `—` sets the standard output stream
 
-`telling/1` `--` returns the name of the standard output stream
+`telling/1` `—` returns the name of the standard output stream
 
-`told/0` `--` closes the standard output stream
+`told/0` `—` closes the standard output stream
 
 
 ## FORMS
@@ -52,10 +52,8 @@ tell(CurrentOutput) .
 - `see/1`  
 `seeing/1`  
 `seen/0`  
-`UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Clocksin81`  
-`5.4]`  
-`[Bratko86`  
-`6.1].
+
+`User Guide(Prolog I/O)`
+[Bowen 91, 7.8]  
+[Clocksin 81, 5.4]  
+[Bratko 86, 6.1].

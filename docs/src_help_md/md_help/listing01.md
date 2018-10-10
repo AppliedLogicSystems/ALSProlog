@@ -1,12 +1,12 @@
----
+—-
 title: 'listing/0'
 predicates:
  - 'listing/0' : Prints all clauses
  - 'listing/1' : Prints clauses matching the specified template
----
-`listing/0` `--` Prints all clauses
+—-
+`listing/0` `—` Prints all clauses
 
-`listing/1` `--` Prints clauses matching the specified template
+`listing/1` `—` Prints clauses matching the specified template
 
 
 ## FORMS
@@ -42,4 +42,4 @@ To list all of the clauses in the module dairy, you could submit the goal :
 
 ## SEE ALSO
 
-- [Clocksin 81, 6.4 ]. 
+- [Clocksin 81, 6.4]. 

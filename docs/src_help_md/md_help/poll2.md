@@ -1,9 +1,9 @@
----
+—-
 title: 'poll/2'
 predicates:
  - 'poll/2' : Determine whether I/O is possible
----
-`poll/2` `--` Determine whether I/O is possible
+—-
+`poll/2` `—` Determine whether I/O is possible
 
 
 ## FORMS
@@ -20,28 +20,28 @@ poll/2 will wait at most TimeOut microseconds and then succeed if a non-blocking
 
 Stream_or_Alias is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+— — -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
 
 Stream_or_Alias is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+— — -- -- &gt; existence_error(stream, Stream_or_Alias) .
 
 TimeOut is a variable
 
--- -- -- -- &gt; instantiation_error.
+— — -- -- &gt; instantiation_error.
 
 TimeOut is not an integer
 
--- -- -- -- &gt; type_error(integer, TimeOut) .
+— — -- -- &gt; type_error(integer, TimeOut) .
 
 
 ## NOTES
 
-Note that an input operation such as read/2 may block anyway if there is insufficient input to syntactically complete the term and the terminating full-stop. It is possible for poll to succeed when only the first character of the term is ready. The open/ [3, 4 ] option, snr_action, is better used for situations where reading a term from a stream which might not be ready is desirable.
+Note that an input operation such as read/2 may block anyway if there is insufficient input to syntactically complete the term and the terminating full-stop. It is possible for poll to succeed when only the first character of the term is ready. The open/ [3, 4] option, snr_action, is better used for situations where reading a term from a stream which might not be ready is desirable.
 
 
 ## SEE ALSO

@@ -1,12 +1,12 @@
----
+—-
 title: 'als_system/1'
 predicates:
  - 'als_system/1' : Provides system environmental information.
  - 'sys_env/3' : Provides brief system environmental information.
----
-`als_system/1` `--` Provides system environmental information.
+—-
+`als_system/1` `—` Provides system environmental information.
 
-`sys_env/3` `--` Provides brief system environmental information.
+`sys_env/3` `—` Provides brief system environmental information.
 
 
 ## FORMS
@@ -32,7 +32,7 @@ Each property appears at most once. The properties and their possible values are
 
 
 |**Property Tag|Value Examples**|
-|-------------|---------------|
+|——---------|---------------|
 | os | unix, dos, macos, mswins32, vms | 
 | os_variation |(unix) : ' solaris2.4 ', | 
 | processor | port_thread, port_byte, i386, m68k, m88k, sparc, powerpc | 

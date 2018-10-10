@@ -1,9 +1,9 @@
----
+—-
 title: ',/2(comma)'
 predicates:
  - ',/2' : conjunction of two goals
----
-`,/2` `--` conjunction of two goals
+—-
+`,/2` `—` conjunction of two goals
 
 
 ## FORMS
@@ -66,5 +66,5 @@ Note that the parentheses around the argument to call/1 are to keep the parser f
 `:/2`  
 `;/2`
 
-- [Bratko 86, 2.3 ]
-- [Clocksin 81, 6.7 ]. 
+- [Bratko 86, 2.3]
+- [Clocksin 81, 6.7]. 

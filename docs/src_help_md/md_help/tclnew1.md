@@ -1,12 +1,12 @@
----
+—-
 title: 'tcl_new/1'
 predicates:
  - 'tcl_new/1' : create a Tcl interpreter
  - 'tk_new/1' : create a Tcl interpreter initialized for Tk
----
-`tcl_new/1` `--` create a Tcl interpreter
+—-
+`tcl_new/1` `—` create a Tcl interpreter
 
-`tk_new/1` `--` create a Tcl interpreter initialized for Tk
+`tk_new/1` `—` create a Tcl interpreter initialized for Tk
 
 
 ## FORMS
@@ -37,14 +37,14 @@ Succeeds,unifyingXwiththeatom'interp1'.
 
 Interpreter is not an atom or variable.
 
--- -- -- -- &gt; type_error(atom_or_variable) .
+— — -- -- &gt; type_error(atom_or_variable) .
 
 The atom Interpreter has already been use as the name of a Tcl interpreter.
 
--- -- -- -- &gt; permission_error(create, tcl_interpreter, Interpreter)
+— — -- -- &gt; permission_error(create, tcl_interpreter, Interpreter)
 
 Tcl is unable to create the interpreter.
 
--- -- -- --
+— — -- --
 tcl_error(message)
 

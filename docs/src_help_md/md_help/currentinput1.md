@@ -1,12 +1,12 @@
----
+—-
 title: 'current_input/1'
 predicates:
  - 'current_input/1' : retrieve current input stream
  - 'current_output/1' : retrieve current output stream
----
-`current_input/1` `--` retrieve current input stream
+—-
+`current_input/1` `—` retrieve current input stream
 
-`current_output/1` `--` retrieve current output stream
+`current_output/1` `—` retrieve current output stream
 
 
 ## FORMS

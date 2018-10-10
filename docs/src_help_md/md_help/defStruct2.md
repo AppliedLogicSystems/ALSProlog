@@ -1,9 +1,9 @@
----
+—-
 title: 'defStruct/2'
 predicates:
  - 'defStruct/2' : specify an abstract data type
----
-`defStruct/2` `--` specify an abstract data type
+—-
+`defStruct/2` `—` specify an abstract data type
 
 
 ## FORMS

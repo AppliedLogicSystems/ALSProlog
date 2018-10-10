@@ -1,9 +1,9 @@
----
+—-
 title: 'make_hash_table/1'
 predicates:
  - 'make_hash_table/1' : create hash table and access predicates
----
-`make_hash_table/1` `--` create hash table and access predicates
+—-
+`make_hash_table/1` `—` create hash table and access predicates
 
 
 ## FORMS
@@ -15,17 +15,17 @@ make_hash_table(Name)
 
 make_hash_table/1 will create a hash table and a set of access methods with the atom Name as the suffix. Suppose for the sake of the following discussion that Name is bound to the atom ' _table ' . Then the access predicates created will be as follows :
 
-reset_table -- throw away old hash table associated with the ' _table ' hash table and create a brand new one.
+reset_table — throw away old hash table associated with the ' _table ' hash table and create a brand new one.
 
-set_table(Key, Value) -- associate Key with Value in the hash table Key should be bound to a ground term. Any former associations that Key had in the hash table are replaced.
+set_table(Key, Value) — associate Key with Value in the hash table Key should be bound to a ground term. Any former associations that Key had in the hash table are replaced.
 
-get_table(Key, Value) -- get the value associated with the ground term bound to Key and unify it with Value.
+get_table(Key, Value) — get the value associated with the ground term bound to Key and unify it with Value.
 
-del_table(Key, Value) -- delete the Key/Value association from the hash table. Key must be bound to a ground term. Value will be unified against the associated value in the table. If the unification is not successful, the table will not be modified.
+del_table(Key, Value) — delete the Key/Value association from the hash table. Key must be bound to a ground term. Value will be unified against the associated value in the table. If the unification is not successful, the table will not be modified.
 
-pget_table(KeyPattern, ValPattern) -- The &quot; p &quot; in pget and pdel, below, stands for pattern. pget_table permits KeyPattern and ValPattern to have any desired instantiation. It will backtrack through the table and locate associations matching the &quot; pattern &quot; as specified by KeyPattern and ValPattern.
+pget_table(KeyPattern, ValPattern) — The &quot; p &quot; in pget and pdel, below, stands for pattern. pget_table permits KeyPattern and ValPattern to have any desired instantiation. It will backtrack through the table and locate associations matching the &quot; pattern &quot; as specified by KeyPattern and ValPattern.
 
-pdel_table(KeyPattern, ValPattern) -- This functions the same as pget_table except that the association is deleted from the table once it is retrieved.
+pdel_table(KeyPattern, ValPattern) — This functions the same as pget_table except that the association is deleted from the table once it is retrieved.
 
 
 ## EXAMPLES
