@@ -3,7 +3,7 @@ title: 'set_stream_position/2'
 predicates:
  - 'set_stream_position/2' : seek to a new position in a stream
 ---
-`set_stream_position/2` `--` seek to a new position in a stream
+`set_stream_position/2` — seek to a new position in a stream
 
 
 ## FORMS
@@ -117,4 +117,4 @@ As the example above demonstrates, set_stream_position/2 may be used when used i
 - `open/4`  
 `get_char/2`  
 `stream_property/2`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

@@ -4,9 +4,9 @@ predicates:
  - '==/2' : terms are identical
  - '\==/2' : terms are not identical
 ---
-`==/2` `--` terms are identical
+`==/2` — terms are identical
 
-`\==/2` `--` terms are not identical
+`\==/2` — terms are not identical
 
 
 ## FORMS
@@ -52,7 +52,7 @@ no.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.4 ]
-- [Clocksin 81, 6.8 ]
-- [Bratko 86, 3.4 ]. 
+- [Bowen 91, 7.4]
+- [Clocksin 81, 6.8]
+- [Bratko 86, 3.4]. 
 

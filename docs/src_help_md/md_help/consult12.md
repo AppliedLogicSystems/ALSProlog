@@ -6,13 +6,13 @@ predicates:
  - 'consultq/1' : load a Prolog file, without messages
  - 'reconsult/1' : load a Prolog file, updating database
 ---
-`consult/1` `--` load a Prolog file
+`consult/1` — load a Prolog file
 
-`consult/2` `--` load a Prolog file, with options
+`consult/2` — load a Prolog file, with options
 
-`consultq/1` `--` load a Prolog file, without messages
+`consultq/1` — load a Prolog file, without messages
 
-`reconsult/1` `--` load a Prolog file, updating database
+`reconsult/1` — load a Prolog file, updating database
 
 
 ## FORMS
@@ -171,6 +171,6 @@ is consulted or reconsulted, the input clauses will be taken from the user ' s t
 
 ## SEE ALSO
 
-- [Bratko 86, 6.5 ]
-- [Clocksin 81, 6.1 ]
+- [Bratko 86, 6.5]
+- [Clocksin 81, 6.1]
 

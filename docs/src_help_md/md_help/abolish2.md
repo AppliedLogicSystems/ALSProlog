@@ -3,7 +3,7 @@ title: 'abolish/2'
 predicates:
  - 'abolish/2' : remove a procedure from the database
 ---
-`abolish/2` `--` remove a procedure from the database
+`abolish/2` — remove a procedure from the database
 
 
 ## FORMS

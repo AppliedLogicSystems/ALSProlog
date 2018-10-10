@@ -3,7 +3,7 @@ title: 'make_hash_table/1'
 predicates:
  - 'make_hash_table/1' : create hash table and access predicates
 ---
-`make_hash_table/1` `--` create hash table and access predicates
+`make_hash_table/1` — create hash table and access predicates
 
 
 ## FORMS

@@ -4,9 +4,9 @@ predicates:
  - 'get_char/1' : read a character from current input stream
  - 'get_char/2' : read character from a specific stream
 ---
-`get_char/1` `--` read a character from current input stream
+`get_char/1` — read a character from current input stream
 
-`get_char/2` `--` read character from a specific stream
+`get_char/2` — read character from a specific stream
 
 
 ## FORMS
@@ -69,9 +69,9 @@ The stream associated with Stream_or_Alias has no input ready to be read and the
 
 ## NOTES
 
-A character is simply an atom with length 1 get_code/ [1, 2 ] is used to retrieve a character code.
+A character is simply an atom with length 1 get_code/ [1, 2] is used to retrieve a character code.
 
-If get_char/ [1, 2 ] is called with Char instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from char_code/2, not get_char/ [1, 2 ].
+If get_char/ [1, 2] is called with Char instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from char_code/2, not get_char/ [1, 2].
 
 
 ## SEE ALSO
@@ -82,4 +82,4 @@ If get_char/ [1, 2 ] is called with Char instantiated to a term which is not a c
 `close/1`  
 `char_code/2`
 
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

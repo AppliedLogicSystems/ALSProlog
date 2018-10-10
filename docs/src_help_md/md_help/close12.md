@@ -4,9 +4,9 @@ predicates:
  - 'close/1' : close an open stream
  - 'close/2' : close an open stream with options
 ---
-`close/1` `--` close an open stream
+`close/1` — close an open stream
 
-`close/2` `--` close an open stream with options
+`close/2` — close an open stream with options
 
 
 ## FORMS
@@ -70,4 +70,4 @@ Certain streams which are opened at system startup time can not be closed. Among
 - `open/4`  
 `current_input/1`  
 `flush_output/1`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

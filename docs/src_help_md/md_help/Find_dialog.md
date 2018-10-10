@@ -3,7 +3,7 @@ title: 'Find Dialog'
 predicates:
  - 'Find Dialog' : Search and replace in edit windows
 ---
-`Find Dialog` `--` Search and replace in edit windows
+`Find Dialog` — Search and replace in edit windows
 
 
 ## FORMS

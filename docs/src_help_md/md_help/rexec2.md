@@ -3,7 +3,7 @@ title: 'rexec/2'
 predicates:
  - 'rexec/2' : Execute an operating system command, possibly remotely.
 ---
-`rexec/2` `--` Execute an operating system command, possibly remotely.
+`rexec/2` — Execute an operating system command, possibly remotely.
 
 
 ## FORMS

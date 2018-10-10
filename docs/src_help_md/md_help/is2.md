@@ -3,7 +3,7 @@ title: 'is/2'
 predicates:
  - 'is/2' : evaluates an arithmetic expression
 ---
-`is/2` `--` evaluates an arithmetic expression
+`is/2` — evaluates an arithmetic expression
 
 
 ## FORMS
@@ -113,6 +113,6 @@ ALS Prolog complies to the ISO Prolog Standard regarding errors. A calculation e
 
 ## SEE ALSO
 
-- [Bowen 91, 7.7 ]
-- [Clocksin 81, 6.11 ]
-- [Bratko 86, 3.4 ]. 
+- [Bowen 91, 7.7]
+- [Clocksin 81, 6.11]
+- [Bratko 86, 3.4]. 

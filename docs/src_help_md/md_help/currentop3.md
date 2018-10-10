@@ -3,7 +3,7 @@ title: 'current_op/3'
 predicates:
  - 'current_op/3' : retrieve current operator definitions
 ---
-`current_op/3` `--` retrieve current operator definitions
+`current_op/3` — retrieve current operator definitions
 
 
 ## FORMS
@@ -38,4 +38,4 @@ close/1 may change the current input or current output streams.
 - `op/3`  
 `read_term/[2`  
 `3]`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

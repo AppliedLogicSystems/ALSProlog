@@ -7,15 +7,15 @@ predicates:
  - 'printf_opt/3' : print out string with format, arguments, options
  - 'printf/4' : print out string with format, arguments, options
 ---
-`printf/1` `--` print out a string to the current output
+`printf/1` — print out a string to the current output
 
-`printf/2` `--` print out a string with arguments
+`printf/2` — print out a string with arguments
 
-`printf/3` `--` print out a string with a format and arguments
+`printf/3` — print out a string with a format and arguments
 
-`printf_opt/3` `--` print out string with format, arguments, options
+`printf_opt/3` — print out string with format, arguments, options
 
-`printf/4` `--` print out string with format, arguments, options
+`printf/4` — print out string with format, arguments, options
 
 
 ## FORMS
@@ -83,5 +83,5 @@ yes.
 - `nl/0`  
 `put/1`  
 `write/0`  
-`UserGuide(PrologI/O)`  
+`User Guide (Prolog I/O)`  
 `[Unix/CReferenceManuals:printf(3S)].

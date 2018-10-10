@@ -4,9 +4,9 @@ predicates:
  - 'var/1' : the variable is unbound
  - 'nonvar/1' : the variable is instantiated
 ---
-`var/1` `--` the variable is unbound
+`var/1` — the variable is unbound
 
-`nonvar/1` `--` the variable is instantiated
+`nonvar/1` — the variable is instantiated
 
 
 ## FORMS
@@ -41,7 +41,7 @@ no.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.6 ]
-- [Bratko 86, 7.1.1 ]
-- [Sterling 86, 10.1 ]. 
+- [Bowen 91, 7.6]
+- [Bratko 86, 7.1.1]
+- [Sterling 86, 10.1]. 
 

@@ -6,13 +6,13 @@ predicates:
  - 'findall/3' : all solutions for a goal, not sorted
  - 'b_findall/4' : bound list of solutions for a goal, not sorted
 ---
-`setof/3` `--` all unique solutions for a goal, sorted
+`setof/3` — all unique solutions for a goal, sorted
 
-`bagof/3` `--` all solutions for a goal, not sorted
+`bagof/3` — all solutions for a goal, not sorted
 
-`findall/3` `--` all solutions for a goal, not sorted
+`findall/3` — all solutions for a goal, not sorted
 
-`b_findall/4` `--` bound list of solutions for a goal, not sorted
+`b_findall/4` — bound list of solutions for a goal, not sorted
 
 
 ## FORMS
@@ -106,7 +106,7 @@ yes.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.5 ]
-- [Clocksin 81, 7.8 ]
-- [Bratko 86, 7.6 ]
-- [Sterling 86, 17.1 ]. 
+- [Bowen 91, 7.5]
+- [Clocksin 81, 7.8]
+- [Bratko 86, 7.6]
+- [Sterling 86, 17.1]. 

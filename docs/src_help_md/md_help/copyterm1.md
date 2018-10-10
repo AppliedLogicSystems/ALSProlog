@@ -3,7 +3,7 @@ title: 'copy_term/1'
 predicates:
  - 'copy_term/1' : make copy of a term
 ---
-`copy_term/1` `--` make copy of a term
+`copy_term/1` — make copy of a term
 
 
 ## FORMS

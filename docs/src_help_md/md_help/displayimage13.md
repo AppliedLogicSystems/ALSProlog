@@ -1,12 +1,12 @@
 ---
 title: 'display_image/[1,3]'
 predicates:
- - 'create_image/ [2, 3 ]' : create an image from a GIF file
- - 'display_image/ [1, 3 ]' : display an image
+ - 'create_image/ [2, 3]' : create an image from a GIF file
+ - 'display_image/ [1, 3]' : display an image
 ---
-`create_image/ [2, 3 ]` `--` create an image from a GIF file
+`create_image/ [2, 3]` — create an image from a GIF file
 
-`display_image/ [1, 3 ]` `--` display an image
+`display_image/ [1, 3]` — display an image
 
 
 ## FORMS

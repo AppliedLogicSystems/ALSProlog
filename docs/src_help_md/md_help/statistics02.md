@@ -4,9 +4,9 @@ predicates:
  - 'statistics/0' : display memory allocation information
  - 'statistics/2' : display runtime statistics
 ---
-`statistics/0` `--` display memory allocation information
+`statistics/0` — display memory allocation information
 
-`statistics/2` `--` display runtime statistics
+`statistics/2` — display runtime statistics
 
 
 ## FORMS
@@ -46,6 +46,6 @@ yes.
 
 ## NOTES
 
-E, B, H, HB, TR, MSP, SPB are registers in the Warren Abstract Machine(WAM) ; cf. [Warren 83 ], [Warren 86 ], [Maier 88 ], Chapter 11.8, [Tick 88 ].
+E, B, H, HB, TR, MSP, SPB are registers in the Warren Abstract Machine(WAM) ; cf. [Warren 83], [Warren 86], [Maier 88], Chapter 11.8, [Tick 88].
 
 

@@ -4,9 +4,9 @@ predicates:
  - 'get_code/1' : read a character code from current input stream
  - 'get_code/2' : read character code from a specific stream
 ---
-`get_code/1` `--` read a character code from current input stream
+`get_code/1` — read a character code from current input stream
 
-`get_code/2` `--` read character code from a specific stream
+`get_code/2` — read character code from a specific stream
 
 
 ## FORMS
@@ -80,5 +80,5 @@ A character code is simply an integer restricted to a certain range of values.
 `close/1`  
 `char_code/2`
 
-- `UserGuide(PrologI/O)`  
+- `User Guide (Prolog I/O)`  
 `.

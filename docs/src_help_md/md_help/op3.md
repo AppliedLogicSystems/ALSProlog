@@ -3,7 +3,7 @@ title: 'op/3'
 predicates:
  - 'op/3' : define operator associativity and precedence
 ---
-`op/3` `--` define operator associativity and precedence
+`op/3` — define operator associativity and precedence
 
 
 ## FORMS
@@ -100,7 +100,7 @@ yes.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.9 ]
-- [Sterling 86, 8.1 ]
-- [Bratko 86, 3.3 ]
-- [Clocksin 81, 5.5 ]. 
+- [Bowen 91, 7.9]
+- [Sterling 86, 8.1]
+- [Bratko 86, 3.3]
+- [Clocksin 81, 5.5]. 

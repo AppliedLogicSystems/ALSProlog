@@ -4,9 +4,9 @@ predicates:
  - 'put_string/1' : output a string to the current output stream
  - 'put_string/2' : output a string to a specific output stream
 ---
-`put_string/1` `--` output a string to the current output stream
+`put_string/1` — output a string to the current output stream
 
-`put_string/2` `--` output a string to a specific output stream
+`put_string/2` — output a string to a specific output stream
 
 
 ## FORMS

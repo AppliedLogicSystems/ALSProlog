@@ -3,7 +3,7 @@ title: 'Prolog Menu'
 predicates:
  - 'Prolog Menu' : Manage prolog projects and settings
 ---
-`Prolog Menu` `--` Manage alsdev  system and settings
+`Prolog Menu` — Manage alsdev  system and settings
 
 
 ## FORMS

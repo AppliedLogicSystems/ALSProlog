@@ -4,9 +4,9 @@ predicates:
  - 'stream_position/2' : reposition a stream
  - 'stream_position/3' : reposition a stream
 ---
-`stream_position/2` `--` reposition a stream
+`stream_position/2` — reposition a stream
 
-`stream_position/3` `--` reposition a stream
+`stream_position/3` — reposition a stream
 
 
 ## FORMS

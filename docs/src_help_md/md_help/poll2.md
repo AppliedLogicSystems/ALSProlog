@@ -3,7 +3,7 @@ title: 'poll/2'
 predicates:
  - 'poll/2' : Determine whether I/O is possible
 ---
-`poll/2` `--` Determine whether I/O is possible
+`poll/2` — Determine whether I/O is possible
 
 
 ## FORMS
@@ -41,11 +41,11 @@ TimeOut is not an integer
 
 ## NOTES
 
-Note that an input operation such as read/2 may block anyway if there is insufficient input to syntactically complete the term and the terminating full-stop. It is possible for poll to succeed when only the first character of the term is ready. The open/ [3, 4 ] option, snr_action, is better used for situations where reading a term from a stream which might not be ready is desirable.
+Note that an input operation such as read/2 may block anyway if there is insufficient input to syntactically complete the term and the terminating full-stop. It is possible for poll to succeed when only the first character of the term is ready. The open/ [3, 4] option, snr_action, is better used for situations where reading a term from a stream which might not be ready is desirable.
 
 
 ## SEE ALSO
 
 - `open/[3`  
 `4]`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

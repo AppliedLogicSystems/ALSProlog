@@ -3,7 +3,7 @@ title: 'Prolog Projects Menu'
 predicates:
  - 'Prolog Projects Menu' : Manage prolog projects and settings
 ---
-`Prolog Projects Menu` `--` Manage prolog projects and settings
+`Prolog Projects Menu` — Manage prolog projects and settings
 
 
 ## FORMS

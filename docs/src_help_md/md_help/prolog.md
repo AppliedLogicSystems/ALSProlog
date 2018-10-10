@@ -3,7 +3,7 @@ title: 'prolog'
 predicates:
  - 'prolog' : call a prolog term from Tcl
 ---
-`prolog` `--` call a prolog term from Tcl
+`prolog` — call a prolog term from Tcl
 
 
 ## FORMS

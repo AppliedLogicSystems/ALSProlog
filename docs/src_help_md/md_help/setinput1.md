@@ -4,9 +4,9 @@ predicates:
  - 'set_input/1' : set current input stream
  - 'set_output/1' : set current output stream
 ---
-`set_input/1` `--` set current input stream
+`set_input/1` — set current input stream
 
-`set_output/1` `--` set current output stream
+`set_output/1` — set current output stream
 
 
 ## FORMS
@@ -80,5 +80,5 @@ close/1 may also change the setting of the current input or output streams.
 - `current_input/1`  
 `open/3`  
 `close/1`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).
 

@@ -4,9 +4,9 @@ predicates:
  - 'curmod/1' : get the current module
  - 'modules/2' : get the use list of a module
 ---
-`curmod/1` `--` get the current module
+`curmod/1` — get the current module
 
-`modules/2` `--` get the use list of a module
+`modules/2` — get the use list of a module
 
 
 ## FORMS

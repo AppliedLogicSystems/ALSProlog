@@ -3,7 +3,7 @@ title: 'length/2'
 predicates:
  - 'length/2' : count the number of elements in a list
 ---
-`length/2` `--` count the number of elements in a list
+`length/2` — count the number of elements in a list
 
 
 ## FORMS

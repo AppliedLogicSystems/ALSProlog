@@ -5,11 +5,11 @@ predicates:
  - 'clause/3' : retrieve a clause with a database reference
  - 'instance/2' : retrieve a clause from the database reference
 ---
-`clause/2` `--` retrieve a clause
+`clause/2` — retrieve a clause
 
-`clause/3` `--` retrieve a clause with a database reference
+`clause/3` — retrieve a clause with a database reference
 
-`instance/2` `--` retrieve a clause from the database reference
+`instance/2` — retrieve a clause from the database reference
 
 
 ## FORMS
@@ -84,6 +84,6 @@ If Ref is not instantiated to a database reference and Head is uninstantiated, t
 
 ## SEE ALSO
 
-- [Bowen 91, 7.3 ]
-- [Sterling 86, 12.2 ]
-- [Clocksin 81, 6.4 ]. 
+- [Bowen 91, 7.3]
+- [Sterling 86, 12.2]
+- [Clocksin 81, 6.4]. 

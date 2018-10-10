@@ -3,7 +3,7 @@ title: 'call/1'
 predicates:
  - 'call/1' : calls a goal
 ---
-`call/1` `--` calls a goal
+`call/1` — calls a goal
 
 
 ## FORMS
@@ -61,6 +61,6 @@ If Goal is an uninstantiated variable or a number, call/1 will fail.
 - `!/0`  
 `:/2`
 
-- [Clocksin 81, 6.7 ]
-- [Bratko 86, 7.2 ]
-- [Sterling 86, 10.4 ]. 
+- [Clocksin 81, 6.7]
+- [Bratko 86, 7.2]
+- [Sterling 86, 10.4]. 

@@ -6,13 +6,13 @@ predicates:
  - 'nospy/0' : removes all spy points
  - 'nospy/1' : removes a spy point
 ---
-`spy/0` `--` enable spy points
+`spy/0` — enable spy points
 
-`spy/1` `--` sets a spy point
+`spy/1` — sets a spy point
 
-`nospy/0` `--` removes all spy points
+`nospy/0` — removes all spy points
 
-`nospy/1` `--` removes a spy point
+`nospy/1` — removes a spy point
 
 
 ## FORMS
@@ -35,10 +35,8 @@ spy/1 places a spy point on the procedure name Name/Arity. nospy/1 removes a spe
 
 ## SEE ALSO
 
-- `Tools(UswingtheDebugger)`  
-`[Bowen91`  
-`6.5]`  
-`[Clocksin81`  
-`6.13]`  
-`[Bratko86`  
-`8.4].
+- Tools (Using the Debugger)
+
+- [Bowen 91, 6.5]  
+- [Clocksin 81, 6.13]  
+- [Bratko 86, 8.4].

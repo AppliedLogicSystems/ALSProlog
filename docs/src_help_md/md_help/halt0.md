@@ -3,7 +3,7 @@ title: 'halt/0'
 predicates:
  - 'halt/0' : exit ALS Prolog
 ---
-`halt/0` `--` exit ALS Prolog
+`halt/0` — exit ALS Prolog
 
 
 ## FORMS

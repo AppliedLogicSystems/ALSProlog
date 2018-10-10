@@ -3,7 +3,7 @@ title: 'repeat/0'
 predicates:
  - 'repeat/0' : always succeed upon backtracking
 ---
-`repeat/0` `--` always succeed upon backtracking
+`repeat/0` — always succeed upon backtracking
 
 
 ## FORMS
@@ -41,6 +41,6 @@ fail.
 
 - `fail/0`
 
-- [Sterling 86, 12.5 ]
-- [Bratko 86, 7.5 ]
-- [Clocksin 81, 6.6 ]. 
+- [Sterling 86, 12.5]
+- [Bratko 86, 7.5]
+- [Clocksin 81, 6.6]. 

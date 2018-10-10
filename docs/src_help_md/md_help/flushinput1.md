@@ -3,7 +3,7 @@ title: 'flush_input/1'
 predicates:
  - 'flush_input/1' : discard buffer contents of stream
 ---
-`flush_input/1` `--` discard buffer contents of stream
+`flush_input/1` — discard buffer contents of stream
 
 
 ## FORMS
@@ -43,4 +43,4 @@ This operation is also useful for use with datagram sockets. The buffer contents
 - `open/[3`  
 `4]`  
 `flush_output/[0`  
-`1].- `UserGuide(PrologI/O).
+`1].- `User Guide (Prolog I/O).

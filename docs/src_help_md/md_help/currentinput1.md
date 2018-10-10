@@ -4,9 +4,9 @@ predicates:
  - 'current_input/1' : retrieve current input stream
  - 'current_output/1' : retrieve current output stream
 ---
-`current_input/1` `--` retrieve current input stream
+`current_input/1` — retrieve current input stream
 
-`current_output/1` `--` retrieve current output stream
+`current_output/1` — retrieve current output stream
 
 
 ## FORMS
@@ -58,4 +58,4 @@ close/1 may change the current input or current output streams.
 `put_char/1`  
 `write/1`
 
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

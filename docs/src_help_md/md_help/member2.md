@@ -4,9 +4,9 @@ predicates:
  - 'member/2' : list membership
  - 'dmember/2' : list membership
 ---
-`member/2` `--` list membership
+`member/2` — list membership
 
-`dmember/2` `--` list membership
+`dmember/2` — list membership
 
 
 ## FORMS

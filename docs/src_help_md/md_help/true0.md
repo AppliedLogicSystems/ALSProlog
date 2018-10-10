@@ -3,7 +3,7 @@ title: 'true/0'
 predicates:
  - 'true/0' : always succeeds
 ---
-`true/0` `--` always succeeds
+`true/0` — always succeeds
 
 
 ## FORMS
@@ -28,4 +28,4 @@ yes.
 
 - `fail/0`
 
-- [Clocksin 81, 6.2 ]. 
+- [Clocksin 81, 6.2]. 

@@ -3,7 +3,7 @@ title: 'abort/0'
 predicates:
  - 'abort/0' : return execution immediately to the Prolog shell
 ---
-`abort/0` `--` return execution immediately to the Prolog shell
+`abort/0` — return execution immediately to the Prolog shell
 
 
 ## FORMS

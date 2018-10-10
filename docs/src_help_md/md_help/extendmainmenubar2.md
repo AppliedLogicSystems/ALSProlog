@@ -2,20 +2,20 @@
 title: 'extend_main_menubar/2'
 predicates:
  - 'extend_main_menubar/2' : add entries to the main menubar
- - 'menu_entries_list/ [2, 3 ]' : obtain menu entries
- - 'path_to_menu_entry/ [2, 3, 4 ]' : obtain path to a menu entry
+ - 'menu_entries_list/ [2, 3]' : obtain menu entries
+ - 'path_to_menu_entry/ [2, 3, 4]' : obtain path to a menu entry
  - 'add_to_main_menu_entry/2' : add an item to a menu entry
  - 'extend_cascade/3' : extend a menu cascade
 ---
-`extend_main_menubar/2` `--` add entries to the main menubar
+`extend_main_menubar/2` — add entries to the main menubar
 
-`menu_entries_list/ [2, 3 ]` `--` obtain menu entries
+`menu_entries_list/ [2, 3]` — obtain menu entries
 
-`path_to_menu_entry/ [2, 3, 4 ]` `--` obtain path to a menu entry
+`path_to_menu_entry/ [2, 3, 4]` — obtain path to a menu entry
 
-`add_to_main_menu_entry/2` `--` add an item to a menu entry
+`add_to_main_menu_entry/2` — add an item to a menu entry
 
-`extend_cascade/3` `--` extend a menu cascade
+`extend_cascade/3` — extend a menu cascade
 
 
 ## FORMS

@@ -11,23 +11,23 @@ predicates:
  - 'write_term/3' : write term to specified output stream with options
  - 'display/1' : write term to current output stream in canonical form
 ---
-`write/1` `--` write term to current output stream
+`write/1` — write term to current output stream
 
-`write/2` `--` write term to specified stream
+`write/2` — write term to specified stream
 
-`writeq/1` `--` write term to current output stream so that it may be read back in
+`writeq/1` — write term to current output stream so that it may be read back in
 
-`writeq/2` `--` write term to specified stream so that it may be read back in
+`writeq/2` — write term to specified stream so that it may be read back in
 
-`write_canonical/1` `--` write term to current output stream in canonical form(no operators)
+`write_canonical/1` — write term to current output stream in canonical form(no operators)
 
-`write_canonical/2` `--` write term to specified stream in canonical form
+`write_canonical/2` — write term to specified stream in canonical form
 
-`write_term/2` `--` write term to current output stream with options
+`write_term/2` — write term to current output stream with options
 
-`write_term/3` `--` write term to specified output stream with options
+`write_term/3` — write term to specified output stream with options
 
-`display/1` `--` write term to current output stream in canonical form
+`display/1` — write term to current output stream in canonical form
 
 
 ## FORMS
@@ -87,7 +87,7 @@ write_term/3 writes out the term Term to the output stream associated with Strea
 
 The options mandated by the draft standard are :
 
-quoted(Bool) -- Bool is true or false. When Bool is true, atoms and functors are written out in such a manner so that read/ [1, 2 ] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.
+quoted(Bool) -- Bool is true or false. When Bool is true, atoms and functors are written out in such a manner so that read/ [1, 2] may be used to read them back in; when Bool is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.
 
 ignore_ops(Bool) -- Bool may be true or false. When Bool is true, compound terms are output in functional notation.
 
@@ -200,27 +200,19 @@ Options is a list containing an element E which is neither a variable nor a vali
 
 ## SEE ALSO
 
-- `read_term/[2`  
-`3]`  
-`read/[1`  
-`2]`  
+- `read_term/[2,3]`  
+`read/[1,2]`  
 `open/4`  
 `close/1`  
-`nl/[0`  
-`1]`  
-`put_char/[1`  
-`2]`  
-`put_code/[1`  
-`2]`  
+`nl/[0,1]`  
+`put_char/[1,2]`  
+`put_code/[1,2]`  
 `set_line_length/2`  
 `op/3`  
 `tell/1`
-- `UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Clocksin81`  
-`6.9]`  
-`[Sterling86`  
-`12.1]`  
-`[Bratko86`  
-`6.2.1].
+
+- `User Guide (Prolog I/O)`  
+- [Bowen 91, 7.8]  
+- [Clocksin 81, 6.9]  
+- [Sterling 86, 12.1]  
+- [Bratko 86, 6.2.1].

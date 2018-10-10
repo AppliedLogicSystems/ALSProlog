@@ -4,9 +4,9 @@ predicates:
  - 'not/1' : tests whether a goal fails
  - '\+/1' : tests whether a goal fails
 ---
-`not/1` `--` tests whether a goal fails
+`not/1` — tests whether a goal fails
 
-`\+/1` `--` tests whether a goal fails
+`\+/1` — tests whether a goal fails
 
 
 ## FORMS
@@ -47,7 +47,7 @@ yes.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.1 ]
-- [Sterling 86, 11.3 ]
-- [Bratko 86, 5.3 ]
-- [Clocksin 81, 6.7 ]. 
+- [Bowen 91, 7.1]
+- [Sterling 86, 11.3]
+- [Bratko 86, 5.3]
+- [Clocksin 81, 6.7]. 

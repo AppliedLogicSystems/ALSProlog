@@ -1,9 +1,9 @@
 ---
 title: 'file_select_dialog/[1,2,3]'
 predicates:
- - 'file_select_dialog/ [1, 2, 3 ]' : select a file
+ - 'file_select_dialog/ [1, 2, 3]' : select a file
 ---
-`file_select_dialog/ [1, 2, 3 ]` `--` select a file
+`file_select_dialog/ [1, 2, 3]` — select a file
 
 
 ## FORMS
@@ -55,7 +55,7 @@ filetypes = FileTypesList
 
 where FileTypesList is a list of the form
 
-[ [Desc1 [ext1 ] ], [Desc2, [ext2 ], ... ]
+[ [Desc1 [ext1] ], [Desc2, [ext2], ... ]
 
 and the Desci and exti are all atoms.
 

@@ -4,9 +4,9 @@ predicates:
  - 'module_closure/2' : creates a module closure
  - 'module_closure/3' : creates a module closure for the specified procedure
 ---
-`module_closure/2` `--` creates a module closure
+`module_closure/2` — creates a module closure
 
-`module_closure/3` `--` creates a module closure for the specified procedure
+`module_closure/3` — creates a module closure for the specified procedure
 
 
 ## FORMS
@@ -134,5 +134,6 @@ Note that we exported leading/1 from module m3, and both module m1 and module m2
 ## SEE ALSO
 
 - `:/2`
-- `UserGuide(Modules)
+
+- `User Guide (Modules)
 

@@ -4,9 +4,9 @@ predicates:
  - 'setPrologInterrupt/1' : establish the type of a Prolog interrupt
  - 'getPrologInterrupt/1' : determine the type of a Prolog interrupt
 ---
-`setPrologInterrupt/1` `--` establish the type of a Prolog interrupt
+`setPrologInterrupt/1` — establish the type of a Prolog interrupt
 
-`getPrologInterrupt/1` `--` determine the type of a Prolog interrupt
+`getPrologInterrupt/1` — determine the type of a Prolog interrupt
 
 
 ## FORMS
@@ -29,5 +29,6 @@ getPrologInterrupt(Term) fetches the value of the global interrupt variable and 
 
 - `forcePrologInterrupt/1`  
 `callWithDelayedInterrupt/1`
-- `UserGuide(PrologInterrupts).
+
+- `User Guide (Prolog Interrupts).
 

@@ -3,7 +3,7 @@ title: 'stream_property/2'
 predicates:
  - 'stream_property/2' : retrieve streams and their properties
 ---
-`stream_property/2` `--` retrieve streams and their properties
+`stream_property/2` — retrieve streams and their properties
 
 
 ## FORMS
@@ -87,5 +87,5 @@ L=['$stderr','$stdin','$stdout',foo]
 `at_end_of_stream/1`
 
 - `set_line_length/2`
-- `UserGuide(PrologI/O)
+- `User Guide (Prolog I/O)
 

@@ -4,9 +4,9 @@ predicates:
  - 'flush_output/0' : flush current output stream
  - 'flush_output/1' : flush specific output stream
 ---
-`flush_output/0` `--` flush current output stream
+`flush_output/0` — flush current output stream
 
-`flush_output/1` `--` flush specific output stream
+`flush_output/1` — flush specific output stream
 
 
 ## FORMS
@@ -76,4 +76,4 @@ Stream_or_Alias is a valid output stream, but the flush operation could not be c
 - `open/4`  
 `close/1`  
 `current_output/1`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

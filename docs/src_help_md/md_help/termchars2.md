@@ -4,9 +4,9 @@ predicates:
  - 'term_chars/2' : convert between a term and the list of characters which represent the term
  - 'term_codes/2' : convert between a term and the list of character codes which represent the term
 ---
-`term_chars/2` `--` convert between a term and the list of characters which represent the term
+`term_chars/2` — convert between a term and the list of characters which represent the term
 
-`term_codes/2` `--` convert between a term and the list of character codes which represent the term
+`term_codes/2` — convert between a term and the list of character codes which represent the term
 
 
 ## FORMS
@@ -81,4 +81,4 @@ CharList(or CodeList) is not parsable as a term
 `number_chars`  
 `atom_chars`
 
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

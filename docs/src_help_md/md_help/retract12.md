@@ -5,11 +5,11 @@ predicates:
  - 'retract/2' : removes a clause specified by a database reference
  - 'erase/1' : removes a clause from the database
 ---
-`retract/1` `--` removes a clause from the database
+`retract/1` — removes a clause from the database
 
-`retract/2` `--` removes a clause specified by a database reference
+`retract/2` — removes a clause specified by a database reference
 
-`erase/1` `--` removes a clause from the database
+`erase/1` — removes a clause from the database
 
 
 ## FORMS
@@ -114,7 +114,7 @@ As the last call to listing/1 shows, there are no more heroes left in the databa
 
 - `clause/1`
 
-- [Bowen 91, 7.3 ]
-- [Clocksin 81, 6.4 ]
-- [Bratko 86, 7.4 ]
-- [Sterling 86, 12.2 ]. 
+- [Bowen 91, 7.3]
+- [Clocksin 81, 6.4]
+- [Bratko 86, 7.4]
+- [Sterling 86, 12.2]. 

@@ -5,11 +5,11 @@ predicates:
  - 'make_det_gv/1' : create named global variable and access methods which preserves instantiations of structures
  - 'free_gv/1' : release store associated with named global variable
 ---
-`make_gv/1` `--` create named global variable and access method
+`make_gv/1` — create named global variable and access method
 
-`make_det_gv/1` `--` create named global variable and access methods which preserves instantiations of structures
+`make_det_gv/1` — create named global variable and access methods which preserves instantiations of structures
 
-`free_gv/1` `--` release store associated with named global variable
+`free_gv/1` — release store associated with named global variable
 
 
 ## FORMS

@@ -4,9 +4,9 @@ predicates:
  - 'open/3' : open a stream
  - 'open/4' : open a stream with options
 ---
-`open/3` `--` open a stream
+`open/3` — open a stream
 
-`open/4` `--` open a stream with options
+`open/4` — open a stream with options
 
 
 ## FORMS
@@ -58,7 +58,7 @@ socket(inet_dgram, Host, Port)
 
 socket(clone, Stream_Or_Alias)
 
-Regardless of the mode(read or write), the call to open/ [3, 4 ] will attempt to open the stream as a server(if appropriate) . Failing that, it will attempt to open the stream as a client. If a connection-oriented socket is opened as a server, then prior to the first buffer read or write, the stream will wait for a client to connect. If the stream is opened as a client, the connection(in a connection-oriented socket) is established as part of the open.
+Regardless of the mode(read or write), the call to open/ [3, 4] will attempt to open the stream as a server(if appropriate) . Failing that, it will attempt to open the stream as a client. If a connection-oriented socket is opened as a server, then prior to the first buffer read or write, the stream will wait for a client to connect. If the stream is opened as a client, the connection(in a connection-oriented socket) is established as part of the open.
 
 socket(unix, PathName) : Open a unix domain socket. Addresses in the unix domain are merely path names which are specified by PathName. Unix domain sockets are somewhat limited in that both the server and client process must reside on the same machine. The stream will be opened as a server if the name specified by PathName does not currently exist(and the requisite permissions exist to create a directory entry) . Otherwise, the stream will be opened as a client.
 
@@ -220,4 +220,4 @@ The DEC-10 compatibility predicates see/1 and tell/1 are defined in terms of ope
 `get_char/1`  
 `put_char/1`  
 `set_stream_position/2`
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

@@ -4,9 +4,9 @@ predicates:
  - 'put/1' : write out a character
  - 'tab/1' : prints out a specified number of spaces
 ---
-`put/1` `--` write out a character
+`put/1` — write out a character
 
-`tab/1` `--` prints out a specified number of spaces
+`tab/1` — prints out a specified number of spaces
 
 
 ## FORMS
@@ -35,10 +35,8 @@ yes.
 ## SEE ALSO
 
 - `nl/0`  
-`UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Clocksin81`  
-`5.2]`  
-`[Bratko86`  
-`6.3].
+
+`User Guide (Prolog I/O)`  
+- [Bowen 91, 7.8]  
+- [Clocksin 81, 5.2]  
+- [Bratko 86, 6.3]

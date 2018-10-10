@@ -3,7 +3,7 @@ title: 'arg/3'
 predicates:
  - 'arg/3' : access the arguments of a structured term
 ---
-`arg/3` `--` access the arguments of a structured term
+`arg/3` — access the arguments of a structured term
 
 
 ## FORMS
@@ -41,9 +41,9 @@ If Nth is not an integer greater than 0 and less than or equal to the arity of S
 - `functor/3`  
 `=../2`
 
-- [Bowen 91, 7.6 ]
-- [Sterling 86, 9.2 ]
-- [Bratko 86, 7.2 ]
-- [Clocksin 81, 6.5 ]
+- [Bowen 91, 7.6]
+- [Sterling 86, 9.2]
+- [Bratko 86, 7.2]
+- [Clocksin 81, 6.5]
 
 

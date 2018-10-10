@@ -5,11 +5,11 @@ predicates:
  - 'all_procedures/4' : retrieves all Prolog- or C-defined procedures
  - 'all_ntbl_entries/4' : retrieves all name table entries
 ---
-`procedures/4` `--` retrieves all Prolog-defined procedures
+`procedures/4` — retrieves all Prolog-defined procedures
 
-`all_procedures/4` `--` retrieves all Prolog- or C-defined procedures
+`all_procedures/4` — retrieves all Prolog- or C-defined procedures
 
-`all_ntbl_entries/4` `--` retrieves all name table entries
+`all_ntbl_entries/4` — retrieves all name table entries
 
 
 ## FORMS

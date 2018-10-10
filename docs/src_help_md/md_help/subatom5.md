@@ -3,7 +3,7 @@ title: 'sub_atom/5'
 predicates:
  - 'sub_atom/5' : dissect an atom
 ---
-`sub_atom/5` `--` dissect an atom
+`sub_atom/5` — dissect an atom
 
 
 ## FORMS
@@ -85,4 +85,4 @@ Length is neither a variable nor an integer
 `atom_chars/2`  
 `atom_codes/2`
 
-- `UserGuide(PrologI/O).
+- `User Guide (Prolog I/O).

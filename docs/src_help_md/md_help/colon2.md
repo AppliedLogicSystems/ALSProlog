@@ -3,7 +3,7 @@ title: ':/2(colon)'
 predicates:
  - ':/2' : calls a goal in the specified module
 ---
-`:/2` `--` calls a goal in the specified module
+`:/2` — calls a goal in the specified module
 
 
 ## FORMS
@@ -31,4 +31,5 @@ If Module is unbound or not bound to a valid module name, the call to : / 2 will
 ## SEE ALSO
 
 - `call/1`  
-`UserGuide(Modules).
+
+`User Guide (Modules).

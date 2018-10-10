@@ -3,7 +3,7 @@ title: 'ALSDev Listener Window'
 predicates:
  - 'Listener Window' : Primary interaction window
 ---
-`Listener Window` `--` Primary interaction window
+`Listener Window` — Primary interaction window
 
 
 ## FORMS

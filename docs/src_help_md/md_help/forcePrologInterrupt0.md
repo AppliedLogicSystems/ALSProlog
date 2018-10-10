@@ -5,11 +5,11 @@ predicates:
  - 'callWithDelayedInterrupt/1' : call goal, setting delayed interrupt
  - 'callWithDelayedInterrupt/2' : call goal, setting delayed interrupt
 ---
-`forcePrologInterrupt/0` `--` force interrupt on next call
+`forcePrologInterrupt/0` — force interrupt on next call
 
-`callWithDelayedInterrupt/1` `--` call goal, setting delayed interrupt
+`callWithDelayedInterrupt/1` — call goal, setting delayed interrupt
 
-`callWithDelayedInterrupt/2` `--` call goal, setting delayed interrupt
+`callWithDelayedInterrupt/2` — call goal, setting delayed interrupt
 
 
 ## FORMS
@@ -38,4 +38,5 @@ callWithDelayedInterrupt/1, except that it invokes Call within module Module.
 
 - `setPrologInterrupt/1`  
 `getPrologInterrupt/1`
-- `UserGuide(PrologInterrupts).
+
+- `User Guide (Prolog Interrupts).

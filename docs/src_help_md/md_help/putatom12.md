@@ -4,9 +4,9 @@ predicates:
  - 'put_atom/1' : output an atom to the current output stream
  - 'put_atom/2' : output an atom to a specific output stream
 ---
-`put_atom/1` `--` output an atom to the current output stream
+`put_atom/1` — output an atom to the current output stream
 
-`put_atom/2` `--` output an atom to a specific output stream
+`put_atom/2` — output an atom to a specific output stream
 
 
 ## FORMS

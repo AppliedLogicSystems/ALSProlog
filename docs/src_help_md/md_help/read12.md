@@ -6,13 +6,13 @@ predicates:
  - 'read_term/2' : read term from current input with options
  - 'read_term/3' : read term from specified stream with options
 ---
-`read/1` `--` read a term from the current input stream
+`read/1` — read a term from the current input stream
 
-`read/2` `--` read a term from specified stream
+`read/2` — read a term from specified stream
 
-`read_term/2` `--` read term from current input with options
+`read_term/2` — read term from current input with options
 
-`read_term/3` `--` read term from specified stream with options
+`read_term/3` — read term from specified stream with options
 
 
 ## FORMS
@@ -155,22 +155,15 @@ The ISO Prolog Standard requires that an error be thrown when there is a syntax 
 
 ## SEE ALSO
 
-- `write/[1`  
-`2]`  
-`write_term/[2`  
-`3]`  
+- `write/[1,2]`  
+`write_term/[2,3]`  
 `open/4`  
 `close/1`  
-`get_char/[1`  
-`2]`  
-`get_code/[1`  
-`2]`  
-`UserGuide(PrologI/O)`  
-`[Bowen91`  
-`7.8]`  
-`[Sterling86`  
-`12.2]`  
-`[Bratko86`  
-`6.2.1]`  
-`[Clocksin81`  
-`5.1].
+`get_char/[1,2]`  
+`get_code/[1,2]`  
+
+`User Guide (Prolog I/O)`  
+- [Bowen 91, 7.8]  
+- [Sterling 86, 12.2]  
+- [Bratko 86, 6.2.1]  
+- [Clocksin 81, 5.1].

@@ -3,7 +3,7 @@ title: ';/2(semi-colon)'
 predicates:
  - ';/2' : disjunction of two goals
 ---
-`;/2` `--` disjunction of two goals
+`;/2` — disjunction of two goals
 
 
 ## FORMS
@@ -80,7 +80,7 @@ no.
 - `!/0`  
 `->/2`
 
-- [Bowen 91, 7.1 ]
-- [Sterling 86, 10.4 ]
-- [Bratko 86, 2.3 ]
-- [Clocksin 81, 6.7 ]. 
+- [Bowen 91, 7.1]
+- [Sterling 86, 10.4]
+- [Bratko 86, 2.3]
+- [Clocksin 81, 6.7]. 

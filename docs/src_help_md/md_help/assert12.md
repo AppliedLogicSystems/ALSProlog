@@ -8,17 +8,17 @@ predicates:
  - 'assertz/1' : adds a clause at the end of a procedure
  - 'assertz/2' : adds a clause at the end of a procedure
 ---
-`assert/1` `--` adds a clause to a procedure
+`assert/1` — adds a clause to a procedure
 
-`assert/2` `--` adds a clause to a procedure
+`assert/2` — adds a clause to a procedure
 
-`asserta/1` `--` adds a clause at the beginning of a procedure
+`asserta/1` — adds a clause at the beginning of a procedure
 
-`asserta/2` `--` adds a clause at the beginning of a procedure
+`asserta/2` — adds a clause at the beginning of a procedure
 
-`assertz/1` `--` adds a clause at the end of a procedure
+`assertz/1` — adds a clause at the end of a procedure
 
-`assertz/2` `--` adds a clause at the end of a procedure
+`assertz/2` — adds a clause at the end of a procedure
 
 
 ## FORMS
@@ -191,7 +191,7 @@ ALS Prolog provides a global variable mechanism separate from the Prolog databas
 
 - `:/2`
 
-- [Bowen 91, 7.3 ]
-- [Clocksin 81, 6.4 ]
-- [Bratko 86, 7.4 ]
-- [Sterling 86, 12.2 ]. 
+- [Bowen 91, 7.3]
+- [Clocksin 81, 6.4]
+- [Bratko 86, 7.4]
+- [Sterling 86, 12.2]. 
