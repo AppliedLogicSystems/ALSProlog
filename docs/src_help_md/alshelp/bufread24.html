@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>bufread/[2,4]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">bufread/[2,4]</h1>
+</header>
+<p><code>bufread/2</code> — runs the Prolog parser on a string of text</p>
+<p><code>bufread/3</code> — similiar to <code>bufread/2</code>, allowing read options</p>
+<p><code>old_bufread/2</code> — similiar to <code>bufread/2</code>, giving additional information on variables</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>bufread(Buffer, Term)
+
+bufread(Buffer, Term, Options)
+
+old_bufread(Buffer, [Term | VarNames ])</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>bufread/2</code> takes a Prolog string, <code>Buffer</code>, and attempts to transform it into a Prolog term. It does this by :</p>
+<ul>
+<li><p>Reading the first term out of Buffer(trailing characters from Buffer are ignored) and unifying it with Term. A closing fullstop (period) is not need: The implementation of <code>bufread/2</code> utilizes the <code>attach_fullstop(true)</code> read-option.</p></li>
+<li><p>If an error has occured, the error message is printed on the terminal in a manner similar to that for <code>consult</code> and for <code>read</code> generally.</p></li>
+</ul>
+<p><code>old_bufread/2</code> behaves similarly, except that it returns in Vars a list of the quoted variable names occurring in the term read. The same information can be obtain using <code>bufread/3</code> with Options containing either <code>variable_names(VNs)</code> or <code>vars_and_names(Vars,Names)</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following examples read the string</p>
+<pre><code>&quot;f(abc, Bob)&quot;
+
+?- bufread(&quot;f(abc, Bob)&quot;, Term).
+
+Term=f(abc,_A) 
+
+yes.
+
+?- bufread(&quot;f(abc, Bob)&quot;, Term, [vars_and_names(Vars,Names)]).
+
+Term=f(abc,_A) 
+Vars=[_A] 
+Names=[&#39;Bob&#39;] 
+
+yes.</code></pre>
+<p>Here is how syntax error (a missing comma) in the string is handled:</p>
+<pre><code>f(abc Bob)stream_descriptor(,open,string,string([102,40,97,98,99,32,66,111,98,41]),[input|nooutput],false,53,[],0,0,0,true,1,wt_opts(78,400,flat),[],wait,text,eof_code,true,0)
+      ^Syntax error 
+    string(&quot;f(abc Bob)&quot;), line 1: Illegal token after primary expression</code></pre>
+<h2 id="note">NOTE</h2>
+<p><code>old_bufread</code>/2 is defined as follows:</p>
+<pre><code>old_bufread(String,[Term|VarNames]) :-
+        open(string(String),read,Stream),
+        read_term(Stream,Term,
+                  [attach_fullstop(true),vars_and_names(_,VarNames)]),
+        close(Stream).</code></pre>
+</body>
+</html>

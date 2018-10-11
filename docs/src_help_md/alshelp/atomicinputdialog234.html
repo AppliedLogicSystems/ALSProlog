@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>atomic_input_dialog/[2,3,4]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">atomic_input_dialog/[2,3,4]</h1>
+</header>
+<p><code>atomic_input_dialog/[2,3,4]</code> — input atoms and numbers</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>atomic_input_dialog(Msg, Input)
+
+atomic_input_dialog(Msg, Title, Input)
+
+atomic_input_dialog(Interp, Msg, Title, Input)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>These predicates present the user with popup dialogs requesting input of text(as atoms) or numbers. The shorter versions are defined by :</p>
+<pre><code>atomic_input_dialog(Msg, Input)
+    :-
+    atomic_input_dialog(Msg, &#39;Input&#39;, Input) .
+
+atomic_input_dialog(Msg, Title, Input)
+    :-
+    atomic_input_dialog(tcli, Msg, Title, Input) .</code></pre>
+<p>For the general call</p>
+<pre><code>atomic_input_dialog(Interp, Msg, Title, Input),</code></pre>
+<p><code>Interp</code>, <code>Msg</code>, and <code>Title</code> should all be atoms, while <code>Input</code> should be an uninstantiated variable.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The call</p>
+<pre><code>?- atomic_input_dialog(&#39;Please input something:&#39;, Input).</code></pre>
+<p>will popup the following window :</p>
+<p><img src="images/atomic_input.gif" /></p>
+<p>If the user types</p>
+<pre><code>Logic is wonderful</code></pre>
+<p>then the result would be</p>
+<pre><code>Atom = Logic is wonderful</code></pre>
+</body>
+</html>

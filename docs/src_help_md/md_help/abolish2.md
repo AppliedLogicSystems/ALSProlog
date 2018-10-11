@@ -37,4 +37,4 @@ If Name is not an atom or Arity is not an integer, abolish/2 fails.
 
 ## SEE ALSO
 
-- `:/2
+- `:/2`

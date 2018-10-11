@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>assert/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">assert/[1,2]</h1>
+</header>
+<p><code>assert/1</code> — adds a clause to a procedure</p>
+<p><code>assert/2</code> — adds a clause to a procedure</p>
+<p><code>asserta/1</code> — adds a clause at the beginning of a procedure</p>
+<p><code>asserta/2</code> — adds a clause at the beginning of a procedure</p>
+<p><code>assertz/1</code> — adds a clause at the end of a procedure</p>
+<p><code>assertz/2</code> — adds a clause at the end of a procedure</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>assert(Clause)
+
+assert(Clause, Ref)
+
+asserta(Clause)
+
+asserta(Clause, Ref)
+
+assertz(Clause)
+
+assertz(Clause, Ref)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>The <code>Clause</code> is added to the procedure with the same name and arity in the module that assert is called from. All uninstantiated variables are re-quantified in the clause before it is added to the database, thus breaking any connection between the original variables and those occurring in the clause in the database. Because of this behavior, the order of calls to assert is important. For example, assuming no clauses already exist for <code>p/1</code>, the first one of the following goals will fail, while the second succeeds.</p>
+<pre><code>?- X = a, assert(p(X)), p(b) .
+
+no.
+
+?- assert(p(X)), X = a, p(b) .
+
+X = a
+
+yes.</code></pre>
+<p>The placement of a clause by <code>assert/1</code> is defined by the implementation. <code>asserta/1</code> always adds its clause before any other clauses in the same procedure, while <code>assertz/1</code> always adds its clause at the end. Each form of assert can take an optional second argument(normally an uninstantiated variable) which is the database reference corresponding to the clause that was added. <code>:/2</code> can be used to specify in which module the assert should take place. The database reference argument is normally passed in as an uninstantiated variable.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following example shows how the different forms of assert work :</p>
+<pre><code>?- assert(p(a)),asserta(p(c)),assertz(p(b)).
+yes.</code></pre>
+<pre><code>?- listing(p/1).
+%user:p/1
+p(c).
+p(a).
+p(b).
+yes.</code></pre>
+<p>Notice that the order of the clauses in the database is different than the order in which they were asserted. This is because the second assert was done with <code>asserta/1</code>, and the third assert was done with <code>assertz/1</code>. The <code>asserta/1</code> call put the <code>p(c)</code> clause ahead of <code>p(a)</code> in the database. The <code>assertz/1</code> call put <code>p(b)</code> at the end of the <code>p/1</code> procedure, which happens to be after the <code>p(a)</code> clause. The next example demonstrates the use of parentheses in asserting a rule into the Prolog database :</p>
+<pre><code>?- assertz((magic(X):-wizard(X);pointGuard(X,lakers))).
+X=_1
+yes.</code></pre>
+<pre><code>?- listing(magic/1).
+%user:magic/1
+magic(_24):-
+wizard(_24)
+;pointGuard(_24,lakers).
+yes.</code></pre>
+<p>If the extra parentheses were not present, the Prolog parser would print the following error message :</p>
+<pre><code>assertz(magic(X) :- wizard(X) ; pointGuard(X, lakers)) .
+^
+Syntax Error : Comma or right paren expected in argument list.</code></pre>
+<p>The next example shows how the assert predicates can be used with modules. The first goal fails because there is no module named animals. After the module is created, the assertion is successful as you can see by looking at the listing of the animals module.</p>
+<pre><code>?- animals:assert(beast(prolog)).
+no.</code></pre>
+<pre><code>?- [user].
+Consulting user.
+module animals.
+endmod.
+user consulted.
+yes.</code></pre>
+<pre><code>?- animals:assert(beast(prolog)).
+yes.</code></pre>
+<pre><code>?- listing(animals:_).
+%animals:beast/1
+beast(prolog).
+yes.</code></pre>
+<p>The following example shows the effects of adding clauses to procedures which are part of the current goal:</p>
+<pre><code>?- assert(movie(jaws)),movie(X),assert(movie(jaws2)).
+X=jaws;
+no.</code></pre>
+<p>The reason this didn’t work is an implementation issue. The following is the sequence of events illustrating what happened:</p>
+<ul>
+<li><p>First the <code>assert(movie(jaws))</code> subgoal was run, causing a new procedure to be placed in the Prolog database.</p></li>
+<li><p>When the subgoal <code>movie(X)</code> was run, no choice point was created because there were no other clauses to try if failure occurred.</p></li>
+<li><p>After <code>movie(X)</code> succeeded, the second clause of <code>movie/1</code> was asserted, and the initial goal succeeded, binding <code>X</code> to <code>jaws</code>.</p></li>
+<li><p>Backtracking was initiated by the <code>';'</code> response to the solution, but no second solution was found for <code>movie/1</code>, even though there was a solution to be found. This was because there was no choice point to return to in <code>movie/1</code>.</p></li>
+</ul>
+<p>One of the interesting(and possibly bad) parts to this phenomenon is that the second time this goal is run it will backtrack through the clauses of <code>movie/1</code>. This is shown below:</p>
+<pre><code>?- listing(movie/1).
+%user:movie/1
+movie(jaws).
+movie(jaws2).
+yes.</code></pre>
+<pre><code>?- assert(movie(jaws)),movie(X),assert(movie(jaws2)).
+X=jaws;
+X=jaws2;
+X=jaws;
+X=jaws2;
+X=jaws2;
+X=jaws2
+yes.</code></pre>
+<p>The reason for this is that there was more than one clause for <code>movie/1</code> in the database this time, so a choicepoint was created for the <code>movie(X)</code> subgoal. Incidentally, this goal would continue finding the</p>
+<pre><code>X = jaws2</code></pre>
+<p>solution. This is because every time the <code>movie(X)</code> finds a new solution, it succeeds, thus causing the</p>
+<pre><code>assert(movie(jaws2))</code></pre>
+<p>subgoal to run. This adds another clause to the database to be tried when the user causes backtracking by pressing semicolon(<code>;</code>) . If you look at the conversation with the Prolog shell shown above, you will notice that the last solution was accepted because no <code>';'</code> was typed after it.</p>
+<h2 id="errors">ERRORS</h2>
+<p>Clauses must be either structured terms or atoms. If clause is a rule, with a principal functor of <code>:-/2</code>, then the head and all the subgoals of the clause must either be atoms or structured terms.</p>
+<h2 id="notes">NOTES</h2>
+<p>ALS Prolog provides a global variable mechanism separate from the Prolog database. Using global variables is much more efficient than using assert and retract.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>:/2</code></p></li>
+<li>[Bowen 91, 7.3]</li>
+<li>[Clocksin 81, 6.4]</li>
+<li>[Bratko 86, 7.4]</li>
+<li><p>[Sterling 86, 12.2]</p></li>
+</ul>
+</body>
+</html>

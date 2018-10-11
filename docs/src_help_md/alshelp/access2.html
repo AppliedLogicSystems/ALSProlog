@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>$access/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">$access/2</h1>
+</header>
+<p><code>$access/2</code> — determine accessability of a file</p>
+<h2 id="forms">FORMS</h2>
+<p><code>'$access'(FileName, AccessMode)</code></p>
+<h2 id="description">DESCRIPTION</h2>
+<p>FileName can be a symbol, a UIA, or a list of ASCII characters. ‘$access’/2 checks whether or not the given file is accessible with the given mode, where AccessMode should be one of the following :</p>
+<pre><code>    4 : write
+    2 : read
+    0 : existence</code></pre>
+<p>These access modes are used as indicated on Unix systems and the Macintosh. However, they are ignored on DOS systems. On DOS systems, the file is only checked as to whether or not it is read accessible.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- &#39;$access&#39;(&#39;../foo/foobar.pl&#39;, 2) .
+
+yes.</code></pre>
+</body>
+</html>

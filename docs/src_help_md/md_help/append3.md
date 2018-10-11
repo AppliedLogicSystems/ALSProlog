@@ -11,14 +11,16 @@ predicates:
 
 ## FORMS
 
+```
 append(List1, List2, List3)
 
 dappend(List1, List2, List3)
+```
 
 
 ## DESCRIPTION
 
-List3 is the result of appending List2 to the end of List1. dappend is the determinate version of append.
+`List3` is the result of appending `List2` to the end of `List1`. `dappend` is the determinate version of `append`.
 
 
 ## EXAMPLES
@@ -41,6 +43,7 @@ yes.
 
 append and dappend are defined by :
 
+```
 append([ ], L, L) .
 
 append([H | T ], L, [H | TL ]) :- append(T, L, TL) .
@@ -49,4 +52,4 @@ append([H | T ], L, [H | TL ]) :- append(T, L, TL) .
 dappend([ ], L, L) :- !.
 
 dappend([H | T ], L, [H | TL ]) :- dappend(T, L, TL) .
-
+```

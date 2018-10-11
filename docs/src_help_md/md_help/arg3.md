@@ -45,5 +45,3 @@ If Nth is not an integer greater than 0 and less than or equal to the arity of S
 - [Sterling 86, 9.2]
 - [Bratko 86, 7.2]
 - [Clocksin 81, 6.5]
-
-

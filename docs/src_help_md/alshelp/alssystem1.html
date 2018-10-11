@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>als_system/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">als_system/1</h1>
+</header>
+<p><code>als_system/1</code> — Provides system environmental information.</p>
+<p><code>sys_env/3</code> — Provides brief system environmental information.</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>als_system(INFO_LIST)
+
+sys_env(OS, OS_Variation, Processor)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>Portable programs which interact with the operating system must take account of the variations in the system environment. <code>als_system/1</code> provides a method of achieving this goal. When the ALS Prolog system initializes itself, the underlying C substrate asserts a single fact</p>
+<pre><code>als_system(INFO_LIST)</code></pre>
+<p>in the module <code>builtins</code> in the Prolog database. The argument of this fact is a list of equations of the form</p>
+<pre><code>property = value</code></pre>
+<p>Each property appears at most once. The properties and their possible values are listed in the table below.</p>
+<table>
+<thead>
+<tr class="header">
+<th><strong>Property Tag</strong></th>
+<th><strong>Value Examples</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>os</td>
+<td>unix, dos, macos, mswins32, vms</td>
+</tr>
+<tr class="even">
+<td>os_variation</td>
+<td>(unix) : solaris2.4</td>
+</tr>
+<tr class="odd">
+<td>processor</td>
+<td>port_thread, port_byte, i386, m68k, m88k, sparc, powerpc</td>
+</tr>
+<tr class="even">
+<td>manufacturer</td>
+<td>generic, sun, motorola, dec,</td>
+</tr>
+<tr class="odd">
+<td>prologVersion</td>
+<td><code>nnn-mm</code></td>
+</tr>
+<tr class="even">
+<td>wins</td>
+<td>nowins, motif, macos, …</td>
+</tr>
+</tbody>
+</table>
+<p>For most purposes, knowing the operating system(OS), and possibly the Processor, is what matters. Consequently, another small fact,</p>
+<pre><code>sys_env(OS, OS_Variation, Processor)</code></pre>
+<p>is asserted during initialization, recording the values of the os, the os_variation, and the processor properties from the als_system list description.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>On a Sun SPARC running Solaris 2.4, TTY portable version :</p>
+<pre><code>?- als_system(X).
+
+X = [os = unix, os_variation = solaris2.4, processor = port_thread, 
+manufacturer = generic, prologVersion = &#39;1-76 &#39;, wins = nowins ]</code></pre>
+</body>
+</html>

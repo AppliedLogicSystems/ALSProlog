@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>atom/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">atom/1</h1>
+</header>
+<p><code>atom/1</code> — the term is an atom</p>
+<p><code>atomic/1</code> — the term is an atom or a number</p>
+<p><code>float/1</code> — the term is a floating point number</p>
+<p><code>integer/1</code> — the term is an integer</p>
+<p><code>number/1</code> — the term is an integer or a floating point</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>atom(Term)
+
+atomic(Term)
+
+float(Term)
+
+integer(Term)
+
+number(Term)
+</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>Each of these predicates will succeed when its argument is of the proper type, and fail otherwise. <code>integer/1</code> and <code>float/1</code> examine the only the representation of a number. For instance, the call <code>integer(2)</code> will succeed because <code>2</code> is represented internally as an integer. In addition, <code>float(4294967296)</code> will succeed because <code>4294967296</code> is represented by a floating point value since it is outside the range of the integer representation.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following are examples of the use of the type predicates :</p>
+<pre><code>?- atom(bomb).
+yes.</code></pre>
+<pre><code>?- integer(2001).
+yes.</code></pre>
+<pre><code>?- float(cement).
+no.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><code>ar/1</code><br />
+<code>nonvar/1</code></li>
+<li>[Bowen 91, 7.6]</li>
+<li>[Sterling 86, 9.1]</li>
+<li>[Bratko 86, 7.1]</li>
+<li>[Clocksin 81, 6.3]</li>
+</ul>
+</body>
+</html>

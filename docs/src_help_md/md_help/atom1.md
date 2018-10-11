@@ -19,7 +19,7 @@ predicates:
 
 
 ## FORMS
-
+```
 atom(Term)
 
 atomic(Term)
@@ -30,10 +30,10 @@ integer(Term)
 
 number(Term)
 
-
+```
 ## DESCRIPTION
 
-Each of these predicates will succeed when its argument is of the proper type, and fail otherwise. integer/1 and float/1 examine the only the representation of a number. For instance, the call integer(2) will succeed because 2 is represented internally as an integer. In addition, float(4294967296.0) will succeed because 4294967296.0 is represented by a floating point value since it is outside the range of the integer representation.
+Each of these predicates will succeed when its argument is of the proper type, and fail otherwise. `integer/1` and `float/1` examine the only the representation of a number. For instance, the call `integer(2)` will succeed because `2` is represented internally as an integer. In addition, `float(4294967296)` will succeed because `4294967296` is represented by a floating point value since it is outside the range of the integer representation.
 
 
 ## EXAMPLES
@@ -63,4 +63,4 @@ no.
 - [Bowen 91, 7.6]
 - [Sterling 86, 9.1]
 - [Bratko 86, 7.1]
-- [Clocksin 81, 6.3]. 
+- [Clocksin 81, 6.3]

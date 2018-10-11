@@ -18,17 +18,16 @@ The current computation is discarded and control returns to the Prolog shell.
 
 ## EXAMPLES
 
+```
 error(Message) :-
-
-write(Message), nl,
-
-abort.
-
+    write(Message), nl,
+    abort.
+```
 
 ## SEE ALSO
 
 - `see/1`  
-`tell/1.
+`tell/1`
 
 ## NOTES
 

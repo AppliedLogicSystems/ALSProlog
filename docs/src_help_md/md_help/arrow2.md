@@ -8,32 +8,36 @@ predicates:
 
 ## FORMS
 
-Condition - &gt; TrueGoal
+```
+Condition -> TrueGoal
 
-Condition - &gt; TrueGoal ; FalseGoal
-
-
+Condition -> TrueGoal ; FalseGoal
+```
 ## DESCRIPTION
 
 
-If Condition succeeds, then TrueGoal will be executed. If-then implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to - &gt; / 2 fails. The second form, results from the interaction between ;/2 and
-- &gt; / 2 because
+If `Condition` succeeds, then `TrueGoal` will be executed. `If-then` implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to -&gt;/2 fails. The second form, results from the interaction between ;/2 and
+-&gt;/2 because
 
-Condition - &gt; TrueGoal ; FalseGoal
+```
+Condition -> TrueGoal ; FalseGoal
+```
 
 is actually executed as :
 
-( Condition - &gt; TrueGoal) ; FalseGoal
+```
+( Condition -> TrueGoal) ; FalseGoal
+```
 
 In this case, FalseGoal will be executed instead of TrueGoal when Condition fails.
 
 Cuts occurring in
 
-- Condition
+- `Condition`
 
-- TrueGoal
+- `TrueGoal`
 
-- FalseGoal
+- `FalseGoal`
 
 cut back to the head of the parent clause.
 
@@ -66,4 +70,4 @@ yes.
 - [Bowen 91, 7.1]
 - [Sterling 86, 11]
 - [Bratko 86, 5.1]
-- [Clocksin 81, 4.2]. 
+- [Clocksin 81, 4.2]
