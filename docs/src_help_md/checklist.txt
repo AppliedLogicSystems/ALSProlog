@@ -21,9 +21,9 @@ atom1.md:  __X___
 atomchars2.md:  ______
 atomicinputdialog234.md:  __X___
 bufread24.md:  __X___
-call1.md:  ______
-canonorder2.md:  ______
-catch3.md:  ______
+call1.md:  __X___
+canonorder2.md:  __X___
+catch3.md:  __X___
 charcode2.md:  ______
 chdir1.md:  ______
 clause23.md:  ______

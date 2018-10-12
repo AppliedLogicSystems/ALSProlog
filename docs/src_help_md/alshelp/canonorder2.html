@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>@=&lt;/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">@=&lt;/2</h1>
+</header>
+<p><code>@=&lt;/2</code> — The left argument is not after the right argument</p>
+<p><code>@&gt;=/2</code> — The left argument is not before the right argument</p>
+<p><code>@&lt;/2</code> — The left argument is before the right argument</p>
+<p><code>@&gt;/2</code> — The left argument is after the right argument</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>Arg1 @=&lt; Arg2
+
+Arg1 @&gt;= Arg2
+
+Arg1 @&lt; Arg2
+
+Arg1 @&gt; Arg2</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>These predicates compare two terms according to the standard order as defined by <code>compare/3</code>. The terms are compared as-is without any transformation or interpretation. The order of a partially instantiated term may change as the level of instantiation changes.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- foobar(something)@&gt;foobar.
+yes.</code></pre>
+<pre><code>?- cement@&gt;mortar.
+no.</code></pre>
+<pre><code>?- inflation_today@=&lt;inflation_tomorrow.
+yes.</code></pre>
+<pre><code>?- rain_in(newYork)@&gt;=rain_in(arizona).
+yes.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><code>compare/3</code></li>
+</ul>
+</body>
+</html>

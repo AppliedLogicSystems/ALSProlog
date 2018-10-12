@@ -16,3 +16,6 @@ Also, add info about Cref; Also: when Cref is clicked, it is loaded, but there i
 atendofstream01.md is a skeleton -- needs to be fleshed out.
 
 Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to builtins, also add to alssystem.md.
+
+Determine whether the following Note from catch/3 is still true:
+catch/3 leaves a choice point....
