@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>current_input/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">current_input/1</h1>
+</header>
+<p><code>current_input/1</code> — retrieve current input stream</p>
+<p><code>current_output/1</code> — retrieve current output stream</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>current_input(Stream)
+
+current_output(Stream)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>current_input/1</code> will unify <code>Stream</code> with the stream descriptor associated with the current input stream. The current input stream is the stream that is read when predicates such as <code>get_char/1</code> or <code>read/1</code> are called. The current input stream may be set by calling <code>set_input/1</code>.</p>
+<p><code>current_output/1</code> will unify <code>Stream</code> with the stream descriptor associated with the current output stream. The current output stream is the stream which is written to when predicates such as <code>put_char/1</code> or <code>write/1</code> are called. The current output stream may be set by calling <code>set_output/1</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>Suppose that the file “test” is comprised of the characters “abcdefgh”. <code>Open</code> the file “test” and set the current input stream to the stream descriptor returned from <code>open</code>:</p>
+<pre><code>?- open(test,read,S1),set_input(S1), current_input(S2).
+S1=stream_descriptor(&#39;&#39;,open,file,test,[input|nooutput],true,42,0,0,0,0,true,
+    0,wt_opts(78,400,flat),[],wait,text,eof_code,true,0) 
+S2=stream_descriptor(&#39;&#39;,open,file,test,[input|nooutput],true,42,0,0,0,0,true,
+    0,wt_opts(78,400,flat),[],wait,text,eof_code,true,0) 
+
+yes.</code></pre>
+<p>Get two characters from the current input stream:</p>
+<pre><code>?- get_char(C1),get_char(C2).
+C1=a
+C2=b</code></pre>
+<p>Close the stream associated with “test”:</p>
+<pre><code>?- current_input(S),close(S).
+
+S=stream_descriptor(&#39;\002&#39;,closed,file,test,[input|nooutput],true,42,0,0,0,0,
+    true,0,wt_opts(78,400,flat),[],wait,text,eof_code,true,0) 
+
+yes.</code></pre>
+<h2 id="notes">NOTES</h2>
+<p><code>close/1</code> applied to an input or output stream may change the current output or current input streams.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>set_input/1</code><br />
+<code>get_char/1</code><br />
+<code>read/1</code><br />
+<code>put_char/1</code><br />
+<code>write/1</code></p></li>
+<li><p><code>User Guide (Prolog I/O)</code></p></li>
+</ul>
+</body>
+</html>

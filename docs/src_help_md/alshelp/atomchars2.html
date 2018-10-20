@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>atom_chars/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">atom_chars/2</h1>
+</header>
+<p><code>atom_chars/2</code> — convert between atoms and the list of characters representing the atom</p>
+<p><code>atom_codes/2</code> — convert between atoms and the list of character codes representing the atom</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>atom_chars(Atom, CharList)
+
+atom_codes(Atom, CodeList)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>atom_chars(Atom, CharList)</code> is true if and only if <code>CharList</code> is a character list whose elements correspond to the characters of the atom <code>Atom</code>.</p>
+<p><code>atom_codes(Atom, CodeList)</code> is true if and only if <code>CodeList</code> is a character code list whose elements correspond to the character codes of the atom <code>Atom</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- atom_chars(&#39;the cat in&#39;,L).
+L=[t,h,e,&#39;&#39;,c,a,t,&#39;&#39;,i,n]
+yes.</code></pre>
+<pre><code>?- atom_chars(A,[t,h,e,&#39; &#39;,h,a,t,&#39;\n&#39;]).
+A=&#39;the hat\n&#39;
+yes.</code></pre>
+<pre><code>?- atom_codes(A,[65,66,67]).
+A=&#39;ABC&#39;
+yes.</code></pre>
+<pre><code>?- atom_codes(holiday,L).
+L=&quot;holiday&quot;
+yes.</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>Atom and CharList are both variables(atom_chars/2)</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Atom and CodeList are both variables(atom_codes/2)</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Atom is neither a variable nor an atom</p>
+<p>– – – – &gt; type_error(atom, Atom).</p>
+<p>CharList is neither a variable nor a list nor a partial list</p>
+<p>– – – – &gt; type_error(list, CharList).</p>
+<p>CodeList is neither a variable nor a list nor a partial list</p>
+<p>– – – – &gt; type_error(list, CodeList).</p>
+<p>CharList is a list but there is a sublist L of CharList whose first element is neither a variable nor a character</p>
+<p>– – – – &gt; domain_error(character_list, L).</p>
+<p>CodeList is a list but there is a sublist L of CodeList whose first element is neither a variable nor a character code</p>
+<p>– – – – &gt; domain_error(character_code_list, L).</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><code>number_chars/2</code><br />
+<code>number_codes/2</code><br />
+<code>term_chars/2</code><br />
+<code>term_codes/2</code></li>
+</ul>
+</body>
+</html>

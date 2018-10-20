@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>$c_malloc/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">$c_malloc/2</h1>
+</header>
+<p><code>$c_malloc/2</code> — Allocates a C data area using the system malloc call</p>
+<p><code>$c_free/1</code> — Frees a C data area</p>
+<p><code>$c_set/2</code> — Modifies the contents of a C data area or a UIA</p>
+<p><code>$c_examine/2</code> — Examines the contents of a C data area or a UIA</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>&#39;$c_malloc&#39;(Size, Ptr)
+
+&#39;$c_free&#39;(Ptr)
+
+&#39;$c_set&#39;(Ptr_or_UIA, FormatList)
+
+&#39;$c_examine&#39;(Ptr_or_UIA, FormatList)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>The following predicates are low-level C-defined builtins in ALS Prolog, providing access to C data areas, as well as UIAs treated as such data areas.</p>
+<p><strong><code>'$c_malloc'/2</code></strong> allocates a C data area. <code>'$c_malloc'(Size, Ptr)</code> is true if <code>Size</code> is a positive integer and <code>Ptr</code> (an integer) unifies with the address of the first byte of a data area allocated by the system call “malloc”. The call fails if malloc returns a null pointer.</p>
+<p><strong><code>'$c_free'/1</code></strong> frees a C data area. <code>'$c_free'(Ptr)</code> is true if <code>Ptr</code> is a number, and it invokes the system call “free” to free the data area pointed by <code>Ptr</code>.</p>
+<p>The next two predicates make use of the following encoding of C types:</p>
+<pre><code>      1  -- int
+      2  -- unsigned int
+      3  -- long
+      4  -- unsigned long
+      5  -- pointer
+      6  -- char
+      7  -- unsigned char
+      8  -- short
+      9  -- unsigned short
+      10 -- string
+      11 -- string of given length (length is 4th arg)
+      12 -- float
+      13 -- double
+      14 -- far pointer  (DOS only)
+      15 -- raw data of given length</code></pre>
+<p><strong><code>'$c_set'/2</code></strong> is used to modify the contents of a C data area or a UIA.</p>
+<pre><code>&#39;$c_set&#39;(Ptr_or_UIA, FormatList)`</code></pre>
+<p>is true if <code>Ptr_or_UIA</code> is bound to the address of a C data area or a <code>UIA</code>, and <code>FormatList</code> is a non-empty list of 3-ary or 4-ary terms of the form</p>
+<p><code>f(Offset, Type, Value {, Length })</code> <em>(Length is used only with type code 11)</em></p>
+<p>The complete call modifies the contents of the data area corresponding to each such term as follows: <br>In each term, <code>Offset</code> is the offset of the field from the start address of the data area. <code>Type</code> is the C type code (as given above) of the field. <code>Value</code> is the data that the field should be set to. <code>Value</code> should be a prolog entity whose type corresponds naturally to the C entity type coded by <code>Type</code>. Numeric C types require an appropriate prolog number. If <code>Type</code> is 10 or 11, then <code>Value</code> must be an atom (including possiblly a <code>UIA</code>), and a null terminated C string name of the atom is copied into the receiving data are without overflow checks. In the case of <code>Type</code>==11, at most <code>Length</code> bytes are copied into the receiving data area.</p>
+<p><strong><code>'$c_examine'/2</code></strong> is used to examine the contents of a C data area or a <code>UIA</code>. <code>'$c_examine'(Ptr_or_UIA, FormatList)</code> is true if <code>Ptr_or_UIA</code> is bound to the address of a C data area or a <code>UIA</code>, and <code>FormatList</code> is a nonempty list of 3-ary or 4-ary terms of the form</p>
+<pre><code>f(Offset, Type, Value{, Length })</code></pre>
+<p>whose arguments are interpreted as in <code>'$c_set/2</code> (above) except that now a data item of the specified type is extracted from the data area and unified with <code>Value</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- Size = 1000, &#39;$c_malloc&#39;(Size, Ptr).
+
+Size=1000 
+Ptr=33558528 
+
+yes.
+
+?- &#39;$c_malloc&#39;(1000, Ptr), &#39;$c_set&#39;(Ptr,[f(0,12,14.5)]), &#39;$c_examine&#39;(Ptr,[g(0,12,X)]).
+
+Ptr=41947136 
+X=14.5 
+
+yes.
+
+?- UIA = &#39;Phantom&#39;, Value = w2g, &#39;$c_set&#39;(UIA, [f(3, 10, Value)]).
+
+UIA=&#39;Phaw2g&#39; 
+Value=w2g 
+
+yes.
+
+?- UIA = &#39;Phantom&#39;, &#39;$c_examine&#39;(UIA, [f(2, 10, Value)]).
+
+UIA=&#39;Phantom&#39; 
+Value=antom 
+
+yes.
+
+?- UIA = &#39;Phantom&#39;, &#39;$c_examine&#39;(UIA, [f(2, 11, Value, 3)]).
+
+UIA=&#39;Phantom&#39; 
+Value=ant 
+
+yes.</code></pre>
+<h2 id="notes">NOTES</h2>
+<p>A slightly higher-level collection of C data access predicates is implemented over the predicates above in ~builtins/cutils.pro. See <a href="calloc23.html">c_alloc/[2,3]</a> and <a href="ccreate3.html">c_create/3</a>.</p>
+</body>
+</html>

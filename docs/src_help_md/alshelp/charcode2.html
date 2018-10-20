@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>char_code/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">char_code/2</h1>
+</header>
+<p><code>char_code/2</code> — convert between characters and codes</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>char_code(Char, Code)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>char_code(Char, Code)</code> is true if the character <code>Char</code> has character code <code>Code</code>. At least one of <code>Char</code> or <code>Code</code> must be instantiated.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- char_code(a,C).
+C=97
+yes.</code></pre>
+<pre><code>?- char_code(C,98).
+C=b
+yes.</code></pre>
+<pre><code>?- char_code(foo,C).
+Error: Argument of type character expected instead of foo.
+- Goal:          builtins:char_code(foo,_A)
+- Throw pattern: error(type_error(character,foo),[builtins:char_code(foo,_A)])</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>Char and Code are both variables</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Char is neither a variable nor a character</p>
+<p>– – – – &gt; type_error(character) .</p>
+<p>Code is neither a variable nor an integer</p>
+<p>– – – – &gt; type_error(integer) .</p>
+<p>Code is an integer but is not a character code</p>
+<p>– – – – &gt; representation_error(character_code) .</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><code>atom_chars/2</code><br />
+<code>number_chars/2</code><br />
+<code>term_chars/2</code></li>
+</ul>
+</body>
+</html>

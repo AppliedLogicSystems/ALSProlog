@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>!/0</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">!/0</h1>
+</header>
+<p><code>!/0</code> — (cut) removes choice points</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>FirstGoal, !, SecondGoal
+
+FirstGoal, !; SecondGoal</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>Discards all choice points made since the parent goal started execution, including the choice points, if any, created by calling the parent goal. In the following two cases, a cut in <code>Condition</code> will remove all choice points created by the <code>Condition</code>, any subgoals to the left of the <code>Condition</code>, and the choice point for the parent goal.</p>
+<pre><code>Condition = (Things, !, MoreThings)
+
+Condition -&amp;gt; TrueGoal; FalseGoal
+
+call(Condition)</code></pre>
+<p>In other words, <br>    <code>-&gt;</code> <br>    <code>call/1</code> <br>    <code>;</code> <br>    <code>:</code> <br>    <code>,</code> <br>are all transparent to cut. The ISO Prolog Standard requires that <code>call/1</code> be opaque to cut. At this time, ALS Prolog deviates from the standard.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal eats/2. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.</p>
+<pre><code>?- listing.
+
+eats(chris,pizza):-!.
+eats(mick,Anything).
+
+yes.
+
+?- eats(Person,pizza).
+
+Person=chris;
+
+no.</code></pre>
+<p>The next example shows that <code>not/1</code> is opaque to cut. This means that a ‘!’ inside the call to <code>not/1</code> will not cut out the choicepoint for <code>not/1</code>, or any other choicepoints created by goals to the left of <code>not/1</code>.</p>
+<pre><code>?- not((!,fail)).
+
+yes.</code></pre>
+<p>Notice the extra pair of parentheses above. This is to prevent the parser from creating a goal to <code>not/2</code> instead of <code>not/1</code>. In the next example, the transparency of <code>call/1</code> with respect to cut is shown:</p>
+<pre><code>?- listing.
+
+cool(peewee):-call((!,fail)).
+
+cool(X).
+
+yes.
+
+?- cool(peewee).
+
+no.
+
+?- cool(bugsbunny).
+
+yes.</code></pre>
+<p><code>peewee</code> is not cool because the <code>'!'</code> removed the choicepoint for <code>cool/1</code>. The <code>fail</code> after the <code>'!'</code> prevented <code>cool/1</code> from succeeding. The rationale for having cut behave this way is so that:</p>
+<p>    <code>cool(peewee) :- call(( !,fail)).</code></p>
+<p>will be equivalent to</p>
+<p>    <code>cool(peewee) :- !, fail.</code></p>
+<p>The next example shows the transparency of - &gt; with respect to cut.</p>
+<pre><code>?- listing.
+
+cool(X):-(X=peewee,!)-&gt;fail.
+
+cool(X).
+
+yes.
+
+?- cool(peewee).
+
+no.</code></pre>
+<p>Again, peewee is not considered cool. In the goal</p>
+<pre><code>?- cool(peewee).
+
+no.</code></pre>
+<p>the <code>'!'</code> after <code>X = peewee</code> cuts the choicepoint for <code>cool/1</code>. The condition succeeds, causing fail to be executed. However, the second clause is never reached because the choicepoint has been cut away. Consequently, the goal fails. The goal</p>
+<pre><code>?- cool(daffyduck).
+
+yes.</code></pre>
+<p>succeeds because the ‘!’ is never reached in the condition of -&gt;. The -&gt; fails because there is no else subgoal. This causes the next clause for <code>cool/1</code> to be executed. This clause always succeeds, therefore <code>daffyduck</code> is considered cool.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>-&gt;/2</code><br />
+<code>not/1</code></p></li>
+<li>[Bowen 91, 7.1]</li>
+<li>[Sterling 86, 11]</li>
+<li>[Bratko 86, 5.1]</li>
+<li><p>[Clocksin 81, 4.2]</p></li>
+</ul>
+</body>
+</html>

@@ -21,18 +21,19 @@
 </header>
 <p><code>arg/3</code> — access the arguments of a structured term</p>
 <h2 id="forms">FORMS</h2>
-<p>arg(Nth, Structure, Argument)</p>
+<pre><code>arg(Nth, Structure, Argument)</code></pre>
 <h2 id="description">DESCRIPTION</h2>
-<p>Argument will be unified with the Nth argument of Structure. Nth must be a positive integer. Structure should be a compound term whose arity is greater than or equal to Nth. When these conditions hold, Argument will be unified with the Nth argument of Structure.</p>
+<p>‘Argument’ will be unified with the ‘Nth’ argument of ‘Structure’. ‘Nth’ must be a positive integer. ‘Structure’ should be a compound term whose arity is greater than or equal to ‘Nth’. When these conditions hold, ‘Argument’ will be unified with the ‘Nth’ argument of ‘Structure’.</p>
 <h2 id="examples">EXAMPLES</h2>
 <pre><code>?- arg(2,stooges(larry,moe,curly),X).
 X=moe
-yes.</code></pre>
-<pre><code>?- arg(2,[a,b,c],X).
+yes.
+
+?- arg(2,[a,b,c],X).
 X=[b,c]
 yes.</code></pre>
 <h2 id="errors">ERRORS</h2>
-<p>If Nth is not an integer greater than 0 and less than or equal to the arity of Structure, arg/3 will fail. Structure must be instantiated to a structured term.</p>
+<p>If <code>Nth</code> is not an integer greater than <code>0</code> and less than or equal to the arity of <code>Structure</code>, <code>arg/3</code> will fail. <code>Structure</code> must be instantiated to a structured term.</p>
 <h2 id="see-also">SEE ALSO</h2>
 <ul>
 <li><p><code>functor/3</code><br />

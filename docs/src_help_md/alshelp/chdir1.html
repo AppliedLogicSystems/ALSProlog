@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>chdir/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">chdir/1</h1>
+</header>
+<p><code>chdir/1</code> — changes the current directory to the specified directory</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>chdir(DirName)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>DirName</code> can be a symbol, a <code>UIA</code>, or a list of ASCII characters describing a valid directory. The current directory is changed to the specified directory. If the current directory cannot be changed to the given directory for any reason, this predicate fails.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- chdir(&#39;../foobar&#39;).
+
+yes.</code></pre>
+</body>
+</html>

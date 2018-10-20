@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>c_alloc/[2,3]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">c_alloc/[2,3]</h1>
+</header>
+<p><code>c_const/2</code> <code>--</code> get the value of a C defined constant</p>
+<p><code>c_rconst/2</code> <code>--</code> get the value of a C defined runtime constant</p>
+<p><code>c_alloc/2</code> <code>--</code> allocate a UIA that can hold C data</p>
+<p><code>c_alloc_abs/2</code> <code>--</code> allocate a C-malloced data area</p>
+<p><code>c_allocn/3</code> <code>--</code> allocate a UIA to hold Num items</p>
+<p><code>c_allocn_abs/3</code> <code>--</code> allocated a C-malloced area to hold Num items</p>
+<p><code>c_free/1</code> <code>--</code> applied to UIA does nothing (freeing handled by gc)</p>
+<p><code>c_free_abs/1</code> <code>--</code> mfree the C area pointed by Ptr.</p>
+<p><code>c_set/3</code> <code>--</code> modify a UIA or C data area</p>
+<p><code>c_set/3</code> <code>--</code> multiply modify a UIA or C data area</p>
+<p><code>c_set_str/4</code> <code>--</code> insert C string in a UIA or C data area</p>
+<p><code>c_set_raw/4</code> <code>--</code> writes chars from a UIA into a UIA or C data area</p>
+<p><code>c_setn/4</code> <code>--</code> perform c_set/3 on a component of an array</p>
+<p><code>c_setn/4</code> <code>--</code> multiply perform c_set/3 on a component of an array</p>
+<p><code>c_examine/3</code> <code>--</code> examine a UIA or C data area</p>
+<p><code>c_examine/3</code> <code>--</code> multiply examine a UIA or C data area</p>
+<p><code>c_examine_str/4</code> <code>--</code> extract chars from a UIA or C data area</p>
+<p><code>c_examine_raw/4</code> <code>--</code> extract raw chars from a UIA or C data area</p>
+<p><code>c_examinen/4</code> <code>--</code> examine a component of an array</p>
+<p><code>c_examinen/4</code> <code>--</code> multiply examine a component of an array</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>c_const(Name,Val)
+
+c_rconst(Name,Val)
+
+c_alloc(Type,UIA)
+
+c_alloc_abs(Type,Ptr)
+
+c_allocn(Type,Num,UIA)
+
+c_allocn_abs(Type,Num,Ptr)
+
+c_free(UIA)
+
+c_free_abs(Ptr)
+
+c_set(Obj,Type1,Val)
+
+c_set(Obj,Type2,[FieldName,Val,...])
+
+c_set_str(Obj,Off,Len,SymOrUIA)
+
+c_set_raw(Obj,Off,Len,UIA)
+
+c_setn(Obj,Type,I,Val)
+
+c_setn(Obj,SType,I,[FieldName,Val,...])
+
+c_examine(Obj,Type,Val)
+
+c_examine(Obj,SType,[FieldName,Val,...])
+
+c_examine_str(Obj,Off,Len,Val)
+
+c_examine_raw(Obj,Off,Len,Val)
+
+c_examinen(Obj,Type,I,Val)
+
+c_examinen(Obj,SType,I,[FieldName,Val,...])</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><strong><code>c_const(Name,Val)</code></strong> unifies <code>Val</code> with the value of the C defined constant <code>Name</code>.</p>
+<p><strong><code>c_rconst(Name,Val)</code></strong> unifies <code>Val</code> with the value of a C defined runtime constant <code>Name</code>. This should not be used to access C globals.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>1st example</code></pre>
+<pre><code>2nd example</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>Errors text…</p>
+<h2 id="notes">NOTES</h2>
+<p>Implemented in ~builtins/cutils.pro over the predicates in <a href="cmalloc2.html">‘$c_malloc’/2</a>.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><a href="cmalloc2.html">‘$c_malloc’/2</a></li>
+<li><a href="ccreate3.html">c_create/3</a></li>
+</ul>
+</body>
+</html>

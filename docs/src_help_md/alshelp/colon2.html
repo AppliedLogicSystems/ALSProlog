@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>:/2 (colon)</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">:/2 (colon)</h1>
+</header>
+<p><code>:/2</code> — calls a goal in the specified module</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>Module : Goal</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>‘Module’ should be instantiated to a name of a an existing, loaded module, and <code>Goal</code> should be instantiated to a non-variable term. The <code>Goal</code> will be executed as if the call to <code>Goal</code> appeared in the module named <code>Module</code>. Any module-dependent procedures such as <code>assert/1</code> or <code>retract/1</code> will operate on the procedures defined in <code>Module</code>. Any cuts appearing in <code>Goal</code> will cut back through the head of the clause that contained the call to <code>:/2</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- listing.
+
+% behavior:eats_linguini/1
+eats_linguini(mike).
+eats_linguini(jane).
+
+% behavior:eats_salad/1
+eats_salad(phil).
+
+yes.
+
+?- eats_linguini(mike).
+Error: Operation attempted on object of type procedure which does not exist.
+Operation attempted on: user:eats_linguini(mike).
+- Goal:          user:eats_linguini(mike)
+- Throw pattern: error(existence_error(procedure,user:eats_linguini(mike)),
+                     [user:eats_linguini(mike)])
+
+?- behavior:eats_linguini(mike).
+
+yes.
+
+?- builtins:setof(Person, behavior:eats_linguini(Person), Persons).
+
+Person=Person 
+Persons=[jane,mike] 
+
+yes.
+
+?- behavior:setof(Person, eats_linguini(Person), Persons).
+
+Person=Person 
+Persons=[jane,mike] 
+
+yes.</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>If <code>Module</code> is unbound or not bound to a valid module name, the call to <code>:/2</code> will fail.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>call/1</code></p></li>
+<li><p><code>User Guide (Modules)</code></p></li>
+</ul>
+</body>
+</html>

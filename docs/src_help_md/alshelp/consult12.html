@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>consult/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">consult/[1,2]</h1>
+</header>
+<p><code>consult/1</code> — load a Prolog file</p>
+<p><code>consult/2</code> — load a Prolog file, with options</p>
+<p><code>consultq/1</code> — load a Prolog file, without messages</p>
+<p><code>reconsult/1</code> — load a Prolog file, updating the prolog database</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>consult(FileSpec)
+
+consult(FileSpec, Options)</code></pre>
+<p><code>[File | Files ]</code><br />
+         <em>Synonym for <code>consult(FileSpec)</code> when <code>FileSpec</code> is <code>[File | Files ]</code></em></p>
+<pre><code>consultq(File)
+
+reconsult(File)</code></pre>
+<p><code>[-File | Files ]</code><br />
+         <em>Equivalent to a sequence of reconsult/consult calls, corresponding to the appearance of - or no -.</em></p>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>FileSpec</code> should be instantiated either to an atom that is the name of a file, or to a list of atoms which are names of files. For each <code>File</code> occurring on <code>FileSpec</code>,</p>
+<ol type="1">
+<li><code>File</code> is opened and read,</li>
+<li>Any clauses currently in memory which were read and asserted previously <em>from this same <code>File</code></em> are erased,</li>
+<li>The clauses occurring in <code>File</code> are asserted into the database,</li>
+<li>Any directives occurring in <code>File</code> are executed immediately when encountered.</li>
+</ol>
+<p><code>consultq/1</code> behaves exactly like <code>consult/1</code>, except that printing of normal <code>consult/1</code> messages on the terminal is suppressed. [Note, however, that if the File does not exist, an error message will still be printed. ]</p>
+<p><code>reconsult/1</code> is identical to <code>consult/1</code> and is preserved for historical consistency.</p>
+<p><code>consult/1</code>, <code>reconsult/1</code>, and <code>consultq/1</code> are defined by :</p>
+<pre><code>consult(File) :- consult(File, [ ]) .
+
+reconsult(File :- consult(File, [ ]) .
+
+consultq(File) :- consult(File, [verbosity(quiet) ]) .</code></pre>
+<p>If File is the atom user, then clauses and commands will be read in from the keyboard until an end of file is read.</p>
+<p>The Options argument of consult/2 is a list of consult options, and their effects, are as follows :</p>
+<p><code>verbosity(Value)</code> <br>      <code>Value = noisy/quiet</code>; turns on/off the printing of messages during consulting.</p>
+<p><code>tgtmod(TgtMod)</code> <br>      Any clauses in <code>File</code> which are not explicitly enclosed in module begin/end directives will be asserted to module <code>TgtMod</code>. The default value of <code>TgtMod</code> is <code>user</code>.</p>
+<p><code>search_path(DirPathList)</code> <br>      <code>DirPathList</code> is a list of directory path names. The <code>File(s)</code> to be consulted are searched for on this path. If the current directory is not listed on <code>DirPathList</code>, it is added at the beginning.</p>
+<p><code>strict_search_path(DirPathList)</code> <br>      Like <code>search_path(DirPathList)</code>, but the current directory is not added even if not present on <code>DirPathList</code>.</p>
+<p><code>consult(Value)</code> <br>      <code>Value = true/false</code>. If <code>Value</code> = true, previous clauses from the <code>File</code> being consulted are not erased, so that the net effect is additive.</p>
+<p><code>ensure_loaded(Value)</code> <br>      <code>Value = true/false</code>. This option has effect only when operating under one of the ALS development shells(ALS IDE or the TTY shell). If <code>Value = true</code>, and if <code>File</code> has previously been consulted, no action is taken for <code>File</code>. If <code>Value = false</code>, <code>File</code> is consulted.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>Let the file <code>fruit.pro</code> contain:</p>
+<pre><code>fruit(apple).
+fruit(X) :- nut(X).
+fruit(orange).
+nut(hazelnut).</code></pre>
+<p>Then:</p>
+<pre><code>?- consult(fruit).
+
+yes.
+?- listing.
+
+% user:fruit/1
+fruit(apple).
+fruit(_A) :- nut(_A).
+fruit(orange).
+
+% user:nut/1
+nut(hazelnut).
+
+yes.</code></pre>
+<p>Now, using a separate editor process, edit <code>fruit.pro</code> so that it contains:</p>
+<pre><code>fruit(apple).
+fruit(X) :- nut(X).
+fruit(raspberry).
+nut(hazelnut).
+nut(acorn).</code></pre>
+<p>Now, consult <code>fruit.pro</code> again:</p>
+<pre><code>?- consult(fruit).
+
+yes.
+?- listing.
+
+% user:fruit/1
+fruit(apple).
+fruit(_A) :- nut(_A).
+fruit(raspberry).
+
+% user:nut/1
+nut(hazelnut).
+nut(acorn).
+
+yes.</code></pre>
+<p>The following example illustrates the practice of putting calls to consult/1 inside of files to be(re) consulted. We have the three files with contents as follows :</p>
+<pre><code>letters.pro
+-----------
+symbol(a).
+symbol(b).
+symbol(c).
+
+numbers.pro
+-----------
+symbol(&#39;1&#39;).
+symbol(&#39;2&#39;).
+symbol(&#39;3&#39;).
+
+topfile.pro
+-----------
+symbol(x).
+symbol(y).
+symbol(z).
+
+:- consult(letters).
+:- consult(numbers).</code></pre>
+<p>The following conversation illustrates the effect of repetitive consult (or reconsult) with embedded consults:</p>
+<pre><code>?- consult(letters).
+
+yes.
+
+?- listing.
+%user:symbol/1
+symbol(a).
+symbol(b).
+symbol(c).
+yes.
+
+?- consult(topfile).
+
+yes.
+
+?- listing.
+%user:symbol/1
+symbol(a).
+symbol(b).
+symbol(c).
+symbol(x).
+symbol(y).
+symbol(z).
+symbol(&#39;1&#39;).
+symbol(&#39;2&#39;).
+symbol(&#39;3&#39;).</code></pre>
+<h2 id="notes">NOTES</h2>
+<p><code>reconsult/1</code> is not compatible with the DEC-10 notion of reconsult. DEC-10 reconsult would, upon seeing a procedure not already seen in a file, wipe out or abolish all clauses for that predicate before adding the new clause in question.</p>
+<p>The present semantics of <code>reconsult/1</code> are that all clauses which were previously defined in a <code>File</code> being loaded are wiped out, with new clauses replacing (positionally in the procedure) any old clauses. Thus, a procedure that is defined by several files will not be entirely wiped out when <code>reconsult/1</code> is invoked on just one of the procedure’s files – only those clauses defined by the one given <code>File</code> are wiped out and subsequently replaced.</p>
+<p>The file <code>user</code> is special. When <code>user</code> is consulted or reconsulted, the input clauses will be taken from the user’s terminal. The end-of-file character (often Control-D or Contol-Z) should be used to terminate the consultation and return to the shell.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li>[Bratko 86, 6.5]</li>
+<li>[Clocksin 81, 6.1]</li>
+</ul>
+</body>
+</html>

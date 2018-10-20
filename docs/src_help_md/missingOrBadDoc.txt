@@ -19,3 +19,8 @@ Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to b
 
 Determine whether the following Note from catch/3 is still true:
 catch/3 leaves a choice point....
+
+Marked cmalloc2.md:  __X___  -- however, cmalloc2.md references pages for c_alloc/[2,3] and c_create/3; if these are not included, those references should be removed.
+
+commandline1.md: ?-builtins:command_line(X). still returns X=[_A,zip].  Could only find 2 discussions labelled
+-P switch k->c (7/27/18) and c->k (7/28/18); thought there had been more. 

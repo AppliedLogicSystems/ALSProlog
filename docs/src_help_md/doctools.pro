@@ -134,15 +134,13 @@ brkout_grp(SortedPackageData, G, G-XGrp, TailSortedPackageData)
 
 accum_grp([], Group, [], []).
 
-accum_grp([xpge(Group, PA, FName, First, Preds)
-                | InterSortedPackageData],
+accum_grp([xpge(Group, PA, FName, First, Preds) | InterSortedPackageData],
           Group,
           [xpge(Group, PA, FName, First, Preds) | TailGroupEntries],  TailSortedPackageData)
         :-!,
         accum_grp(InterSortedPackageData, Group, TailGroupEntries, TailSortedPackageData).
 
-accum_grp([xpge(NextGroup, PA, FName, First, Preds)
-                | InterSortedPackageData],
+accum_grp([xpge(NextGroup, PA, FName, First, Preds) | InterSortedPackageData],
            Group, [],
            [xpge(NextGroup, PA, FName, First, Preds) | InterSortedPackageData]).
 
