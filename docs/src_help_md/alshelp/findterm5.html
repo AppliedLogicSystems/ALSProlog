@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>$findterm/5</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">$findterm/5</h1>
+</header>
+<p><code>$findterm/5</code> — locates the given term on the heap</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>&#39; $findterm &#39;(Functor, Arity, HeapPos, Term, NewHeapPos)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>The term whose <code>Functor</code> and <code>Arity</code> are given is searched for on the heap starting from the given heap position <code>HeapPos</code>. If the term is located, the fourth argument, <code>Term</code>, is unified with the term found in the heap, and the fifth argument, <code>NewHeapPos</code>, is unified with a pointer to the next heap location after the term found. Heap positions are offsets with respect to the heap base. If the term cannot be found, this predicate fails.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- X = f(a,b), &#39;$findterm&#39;(f, 2, 0, T, NHP).
+
+X = f(a,b)
+
+T = f(a,b)
+
+NHP = 3
+
+yes.</code></pre>
+</body>
+</html>

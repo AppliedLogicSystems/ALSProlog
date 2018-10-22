@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>file_select_dialog/[1,2,3]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">file_select_dialog/[1,2,3]</h1>
+</header>
+<p><code>file_select_dialog/ [1,2,3]</code> — select a file</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>file_select_dialog(FileName)
+
+file_select_dialog(Options, FileName)
+
+file_select_dialog(Interp, Options, FileName)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>These predicates allow the user to select a file using the native file selection dialogs on each platform. The shorter versions are defined by :</p>
+<pre><code>file_select_dialog(FileName)
+    :-
+    file_select_dialog(shl_tcli, [title = &#39; Select File &#39; ], FileName) .
+
+file_select_dialog(Options, FileName)
+    :-
+    file_select_dialog(shl_tcli, Options, FileName) .</code></pre>
+<p>For the general call</p>
+<pre><code>file_select_dialog(Interp, Options, FileName)</code></pre>
+<p><code>Interp</code> should be an atom naming a Tcl interpreter, <code>Filename</code> should be an uninstantiated variable, and <code>Options</code> should be a list of options as follows :</p>
+<p><code>defaultname = DefaultName</code>         <em>default file name</em></p>
+<p><code>ext = Ext</code>         <em>to either add or use for selection</em></p>
+<p><code>mode = new/select/save_as</code>         <em>default = <code>select</code></em></p>
+<p><code>initialdir = Initial</code>         <em>dir in which to begin…</em></p>
+<p><code>title = WindowTitle</code></p>
+<p><code>filetypes = FileTypesList</code> <br>        <em>where <code>FileTypesList</code> is a list of the form<br />
+        <code>[[Desc1 [ext1]], [Desc2, [ext2],...]</code><br />
+        and the <code>Desci</code> and <code>exti</code> are all atoms</em></p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The call</p>
+<pre><code>?- file_select_dialog(File).</code></pre>
+<p>would produce this popup :</p>
+<p><img src="images/file_sel-1.gif" /></p>
+</body>
+</html>

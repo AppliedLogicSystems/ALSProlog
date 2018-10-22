@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>functor/3</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">functor/3</h1>
+</header>
+<p><code>functor/3</code> — builds structures and retrieves information about them</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>functor(Structure, Functor, Arity)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>The principal functor of term <code>Structure</code> has name <code>Functor</code> and arity <code>Arity</code>, where <code>Functor</code> is an atom. Either <code>Structure</code> must be instantiated to a term or an atom, or <code>Functor</code> and <code>Arity</code> must be instantiated to an atom and a non-negative integer, respectively.</p>
+<p>In the case where <code>Structure</code> is initially unbound, <code>functor/3</code> will unify <code>Structure</code> with a structured term of <code>Arity</code> arguments, where the principal functor of the term is <code>Functor</code>. Each argument of the new structure will be a new uninstantiated variable.</p>
+<p>When <code>Structure</code> is instantiated to a structured term, <code>Functor</code> will be unified with the principal functor of <code>Structure</code> and <code>Arity</code> will be unified with the arity. <code>functor/3</code> treats atoms as structured terms with arity 0. The principal functor of a list is ’ . ’ with arity 2.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- functor(Structure,fish,2).
+
+Structure=fish(_123,_124)
+
+yes.
+
+?- functor(city(&#39;SantaMonica&#39;,&#39;CA&#39;,&#39;USA&#39;), Functor, Arity).
+
+Functor=city
+Arity=3
+
+yes.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>arg/3</code><br />
+<code>mangle/3</code></p></li>
+<li>[Bowen 91, 7.6]</li>
+<li>[Clocksin 81, 6.5]</li>
+<li>[Bratko 86, 7.2]</li>
+<li><p>[Sterling 86, 9.2]</p></li>
+</ul>
+</body>
+</html>
