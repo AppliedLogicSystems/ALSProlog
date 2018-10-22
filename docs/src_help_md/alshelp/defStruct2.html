@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>defStruct/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">defStruct/2</h1>
+</header>
+<p><code>defStruct/2</code> — specify an abstract data type</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>:- defStruct(TypeID, Equations) .</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>Used as a directive to specify an abstract datatype. <code>TypeID</code> is an atom functioning identifying the type. <code>Equations</code> is a list of <em>[equality statements]</em> of the form :</p>
+<pre><code>      Left = Right</code></pre>
+<p>where the left component of the equality statements must be one of :</p>
+<ul>
+<li><p><code>propertiesList</code></p></li>
+<li><p><code>accessPred</code></p></li>
+<li><p><code>setPred</code></p></li>
+<li><p><code>makePred</code></p></li>
+<li><p><code>structLabel</code></p></li>
+</ul>
+<p>The right sides of equality statements are Prolog terms whose structure depends on the left side entry, as follows.</p>
+<p><strong><code>propertiesList</code></strong> <br>    A list of atoms or expressions which are the symbolic names, or names plus values, of the properties or slots of the structure being defined. Details a presented below.</p>
+<p>For all of the rest of the equality statements, the right side is a single atom.</p>
+<p><strong><code>accessPred</code></strong> <br>    The name of the ternary(3-argument) predicate to be used for accessing the values of the slots in the structure. Calls on a generated accessPred take the form</p>
+<p>&lt;accessPred&gt;(&lt;slotname&gt;, &lt;Structure&gt;, &lt;Value&gt;)</p>
+<p><strong><code>setPred</code></strong> <br>    The name of the ternary(3-argument) predicate to be used for setting or changing the values of the slots in the structure. Calls on a generated accessPred take the form</p>
+<p>&lt;setPred&gt;(&lt;slotname&gt;, &lt;Structure&gt;, &lt;Value&gt;)</p>
+<p><strong><code>makePred</code></strong> <br>    The name of the unary predicate used for obtaining a fresh structure of the defined type.</p>
+<p><strong><code>structLabel</code></strong> <br>    The name of the functor of the structure defined.</p>
+<p>In more detail, a <strong><code>propertiesList</code></strong> is a list of <strong><em>[slot specifications]</em></strong> as follows :</p>
+<ul>
+<li><p>an atom, which is the name of the particular slot, or</p></li>
+<li>an expression of the form</li>
+</ul>
+<pre><code>     SlotName/Term,</code></pre>
+<p>where <code>SlotName</code> is an atom serving as the name of this slot, and <code>Term</code> is an arbitrary Prolog term which is the default value of this particular slot, or</p>
+<ul>
+<li>an <strong><em>[include]</em></strong> expression which is a term of the form</li>
+</ul>
+<pre><code>     include(File, Type)</code></pre>
+<p>where <code>File</code> is a path to a file, and <code>Type</code> is the name of a <code>defStruct</code> which appears in that file; if <code>File</code> can be located, and if the <code>defStruct</code> <code>Type</code> appears in <code>File</code>, the elements of propertiesList for <code>Type</code> are interpolated at the point where the include expression occurred; include expressions may be recursively nested. [Note : Relative paths in recursive includes must be valid from the directory in which the <code>defStruct</code> directive was invoked. ]</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>:- defStruct(windows,
+     [ propertiesList =
+        [ windowName, % name of the window
+          windowNum,  % assigned by window sys
+          borderColor/blue, % for color displays
+          borderType/sing,  % single or double lines
+          uLR, uLC,   % coords(Row, Col) of upper Left corner
+          lRR, lRC,   % coords(Row, Col) of lower Right corner
+          fore/black, % foreground/background
+          back/white  % text attribs
+        ],
+        accessPred = accessWI,
+        setPred = setWI,
+        makePred = makeWindowStruct,
+        structLabel = wi
+     ] ).</code></pre>
+<p>Then :</p>
+<pre><code>     ..., makeWindowStruct(WIN),
+     ..., setWI(windowName, WIN, foo),
+     ..., accessWI(borderColor, WIN, BColor), ...</code></pre>
+</body>
+</html>

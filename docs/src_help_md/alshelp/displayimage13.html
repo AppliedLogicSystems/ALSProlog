@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>display_image/[1,3]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">display_image/[1,3]</h1>
+</header>
+<p><code>create_image/ [2, 3]</code> — create an image from a GIF file</p>
+<p><code>display_image/ [1, 3]</code> — display an image</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>create_image(ImagePath, ImageName)
+
+create_image(Interp, ImagePath, ImageName)
+
+display_image(ImageName)
+
+display_image(Interp, ImageName, Options)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>These routines provide simple access from ALS Prolog to the image routines of Tk. The current versions support GIF images, but the routines can be extended to any of the types Tk supports. To display images, one must specify a path to the image file, and must first produce an internal Tk form of the image. This is done with :</p>
+<pre><code>create_image(ImagePath, ImageName)
+     :-
+     create_image(tcli, ImagePath, ImageName).</code></pre>
+<p>Assume that</p>
+<pre><code>     pow_wow_dance.gif</code></pre>
+<p>is a file in the current directory. Then the call</p>
+<pre><code>     ?- create_image(&#39;pow_wow_dance.gif&#39;, pow_wow).</code></pre>
+<p>will create the internal form of this image and associate the name pow_wow with it.</p>
+<p>Display of images which have been created is accomplished with :</p>
+<pre><code>display_image(ImageName)
+     :-
+     display_image(tcli, ImageName, [ ]).</code></pre>
+<p>Thus, the call</p>
+<pre><code>? -display_image(pow_wow).</code></pre>
+<p>produces</p>
+<p><img src="images/pow_wow_dancer.gif" /></p>
+<p>For the goal <code>display_image(tcli, ImageName, Options)</code>, <code>Options</code> is a list equations describing properties of the image. The supported properties and their defaults are:</p>
+<pre><code>width=Width, default = 200),
+height=Height, default = 200,
+x=X, default = 75,
+y=Y, default = 75,
+border_width=BorderWidth, default = 2</code></pre>
+</body>
+</html>

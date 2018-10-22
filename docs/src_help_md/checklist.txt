@@ -43,13 +43,13 @@ currentinput1.md:  __X___
 currentop3.md:  __X___
 currentprologflag2.md:  __X___
 cut0.md:  __X___
-datetime2.md:  ______
-defStruct2.md:  ______
-defineClass1.md:  ______
-displayimage13.md:  ______
-dynamic1.md:  ______
-existsfile1.md:  ______
-extendmainmenubar2.md:  ______
+>>>> datetime2.md:  ______   <<< Removed in favor of sysdatetime2.md
+defStruct2.md:  __X___
+defineClass1.md:  __X___
+displayimage13.md:  __X___
+dynamic1.md:  __X___
+existsfile1.md:  __X___
+extendmainmenubar2.md:  __X___
 fail0.md:  ______
 fileselectdialog123.md:  ______
 findterm5.md:  ______
@@ -119,7 +119,7 @@ statistics02.md:  ______
 streamposition3.md:  ______
 streamproperty2.md:  ______
 subatom5.md:  ______
-sysdatetime2.md:  ______
+sysdatetime2.md:  __X___
 system1.md:  ______
 tclcall3.md:  ______
 tclcoercenumber3.md:  ______

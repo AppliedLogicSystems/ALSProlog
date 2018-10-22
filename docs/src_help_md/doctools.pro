@@ -41,6 +41,7 @@ pack_kid(tcltk_interface, alsdev).
 toc_locn('./alshelp').
 
 td:- toc_from_docsdb.
+tdcore :- tocs_from_docsdbs([core_prolog]).
 tdalsdev :- tocs_from_docsdbs([alsdev]).
 
 toc_from_docsdb

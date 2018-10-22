@@ -5,185 +5,158 @@ predicates:
 ---
 `defineClass/1` — specify an ObjectPro class
 
-
 ## FORMS
-
+```
 :- defineClass(SpecEqns) .
-
-
+```
 ## DESCRIPTION
 
-Used as a directive to specify an ObjectPro class. SpecEqns is a list of
-equations
+Used as a directive to specify an ObjectPro class. `SpecEqns is` a list of equations of the form
+```
+     Keyword = Value
 
-of the form
+```
+The acceptable keywords, together with their associated `Value` types, are the following :
 
-Keyword = Value
+**`name`** - atom
 
-The acceptable keywords, together with their associated Value types, are the following :
+**`subclassOf`** - atom _(name of an existing class to serve as parent)_
 
-name - atom
+**`addl_slots`** - list of atoms _(to serve as names of local slots)_
 
-subclassOf - atom(name of a(parent) classe)
+**`defaults`** - list of default values for slots
 
-addl_slots - list of atoms(names of local slots)
+**`constrs`** - list of constraint expressions for slots
 
-defaults - list of default values for slots
+**`export`** - yes **_[or]_** no
 
-constrs - list of constraint expressions for slots
+**`action`** - atom
 
-export - yes
-**_[or]_**
-no
+The _name equation_ and the _subclassOf equation_ are both required. The single top-level pre-defined class is called **`genericObjects`**. Atoms on the _addl_slots list_ specify slots in the structure defining the state of objects which are instances of this class. These slot names must be distinct from slot names in any of the ancestor classes from which the new class inherits. The **__state-schema__** of a class is the union of the local _addl_slots_ of the class with the _addl_slots_ of all classes of which the class is a subclass. An object which is instance of a class has a slot in its state structure corresponding to each entry in the state-schema for the class.
 
-action - atom
+Class definitions can supply default values for slots using an equation of the type
+```
+defaults = [..., <SlotName> = <Value>, ...]
+```
+where each &lt;`SlotName`&gt; is any one of the slotnames from the complete state schema of the class, and &lt;`Value`&gt; is any appropriate value for that slot. Omitting this keyword in a class definition is equivalent to including
+```
+defaults = []
+```
+If the _`export = yes`_ equation appears on `SpecEqns`, the class methods and other information concerning the class are exported from the module in which the directive is executed.
 
-The name equation and the subclassOf equation are both required. The top-level pre-defined class is called genericObjects. Atoms on the addl_slots list specify slots in the structure defining the state of objects which are instances of this class. These slot names must be distinct frome slot names in any of the ancestor classes from which the new class inherits. The
-state-schema
+The _constraints equation_ is used to impose constraints on the values of particular slots in the states of objects which instances of the class. The general form of a constraint specification is
+```
+    constrs = list of constraint expressions
+```
+Three types of constraint expressions are supported:
 
-of a class is the union of the addl_slots of the class with the addl_slots of all classes of which the class is a subclass. An object which is instance of a class has a slot in its state structure corresponding to each entry in the state-schema for the class.
+- `slotName = value`
 
-Class definitions can supply default values for slots using the equation
+- `slotName < valueList`
 
-defaults = [..., &lt; SlotName &gt; = &lt; Value &gt;, ... ]
+- `slotName - Var^Condition`
 
-where each &lt; SlotName &gt; is any one of the slotnames from the complete state schema of the class, and &lt; Value &gt; is any appropriate value for that slot. Omitting this keyword in a class definition is equivalent to including
+The left side of each of the the equations is the name of a slot occurring in the complete state-schema of the class being defined.  The first two types of expressions are special cases of the third. 
 
-defaults = [
+In the first constraint expression, `slotName = value`, `value` is any Prolog term, and specifies a fixed value for this slot. 
 
-If export = yes equation appears on SpecEqns, the class methods and other information concerning the class are exported from the module in which the directive is executed.
+The second constraint expression, `slotName < valueList`, requires the values installed under `slotName` to be among the Prolog terms appearing on the list `valueList`. Here `'<'` is a short hand for 'is an element of'. 
 
-The constraints equation imposes constraints on the values of particular slots in the states of objects which instances of the class. The general form of a constraint specification is
+The third constraint expression subsumes the first two. `Var` is a Prolog variable, and `Condition` is an arbitrary Prolog call in which `Var` occurs. The test is imposed by binding the incoming candidate value to the variable `Var`, and then calling the test `Conditon`. Installation of the incoming value in the slot named `slotName` takes place only if the test `Condition` succeeds.
 
-constrs = list of constraint expressions
+If an equation `action = Name` occurs on `SpecEqns`, where `Name` is an atom, then methods of this class must be implemented by a binary predicate `Name/2`. If this equation is absent, the methods predicate for this class will be 
+```
+    <className>Action/2, 
+```
+where `<className>` is the name of the class(i.e., `name = <className>` occurs on `SpecEqns`). The format of the calls to this predicate is
+```
+    <className> Action(Message, State)
+```
+where `State` is the state of an object of this class, and  `Message` is an arbitrary Prolog term.
 
-Three types of constraint expressions are supported :
-
-- slotName = value
-
-- slotName &lt; valueList
-
-- slotName - Var^Condition
-
-The first two cases are special cases of the third. Tthe left side of the equations is a slot occurring in the complete state-schema of the class being defined. The first, slotName = value, value is any Prolog term, and specifies a fixed value for this slot. The expression slotName &lt; valueList requires the values installed under slotName to be among the Prolog terms appearing on the list valueList. Here ' &lt; ' is a short hand for ' is an element of ' . The third constraint expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs. The test is imposed by binding the incoming candidate value to the variable Var, and then calling the test Conditon. Installation of the incoming value in the slot takes place only if the test Condition succeeds.
-
-If an equation action = Name occurs on SpecEqns, where Name is an atom, then methods of this class must be implemented by a binary predicate Name/2. If this equation is absent, the methods predicate will be &lt; className &gt; Action/2, where &lt; className &gt; is the name of the class(i.e., name = &lt; className &gt; occurs on SpecEqns) . The format of the calls to this predicate is
-
-&lt; className &gt; Action(Message, State)
-
-where State is the state of an object of this class, and Message is an arbitrary Prolog term.
-
-The structure of a State is opaque. Access to the slots is provided by two predicates :
-
+The structure of a State is opaque. Access to the slots is provided by two predicates:
+```
 setObjStruct(SlotDescrip, State, Value)
 
 accessObjStruct(SlotDescrip, State, VarOrValue)
-
-SlotDescrip is a
-slot description
-
-, which is either a slot name, or an expression of the form
-
-SlotName^SlotDescrip
-
+```
+`SlotDescrip` is a slot description, which is either a slot name, or an expression of the form
+```
+     SlotName^SlotDescrip
+```
 The latter is used in cases of compound objects in which the value installed in a slot may be the state of another object. Thus,
-
-&lt; what &gt; ObjStruct(Slot1^Slot2, State, Value)
-
+```
+     <what>ObjStruct(Slot1^Slot2, State, Value)
+```
 is equivalent to
-
-accessObjStruct(Slot1, State, Obj1),
-
-&lt; what &gt; ObjStruct(Slot2, Obj1, Value)
-
+```
+     accessObjStruct(Slot1, State, Obj1),
+     <what>ObjStruct(Slot2, Obj1, Value)
+```
 The call
+```
+    setObjStruct(SlotName, State, Value)
+```
+destructively updates the slot `SlotName` of `State` to contain `Value`, provided that:
 
-setObjStruct(SlotName, State, Value)
+ - `Value` is not an uninstantiated variable, and
+ - any constraints imposed on this slot by the class are satisfied by the incoming `Value`. 
 
-destructively updates the slot SlotName of State to contain Value, which cannot be an uninstantiated variable, provided that any constraints imposed on this slot by the class are satisfied by the incoming Value. However, Value can contain uninstantiated variables. The second call
+However, note that `Value` can be a term containing uninstantiated variables. 
 
-accessObjStruct(SlotName, State, Value)
-
-accesses the slot SlotName of State and unifies the value obtained with VarOrValue. For compactness, the following syntactic sugar is provided :
-
-State^SlotDescrip : = Value
-
+The second call
+```
+    accessObjStruct(SlotName, State, ValueOrValue)
+```
+accesses the slot `SlotName` of `State` and unifies the value obtained with `VarOrValue`. For compactness, the following syntactic sugar is provided:
+```
+     State^SlotDescrip := Value
+```
 for
-
-setObjStruct(SlotDescrip, State, Value)
-
+```
+     setObjStruct(SlotDescrip, State, Value)
+```
 and
-
-VarOrValue : = State^SlotDescrip
-
+```
+     VarOrValue := State^SlotDescrip
+```
 for
-
-accessObjStruct(SlotDescrip, State, VarOrValue)
-
-The bodies of clauses defining the action predicate of a class can contain calls on accessObjStruct/3, setObjStruct/3(and : =), send/2, send_self/2, and any other built-in or program-defined Prolog predicate.
-
+```
+     accessObjStruct(SlotDescrip, State, VarOrValue)
+```
+The bodies of clauses defining the action predicate of a class can contain calls on `accessObjStruct/3, setObjStruct/3, :=, send/2, send_self/2`, and any other built-in or program-defined Prolog predicate.
 
 ## EXAMPLES
-
-:- defineClass([name = stacker,
-
-subclassOf = [genericObjects ],
-
-addl_slots = [theStack, depth ]
-
-]) .
-
-
-:- defineObject([name = stack,
-
-instanceOf = stacker,
-
-values = [theStack = [ ], depth = 0]
-
-]) .
-
-
+```
+:- defineClass(
+     [ name = stacker,
+       subclassOf = [genericObjects],
+       addl_slots = [theStack, depth]
+     ] ).
 
 stackerAction(push(Item), State)
-
-:-
-
-accessObjStruct(theStack, State, CurStack),
-
-setObjStruct(theStack, State, [Item | CurStack ]),
-
-accessObjStruct(depth, State, CurDepth),
-
-NewDepth is CurDepth + 1,
-
-setObjStruct(depth, State, NewDepth) .
-
+     :-
+     accessObjStruct(theStack, State, CurStack),
+     setObjStruct(theStack, State, [Item | CurStack ]),
+     accessObjStruct(depth, State, CurDepth),
+     NewDepth is CurDepth + 1,
+     setObjStruct(depth, State, NewDepth).
 
 stackerAction(pop(Item), State)
-
-:-
-
-accessObjStruct(theStack, State, [Item | RestStack ]),
-
-setObjStruct(theStack, State, RestStack),
-
-accessObjStruct(depth, State, CurDepth),
-
-NewDepth is CurDepth - 1,
-
-setObjStruct(depth, State, NewDepth) .
-
+     :-
+     accessObjStruct(theStack, State, [Item | RestStack ]),
+     setObjStruct(theStack, State, RestStack),
+     accessObjStruct(depth, State, CurDepth),
+     NewDepth is CurDepth - 1,
+     setObjStruct(depth, State, NewDepth).
 
 stackerAction(cur_stack(Stack), State)
-
-:-
-
-accessObjStruct(theStack, State, Stack) .
-
+     :-
+     accessObjStruct(theStack, State, Stack).
 
 stackerAction(cur_depth(Depth), State)
+     :-
+     accessObjStruct(depth, State, Depth).
 
-:-
-
-accessObjStruct(depth, State, Depth) .
-
+...create_object([name=stack, instanceOf=stacker, values=[theStack=[], depth=0] ], Obj),...
+```
