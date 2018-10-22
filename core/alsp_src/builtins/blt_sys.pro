@@ -279,15 +279,13 @@ make_det_gv2(Mod,Name,InitVal) :-
 
 
 /*------------------------------------------------------------------*
- | exec_file_command appends a command onto a file string and calls
+ | exec_file_command appends a file string onto a command and calls
  | system on the result.
  *------------------------------------------------------------------*/
 
 exec_file_command(Command,FileStruct) 
 	:-
-	make_file_name(FileStruct,File,_),
-	atom_concat(Command,' ',CommandPlusSpace),
-	atom_concat(CommandPlusSpace,File,NewCommandName),
+	catenate([Command, ' ', FileStruct], NewCommandName),
 	system(NewCommandName).
 
 /*--------TO LIBRARY ??---------------------------------------------*

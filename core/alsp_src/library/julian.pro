@@ -363,12 +363,96 @@ fin_next_business_day_ess(_, StDtESS, NxtStDtESS)
 			http://www.harold.com/toys/cal.cgi?year=2000
 
 	to cacluate the following changeovers.
+
+	=======================================
+	Not yet incorporated (from Wikipedia:)
+	https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States#2005–2009:_Second_extension
+
+	By the Energy Policy Act of 2005, daylight saving time (DST) was extended in the United States 
+	beginning in 2007.[10] As from that year, DST begins on the second Sunday of March and ends on 
+	the first Sunday of November. 
+	=======================================
  *--------------------------------------------------------------------------*/
 
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% DAYLIGHT SAVINGS DATES
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dst_ahead(2025,3,9).
+dst_back(2025,11,2).
+
+dst_ahead(2024,3,10).
+dst_back(2024,11,3).
+
+dst_ahead(2023,3,12).
+dst_back(2023,11,5).
+
+dst_ahead(2022,3,13).
+dst_back(2022,11,6).
+
+dst_ahead(2021,3,14).
+dst_back(2021,11,7).
+
+dst_ahead(2020,3,8).
+dst_back(2020,11,1).
+
+dst_ahead(2019,3,10).
+dst_back(2019,11,3).
+
+dst_ahead(2018,3,11).
+dst_back(2018,11,4).
+
+dst_ahead(2017,3,12).
+dst_back(2017,11,5).
+
+dst_ahead(2016,3,13).
+dst_back(2016,11,6).
+
+dst_ahead(2015,3,8).
+dst_back(2015,11,1).
+
+dst_ahead(2014,3,9).
+dst_back(2014,11,2).
+
+dst_ahead(2013,3,10).
+dst_back(2013,11,3).
+
+dst_ahead(2012,3,11).
+dst_back(2012,11,4).
+
+dst_ahead(2011,3,13).
+dst_back(2011,11,6).
+
+dst_ahead(2010,3,14).
+dst_back(2010,11,7).
+
+dst_ahead(2009,3,8).
+dst_back(2009,11,1).
+
+dst_ahead(2008,3,9).
+dst_back(2008,11,2).
+
+dst_ahead(2007,3,11).
+dst_back(2007,11,4).
+
+dst_ahead(2006,4,2).
+dst_back(2006,10,29).
+
+dst_ahead(2005,4,3).
+dst_back(2005,10,30).
+
+dst_ahead(2004,4,4).
+dst_back(2004,10,31).
+
+dst_ahead(2003,4,6).
+dst_back(2003,10,26).
+
+dst_ahead(2002,4,7).
+dst_back(2002,10,27).
+
+dst_ahead(2001,4,1).
+dst_back(2001,10,28).
 
 dst_ahead(2000,4,2).
 dst_back(2000,10,29).

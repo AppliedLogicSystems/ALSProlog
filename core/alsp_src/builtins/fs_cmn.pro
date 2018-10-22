@@ -203,7 +203,7 @@ time_less(HH0:MM0:SS0, HH1:MM1:SS1)
 
 /*!--------------------------------------------------------------
  |	datetime_less/2
- |	datetime_less(Time0, Time1)
+ |	datetime_less(DateTime0, DateTime1)
  |	datetime_less(+,+)
  |
  |	 - tests two terms representing datetime for ordering
