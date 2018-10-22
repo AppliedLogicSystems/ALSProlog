@@ -45,11 +45,11 @@ list_tcl_eval([L | CL], Interp, _)
 
 init_tk_alslib
 	:-
-	init_tk_alslib(tcli,_).
+	init_tk_alslib(shl_tcli,_).
 
 init_tk_alslib(Shared)
 	:-
-	init_tk_alslib(tcli, Shared).
+	init_tk_alslib(shl_tcli, Shared).
 
 :-dynamic(tcl_interp_created/1).
 
@@ -195,7 +195,7 @@ vtl(File) :-
 
 vtl(File, ArgC, ArgV)
 	:-
-	vtl(tcli, File, ArgC, ArgV).
+	vtl(shl_tcli, File, ArgC, ArgV).
 
 vtl(Interp, File, ArgC, ArgV)
 	:-
@@ -221,11 +221,11 @@ vtl(Interp, File, ArgC, ArgV)
  *------------------------------------------------------------*/
 popup_select_items(SourceList, ChoiceList)
 	:-
-	popup_select_items(tcli, SourceList, [], ChoiceList).
+	popup_select_items(shl_tcli, SourceList, [], ChoiceList).
 
 popup_select_items(SourceList, Options, ChoiceList)
 	:-
-	popup_select_items(tcli, SourceList, Options, ChoiceList).
+	popup_select_items(shl_tcli, SourceList, Options, ChoiceList).
 
 /*------------------------------------------------------------*
  |	popup_select_items/3
@@ -312,7 +312,7 @@ info_dialog(Msg)
 
 info_dialog(Msg, Title)
 	:-
-	info_dialog(tcli, Msg, Title).
+	info_dialog(shl_tcli, Msg, Title).
 
 info_dialog(Interp, Msg, Title)
 	:-
@@ -357,7 +357,7 @@ yes_no_dialog(Msg, Answer)
 
 yes_no_dialog(Msg, Title, Answer)
 	:-
-	yes_no_dialog(tcli, Msg, Title, Answer).
+	yes_no_dialog(shl_tcli, Msg, Title, Answer).
 
 yes_no_dialog(Interp, Msg, Title, Answer)
 	:-
@@ -392,7 +392,7 @@ atomic_input_dialog(Msg, Atom)
 
 atomic_input_dialog(Msg, Title, Atom)
 	:-
-	atomic_input_dialog(tcli, Msg, Title, Atom).
+	atomic_input_dialog(shl_tcli, Msg, Title, Atom).
 
 atomic_input_dialog(Interp, Msg, Title, Atom)
 	:-
@@ -415,7 +415,7 @@ user_pw_input_dialog(UID, PWD)
 
 user_pw_input_dialog(Title,UID, PWD)
 	:-
-	user_pw_input_dialog(tcli,Title,UID, PWD).
+	user_pw_input_dialog(shl_tcli,Title,UID, PWD).
 
 user_pw_input_dialog(Interp,Title,UID, PWD)
 	:-
@@ -461,11 +461,11 @@ export file_select_dialog/3.
 
 file_select_dialog(FileName)
 	:-
-	file_select_dialog(tcli, [title='Select File'], FileName).
+	file_select_dialog(shl_tcli, [title='Select File'], FileName).
 
 file_select_dialog(Options, FileName)
 	:-
-	file_select_dialog(tcli, Options, FileName).
+	file_select_dialog(shl_tcli, Options, FileName).
 
 file_select_dialog(Interp, Options, FileName)
 	:-
@@ -625,7 +625,7 @@ export create_image/3.
 
 create_image(ImagePath, ImageName)
 	:-
-	create_image(tcli, ImagePath, ImageName).
+	create_image(shl_tcli, ImagePath, ImageName).
 
 create_image(Interp, ImagePath, ImageName)
 	:-
@@ -650,7 +650,7 @@ export display_image/3.
 
 display_image(ImageName)
 	:-
-	display_image(tcli, ImageName, []).
+	display_image(shl_tcli, ImageName, []).
 
 display_image(Interp, ImageName, Options)
 	:-
@@ -674,12 +674,12 @@ export create_display_image/3.
 create_display_image(ImagePath)
 	:-
 	create_image(ImagePath, ImageName),
-	display_image(tcli, ImageName, []).
+	display_image(shl_tcli, ImageName, []).
 
 create_display_image(ImagePath, Options)
 	:-
 	create_image(ImagePath, ImageName),
-	display_image(tcli, ImageName, Options).
+	display_image(shl_tcli, ImageName, Options).
 
 create_display_image(Interp, ImagePath, Options)
 	:-
@@ -692,7 +692,7 @@ export display_image/5.
 
 display_image(ImageFile, ImageWidth, ImageHeight)
 	:-
-	display_image(tcli, '.', ImageFile, ImageWidth, ImageHeight).
+	display_image(shl_tcli, '.', ImageFile, ImageWidth, ImageHeight).
 
 display_image(Interp, ImageDir, ImageFile, ImageWidth, ImageHeight)
 	:-
@@ -847,7 +847,7 @@ export menu_entries_list/3.
 
 menu_entries_list(MenuPath, EntriesList)
 	:-
-	menu_entries_list(tcli, MenuPath, EntriesList).
+	menu_entries_list(shl_tcli, MenuPath, EntriesList).
 
 menu_entries_list(Interp, MenuPath, EntriesList)
 	:-
@@ -864,7 +864,7 @@ export path_to_menu_entry/4.
 
 path_to_menu_entry(MenuPath, Index, SubMenuPath)
 	:-
-	path_to_menu_entry(tcli, MenuPath, Index, SubMenuPath).
+	path_to_menu_entry(shl_tcli, MenuPath, Index, SubMenuPath).
 
 path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
 	:-
