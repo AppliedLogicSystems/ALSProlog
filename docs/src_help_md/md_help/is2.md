@@ -5,25 +5,22 @@ predicates:
 ---
 `is/2` — evaluates an arithmetic expression
 
-
 ## FORMS
-
+```
 Result is Expression
-
-
+```
 ## DESCRIPTION
 
-Expression should be a ground term that can be evaluated. Numbers evaluate as themselves, and a list evaluates as the first element of the list. The operators listed in
-[Table 3(_[Arithmetic,Operators.]_)](href = alshelpis2.htm#ea2a73ad)
-and
-[Table 5(_[Arithmetic,Functions.]_)](href = alshelpis2.htm#e9235b96)
-can also be evaluated when their arguments can be evaluated. If Result is an unbound variable, then it will be bound to the numeric value of Expression. If Result is not unbound, then it will be evaluated, and the value of the Result will be unified with the value of the Expression.
+`Expression` should be a ground term that can be evaluated. Numbers evaluate as themselves, and a list evaluates as the first element of the list. The operators listed in _Arithmetic Operators_ and
+_Arithmetic Functions_ can also be evaluated when their arguments can be evaluated. If `Result` is an unbound variable, then it will be bound to the numeric value of `Expression`. If `Result` is not unbound, then it will be evaluated, and the value of the `Result` will be unified with the value of `Expression`.
 
 
 
 
+<hr>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Arithmetic Operators**
 
-|**Operator|Description**|
+|Operator|Description|
 |---------|------------|
 | -X | unary minus | 
 | X div Y | integer division | 
@@ -43,14 +40,11 @@ can also be evaluated when their arguments can be evaluated. If Result is an unb
 | 0 ' Char | the | 
 
 
-Table 3
-Arithmetic Operators.
 
+<hr>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Arithmetic Functions**
 
-
-
-
-|**Function|Description**|
+|Function|Description|
 |---------|------------|
 | abs(X) | absolute value | 
 | acos(X) | arc cosine | 
@@ -77,33 +71,36 @@ Arithmetic Operators.
 | y1(X) | Bessel function of second kind of order 1 | 
 
 
-Table 5
-Arithmetic Functions.
 
 
 ## EXAMPLES
-
 ```
-?- 2is3-1.
+?- 2 is 3-1.
+
 yes.
-```
 
-```
-?- Xis6*7
+?- X is 6*7
+
 X=42
-yes.
-```
 
-```
-?- Xis2.5+3.5.
+yes.
+
+?- X is 2.5+3.5.
+
 X=6
+
+yes.
+
+?- Result is sqrt(2).
+
+Result=1.414213562 
+
 yes.
 ```
-
 
 ## ERRORS
 
-is/2 fails when it attempts to evaluate an unknown operator, or if Expression is not ground. Failure also occurs if there are any arithmetic faults, such as overflow, underflow, or division by zero.
+`is/2` fails when it attempts to evaluate an unknown operator, or if `Expression` is not ground. Failure also occurs if there are any arithmetic faults, such as overflow, underflow, or division by zero.
 
 
 ## NOTES
@@ -115,4 +112,4 @@ ALS Prolog complies to the ISO Prolog Standard regarding errors. A calculation e
 
 - [Bowen 91, 7.7]
 - [Clocksin 81, 6.11]
-- [Bratko 86, 3.4]. 
+- [Bratko 86, 3.4]

@@ -30,11 +30,11 @@ file_select_dialog(Interp, Options, FileName)</code></pre>
 <p>These predicates allow the user to select a file using the native file selection dialogs on each platform. The shorter versions are defined by :</p>
 <pre><code>file_select_dialog(FileName)
     :-
-    file_select_dialog(shl_tcli, [title = &#39; Select File &#39; ], FileName) .
+    file_select_dialog(tcli, [title = &#39; Select File &#39; ], FileName) .
 
 file_select_dialog(Options, FileName)
     :-
-    file_select_dialog(shl_tcli, Options, FileName) .</code></pre>
+    file_select_dialog(tcli, Options, FileName) .</code></pre>
 <p>For the general call</p>
 <pre><code>file_select_dialog(Interp, Options, FileName)</code></pre>
 <p><code>Interp</code> should be an atom naming a Tcl interpreter, <code>Filename</code> should be an uninstantiated variable, and <code>Options</code> should be a list of options as follows :</p>
@@ -51,5 +51,11 @@ file_select_dialog(Options, FileName)
 <pre><code>?- file_select_dialog(File).</code></pre>
 <p>would produce this popup :</p>
 <p><img src="images/file_sel-1.gif" /></p>
+<h2 id="notes">NOTES</h2>
+<p>The default Tcl interpreter for <code>file_select_dialog/[1,2]</code> is <code>tcli</code> as shown above. This interpreter is <em><em>NOT</em></em> automatically intialized by alsdev. You must first run <code>init_tk_alslib/0</code> or <code>init_tk_alslib/1</code>, or run <code>init_tk_alslib/2</code> with <code>Interp = tcli</code>. If you wish to run <code>file_select_dialog/3</code> with <code>Interp</code> bound to a Tcl interpreter <code>I</code> other than <code>tcli</code>, you must first run <code>init_tk_alslib/2</code> with <code>Interp</code> bound to this same <code>I</code> (only once is necessary).</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li>init_tk_alslib/[0,1,2]</li>
+</ul>
 </body>
 </html>

@@ -64,10 +64,10 @@ getchar12.md:  __X___
 getcode12.md:  __X___
 getenv2.md:  __X___
 halt0.md:  __X___
-identity2.md:  ______
-infodialog123.md:  ______
-inittkalslib012.md:  ______
-is2.md:  ______
+identity2.md:  __X___
+infodialog123.md:  __X___
+inittkalslib012.md:  __X___
+is2.md:  __X___
 leash1.md:  ______
 length2.md:  ______
 lessthan2.md:  ______
