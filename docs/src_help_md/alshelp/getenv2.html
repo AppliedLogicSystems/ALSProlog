@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>getenv/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">getenv/2</h1>
+</header>
+<p><code>getenv/2</code> — gets the value of the given os environment variable</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>getenv(EnvVar, EnvVal)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>EnvVar</code>, which must be instantiated, can be a symbol, an <code>UIA</code>, or a list of ASCII characters denoting an operating system environment or shell variable. The value of this external variable is accessed and an atom or a <code>UIA</code> composed of the corresponding list of ASCII characters is unified with <code>EnvVal</code>. If <code>EnvVar</code> is not defined in the os environment, <code>getenv/2</code> fails.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- getenv(&#39;TERM&#39;, Term) .
+
+Term = xterm
+
+yes.
+
+?- getenv(&#39;PATH&#39;, Path).
+
+Path = &#39;.:/usr/local/bin:/usr/bin/X11:/usr/bin:/bin:/usr/ccs/bin&#39;
+
+yes.
+
+?- getenv(&#39;FOOBAR&#39;, Foobar).
+
+no.</code></pre>
+</body>
+</html>

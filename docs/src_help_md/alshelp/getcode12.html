@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>get_code/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">get_code/[1,2]</h1>
+</header>
+<p><code>get_code/1</code> — read a character code from current input stream</p>
+<p><code>get_code/2</code> — read character code from a specific stream</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>get_code(Code)
+
+get_code(Stream_or_Alias, Code)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>get_code/1</code> will retrieve the next character code from the current input stream and unify it with <code>Code</code>. <code>get_code/2</code> will retrieve a character code from the input stream associated with <code>Stream_or_Alias</code> and unify it with <code>Code</code>.</p>
+<p>If there are no more data left in the stream to be read and if the stream has the property eof_action(eof_code), then <code>Code</code> will be unified with -1</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- get_code(C1),get_code(C2),get_ccode(C3),get_code(C4).
+test&lt;newline&gt;
+
+C1=116
+C2=101
+C3=115
+C4=116</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p><code>Stream_or_Alias</code> is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+<p>– – – – &gt; domain_error(stream_or_alias, <code>Stream_or_Alias</code>) .</p>
+<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
+<p>– – – – &gt; existence_error(stream, <code>Stream_or_Alias</code>) .</p>
+<p><code>Stream_or_Alias</code> is not an input stream</p>
+<p>– – – – &gt; permission_error(input, stream, <code>Stream_or_Alias</code>) .</p>
+<p>Code is neither a variable nor a character code</p>
+<p>– – – – &gt; type_error(integer, Code) .</p>
+<p>The stream associated with <code>Stream_or_Alias</code> is at the end of the stream and the stream has the property eof_action(error)</p>
+<p>– – – – &gt; existence_error(past_end_of_stream, <code>Stream_or_Alias</code>) .</p>
+<p>The stream associated with <code>Stream_or_Alias</code> has no input ready to be read and the stream has the property snr_action(error)</p>
+<p>– – – – &gt; existence_error(stream_not_ready, <code>Stream_or_Alias</code>) .</p>
+<h2 id="notes">NOTES</h2>
+<p>A character code is simply an integer restricted to a certain range of values.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>put_code/2</code><br />
+<code>get_char/2</code><br />
+<code>open/4</code><br />
+<code>close/1</code><br />
+<code>char_code/2</code></p></li>
+<li><p><code>User Guide (Prolog I/O)</code></p></li>
+</ul>
+</body>
+</html>

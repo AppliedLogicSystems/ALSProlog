@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>get0/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">get0/1</h1>
+</header>
+<p><code>get0/1</code> — read the next character</p>
+<p><code>get/1</code> — read the next printable character</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>get0(Char)
+
+get(Char)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>get0/1</code> unifies <code>Char</code> with the ASCII code of the next character from the current input stream. If there are no more characters left in the stream, <code>Char</code> will be unified with -1</p>
+<p><code>get/1</code> discards all non-printing characters from the current input stream. It unifies <code>Char</code> with the ASCII code of the first non-blank printable character. Char is unified with -1 on end of file.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- get(First),get(Second),get(Third).
+ABCDEFGHI&lt;newline&gt;
+
+First=65,
+Second=66,
+Third=67
+
+yes.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>skip/1</code><br />
+<code>get_char/2</code><br />
+<code>get_code/2</code></p></li>
+<li>[Bowen 91, 7.8]</li>
+<li>[Clocksin 81, 6.9]</li>
+<li><p>[Bratko 86, 6.3]</p></li>
+</ul>
+</body>
+</html>
