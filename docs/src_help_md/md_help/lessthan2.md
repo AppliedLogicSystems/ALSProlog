@@ -22,20 +22,19 @@ predicates:
 
 
 ## FORMS
-
+```
 Expression1 < Expression2
 
 Expression1 > Expression2
 
-Expression1 = : = Expression2
+Expression1 =:= Expression2
 
-Expression1 = \ = Expression2
+Expression1 =\= Expression2
 
-Expression1 = < Expression2
+Expression1 =< Expression2
 
-Expression1 > = Expression2
-
-
+Expression1 >= Expression2
+```
 
 ## DESCRIPTION
 
@@ -45,17 +44,19 @@ Both arguments to each relational operator should be instantiated to expressions
 ## EXAMPLES
 
 ```
-?- -7*0=<1+1
+?- -7*0 =< 1+1
+
 yes.
 ```
 
 ```
-?- 1+1=<7*0
+?- 1+1 =< 7*0
+
 no.
 ```
 
 
 ## ERRORS
 
-The ISO Prolog Standard requires that a calculation error be thrown when the arguments cannot be evaluated a for these operators. At this time, ALS Prolog does not conform to this requirement.
+The ISO Prolog Standard requires that a calculation error be thrown when the arguments cannot be evaluated for any of these operators. At this time, ALS Prolog does not conform to this requirement.  Instead, it throws a `type_error(evaluable,...)` indicating that an argument is not evaluable.
 

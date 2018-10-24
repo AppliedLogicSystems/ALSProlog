@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>&lt;/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">&lt;/2</h1>
+</header>
+<p><code>&lt;/2</code> — The left expression is less than the right expression</p>
+<p><code>&gt;/2</code> — The left expression is greater than the right expression</p>
+<p><code>=:=/2</code> — The left and right expressions are equal</p>
+<p><code>=\=/2</code> — The left and right expressions are not equal</p>
+<p><code>=&lt;/2</code> — The left expression is less than or equal to the right</p>
+<p><code>&gt;=/2</code> — The left expression is greater than or equal to the right</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>Expression1 &lt; Expression2
+
+Expression1 &gt; Expression2
+
+Expression1 =:= Expression2
+
+Expression1 =\= Expression2
+
+Expression1 =&lt; Expression2
+
+Expression1 &gt;= Expression2</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>Both arguments to each relational operator should be instantiated to expressions which can be evaluated by is/2. The relational operator succeeds if the relation holds for the value of the two arguments, and fails otherwise. A relational operator will fail if one or both of its arguments cannot be evaluated.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- -7*0 =&lt; 1+1
+
+yes.</code></pre>
+<pre><code>?- 1+1 =&lt; 7*0
+
+no.</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>The ISO Prolog Standard requires that a calculation error be thrown when the arguments cannot be evaluated for any of these operators. At this time, ALS Prolog does not conform to this requirement. Instead, it throws a <code>type_error(evaluable,...)</code> indicating that an argument is not evaluable.</p>
+</body>
+</html>

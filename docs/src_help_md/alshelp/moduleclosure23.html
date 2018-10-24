@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>module_closure/[2,3]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">module_closure/[2,3]</h1>
+</header>
+<p><code>module_closure/2</code> — creates a module closure</p>
+<p><code>module_closure/3</code> — creates a module closure for the specified procedure</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>:- module_closure(Name, Arity, Procedure) .
+
+:- module_closure(Name, Arity) .</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>For some Prolog procedures, it is essential to know the module within which they are invoked. For example, <code>setof/3</code> must invoke the goal in its second argument relative to the correct module. The problem is that <code>setof/3</code> is defined in <code>module builtins</code>, while it may invoked in some other module which is where the code defining the goal in the second argument should be run. In reality, <code>setof/3</code> is defined as the module closure of another predicate <code>setof/4</code> (whose definition appears in the <code>builtins module</code>). The extra argument to <code>setof/4</code> is the module in which the goal in the second argument of <code>setof/3</code> is to be run. Declaring <code>setof/3</code> to be a module closure of <code>setof/4</code> means that goals of the form</p>
+<pre><code>..., setof(X, G, L), ...</code></pre>
+<p>are automatically expanded to goals of the form</p>
+<pre><code>..., setof(M, X, G, L), ...</code></pre>
+<p>where <code>M</code> is the current module; i.e., the module in which the original call took place. Thus <code>setof/4</code> is supplied with the correct module <code>M</code> in which to run the goal in the second argument of the original call to <code>setof/3</code>.</p>
+<p>The actual predicate that you write should expect to receive the calling module as its first argument. Then one ’ closes ’ the predicate with a module closure declaration which suppresses the first(module) argument. The arguments to <code>module_closure/3</code> are as follows :</p>
+<ul>
+<li><p><code>Name</code> is the name of the procedure the user will call.</p></li>
+<li><p><code>Arity</code> is the number of arguments of the user procedure; that is, the number of arguments in the ‘closed’ procedure which the user procedure will call.</p></li>
+<li><p><code>Procedure</code> is the name of the(unclosed) procedure to call with the additional module argument. Note that <code>Procedure</code> can be different than <code>Name</code>, although they are often the same.</p></li>
+</ul>
+<p>The procedure that the user will call should be exported if it is contained within a module. The actual (unclosed) procedure does not need to be exported.</p>
+<p><code>module_closure/2</code> simply identifies the first and third arguments of module_closure/3. That is, the command</p>
+<pre><code>:- module_closure(foo, 5) .</code></pre>
+<p>is equivalent to</p>
+<pre><code>:- module_closure(foo, 5, foo) .</code></pre>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following example illustrates the use of <code>module_closure/3</code>. First assume that the following three modules and code have been created and loaded :</p>
+<pre><code>module m1.
+use m3.
+export testA/1.
+
+testA(X) :- leading(X) .
+
+p(tom).
+p(dick).
+p(harry).
+
+endmod. % m1
+
+module m2.
+use m3.
+export testB/1.
+
+testB(X) :- leading(X) .
+
+p(sally).
+p(jane).
+p(martha).
+
+endmod. % m2
+
+module m3.
+
+leading(X) :- p(X) .
+
+endmod. % m3</code></pre>
+<p>Attempting to run either testA or testB in default module <code>user</code> fails :</p>
+<pre><code>?- testA(X).
+
+no.
+
+?- testB(X).
+
+no.</code></pre>
+<p>This is because the call to p(X) runs in module m3 which has no clauses defining p/1. Now let us change module m3 to read as follows :</p>
+<pre><code>module m3.
+
+first(M, X) :- M:p(X).
+
+export leading/1.
+
+:- module_closure(leading, 1, first) .
+
+endmod.</code></pre>
+<p>We have defined a new predicate <code>first/2</code> which carries a module as its first argument and which makes the call to <code>p(X)</code> in that module. And we have specified that <code>leading/1</code> is the module closure of <code>first/2</code>. Now the calls succeed :</p>
+<pre><code>?- testA(X).
+
+X=tom
+
+yes.
+
+?- testB(X).
+
+X=sally
+
+yes.</code></pre>
+<p>Note that we exported <code>leading/1</code> from <code>module m3</code>, and both <code>module m1</code> and <code>module m2</code> were declared to use <code>module m3</code>.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>:/2</code></p></li>
+<li><p>`User Guide (Modules)</p></li>
+</ul>
+</body>
+</html>

@@ -8,40 +8,50 @@ predicates:
 
 `dmember/2` — list membership
 
-
 ## FORMS
-
+```
 member(Element, List)
 
 dmember(Element, List)
-
-
+```
 ## DESCRIPTION
 
-member/2 succeeds when Element can be unified with one of the elements in the list, List. dmember/2 is the determinate version of member/2.
-
+`member/2` succeeds when `Element` can be unified with one of the elements in `List`. `dmember/2` is the determinate version of `member/2`.
 
 ## EXAMPLES
-
 ```
-?- member(a,[a,b,c]).
+?- member(b, [a,b,c]).
+
 yes.
-```
 
-```
+?- member(foo, [bar | T]).
+
+T=[foo|_A] 
+
+yes.
+
 ?- member(X,[1,2,3]).
+
 X=1;
+
 X=2;
+
 X=3;
+
+no.
+
+?- dmember(X,[1,2,3]).
+
+X=1;
+
 no.
 ```
 
-
 ## NOTES
 
-member/2 and dmember/2 are defined by the following clauses :
+`member/2` and `dmember/2` are defined by the following clauses :
 
-
+```
 member(Item, [Item | _ ]) .
 
 member(Item, [_ | Rest ]) :- member(Item, Rest) .
@@ -50,4 +60,4 @@ member(Item, [_ | Rest ]) :- member(Item, Rest) .
 dmember(Item, [Item | _ ]) :- !.
 
 dmember(Item, [_ | Rest ]) :- dmember(Item, Rest) .
-
+```

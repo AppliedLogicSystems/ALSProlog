@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>leash/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">leash/1</h1>
+</header>
+<p><code>leash/1</code> — set which ports are leashed for the debugger</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>leash(Mode)
+
+leash([Mode | Modes ])</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>For each of the <code>Modes</code> on the argument, the leashing mode of the debugger is set for that <code>Mode</code>, where <code>Mode</code> is one of the atoms shown in <em>Leashing Modes Table</em> below. Note that it does not make sense to use the list argument format for specifying modes if the <code>all</code> mode is included with other modes.</p>
+<p><strong>Leashing Modes Table</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Mode</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>all</td>
+<td>Prompt at all ports</td>
+</tr>
+<tr class="even">
+<td>call</td>
+<td>Prompt at call ports</td>
+</tr>
+<tr class="odd">
+<td>exit</td>
+<td>Prompt at redo ports</td>
+</tr>
+<tr class="even">
+<td>fail</td>
+<td>Prompt at fail ports</td>
+</tr>
+<tr class="odd">
+<td>redo</td>
+<td>Prompt at redo ports</td>
+</tr>
+</tbody>
+</table>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following examples illustrate the use of leash/1:</p>
+<pre><code>?- leash([call,redo]).
+yes.
+
+?- leash([]).
+yes.</code></pre>
+<p>Note that using an empty list as the argument to leash/1, as shown in the example above, results in no ports being leashed.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>trace/1</code><br />
+<code>spy/1</code></p></li>
+<li><code>Tools (Using the Debugger)</code><br />
+</li>
+<li><p>[Clocksin81, 8.4]</p></li>
+</ul>
+</body>
+</html>
