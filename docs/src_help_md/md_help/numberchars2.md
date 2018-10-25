@@ -8,62 +8,61 @@ predicates:
 
 `number_codes/2` — convert between a number and the list of character codes which represent the number
 
-
 ## FORMS
-
+```
 number_chars(Number, CharList)
 
 number_codes(Number, CodeList)
-
-
+```
 ## DESCRIPTION
 
-If CharList is bound to a list of characters then it is parsed according to the syntax rules for numbers. Should the parse be successful, the resulting value is unified with Number in a call to number_chars/2.
+In a call to `number_chars/2`, if `CharList` is bound to a list of characters then it is parsed according to the syntax rules for numbers; should the parse be successful, the resulting value is unified with `Number`. 
 
-If CodeList is bound to a list of character codes then it is is parsed according to the syntax rules for numbers. Should the parse be successful, the resulting value is unified with Number in a call to number_codes/2.
+If `Number` is bound to a number in `number_chars/2`, after first ascertaining that `CharList` is bound to a ground list, then `CharList` will be unified with a list of characters that would result as output from `write_canonical(Number)`.
 
-In Number is bound to a number in either number_chars/2(or number_codes/2), after first ascertaining that CharList(or CodeList) is bound to a ground list, then CharList(or CodeList) will be bound to a list of characters(character codes) that would result as output from write_canonical(Number) .
+In a call to `number_codes/2`, if `CodeList` is bound to a list of character codes, then it is is parsed according to the syntax rules for numbers; should the parse be successful, the resulting value is unified with `Number`.
 
+If `Number` is bound to a number in `number_codes/2`, after first ascertaining that `CodeList` is bound to a ground list, then `CodeList` will be unified with a list of character codes that would result as output from `write_canonical(Number)`.
 
 ## EXAMPLES
 
 ```
 ?- number_chars(-2.3,L).
+
 L=[-,'2',.,'3']
-yes.
-```
 
-```
-?- number_codes(N,&quot;123&quot;).
+yes.
+
+?- number_codes(N, "123" ).
+
 N=123
-yes.
-```
 
-```
-?- number_codes(N,&quot;123.4&quot;).
+yes.
+
+?- number_codes(N, "123.4" ).
+
 N=123.4
-yes.
-```
 
-```
+yes.
+
 ?- number_chars(123.4,['1',A,B,.,C]).
-A='2'
-B='3'
-C='4'
-yes.
-```
 
-```
-?- number_codes(N,&quot;0xffe&quot;).
+A='2' 
+B='3' 
+C='4' 
+
+yes.
+
+?- number_codes(N,"0xffe" ).
+
 N=4094
-yes.
-```
 
-```
-?- number_codes(N,&quot;foobar&quot;).
-Error:Syntaxerror.
--Goal:builtins:number_codes(_A,&quot;foobar&quot;)
--Throwpattern:error(syntax_error,[builtins:number_codes(_A,*)])
+yes.
+
+?- number_codes(N,"foobar").
+Error: Syntax error.
+- Goal:          builtins:number_codes(_A,"foobar")
+- Throw pattern: error(syntax_error,[builtins:number_codes(_A,*)])
 ```
 
 ## ERRORS
@@ -96,4 +95,4 @@ CharList(or CodeList) is not parsable as a number
 ## SEE ALSO
 
 - `read_term/3`  
-`write_canonical/2.
+`write_canonical/2`

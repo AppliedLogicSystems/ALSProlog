@@ -77,11 +77,11 @@ makehashtable1.md:  __X___
 mangle3.md:  __X___
 member2.md:  __X___
 moduleclosure23.md:  __X___
-name2.md:  ______
-not1.md:  ______
-numberchars2.md:  ______
-op3.md:  ______
-open34.md:  ______
+name2.md:  __X___
+not1.md:  __X___
+numberchars2.md:  __X___
+op3.md:  __X___
+open34.md:  __X___
 peekchar12.md:  ______
 peekcode12.md:  ______
 poll2.md:  ______

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>number_chars/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">number_chars/2</h1>
+</header>
+<p><code>number_chars/2</code> — convert between a number and the list of characters which represent the number</p>
+<p><code>number_codes/2</code> — convert between a number and the list of character codes which represent the number</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>number_chars(Number, CharList)
+
+number_codes(Number, CodeList)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>In a call to <code>number_chars/2</code>, if <code>CharList</code> is bound to a list of characters then it is parsed according to the syntax rules for numbers; should the parse be successful, the resulting value is unified with <code>Number</code>.</p>
+<p>If <code>Number</code> is bound to a number in <code>number_chars/2</code>, after first ascertaining that <code>CharList</code> is bound to a ground list, then <code>CharList</code> will be unified with a list of characters that would result as output from <code>write_canonical(Number)</code>.</p>
+<p>In a call to <code>number_codes/2</code>, if <code>CodeList</code> is bound to a list of character codes, then it is is parsed according to the syntax rules for numbers; should the parse be successful, the resulting value is unified with <code>Number</code>.</p>
+<p>If <code>Number</code> is bound to a number in <code>number_codes/2</code>, after first ascertaining that <code>CodeList</code> is bound to a ground list, then <code>CodeList</code> will be unified with a list of character codes that would result as output from <code>write_canonical(Number)</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- number_chars(-2.3,L).
+
+L=[-,&#39;2&#39;,.,&#39;3&#39;]
+
+yes.
+
+?- number_codes(N, &quot;123&quot; ).
+
+N=123
+
+yes.
+
+?- number_codes(N, &quot;123.4&quot; ).
+
+N=123.4
+
+yes.
+
+?- number_chars(123.4,[&#39;1&#39;,A,B,.,C]).
+
+A=&#39;2&#39; 
+B=&#39;3&#39; 
+C=&#39;4&#39; 
+
+yes.
+
+?- number_codes(N,&quot;0xffe&quot; ).
+
+N=4094
+
+yes.
+
+?- number_codes(N,&quot;foobar&quot;).
+Error: Syntax error.
+- Goal:          builtins:number_codes(_A,&quot;foobar&quot;)
+- Throw pattern: error(syntax_error,[builtins:number_codes(_A,*)])</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p>Number and CharList are variables(number_chars/3)</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Number and CodeList are variables(number_codes/3)</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p>Number is neither a number nor a variable</p>
+<p>– – – – &gt; type_error(number, Number)</p>
+<p>CharList is neither a variable nor a list of characters</p>
+<p>– – – – &gt; domain_error(character_list, List)</p>
+<p>CodeList is neither a variable nor a list of character codes</p>
+<p>– – – – &gt; domain_error(character_code_list, List)</p>
+<p>CharList(or CodeList) is not parsable as a number</p>
+<p>– – – – &gt; syntax_error</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><code>read_term/3</code><br />
+<code>write_canonical/2</code></li>
+</ul>
+</body>
+</html>

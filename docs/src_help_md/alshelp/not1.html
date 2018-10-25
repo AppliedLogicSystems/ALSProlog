@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>not/1</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">not/1</h1>
+</header>
+<p><code>not/1</code> — tests whether a goal fails</p>
+<p><code>\+/1</code> — tests whether a goal fails</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>not Goal
+
+not(Goal)
+
+\+ Goal
+
+\+(Goal)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>not/1</code> and <code>\+/1</code> implement negation by failure. If the <code>Goal</code> fails, then <code>not(Goal)</code> succeeds. If <code>Goal</code> succeeds, then <code>not(Goal)</code> fails. When <code>not/1</code> succeeds it doesn’t bind any variables. Cuts occurring within Goal will be restricted to cutting choices created within the execution of <code>Goal</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- not(true).
+
+no.
+
+?- not(a=b).
+
+yes.
+
+?- not(not(f(A)=f(b))).
+
+A=_2
+
+yes.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li>[Bowen 91, 7.1]</li>
+<li>[Sterling 86, 11.3]</li>
+<li>[Bratko 86, 5.3]</li>
+<li>[Clocksin 81, 6.7]</li>
+</ul>
+</body>
+</html>
