@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>poll/2</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">poll/2</h1>
+</header>
+<p><code>poll/2</code> — Determine whether I/O is possible</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>poll(Stream_or_Alias, TimeOut)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>poll/2</code> will wait at most <code>TimeOut</code> microseconds and then succeed if a non-blocking I/O operation may be started on the stream associated with <code>Stream_or_Alias</code>. Failure will occur if the I/O operation would block.</p>
+<h2 id="errors">ERRORS</h2>
+<p><code>Stream_or_Alias</code> is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+<p>– – – – &gt; domain_error(stream_or_alias, Stream_or_Alias) .</p>
+<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
+<p>– – – – &gt; existence_error(stream, Stream_or_Alias) .</p>
+<p><code>TimeOut</code> is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p><code>TimeOut</code> is not an integer</p>
+<p>– – – – &gt; type_error(integer, TimeOut) .</p>
+<h2 id="notes">NOTES</h2>
+<p>Note that an input operation such as <code>read/2</code> may block anyway if there is insufficient input to syntactically complete the term and the terminating full-stop. It is possible for poll to succeed when only the first character of the term is ready. The <code>open/[3,4]</code> option, <code>snr_action</code>, is better used for situations where reading a term from a stream which might not be ready is desirable.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>open/[3,4]</code></p></li>
+<li><p>User Guide (Prolog I/O)</p></li>
+</ul>
+</body>
+</html>

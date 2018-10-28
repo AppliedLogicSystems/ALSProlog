@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>printf/[1,2,3,4]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">printf/[1,2,3,4]</h1>
+</header>
+<p><code>printf/1</code> — print out a string to the current output</p>
+<p><code>printf/2</code> — print out a string with arguments</p>
+<p><code>printf/3</code> — print out a string with a format and arguments</p>
+<p><code>printf_opt/3</code> — print out string with format, arguments, options</p>
+<p><code>printf/4</code> — print out string with format, arguments, options</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>printf(Format)
+
+printf(Format, ArgList)
+
+printf(Steam_or_Alias, Format, ArgList)
+
+printf_opt(Format, ArgList, Options)
+
+printf(Stream_or_Alias, Format, ArgList, WriteOptions)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>printf/2 takes a format string and a list of arguments to include in the format string. printf/1 is the same as printf/2 except no argument list is given. The following is a list of the special formatting possible within the format string :</p>
+<p><code>\n</code> – prints a newline(same as <code>nl/0</code>)</p>
+<p><code>\t</code> – prints a tab character</p>
+<p><code>\\</code> – prints a backslash</p>
+<p><code>\%</code> – prints a percent sign</p>
+<p><code>%c</code> – prints the corresponding Prolog character(atom) in the argument list</p>
+<p><code>%d</code> – prints the corresponding decimal number in the argument list</p>
+<p><code>%s</code> – prints the corresponding Prolog string in the argument list</p>
+<p><code>%t</code> – prints the corresponding Prolog term in the argument list (same as <code>write/1</code>)</p>
+<p>All other characters are printed as they appear in the format string.</p>
+<p>Using printf is generally much easier than using the equivalent <code>write/1</code>, <code>put/1</code>, and <code>nl/0</code> predicates because the whole message you want to print out can be assembled and carried out by one call to <code>printf</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- printf(&#39;hello world\n&#39;).
+hello world
+
+yes.
+
+?- printf(&#39;Letters:%c%c%c\n&#39;, [a,b,c]).
+Letters:abc
+
+yes.
+
+?- printf(&#39;Contents:%t, Amount:%d\n&#39;, [pocket(keys,wallet,watch),3]).
+Contents:pocket(keys,wallet,watch),Amount:3
+
+yes.</code></pre>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>nl/0</code><br />
+<code>put/1</code><br />
+<code>write/0</code></p></li>
+<li>User Guide (Prolog I/O)</li>
+<li><p>Unix/C Reference Manuals: printf(3S)</p></li>
+</ul>
+</body>
+</html>

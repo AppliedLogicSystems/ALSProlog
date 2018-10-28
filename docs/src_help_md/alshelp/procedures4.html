@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>procedures/4</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">procedures/4</h1>
+</header>
+<p><code>procedures/4</code> — retrieves all Prolog-defined procedures</p>
+<p><code>all_procedures/4</code> — retrieves all Prolog- or C-defined procedures</p>
+<p><code>all_ntbl_entries/4</code> — retrieves all name table entries</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>procedures(Module, Pred, Arity, DBRef)
+
+all_procedures(Module, Pred, Arity, DBRef)
+
+all_ntbl_entries(Module, Pred, Arity, DBRef)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>For all three of these 4-argument predicates, the system name table is searched for an entry corresponding to the triple <code>(Module, Pred, Arity)</code>. If such an entry is found, the name table entry is accessed and <code>DBRef</code> is unified with the database reference of the procedure’s first clause.</p>
+<p><code>procedures/4</code> only considers procedures defined in Prolog; <code>all_procedures/4</code> considers just procedures defined in either Prolog or C; <code>all_ntbl_entries/4</code> considers all name table entries. If the triple <code>(Module, Pred, Arity)</code> is not completely specified, all matching name table entries of the appropriate sort are successively returned.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- procedures(M,P,A,DB).
+
+M=builtins 
+P=subClassOf 
+A=2 
+DB=&#39;$dbref&#39;(26348,530,4,2139095040.0) ;
+
+M=builtins 
+P=succeed_or_fail 
+A=2 
+DB=&#39;$dbref&#39;(12416,529,5,-8388608) ;
+
+M=sio 
+P=output_stream_or_alias_ok 
+A=2 
+DB=&#39;$dbref&#39;(49208,516,23,-8388608) 
+
+yes.
+
+?- all_procedures(builtins,P,A,DB).
+
+P=dbg_spy 
+A=3 
+DB=0 ;
+
+P=subClassOf 
+A=2 
+DB=&#39;$dbref&#39;(26348,114,4,2139095040.0) ;
+
+P=succeed_or_fail 
+A=2 
+DB=&#39;$dbref&#39;(12416,113,5,-8388608) ;
+
+P=dbg_nospy 
+A=3 
+DB=0 
+
+yes.
+
+?- all_ntbl_entries(debugger, Pred, Arity, DBRef).
+
+Pred=nl 
+Arity=1 
+DBRef=0 ;
+
+Pred=toggle_mod_show 
+Arity=1 
+DBRef=&#39;$dbref&#39;(42744,295,911,-8388608) ;
+
+Pred=leash 
+Arity=1 
+DBRef=&#39;$dbref&#39;(40096,295,943,-8388608) 
+
+yes.</code></pre>
+</body>
+</html>

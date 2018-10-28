@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>peek_code/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">peek_code/[1,2]</h1>
+</header>
+<p><code>peek_code/1</code> — obtain char code from current input stream</p>
+<p><code>peek_code/2</code> — obtain char code from stream</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>peek_code(Charcode)
+
+peek_code(Stream_or_alias, Charcode)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>peek_code(Charcode)</code> unifies <code>Charcode</code> with the ASCII code of the next character obtained from the default input stream. However, the character is not consumed from the stream.</p>
+<p><code>peek_char(Alias_or_Stream, Charcode)</code> unifies <code>Charcode</code> with the ASCII code of the next character obtained from the stream associated with <code>Stream_or_alias</code>. However, the character is not consumed from that stream.</p>
+</body>
+</html>
