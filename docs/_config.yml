@@ -5,3 +5,12 @@ url: "https://alsprolog.com"
 # Build settings
 markdown: kramdown
 #permalink: pretty
+
+defaults:
+  -
+    scope:
+      path: "src_help_md/md_help"
+      type: "pages"
+    values:
+      layout: "reference-page"
+      
