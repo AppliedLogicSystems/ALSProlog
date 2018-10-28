@@ -1,5 +1,4 @@
 ---
-layout: reference-page
 title: 'var/1'
 predicates:
  - 'var/1' : the variable is unbound
