@@ -4,21 +4,21 @@ predicates:
  - 'var/1' : the variable is unbound
  - 'nonvar/1' : the variable is instantiated
 ---
-`var/1` — the variable is unbound
-
+`var/1` — the variable is unbound  
 `nonvar/1` — the variable is instantiated
 
 
 ## FORMS
 
+```
 var(Term)
 nonvar(Term)
-
+```
 
 ## DESCRIPTION
 
-var/1 succeeds if Term is an unbound variable, and fails otherwise.
-nonvar/1 succeeds when Term is a constant or structured term.
+`var/1` succeeds if `Term` is an unbound variable, and fails otherwise.
+`nonvar/1` succeeds when `Term` is a constant or structured term.
 
 
 ## EXAMPLES
@@ -34,7 +34,7 @@ yes.
 ```
 
 ```
-?- X=Y,Y=Z,Z=doughnut,var(X).
+?- X=Y, Y=Z, Z=doughnut, var(X).
 no.
 ```
 
@@ -43,5 +43,5 @@ no.
 
 - [Bowen 91, 7.6]
 - [Bratko 86, 7.1.1]
-- [Sterling 86, 10.1]. 
+- [Sterling 86, 10.1]
 
