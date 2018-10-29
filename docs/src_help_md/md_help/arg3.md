@@ -12,7 +12,7 @@ arg(Nth, Structure, Argument)
 ```
 ## DESCRIPTION
 
-'Argument' will be unified with the 'Nth' argument of 'Structure'. 'Nth' must be a positive integer. 'Structure' should be a compound term whose arity is greater than or equal to 'Nth'. When these conditions hold, 'Argument' will be unified with the 'Nth' argument of 'Structure'.
+`Argument` will be unified with the `Nth` argument of `Structure`. `Nth` must be a positive integer. `Structure` should be a compound term whose arity is greater than or equal to `Nth`. When these conditions hold, `Argument` will be unified with the `Nth` argument of `Structure`.
 
 
 ## EXAMPLES
