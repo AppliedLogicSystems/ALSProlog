@@ -131,7 +131,7 @@ trace01.md:  ______
 true0.md:  ______
 ttyflush0.md:  ______
 uiaalloc2.md:  ______
-unify2.md:  ______
+unify2.md:  __XC____
 var1.md:  __XC____
 write12.md:  __XC____
 yesnodialog234.md:  __XC____
