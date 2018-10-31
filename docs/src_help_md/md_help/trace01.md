@@ -14,6 +14,7 @@ predicates:
 
 ## FORMS
 
+```
 trace Goal
 
 trace(Goal)
@@ -21,11 +22,11 @@ trace(Goal)
 trace
 
 notrace
-
+```
 
 ## DESCRIPTION
 
-In the trace/1 case, the Goal will be single stepped according to the debugger ' s leash mode. In the trace/0 case, tracing will be turned on for all items until a call to notrace/0 is encountered.
+In the `trace/1` case, the `Goal` will be single stepped according to the debugger's leash mode. In the `trace/0` case, tracing will be turned on for all items until a call to `notrace/0` is encountered.
 
 
 ## EXAMPLES
@@ -44,10 +45,9 @@ In the trace/1 case, the Goal will be single stepped according to the debugger '
 
 ## SEE ALSO
 
-- `spy/1`  
-`nospy/0`  
-`leash/0`
-
+- `spy/1`
+- `nospy/0`
+- `leash/0`
 - [Bowen 91, 4.5]
 - [Bratko 86, 8.4]
-- [Clocksin 81, 8.3]. 
+- [Clocksin 81, 8.3]
