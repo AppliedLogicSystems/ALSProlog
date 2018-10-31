@@ -8,13 +8,11 @@ predicates:
 
 ## FORMS
 
-true
-
+`true`
 
 ## DESCRIPTION
 
-true/0 succeeds once, and fails upon backtracking.
-
+`true/0` succeeds once, and fails upon backtracking.
 
 ## EXAMPLES
 
@@ -27,5 +25,4 @@ yes.
 ## SEE ALSO
 
 - `fail/0`
-
-- [Clocksin 81, 6.2]. 
+- [Clocksin 81, 6.2]
