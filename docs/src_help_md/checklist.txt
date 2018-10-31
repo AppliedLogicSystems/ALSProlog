@@ -129,7 +129,7 @@ tell1.md:  ______
 termchars2.md:  ______
 trace01.md:  ______
 true0.md:  ______
-ttyflush0.md:  ______
+ttyflush0.md:  __XC____
 uiaalloc2.md:  __XC____
 unify2.md:  __XC____
 var1.md:  __XC____
