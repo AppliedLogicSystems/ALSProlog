@@ -186,6 +186,11 @@ BUNDLE ?= bundle
 docs :
 	cd $(CORE)/../docs && $(BUNDLE) install && $(BUNDLE) exec jekyll build
 
+testdocs : docs
+	cd $(CORE)/../docs && $(BUNDLE) exec htmlproofer \
+	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
+	--assume-extension --empty-alt-ignore _site
+
 clean :
 	rm -f *.o rm *.d
 
