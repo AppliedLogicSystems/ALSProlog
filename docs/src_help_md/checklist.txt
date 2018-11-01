@@ -124,7 +124,7 @@ system1.md:  ______
 tclcall3.md:  ______
 tclcoercenumber3.md:  ______
 tcldelete1.md:  ______
-tclnew1.md:  ______
+tclnew1.md:  __XC____
 tell1.md:  __XC____
 termchars2.md:  __XC____
 trace01.md:  __XC____
