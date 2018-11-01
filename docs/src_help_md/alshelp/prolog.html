@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>prolog</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">prolog</h1>
+</header>
+<p><code>prolog</code> — call a prolog term from Tcl</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>prolog option ? arg arg... ?</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p>The <code>prolog</code> command provides methods for executing a prolog query in ALS Prolog from within an executing Tcl script. <code>Option</code> indicates how the query is expressed. The valid values for <code>Option</code> are :</p>
+<pre><code>**prolog call** module predicate ? -type arg ... ?</code></pre>
+<p>This version directly calls a predicate in a module with type-converted arguments. The command returns 1 if the query succeeds, or 0 if it fails. The arguments can take the following forms :</p>
+<p><code>-number arg</code> Passes arg as an integer or floating point number.</p>
+<p><code>-atom arg</code> Passes arg as an atom.</p>
+<p><code>-list arg</code> Passes arg as a list.</p>
+<p><code>-var varName</code> Passes an unbound Prolog varaible. When the Prolog variable is bound, the Tcl variable with the name <code>varName</code> is set to the binding.</p>
+<pre><code>**prolog read_call** termString ? varName ... ?</code></pre>
+<p>The string <code>termString</code> is first read as a prolog term and then called. The command returns 1 if the query succeeds, or 0 if it fails. The optional variables named by the <code>varName</code> arguments are set when a Prolog variable in the query string is bound. The prolog variables are matched to <code>varNames</code> in left-to-right depth first order.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>prolog call builtins append -atom a -atom b -var x</code></pre>
+<p>Returns 1, and the Tcl variable <code>x</code> is set to <code>{}(a,b)</code>.</p>
+<pre><code>prolog read_call &quot;append(a, b, X)&quot; x</code></pre>
+<p>Returns 1, and the Tcl variable <code>x</code> is set to <code>{}(a,b)</code>.</p>
+</body>
+</html>

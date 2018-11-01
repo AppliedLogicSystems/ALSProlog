@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>put_code/[1,2]</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">put_code/[1,2]</h1>
+</header>
+<p><code>put_code/1</code> — output a character code to the current output stream</p>
+<p><code>put_code/2</code> — output a character code to a specific output stream</p>
+<h2 id="forms">FORMS</h2>
+<pre><code>put_code(Char)
+
+put_code(Stream_or_Alias, Code)</code></pre>
+<h2 id="description">DESCRIPTION</h2>
+<p><code>put_code/1</code> will write out the character code bound to <code>Char</code> to the current output stream.</p>
+<p><code>put_code/2</code> will write out the character code bound to <code>Char</code> to the output stream associated with <code>Stream_or_Alias</code>.</p>
+<h2 id="examples">EXAMPLES</h2>
+<pre><code>?- put_code(0&#39;\t),put_code(0&#39;h),put_code(0&#39;o),put_code(0&#39;w),
+?_ put_code(0&#39;d),put_code(0&#39;y),put_code(0&#39;\n).
+    howdy
+
+yes.</code></pre>
+<h2 id="errors">ERRORS</h2>
+<p><code>Stream_or_Alias</code> is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+<p>– – – – &gt; domain_error(stream_or_alias, Stream_or_Alias) .</p>
+<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
+<p>– – – – &gt; existence_error(stream, Stream_or_Alias) .</p>
+<p><code>Stream_or_Alias</code> is not an output stream</p>
+<p>– – – – &gt; permission_error(output, stream, Stream_or_Alias) .</p>
+<p><code>Code</code> is a variable</p>
+<p>– – – – &gt; instantiation_error.</p>
+<p><code>Code</code> is neither a variable nor a character</p>
+<p>– – – – &gt; type_error(character, Code) .</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>get_code/1</code><br />
+<code>put_char/1</code><br />
+<code>open/4</code><br />
+<code>close/1</code><br />
+<code>char_code/2</code><br />
+<code>nl/1</code></p></li>
+<li><p>User Guide (Prolog I/O)</p></li>
+</ul>
+</body>
+</html>
