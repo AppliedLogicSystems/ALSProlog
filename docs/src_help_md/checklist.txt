@@ -120,7 +120,7 @@ streamposition3.md:  ______
 streamproperty2.md:  ______
 subatom5.md:  ______
 sysdatetime2.md:  __X___
-system1.md:  ______
+system1.md:  __XC____
 tclcall3.md:  __XC____
 tclcoercenumber3.md:  __XC____
 tcldelete1.md:  __XC____
