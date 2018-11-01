@@ -122,7 +122,7 @@ subatom5.md:  ______
 sysdatetime2.md:  __X___
 system1.md:  ______
 tclcall3.md:  ______
-tclcoercenumber3.md:  ______
+tclcoercenumber3.md:  __XC____
 tcldelete1.md:  __XC____
 tclnew1.md:  __XC____
 tell1.md:  __XC____
