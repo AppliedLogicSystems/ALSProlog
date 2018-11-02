@@ -110,7 +110,7 @@ setPrologInterrupt1.md:  ______
 setinput1.md:  ______
 setlinelength2.md:  ______
 setof3.md:  ______
-setstreamposition2.md:  ______
+setstreamposition2.md:  __XC____
 skip1.md:  ______
 sort2.md:  ______
 sprintf3.md:  ______
