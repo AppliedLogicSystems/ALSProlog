@@ -116,7 +116,7 @@ sort2.md:  ______
 sprintf3.md:  ______
 spy01.md:  ______
 statistics02.md:  ______
-streamposition3.md:  ______
+streamposition3.md:  __XC____
 streamproperty2.md:  __XC____
 subatom5.md:  __XC____
 sysdatetime2.md:  __X___
