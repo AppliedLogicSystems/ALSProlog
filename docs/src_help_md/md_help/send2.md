@@ -8,31 +8,32 @@ predicates:
 
 ## FORMS
 
+```
 send(Object, Message)
-
+```
 
 ## DESCRIPTION
 
 A message is sent to an object with a call of the form
 
-send(Object, Message)
+`send(Object, Message)`
 
-where Object is the target object(or an atom naming the object), and Message is an arbitrary Prolog term. The Message may include uninstantiated variables which might be instantiated by the object ' s method for dealing with Message. Such calls to send/2 can occur both in ordinary Prolog code, and in the code defining methods of classes. For convience, the call
+where `Object` is the target object (or an atom naming the object), and `Message` is an arbitrary Prolog term. The `Message` may include uninstantiated variables which might be instantiated by the object's method for dealing with `Message`. Such calls to `send/2` can occur both in ordinary Prolog code, and in the code defining methods of classes. For convience, the call
 
-s
-end_self(Object, Message)
+`send_self(Object, Message)`
 
 is provided as syntactic sugar for
 
-send(Object, Message)
+`send(Object, Message)`
 
-No attempt to verify that a send_self message is being sent from an object to itself.
+No attempt to verify that a `send_self` message is being sent from an object to itself.
 
 
 ## EXAMPLES
 
+```
 send(Object, push(2))
 
 send(Object, pop(X))
-
+```
 

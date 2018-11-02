@@ -104,7 +104,7 @@ rexec2.md:  ______
 saveimage2.md:  ______
 see1.md:  ______
 semicolon2.md:  ______
-send2.md:  ______
+send2.md:  __XC____
 setObjStruct3.md:  __XC____
 setPrologInterrupt1.md:  __XC____
 setinput1.md:  __XC____
