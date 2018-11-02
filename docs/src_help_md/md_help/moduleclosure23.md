@@ -4,9 +4,6 @@ predicates:
  - 'module_closure/2' : creates a module closure
  - 'module_closure/3' : creates a module closure for the specified procedure
 ---
-`module_closure/2` — creates a module closure
-
-`module_closure/3` — creates a module closure for the specified procedure
 
 ## FORMS
 ```

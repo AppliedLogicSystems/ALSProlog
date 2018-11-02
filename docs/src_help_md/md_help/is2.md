@@ -3,7 +3,6 @@ title: 'is/2'
 predicates:
  - 'is/2' : evaluates an arithmetic expression
 ---
-`is/2` — evaluates an arithmetic expression
 
 ## FORMS
 ```

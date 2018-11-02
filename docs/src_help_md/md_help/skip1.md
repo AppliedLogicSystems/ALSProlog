@@ -3,7 +3,6 @@ title: 'skip/1'
 predicates:
  - 'skip/1' : discard all input characters until specified character
 ---
-`skip/1` — discard all input characters until specified character
 
 ## FORMS
 

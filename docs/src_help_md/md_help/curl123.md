@@ -6,14 +6,6 @@ predicates:
  - 'curl/3' : Separate URL, Options, and Target args
  - 'http/3' : REST-inspired user-level interface for curl
 ---
-`curl/1` — Combined URL, Options, and Target all in one list
-
-`curl/2` — Separate URL arg, combined Options, and Target in one list
-
-`curl/3` — Separate URL, Options, and Target args
-
-`http/3` — REST-inspired user-level interface for curl
-
 
 ## FORMS
 

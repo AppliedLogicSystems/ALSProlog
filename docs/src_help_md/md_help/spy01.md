@@ -6,14 +6,6 @@ predicates:
  - 'nospy/0' : removes all spy points
  - 'nospy/1' : removes a spy point
 ---
-`spy/0` — enable spy points
-
-`spy/1` — sets a spy point
-
-`nospy/0` — removes all spy points
-
-`nospy/1` — removes a spy point
-
 
 ## FORMS
 

@@ -3,7 +3,6 @@ title: 'current_op/3'
 predicates:
  - 'current_op/3' : retrieve current operator definitions
 ---
-`current_op/3` — retrieve current operator definitions
 
 ## FORMS
 ```

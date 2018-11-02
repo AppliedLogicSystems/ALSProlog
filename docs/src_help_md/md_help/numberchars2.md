@@ -4,9 +4,6 @@ predicates:
  - 'number_chars/2' : convert between a number and the list of characters which represent the number
  - 'number_codes/2' : convert between a number and the list of character codes which represent the number
 ---
-`number_chars/2` — convert between a number and the list of characters which represent the number
-
-`number_codes/2` — convert between a number and the list of character codes which represent the number
 
 ## FORMS
 ```

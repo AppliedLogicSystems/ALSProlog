@@ -5,12 +5,6 @@ predicates:
  - 'telling/1' : returns the name of the standard output stream
  - 'told/0' : closes the standard output stream
 ---
-`tell/1` — sets the standard output stream
-
-`telling/1` — returns the name of the standard output stream
-
-`told/0` — closes the standard output stream
-
 
 ## FORMS
 

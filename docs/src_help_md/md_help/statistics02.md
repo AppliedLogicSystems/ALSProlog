@@ -4,10 +4,6 @@ predicates:
  - 'statistics/0' : display memory allocation information
  - 'statistics/2' : display runtime statistics
 ---
-`statistics/0` — display memory allocation information
-
-`statistics/2` — display runtime statistics
-
 
 ## FORMS
 

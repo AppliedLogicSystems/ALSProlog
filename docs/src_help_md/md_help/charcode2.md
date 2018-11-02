@@ -3,7 +3,6 @@ title: 'char_code/2'
 predicates:
  - 'char_code/2' : convert between characters and codes
 ---
-`char_code/2` — convert between characters and codes
 
 ## FORMS
 ```

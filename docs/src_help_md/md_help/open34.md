@@ -4,9 +4,6 @@ predicates:
  - 'open/3' : open a stream
  - 'open/4' : open a stream with options
 ---
-`open/3` — open a stream
-
-`open/4` — open a stream with options
 
 ## FORMS
 ```

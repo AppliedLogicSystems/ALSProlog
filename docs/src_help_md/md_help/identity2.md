@@ -4,9 +4,6 @@ predicates:
  - '==/2' : terms are identical
  - '\==/2' : terms are not identical
 ---
-`==/2` — terms are identical
-
-`\==/2` — terms are not identical
 
 ## FORMS
 ```

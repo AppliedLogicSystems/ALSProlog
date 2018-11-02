@@ -4,9 +4,6 @@ predicates:
  - 'put/1' : write out a character
  - 'tab/1' : prints out a specified number of spaces
 ---
-`put/1` — write out a character
-
-`tab/1` — prints out a specified number of spaces
 
 ## FORMS
 ```

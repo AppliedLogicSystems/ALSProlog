@@ -3,7 +3,6 @@ title: 'fail/0'
 predicates:
  - 'fail/0' : always fails
 ---
-`fail/0` — always fails
 
 ## FORMS
 ```

@@ -3,7 +3,6 @@ title: 'create_object/2'
 predicates:
  - 'create_object/2' : create an object
 ---
-`create_object/2` — create an object
 
 ## FORMS
 ```

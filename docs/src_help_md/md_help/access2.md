@@ -3,7 +3,6 @@ title: '$access/2'
 predicates:
  - '$access/2' : determine accessability of a file
 ---
-`$access/2` — determine accessability of a file
 
 ## FORMS
 

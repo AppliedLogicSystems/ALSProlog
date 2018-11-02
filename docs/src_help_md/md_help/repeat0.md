@@ -3,7 +3,6 @@ title: 'repeat/0'
 predicates:
  - 'repeat/0' : always succeed upon backtracking
 ---
-`repeat/0` — always succeed upon backtracking
 
 ## FORMS
 ```

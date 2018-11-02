@@ -3,8 +3,6 @@ title: 'arg/3'
 predicates:
  - 'arg/3' : access the arguments of a structured term
 ---
-`arg/3` — access the arguments of a structured term
-
 
 ## FORMS
 ```

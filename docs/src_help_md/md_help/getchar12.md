@@ -4,9 +4,6 @@ predicates:
  - 'get_char/1' : read a character from current input stream
  - 'get_char/2' : read character from a specific stream
 ---
-`get_char/1` — read a character from current input stream
-
-`get_char/2` — read character from a specific stream
 
 ## FORMS
 ```

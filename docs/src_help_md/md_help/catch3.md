@@ -4,9 +4,6 @@ predicates:
  - 'catch/3' : execute a goal, specifying an exception handler
  - 'throw/1' : give control to an exception handler
 ---
-`catch/3` — execute a goal, specifying an exception handler
-
-`throw/1` — give control to an exception handler
 
 ## FORMS
 ```

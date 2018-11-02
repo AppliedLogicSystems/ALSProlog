@@ -3,8 +3,6 @@ title: 'file_select_dialog/[1,2,3]'
 predicates:
  - 'file_select_dialog/ [1,2,3]' : select a file
 ---
-`file_select_dialog/ [1,2,3]` — select a file
-
 
 ## FORMS
 ```

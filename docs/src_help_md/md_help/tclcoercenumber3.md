@@ -5,12 +5,6 @@ predicates:
  - 'tcl_coerce_atom/3' : convert Tcl entity to Prolog atom
  - 'tcl_coerce_list/3' : convert Tcl entity to Prolog list
 ---
-`tcl_coerce_number/3` — convert Tcl entity to Prolog number
-
-`tcl_coerce_atom/3` — convert Tcl entity to Prolog atom
-
-`tcl_coerce_list/3` — convert Tcl entity to Prolog list
-
 
 ## FORMS
 

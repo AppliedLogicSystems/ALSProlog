@@ -3,7 +3,6 @@ title: 'command_line/1'
 predicates:
  - 'command_line/1' : provides access to the prolog system start-up command line
 ---
-`command_line/1` — provides access to the prolog system start-up command line
 
 ## FORMS
 ```

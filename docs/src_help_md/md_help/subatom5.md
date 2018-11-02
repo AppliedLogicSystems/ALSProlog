@@ -3,8 +3,6 @@ title: 'sub_atom/5'
 predicates:
  - 'sub_atom/5' : dissect an atom
 ---
-`sub_atom/5` — dissect an atom
-
 
 ## FORMS
 

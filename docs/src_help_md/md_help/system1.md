@@ -3,8 +3,6 @@ title: 'system/1'
 predicates:
  - 'system/1' : Executes the specified OS shell command
 ---
-`system/1` — Executes the specified OS shell command
-
 
 ## FORMS
 

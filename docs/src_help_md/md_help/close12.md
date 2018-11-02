@@ -4,9 +4,6 @@ predicates:
  - 'close/1' : close an open stream
  - 'close/2' : close an open stream with options
 ---
-`close/1` — close an open stream
-
-`close/2` — close an open stream with options
 
 ## FORMS
 ```

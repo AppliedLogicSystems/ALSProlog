@@ -4,9 +4,6 @@ predicates:
  - 'reverse/2' : list reversal
  - 'dreverse/2' : determinate list reversal
 ---
-`reverse/2` — list reversal
-
-`dreverse/2` — determinate list reversal
 
 ## FORMS
 ```

@@ -4,10 +4,6 @@ predicates:
  - 'set_input/1' : set current input stream
  - 'set_output/1' : set current output stream
 ---
-`set_input/1` — set current input stream
-
-`set_output/1` — set current output stream
-
 
 ## FORMS
 

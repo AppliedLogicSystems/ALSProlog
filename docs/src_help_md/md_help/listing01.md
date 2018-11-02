@@ -4,10 +4,6 @@ predicates:
  - 'listing/0' : Prints all clauses
  - 'listing/1' : Prints clauses matching the specified template
 ---
-`listing/0` — Prints all clauses
-
-`listing/1` — Prints clauses matching the specified template
-
 
 ## FORMS
 ```

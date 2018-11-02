@@ -4,10 +4,6 @@ predicates:
  - 'setPrologInterrupt/1' : establish the type of a Prolog interrupt
  - 'getPrologInterrupt/1' : determine the type of a Prolog interrupt
 ---
-`setPrologInterrupt/1` — establish the type of a Prolog interrupt
-
-`getPrologInterrupt/1` — determine the type of a Prolog interrupt
-
 
 ## FORMS
 
