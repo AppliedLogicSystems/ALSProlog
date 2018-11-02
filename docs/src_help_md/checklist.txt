@@ -102,7 +102,7 @@ retract12.md:  ______
 reverse2.md:  ______
 rexec2.md:  ______
 saveimage2.md:  ______
-see1.md:  ______
+see1.md:  __XC____
 semicolon2.md:  __XC____
 send2.md:  __XC____
 setObjStruct3.md:  __XC____
