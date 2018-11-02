@@ -113,7 +113,7 @@ setof3.md:  ______
 setstreamposition2.md:  __XC____
 skip1.md:  ______
 sort2.md:  ______
-sprintf3.md:  ______
+sprintf3.md:  __XC____
 spy01.md:  __XC____
 statistics02.md:  __XC____
 streamposition3.md:  __XC____
