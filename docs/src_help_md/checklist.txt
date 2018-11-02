@@ -108,7 +108,7 @@ send2.md:  ______
 setObjStruct3.md:  ______
 setPrologInterrupt1.md:  ______
 setinput1.md:  ______
-setlinelength2.md:  ______
+setlinelength2.md:  __XC____
 setof3.md:  __XC____
 setstreamposition2.md:  __XC____
 skip1.md:  __XC____

@@ -14,21 +14,21 @@ predicates:
 
 ## FORMS
 
+```
 set_line_length(Stream_or_Alias, Length)
 
 set_maxdepth(Stream_or_Alias, Depth)
 
 set_depth_computation(Stream_or_Alias, Flat_Nonflat)
-
+```
 
 ## DESCRIPTION
 
-set_line_length/2 sets the default line length for the output stream associated with Stream_or_Alias to the integer value bound to Length. The default line length is an integer parameter used by writeq/ [1, 2], write_canonical/ [1, 2], and write_term/ [2, 3] to determine where line breaks should occur when outputting a term. A call to write_term may temporarily overide this parameter by specifying the line_length option in the write options list. The default line length may also be set at the time the stream is opened by specifying the line_length option in the options list to open/ [3, 4].
+`set_line_length/2` sets the default line length for the output stream associated with `Stream_or_Alias` to the integer value bound to `Length`. The default line length is an integer parameter used by `writeq/[1,2]`, `write_canonical/[1,2]`, and `write_term/[2,3]` to determine where line breaks should occur when outputting a term. A call to `write_term` may temporarily overide this parameter by specifying the `line_length` option in the `write` options list. The default line length may also be set at the time the stream is opened by specifying the `line_length` option in the options list to `open/[3,4]`.
 
-set_maxdepth/2 sets the default depth limit to which terms are output for the output stream associated with Stream_or_Alias to the integer value bound to Depth. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to write_term/ [3, 4] with the appropriate write option.
+`set_maxdepth/2` sets the default depth limit to which terms are output for the output stream associated with `Stream_or_Alias` to the integer value bound to `Depth`. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to `write_term/[3,4]` with the appropriate write option.
 
-set_depth_computation/2 sets the manner in which the depth of a term is computed for the output stream associated with Stream_or_Alias to the atomic value bound to Flat_Nonflat. As the name of the variable implies, Flat_Nonflat must be bound to one of the two atoms, flat or nonflat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is nonflat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.
-
+`set_depth_computation/2` sets the manner in which the depth of a term is computed for the output stream associated with `Stream_or_Alias` to the atomic value bound to `Flat_Nonflat`. As the name of the variable implies, `Flat_Nonflat` must be bound to one of the two atoms, flat or nonflat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is nonflat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.
 
 ## EXAMPLES
 
@@ -37,77 +37,78 @@ set_depth_computation/2 sets the manner in which the depth of a term is computed
 ?-_L=[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z],
 ?-_write(L),nl.
 [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]
-L=[a,b,c,d,e,f,g,
+L = [a,b,c,d,e,f,g,
 h,i,j,k,l,
 m,n,o,p,q,
 r,s,t,u,v,
 w,x,y,z]
+```
+
+```
 ?- set_maxdepth(user_output,8),
 ?-_set_depth_computation(user_output,nonflat),
 ?-_L=[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z],
 ?-_write(L),nl.
 [a,b,c,d,e,f,g,h,...]
-L=[a,b,c,d,e,f,
+L = [a,b,c,d,e,f,
 g,...]
 ```
 
 ## ERRORS
 
-Stream_or_Alias is a variable
+`Stream_or_Alias` is a variable
 
--- -- -- -- &gt; instantiation_error.
+-- -- -- -- > `instantiation_error`
 
-Stream_or_Alias is neither a variable nor a stream descriptor nor an alias
+`Stream_or_Alias` is neither a variable nor a stream descriptor nor an alias
 
--- -- -- -- &gt; domain_error(stream_or_alias, Stream_or_Alias) .
+-- -- -- -- > `domain_error(stream_or_alias, Stream_or_Alias)`
 
-Stream_or_Alias is not associated with an open stream
+`Stream_or_Alias` is not associated with an open stream
 
--- -- -- -- &gt; existence_error(stream, Stream_or_Alias) .
+-- -- -- -- > `existence_error(stream, Stream_or_Alias)`
 
-Stream_or_Alias is not an output stream
+`Stream_or_Alias` is not an output stream
 
--- -- -- -- &gt; permission_error(output, stream, Stream_or_Alias) .
+-- -- -- -- > `permission_error(output, stream, Stream_or_Alias)`
 
-Length, Depth, or Flat_or_Nonflat is a variable
+`Length`, `Depth`, or `Flat_or_Nonflat` is a variable
 
--- -- -- -- &gt; instantiation_error.
+-- -- -- -- > `instantiation_error`
 
-Length is not a variable or an integer
+`Length` is not a variable or an integer
 
--- -- -- -- &gt; type_error(integer, Length)
+-- -- -- -- > `type_error(integer, Length)`
 
-Length is not an integer greater than four
+`Length` is not an integer greater than four
 
--- -- -- -- &gt; domain_error(line_length, Length)
+-- -- -- -- > `domain_error(line_length, Length)`
 
-Depth is not a variable or an integer
+`Depth` is not a variable or an integer
 
--- -- -- -- &gt; type_error(integer, Depth)
+-- -- -- -- > `type_error(integer, Depth)`
 
-Depth is an integer, but not a positive integer
+`Depth` is an integer, but not a positive integer
 
--- -- -- -- &gt; domain_error(positive_integer, Depth)
+-- -- -- -- > `domain_error(positive_integer, Depth)`
 
-Flat_or_Nonflat is neither a variable nor an atom
+`Flat_or_Nonflat` is neither a variable nor an atom
 
--- -- -- -- &gt; type_error(atom, Flat_or_nonflat)
+-- -- -- -- > `type_error(atom, Flat_or_nonflat)`
 
-Flat_or_Nonflat is an atom, but is neither flat nor nonflat
+`Flat_or_Nonflat` is an atom, but is neither flat nor nonflat
 
--- -- -- -- &gt; domain_error(depth_computation, Flat_or_nonflat)
-
-
+-- -- -- -- > `domain_error(depth_computation, Flat_or_nonflat)`
 
 ## NOTES
 
-Note in the above examples that write/ [1, 2] does not pay attention to the line length. It does however, observe the default maximum depth and the method for computing the depth.
+Note in the above examples that `write/[1,2]` does not pay attention to the line length. It does however, observe the default maximum depth and the method for computing the depth.
 
 
 ## SEE ALSO
 
-- `stream_property/2`  
-`open/4`  
-`write_term/3`
-- `User Guide (Prolog I/O).
+- `stream_property/2`
+- `open/4`
+- `write_term/3`
+- User Guide (Prolog I/O)
 
