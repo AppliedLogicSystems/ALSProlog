@@ -118,7 +118,7 @@ spy01.md:  ______
 statistics02.md:  ______
 streamposition3.md:  ______
 streamproperty2.md:  ______
-subatom5.md:  ______
+subatom5.md:  __XC____
 sysdatetime2.md:  __X___
 system1.md:  __XC____
 tclcall3.md:  __XC____

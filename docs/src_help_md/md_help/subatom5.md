@@ -8,81 +8,77 @@ predicates:
 
 ## FORMS
 
+```
 sub_atom(Atom, Before, Length, After, SubAtom)
-
+```
 
 ## DESCRIPTION
 
-sub_atom/5 is used to take apart an atom. The only instantiation requirement is that Atom be instantiated to an atom. If any of Before, Length, or After are instantiated, they must be instantatiated to integers. If SubAtom is instantiated, it must be instantiated to an atom.
+`sub_atom/5` is used to take apart an atom. The only instantiation requirement is that `Atom` be instantiated to an atom. If any of `Before`, `Length`, or `After` are instantiated, they must be instantatiated to integers. If `SubAtom` is instantiated, it must be instantiated to an atom.
 
-The Before parameter gives the number of characters in Atom before the start of the atom SubAtom. Length is the length of this SubAtom. After is the number of characters of Atom following the end of SubAtom. The first character of any atom is considered to begin at position 1
+The `Before` parameter gives the number of characters in `Atom` before the start of the atom `SubAtom`. `Length` is the length of this `SubAtom`. `After` is the number of characters of `Atom` following the end of `SubAtom`. The first character of any atom is considered to begin at position 1.
 
-sub_atom/5 is resatisfiable. Upon backtracking all possible values of Before, Length, After, and SubAtom are generated subject to the initial instantiations of these parameters.
-
+`sub_atom/5` is resatisfiable. Upon backtracking all possible values of `Before`, `Length`, `After`, and `SubAtom` are generated subject to the initial instantiations of these parameters.
 
 ## EXAMPLES
 
 ```
-?- sub_atom(abcdefg,2,3,X,Y).
+?- sub_atom(abcdefg, 2, 3, X, Y).
 X=2
 Y=cde
 yes.
 ```
-
 ```
-?- sub_atom(abcdefg,B,L,A,cde).
+?- sub_atom(abcdefg, B, L, A, cde).
 B=2
 L=3
 A=2
 yes.
 ```
-
 ```
-?- sub_atom(abcdefg,B,4,A,Y).
+?- sub_atom(abcdefg, B, 4, A, Y).
 B=0
 A=3
-Y=abcd;
+Y=abcd ;
 B=1
 A=2
-Y=bcde;
+Y=bcde ;
 B=2
 A=1
-Y=cdef;
+Y=cdef ;
 B=3
 A=0
-Y=defg;
+Y=defg ;
 no.
 ```
 
-
 ## ERRORS
 
-Atom is a variable
+`Atom` is a variable
 
--- -- -- -- &gt; instantiation_error.
+-- -- -- -- > `instantiation_error`
 
-Atom is neither a variable nor an atom
+`Atom` is neither a variable nor an atom
 
--- -- -- -- &gt; type_error(atom, Atom)
+-- -- -- -- > `type_error(atom, Atom)`
 
-SubAtom is neither a variable nor an atom
+`SubAtom` is neither a variable nor an atom
 
--- -- -- -- &gt; type_error(atom, SubAtom)
+-- -- -- -- > `type_error(atom, SubAtom)`
 
-Start is neither a variable nor an integer
+`Start` is neither a variable nor an integer
 
--- -- -- -- &gt; type_error(integer, Start)
+-- -- -- -- > `type_error(integer, Start)`
 
-Length is neither a variable nor an integer
+`Length` is neither a variable nor an integer
 
--- -- -- -- &gt; type_error(integer, Length)
+-- -- -- -- > `type_error(integer, Length)`
 
 
 ## SEE ALSO
 
-- `atom_length/2`  
-`atom_concat/3`  
-`atom_chars/2`  
-`atom_codes/2`
-
-- `User Guide (Prolog I/O).
+- `atom_length/2`
+- `atom_concat/3`
+- `atom_chars/2`
+- `atom_codes/2`
+- User Guide (Prolog I/O)
