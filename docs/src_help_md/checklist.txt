@@ -101,7 +101,7 @@ repeat0.md:  ______
 retract12.md:  ______
 reverse2.md:  ______
 rexec2.md:  ______
-saveimage2.md:  ______
+saveimage2.md:  __XC____
 see1.md:  __XC____
 semicolon2.md:  __XC____
 send2.md:  __XC____
