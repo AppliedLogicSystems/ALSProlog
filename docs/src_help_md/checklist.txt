@@ -95,12 +95,12 @@ putatom12.md:  __X___
 putchar12.md:  __X___
 putcode12.md:  __X___
 putstring12.md:  __X___
-read12.md:  ______
-recorda3.md:  ______
-repeat0.md:  ______
-retract12.md:  ______
-reverse2.md:  ______
-rexec2.md:  ______
+read12.md:  __X___
+recorda3.md:  __X___
+repeat0.md:  __X___
+retract12.md:  __X___
+reverse2.md:  __X___
+rexec2.md:  ______		<< buggy: Issue #134
 saveimage2.md:  __XC____
 see1.md:  __XC____
 semicolon2.md:  __XC____

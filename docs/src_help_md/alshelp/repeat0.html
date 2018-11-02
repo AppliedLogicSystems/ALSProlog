@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>repeat/0</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">repeat/0</h1>
+</header>
+<p><code>repeat/0</code> — always succeed upon backtracking</p>
+<h2 id="forms">FORMS</h2>
+<p>repeat</p>
+<h2 id="description">DESCRIPTION</h2>
+<p>repeat/0 always succeeds, even during backtracking. This behavior is useful for implementing loops which repeatedly perform some side-effect. repeat/0 is defined by the following clauses :</p>
+<p>repeat.</p>
+<p>repeat :- repeat.</p>
+<h2 id="examples">EXAMPLES</h2>
+<p>The following procedure will repeat forever, reading in an expression and printing out its value.</p>
+<p>loop :-</p>
+<p>repeat,</p>
+<p>read(Expression),</p>
+<p>Value is Expression,</p>
+<p>write(’ Value = ’), write(Value), nl,</p>
+<p>fail.</p>
+<h2 id="see-also">SEE ALSO</h2>
+<ul>
+<li><p><code>fail/0</code></p></li>
+<li>[Sterling 86, 12.5]</li>
+<li>[Bratko 86, 7.5]</li>
+<li><p>[Clocksin 81, 6.6].</p></li>
+</ul>
+</body>
+</html>
