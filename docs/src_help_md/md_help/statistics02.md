@@ -11,35 +11,36 @@ predicates:
 
 ## FORMS
 
+```
 statistics
 
 statistics(runtime, X)
-
+```
 
 ## DESCRIPTION
 
-statistics/0 shows the current allocations and amounts used for the working areas of ALS Prolog. statistics(runtime, X) unifies X with a two-element list
+`statistics/0` shows the current allocations and amounts used for the working areas of ALS Prolog. `statistics(runtime, X)` unifies `X` with a two-element list
 
-[Total, SinceLast ],
+`[Total, SinceLast]`
 
-where Total is the elapsed cpu time since the start of Prolog execution, and SinceLast is the cpu time which has elapsed since the last call to statistics/2.
+where `Total` is the elapsed cpu time since the start of Prolog execution, and `SinceLast` is the cpu time which has elapsed since the last call to `statistics/2`.
 
 
 ## EXAMPLES
 
 ```
 ?- statistics.
-MachineState:
-E=ef7fd94B=efffe1cH=ef7fe44HB=ef7fe44TR=efffe1c
-MSP=ef7fd8cSPB=ef7fd94
-ClauseSpace:55540/262144(bytesused/totalbytes)
+Machine State:
+E=ef7fd94 B=efffe1c H=ef7fe44 HB=ef7fe44 TR=efffe1c
+MSP=ef7fd8c SPB=ef7fd94
+Clause Space: 55540/262144 (bytes used/total bytes)
 yes.
 ```
 
 ```
-?- statistics(runtime,[Total,SinceLast]).
-Total=1.95
-SinceLast=0.033333333
+?- statistics(runtime, [Total, SinceLast]).
+Total = 1.95
+SinceLast = 0.033333333
 yes.
 ```
 

@@ -115,7 +115,7 @@ skip1.md:  ______
 sort2.md:  ______
 sprintf3.md:  ______
 spy01.md:  ______
-statistics02.md:  ______
+statistics02.md:  __XC____
 streamposition3.md:  __XC____
 streamproperty2.md:  __XC____
 subatom5.md:  __XC____
