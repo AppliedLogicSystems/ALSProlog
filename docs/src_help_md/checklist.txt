@@ -106,7 +106,7 @@ see1.md:  ______
 semicolon2.md:  ______
 send2.md:  ______
 setObjStruct3.md:  ______
-setPrologInterrupt1.md:  ______
+setPrologInterrupt1.md:  __XC____
 setinput1.md:  __XC____
 setlinelength2.md:  __XC____
 setof3.md:  __XC____

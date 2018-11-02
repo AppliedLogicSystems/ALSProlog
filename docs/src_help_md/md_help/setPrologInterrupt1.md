@@ -11,24 +11,24 @@ predicates:
 
 ## FORMS
 
+```
 setPrologInterrupt(Term)
 
 getPrologInterrupt(Term)
-
+```
 
 ## DESCRIPTION
 
-Term is an arbitrary Prolog term.
+`Term` is an arbitrary Prolog term.
 
-setPrologInterrupt(Term) sets the value of the global interrupt variable to be Term.
+`setPrologInterrupt(Term)` sets the value of the global interrupt variable to be `Term`.
 
-getPrologInterrupt(Term) fetches the value of the global interrupt variable and unifies it with Term.
+`getPrologInterrupt(Term)` fetches the value of the global interrupt variable and unifies it with `Term`.
 
 
 ## SEE ALSO
 
-- `forcePrologInterrupt/1`  
-`callWithDelayedInterrupt/1`
-
-- `User Guide (Prolog Interrupts).
+- `forcePrologInterrupt/1`
+- `callWithDelayedInterrupt/1`
+- User Guide (Prolog Interrupts)
 
