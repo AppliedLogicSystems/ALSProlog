@@ -63,3 +63,9 @@ How I've been working:
 	Click on <Work> in the left side of the als_help.html window
 	Etc. 
 7. When <Work> is completely fixed, I check if off in checklist.txt.
+---------------
+Jekyll Workflow:
+0. In terminal B, in docs dir, run: bundle exec jekyll serve
+1. In terminal A, edit docs/src_help_md/md_help/<Work>.md, save.
+2. In browser, examine <Work> page from http://127.0.0.1:4000/ref-manual/
+3. Cycle back to 1
