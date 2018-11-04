@@ -9,6 +9,10 @@ markdown: kramdown
 theme: minima
 #permalink: pretty
 
+kramdown:
+  syntax_highlighter_opts:
+    default_lang: prolog
+
 # Enable as many error-checks as possible
 safe                : true
 strict_front_matter : true
