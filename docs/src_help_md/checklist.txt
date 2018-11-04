@@ -16,7 +16,7 @@ append3.md:  __X___
 arg3.md:  __X____
 arrow2.md:  __X___
 assert12.md:  __X___
-atendofstream01.md:  ______	<< unfinished
+atendofstream01.md:  __X___
 atom1.md:  __X___
 atomchars2.md:  __X___
 atomicinputdialog234.md:  __X___
