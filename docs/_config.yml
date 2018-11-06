@@ -20,4 +20,7 @@ defaults:
       path: "src_help_md/md_help"
       type: "pages"
     values:
+      reference: true
+      package: Core Prolog
+      group: Control
       layout: "reference-page"
