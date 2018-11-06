@@ -1,7 +1,8 @@
 ---
 title: 'compare/3'
+group: Terms
 predicates:
- - 'compare/3' : compares two terms in the standard order
+- {sig: 'compare/3', desc: 'compares two terms in the standard order'}
 ---
 `compare/3` — compares two terms in the standard order
 

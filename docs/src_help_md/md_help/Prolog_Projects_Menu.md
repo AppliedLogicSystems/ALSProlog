@@ -1,7 +1,8 @@
 ---
 title: 'Prolog Projects Menu'
+package: ALSDev
 predicates:
- - 'Prolog Projects Menu' : Manage prolog projects and settings
+- {sig: 'Prolog Projects Menu', desc: 'Manage prolog projects and settings'}
 ---
 `Prolog Projects Menu` — Manage prolog projects and settings
 

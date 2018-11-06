@@ -1,8 +1,8 @@
 ---
 title: 'curmod/1'
 predicates:
- - 'curmod/1' : get the current module
- - 'modules/2' : get the use list of a module
+- {sig: 'curmod/1', desc: 'get the current module'}
+- {sig: 'modules/2', desc: 'get the use list of a module'}
 ---
 `curmod/1` — get the current module
 

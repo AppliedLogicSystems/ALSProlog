@@ -1,8 +1,9 @@
 ---
 title: 'var/1'
+group: Prolog Database
 predicates:
- - 'var/1' : the variable is unbound
- - 'nonvar/1' : the variable is instantiated
+- {sig: 'var/1', desc: 'the variable is unbound'}
+- {sig: 'nonvar/1', desc: 'the variable is instantiated'}
 ---
 `var/1` — the variable is unbound  
 `nonvar/1` — the variable is instantiated

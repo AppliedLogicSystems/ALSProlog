@@ -1,8 +1,9 @@
 ---
 title: 'get0/1'
+group: Input Output
 predicates:
- - 'get0/1' : read the next character
- - 'get/1' : read the next printable character
+- {sig: 'get0/1', desc: 'read the next character'}
+- {sig: 'get/1', desc: 'read the next printable character'}
 ---
 `get0/1` — read the next character
 

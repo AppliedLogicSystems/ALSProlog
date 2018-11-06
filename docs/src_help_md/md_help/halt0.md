@@ -1,7 +1,7 @@
 ---
 title: 'halt/0'
 predicates:
- - 'halt/0' : exit ALS Prolog
+- {sig: 'halt/0', desc: 'exit ALS Prolog'}
 ---
 `halt/0` — exit ALS Prolog
 

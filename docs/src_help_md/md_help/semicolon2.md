@@ -1,7 +1,7 @@
 ---
 title: ';/2 (semi-colon)'
 predicates:
- - ';/2' : disjunction of two goals
+- {sig: ';/2', desc: 'disjunction of two goals'}
 ---
 `;/2` — disjunction of two goals
 

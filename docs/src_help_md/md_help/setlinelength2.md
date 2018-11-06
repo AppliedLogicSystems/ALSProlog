@@ -1,9 +1,10 @@
 ---
 title: 'set_line_length/2'
+group: Input Output
 predicates:
- - 'set_line_length/2' : set length of line for output stream
- - 'set_max_depth/2' : set maximum depth that terms will be written to
- - 'set_depth_computation/2' : set method of computing term depth
+- {sig: 'set_line_length/2', desc: 'set length of line for output stream'}
+- {sig: 'set_max_depth/2', desc: 'set maximum depth that terms will be written to'}
+- {sig: 'set_depth_computation/2', desc: 'set method of computing term depth'}
 ---
 `set_line_length/2` — set length of line for output stream
 

@@ -1,7 +1,8 @@
 ---
 title: 'send/2'
+package: ALSDev
 predicates:
- - 'send/2' : send a message to an object
+- {sig: 'send/2', desc: 'send a message to an object'}
 ---
 `send/2` — send a message to an object
 

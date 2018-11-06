@@ -1,7 +1,8 @@
 ---
 title: 'arg/3'
+group: Terms
 predicates:
- - 'arg/3' : access the arguments of a structured term
+- {sig: 'arg/3', desc: 'access the arguments of a structured term'}
 ---
 `arg/3` — access the arguments of a structured term
 

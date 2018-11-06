@@ -1,8 +1,9 @@
 ---
 title: 'peek_code/[1,2]'
+group: Input Output
 predicates:
- - 'peek_code/1' : obtain char code from stream
- - 'peek_code/2' : obtain char from stream
+- {sig: 'peek_code/1', desc: 'obtain char code from stream'}
+- {sig: 'peek_code/2', desc: 'obtain char from stream'}
 ---
 `peek_code/1` — obtain char code from current input stream
 

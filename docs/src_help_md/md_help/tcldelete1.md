@@ -1,8 +1,9 @@
 ---
 title: 'tcl_delete/1'
+package: ALSDev
 predicates:
- - 'tcl_delete/1' : delete a Tcl interpreter
- - 'tcl_delete_all/0' : delete all Tcl interpreters
+- {sig: 'tcl_delete/1', desc: 'delete a Tcl interpreter'}
+- {sig: 'tcl_delete_all/0', desc: 'delete all Tcl interpreters'}
 ---
 `tcl_delete/1` — delete a Tcl interpreter
 

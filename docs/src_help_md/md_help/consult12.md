@@ -1,10 +1,11 @@
 ---
 title: 'consult/[1,2]'
+group: Input Output
 predicates:
- - 'consult/1' : load a Prolog file
- - 'consult/2' : load a Prolog file, with options
- - 'consultq/1' : load a Prolog file, without messages
- - 'reconsult/1' : load a Prolog file, updating the prolog database
+- {sig: 'consult/1', desc: 'load a Prolog file'}
+- {sig: 'consult/2', desc: 'load a Prolog file, with options'}
+- {sig: 'consultq/1', desc: 'load a Prolog file, without messages'}
+- {sig: 'reconsult/1', desc: 'load a Prolog file, updating the prolog database'}
 ---
 `consult/1` — load a Prolog file
 

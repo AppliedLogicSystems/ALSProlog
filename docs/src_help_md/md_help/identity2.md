@@ -1,8 +1,9 @@
 ---
 title: '==/2'
+group: Terms
 predicates:
- - '==/2' : terms are identical
- - '\==/2' : terms are not identical
+- {sig: '==/2', desc: 'terms are identical'}
+- {sig: '\==/2', desc: 'terms are not identical'}
 ---
 `==/2` — terms are identical
 

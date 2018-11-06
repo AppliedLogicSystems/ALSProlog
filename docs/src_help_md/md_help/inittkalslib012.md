@@ -1,7 +1,8 @@
 ---
 title: 'init_tk_alslib/[0,1,2]'
+package: ALSDev
 predicates:
- - 'init_tk_alslib/[0,1,2]' : initialize GUI library, creating Tcl interpreter
+- {sig: 'init_tk_alslib/[0,1,2]', desc: 'initialize GUI library, creating Tcl interpreter'}
 ---
 `init_tk_alslib/[0,1,2]` — initialize GUI library, creating Tcl interpreter
 

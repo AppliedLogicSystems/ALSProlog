@@ -1,7 +1,8 @@
 ---
 title: 'length/2'
+group: Terms
 predicates:
- - 'length/2' : count the number of elements in a list
+- {sig: 'length/2', desc: 'count the number of elements in a list'}
 ---
 `length/2` — count the number of elements in a list
 

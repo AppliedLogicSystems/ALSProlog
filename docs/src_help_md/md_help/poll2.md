@@ -1,7 +1,8 @@
 ---
 title: 'poll/2'
+group: Input Output
 predicates:
- - 'poll/2' : Determine whether I/O is possible
+- {sig: 'poll/2', desc: 'Determine whether I/O is possible'}
 ---
 `poll/2` — Determine whether I/O is possible
 

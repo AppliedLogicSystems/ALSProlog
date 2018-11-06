@@ -1,7 +1,7 @@
 ---
 title: 'abolish/2'
 predicates:
- - 'abolish/2' : remove a procedure from the database
+- {sig: 'abolish/2', desc: 'remove a procedure from the database'}
 ---
 `abolish/2` — remove a procedure from the database
 

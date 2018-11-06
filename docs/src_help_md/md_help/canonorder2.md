@@ -1,10 +1,11 @@
 ---
 title: '@=</2'
+group: Terms
 predicates:
- - '@=</2' : The left argument is not after the right argument
- - '@>=/2' : The left argument is not before the right argument
- - '@</2' : The left argument is before the right argument
- - '@>/2' : The left argument is after the right argument
+- {sig: '@=</2', desc: 'The left argument is not after the right argument'}
+- {sig: '@>=/2', desc: 'The left argument is not before the right argument'}
+- {sig: '@</2', desc: 'The left argument is before the right argument'}
+- {sig: '@>/2', desc: 'The left argument is after the right argument'}
 ---
 `@=</2` — The left argument is not after the right argument
 

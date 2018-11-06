@@ -1,7 +1,8 @@
 ---
 title: 'Tools Menu'
+package: ALSDev
 predicates:
- - 'Tools Menu' : Invoke various useful tools
+- {sig: 'Tools Menu', desc: 'Invoke various useful tools'}
 ---
 `Tools Menu` — Invoke various useful tools
 

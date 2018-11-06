@@ -1,7 +1,8 @@
 ---
 title: 'ALSDev File Menu'
+package: ALSDev
 predicates:
- - 'File Menu' : Select a file for editing
+- {sig: 'File Menu', desc: 'Select a file for editing'}
 ---
 `File Menu` — Select a file for editing
 

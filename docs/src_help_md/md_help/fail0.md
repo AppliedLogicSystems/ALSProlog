@@ -1,7 +1,7 @@
 ---
 title: 'fail/0'
 predicates:
- - 'fail/0' : always fails
+- {sig: 'fail/0', desc: 'always fails'}
 ---
 `fail/0` — always fails
 

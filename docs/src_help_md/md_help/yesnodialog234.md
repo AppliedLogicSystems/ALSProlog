@@ -1,7 +1,8 @@
 ---
 title: 'yes_no_dialog/[2,3,4]'
+package: ALSDev
 predicates:
- - 'yes_no_dialog/[2,3,4]' : present a yes/no dialog
+- {sig: 'yes_no_dialog/[2,3,4]', desc: 'present a yes/no dialog'}
 ---
 `yes_no_dialog/[2,3,4]` — present a yes/no dialog
 

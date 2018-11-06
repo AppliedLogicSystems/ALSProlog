@@ -1,8 +1,9 @@
 ---
 title: 'module_closure/[2,3]'
+group: Prolog Database
 predicates:
- - 'module_closure/2' : creates a module closure
- - 'module_closure/3' : creates a module closure for the specified procedure
+- {sig: 'module_closure/2', desc: 'creates a module closure'}
+- {sig: 'module_closure/3', desc: 'creates a module closure for the specified procedure'}
 ---
 `module_closure/2` — creates a module closure
 

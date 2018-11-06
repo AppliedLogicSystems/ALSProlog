@@ -1,7 +1,8 @@
 ---
 title: 'copy_term/2'
+group: Terms
 predicates:
- - 'copy_term/2' : make copy of a term
+- {sig: 'copy_term/2', desc: 'make copy of a term'}
 ---
 `copy_term/2` — make copy of a term
 

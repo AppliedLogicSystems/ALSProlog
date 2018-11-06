@@ -1,7 +1,8 @@
 ---
 title: 'skip/1'
+group: Input Output
 predicates:
- - 'skip/1' : discard all input characters until specified character
+- {sig: 'skip/1', desc: 'discard all input characters until specified character'}
 ---
 `skip/1` — discard all input characters until specified character
 

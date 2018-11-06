@@ -1,8 +1,9 @@
 ---
 title: 'setObjStruct/3'
+package: ALSDev
 predicates:
- - 'setObjStruct/3' : set the value of a slot in an object
- - 'accessObjStruct/3' : access the value of a slot in an object
+- {sig: 'setObjStruct/3', desc: 'set the value of a slot in an object'}
+- {sig: 'accessObjStruct/3', desc: 'access the value of a slot in an object'}
 ---
 `setObjStruct/3` — set the value of a slot in an object
 

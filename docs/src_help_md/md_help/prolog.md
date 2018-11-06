@@ -1,7 +1,8 @@
 ---
 title: 'prolog'
+package: ALSDev
 predicates:
- - 'prolog' : call a prolog term from Tcl
+- {sig: 'prolog', desc: 'call a prolog term from Tcl'}
 ---
 `prolog` — call a prolog term from Tcl
 

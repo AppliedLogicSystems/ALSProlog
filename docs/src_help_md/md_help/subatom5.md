@@ -1,7 +1,8 @@
 ---
 title: 'sub_atom/5'
+group: Terms
 predicates:
- - 'sub_atom/5' : dissect an atom
+- {sig: 'sub_atom/5', desc: 'dissect an atom'}
 ---
 `sub_atom/5` — dissect an atom
 

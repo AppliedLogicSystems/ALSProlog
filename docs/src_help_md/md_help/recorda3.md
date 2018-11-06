@@ -1,9 +1,10 @@
 ---
 title: 'recorda/3'
+group: Terms
 predicates:
- - 'recorda/3' : records item in internal term database
- - 'recordz/3' : records item in internal term database
- - 'recorded/3' : retrieves item from internal term database
+- {sig: 'recorda/3', desc: 'records item in internal term database'}
+- {sig: 'recordz/3', desc: 'records item in internal term database'}
+- {sig: 'recorded/3', desc: 'retrieves item from internal term database'}
 ---
 `recorda/3` — records item in internal term database
 

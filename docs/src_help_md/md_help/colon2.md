@@ -1,7 +1,7 @@
 ---
 title: ':/2 (colon)'
 predicates:
- - ':/2' : calls a goal in the specified module
+- {sig: ':/2', desc: 'calls a goal in the specified module'}
 ---
 `:/2` — calls a goal in the specified module
 

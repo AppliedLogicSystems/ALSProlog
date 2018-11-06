@@ -1,7 +1,8 @@
 ---
 title: 'make_hash_table/1'
+group: Terms
 predicates:
- - 'make_hash_table/1' : create a hash table and access predicates
+- {sig: 'make_hash_table/1', desc: 'create a hash table and access predicates'}
 ---
 `make_hash_table/1` — create a hash table and access predicates
 

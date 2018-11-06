@@ -1,7 +1,8 @@
 ---
 title: '$access/2'
+group: Input Output
 predicates:
- - '$access/2' : determine accessability of a file
+- {sig: '$access/2', desc: 'determine accessability of a file'}
 ---
 `$access/2` — determine accessability of a file
 

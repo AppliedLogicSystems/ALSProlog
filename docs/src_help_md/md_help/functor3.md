@@ -1,7 +1,8 @@
 ---
 title: 'functor/3'
+group: Terms
 predicates:
- - 'functor/3' : builds structures and retrieves information about them
+- {sig: 'functor/3', desc: 'builds structures and retrieves information about them'}
 ---
 `functor/3` — builds structures and retrieves information about them
 

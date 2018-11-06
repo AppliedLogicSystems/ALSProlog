@@ -1,9 +1,10 @@
 ---
 title: 'bufread/[2,3]'
+group: Input Output
 predicates:
- - 'bufread/2' : runs the Prolog parser on a string of text
- - 'bufread/3' : similiar to bufread/2, allowing read options
- - 'old_bufread/2' : similiar to bufread/2, giving additional information on variables
+- {sig: 'bufread/2', desc: 'runs the Prolog parser on a string of text'}
+- {sig: 'bufread/3', desc: 'similiar to bufread/2, allowing read options'}
+- {sig: 'old_bufread/2', desc: 'similiar to bufread/2, giving additional information on variables'}
 ---
 `bufread/2` — runs the Prolog parser on a string of text
 

@@ -1,11 +1,12 @@
 ---
 title: 'printf/[1,2,3,4]'
+group: Input Output
 predicates:
- - 'printf/1' : print out a string to the current output
- - 'printf/2' : print out a string with arguments
- - 'printf/3' : print out a string with a format and arguments
- - 'printf_opt/3' : print out string with format, arguments, options
- - 'printf/4' : print out string with format, arguments, options
+- {sig: 'printf/1', desc: 'print out a string to the current output'}
+- {sig: 'printf/2', desc: 'print out a string with arguments'}
+- {sig: 'printf/3', desc: 'print out a string with a format and arguments'}
+- {sig: 'printf_opt/3', desc: 'print out string with format, arguments, options'}
+- {sig: 'printf/4', desc: 'print out string with format, arguments, options'}
 ---
 `printf/1` — print out a string to the current output
 

@@ -1,10 +1,11 @@
 ---
 title: 'curl/[1,2,3]'
+group: Input Output
 predicates:
- - 'curl/1' : Combined URL, Options, and Target all in one list
- - 'curl/2' : Separate URL arg, combined Options, and Target in one list
- - 'curl/3' : Separate URL, Options, and Target args
- - 'http/3' : REST-inspired user-level interface for curl
+- {sig: 'curl/1', desc: 'Combined URL, Options, and Target all in one list'}
+- {sig: 'curl/2', desc: 'Separate URL arg, combined Options, and Target in one list'}
+- {sig: 'curl/3', desc: 'Separate URL, Options, and Target args'}
+- {sig: 'http/3', desc: 'REST-inspired user-level interface for curl'}
 ---
 `curl/1` — Combined URL, Options, and Target all in one list
 

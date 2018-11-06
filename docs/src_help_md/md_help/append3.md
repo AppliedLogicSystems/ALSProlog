@@ -1,8 +1,9 @@
 ---
 title: 'append/3'
+group: Terms
 predicates:
- - 'append/3' : append two lists
- - 'dappend/3' : append two lists
+- {sig: 'append/3', desc: 'append two lists'}
+- {sig: 'dappend/3', desc: 'append two lists'}
 ---
 `append/3` — append two lists
 

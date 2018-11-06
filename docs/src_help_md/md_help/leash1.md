@@ -1,7 +1,7 @@
 ---
 title: 'leash/1'
 predicates:
- - 'leash/1' : set which ports are leashed for the debugger
+- {sig: 'leash/1', desc: 'set which ports are leashed for the debugger'}
 ---
 `leash/1` — set which ports are leashed for the debugger
 

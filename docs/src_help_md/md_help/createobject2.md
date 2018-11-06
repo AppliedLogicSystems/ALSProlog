@@ -1,7 +1,8 @@
 ---
 title: 'create_object/2'
+package: ALSDev
 predicates:
- - 'create_object/2' : create an object
+- {sig: 'create_object/2', desc: 'create an object'}
 ---
 `create_object/2` — create an object
 

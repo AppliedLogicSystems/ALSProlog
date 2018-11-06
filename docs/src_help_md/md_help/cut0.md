@@ -1,7 +1,7 @@
 ---
 title: '\!/0'
 predicates:
- - '\!/0' : (cut) removes choice points
+- {sig: '\!/0', desc: '(cut) removes choice points'}
 ---
 `!/0` — (cut) removes choice points
 
