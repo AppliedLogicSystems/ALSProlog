@@ -2025,7 +2025,7 @@ For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) st
 ### curl/1-3 
 
 An alternate, more direct, way of invoking the immediate interface from prolog to Curl is
-provided by the predicates curl/1-3.  Below, options must be list of Curl options as described above.
+provided by the predicates curl/1-3.  Below, Options must be list of Curl options as described above.
 ````
 curl/1:
 curl(Options)
@@ -2035,7 +2035,7 @@ curl/2:
 Effectively:
 curl(URL, Target)
     :-
-    curl(URL, Options, Target).
+    curl(URL, [], Target).
 
 curl/3:
 Effectively:
