@@ -4,9 +4,6 @@ predicates:
  - 'get_code/1' : read a character code from current input stream
  - 'get_code/2' : read character code from a specific stream
 ---
-`get_code/1` — read a character code from current input stream
-
-`get_code/2` — read character code from a specific stream
 
 ## FORMS
 ```

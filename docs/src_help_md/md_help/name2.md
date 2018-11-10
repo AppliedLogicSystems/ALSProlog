@@ -3,7 +3,6 @@ title: 'name/2'
 predicates:
  - 'name/2' : converts strings to atoms and atoms to strings
 ---
-`name/2` — converts strings to atoms and atoms to strings
 
 ## FORMS
 ```

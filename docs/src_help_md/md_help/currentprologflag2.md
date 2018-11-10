@@ -4,9 +4,6 @@ predicates:
  - 'current_prolog_flag/2' : retrieve value(s) of prolog flag(s)
  - 'set_prolog_flag/2' : set value of a Prolog flag
 ---
-`current_prolog_flag/2` — retrieve value(s) of prolog flag(s)
-
-`set_prolog_flag/2` — set value of a Prolog flag
 
 ## FORMS
 ```

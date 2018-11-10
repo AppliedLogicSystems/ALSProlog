@@ -4,9 +4,6 @@ predicates:
  - 'at_end_of_stream/0' : test for end of the curent input stream
  - 'at_end_of_stream/1' : test for end of a specific input stream
 ---
-`at_end_of_stream/0` — test for end of the curent input stream
-
-`at_end_of_stream/1` — test for end of a specific input stream
 
 ## FORMS
 ```

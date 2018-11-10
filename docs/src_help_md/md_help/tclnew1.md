@@ -4,10 +4,6 @@ predicates:
  - 'tcl_new/1' : create a Tcl interpreter
  - 'tk_new/1' : create a Tcl interpreter initialized for Tk
 ---
-`tcl_new/1` — create a Tcl interpreter
-
-`tk_new/1` — create a Tcl interpreter initialized for Tk
-
 
 ## FORMS
 

@@ -3,7 +3,6 @@ title: 'popup_select_items/[2,3,4]'
 predicates:
  - 'popup_select_items/ [2,3,4]' : present popup selection list
 ---
-`popup_select_items/ [2,3,4]` — present popup selection list
 
 ## FORMS
 ```

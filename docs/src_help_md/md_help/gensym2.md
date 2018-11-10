@@ -3,7 +3,6 @@ title: 'gensym/2'
 predicates:
  - 'gensym/2' : generates families of unique symbolsr
 ---
-`gensym/2` — generates families of unique symbolsr
 
 ## FORMS
 ```

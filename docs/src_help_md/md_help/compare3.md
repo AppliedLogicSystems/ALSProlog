@@ -3,8 +3,6 @@ title: 'compare/3'
 predicates:
  - 'compare/3' : compares two terms in the standard order
 ---
-`compare/3` — compares two terms in the standard order
-
 
 ## FORMS
 ```

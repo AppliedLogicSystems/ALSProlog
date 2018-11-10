@@ -2,6 +2,14 @@
 layout: default
 ---
 
-<h1>{{ page.title | escape}}</h1>
+<h1>{{ page.title | escape }}</h1>
+
+<p>
+{%- for p in page.predicates %}
+	{%- for kv in p %}
+<code>{{ kv[0] | escape}}</code> — {{ kv[1] | escape }}<br>
+	{%- endfor %}
+{%- endfor %}
+</p>
 
 {{ content }}

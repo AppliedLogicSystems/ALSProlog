@@ -4,9 +4,6 @@ predicates:
  - 'flush_output/0' : flush current output stream
  - 'flush_output/1' : flush specific output stream
 ---
-`flush_output/0` — flush current output stream
-
-`flush_output/1` — flush specific output stream
 
 ## FORMS
 ```

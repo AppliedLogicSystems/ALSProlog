@@ -3,7 +3,6 @@ title: 'functor/3'
 predicates:
  - 'functor/3' : builds structures and retrieves information about them
 ---
-`functor/3` — builds structures and retrieves information about them
 
 ## FORMS
 ```

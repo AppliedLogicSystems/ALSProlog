@@ -3,8 +3,6 @@ title: 'ALSDev File Menu'
 predicates:
  - 'File Menu' : Select a file for editing
 ---
-`File Menu` — Select a file for editing
-
 
 ## FORMS
 

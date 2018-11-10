@@ -6,14 +6,6 @@ predicates:
  - 'consultq/1' : load a Prolog file, without messages
  - 'reconsult/1' : load a Prolog file, updating the prolog database
 ---
-`consult/1` — load a Prolog file
-
-`consult/2` — load a Prolog file, with options
-
-`consultq/1` — load a Prolog file, without messages
-
-`reconsult/1` — load a Prolog file, updating the prolog database
-
 
 ## FORMS
 ```

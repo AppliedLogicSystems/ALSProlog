@@ -3,7 +3,6 @@ title: 'poll/2'
 predicates:
  - 'poll/2' : Determine whether I/O is possible
 ---
-`poll/2` — Determine whether I/O is possible
 
 ## FORMS
 ```

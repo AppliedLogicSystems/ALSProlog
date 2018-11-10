@@ -4,9 +4,6 @@ predicates:
  - 'not/1' : tests whether a goal fails
  - '\+/1' : tests whether a goal fails
 ---
-`not/1` — tests whether a goal fails
-
-`\+/1` — tests whether a goal fails
 
 ## FORMS
 ```

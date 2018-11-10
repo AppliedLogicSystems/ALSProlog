@@ -3,8 +3,6 @@ title: 'ttyflush/0'
 predicates:
  - 'ttyflush/0' : forces all buffered output to the screen
 ---
-`ttyflush/0` — forces all buffered output to the screen
-
 
 ## FORMS
 

@@ -5,12 +5,6 @@ predicates:
  - 'retract/2' : removes a clause specified by a database reference
  - 'erase/1' : removes a clause from the database
 ---
-`retract/1` — removes a clause from the database
-
-`retract/2` — removes a clause specified by a database reference
-
-`erase/1` — removes a clause from the database
-
 
 ## FORMS
 ```

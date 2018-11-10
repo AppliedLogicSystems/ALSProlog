@@ -3,8 +3,6 @@ title: 'true/0'
 predicates:
  - 'true/0' : always succeeds
 ---
-`true/0` — always succeeds
-
 
 ## FORMS
 

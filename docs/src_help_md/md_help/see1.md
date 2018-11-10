@@ -5,12 +5,6 @@ predicates:
  - 'seeing/1' : returns the name of the current input stream
  - 'seen/0' : closes the current input stream
 ---
-`see/1` — sets the current input stream
-
-`seeing/1` — returns the name of the current input stream
-
-`seen/0` — closes the current input stream
-
 
 ## FORMS
 

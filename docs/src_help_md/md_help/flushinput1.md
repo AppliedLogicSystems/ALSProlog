@@ -3,7 +3,6 @@ title: 'flush_input/1'
 predicates:
  - 'flush_input/1' : discard buffer contents of stream
 ---
-`flush_input/1` — discard buffer contents of stream
 
 ## FORMS
 ```

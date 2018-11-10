@@ -3,8 +3,6 @@ title: 'stream_property/2'
 predicates:
  - 'stream_property/2' : retrieve streams and their properties
 ---
-`stream_property/2` — retrieve streams and their properties
-
 
 ## FORMS
 

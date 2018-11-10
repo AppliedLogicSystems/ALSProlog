@@ -3,7 +3,6 @@ title: 'init_tk_alslib/[0,1,2]'
 predicates:
  - 'init_tk_alslib/[0,1,2]' : initialize GUI library, creating Tcl interpreter
 ---
-`init_tk_alslib/[0,1,2]` — initialize GUI library, creating Tcl interpreter
 
 ## FORMS
 ```

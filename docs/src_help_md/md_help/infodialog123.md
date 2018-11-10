@@ -3,7 +3,6 @@ title: 'info_dialog/[1,2,3]'
 predicates:
  - 'info_dialog/ [1,2,3]' : present an information dialog
 ---
-`info_dialog/ [1,2,3]` — present an information dialog
 
 ## FORMS
 ```

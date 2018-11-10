@@ -3,7 +3,6 @@ title: '\!/0'
 predicates:
  - '\!/0' : (cut) removes choice points
 ---
-`!/0` — (cut) removes choice points
 
 ## FORMS
 ```

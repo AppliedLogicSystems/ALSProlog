@@ -4,10 +4,6 @@ predicates:
  - 'tcl_call/3' : execute Tcl script
  - 'tcl_eval/3' : evaluate Tcl script
 ---
-`tcl_call/3` — execute Tcl script
-
-`tcl_eval/3` — evaluate Tcl script
-
 
 ## FORMS
 

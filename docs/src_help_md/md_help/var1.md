@@ -1,12 +1,9 @@
 ---
 title: 'var/1'
 predicates:
- - 'var/1' : the variable is unbound
+ - 'var/1' : the variable is *unbound*
  - 'nonvar/1' : the variable is instantiated
 ---
-`var/1` — the variable is unbound  
-`nonvar/1` — the variable is instantiated
-
 
 ## FORMS
 

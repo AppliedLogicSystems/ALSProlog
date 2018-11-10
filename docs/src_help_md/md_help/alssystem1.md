@@ -4,10 +4,6 @@ predicates:
  - 'als_system/1' : Provides system environmental information.
  - 'sys_env/3' : Provides brief system environmental information.
 ---
-`als_system/1` — Provides system environmental information.
-
-`sys_env/3` — Provides brief system environmental information.
-
 
 ## FORMS
 

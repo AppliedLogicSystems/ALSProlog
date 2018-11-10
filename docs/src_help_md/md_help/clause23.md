@@ -5,11 +5,6 @@ predicates:
  - 'clause/3' : retrieve a clause with a database reference
  - 'instance/2' : retrieve a clause from the database reference
 ---
-`clause/2` — retrieve a clause
-
-`clause/3` — retrieve a clause with a database reference
-
-`instance/2` — retrieve a clause from the database reference
 
 ## FORMS
 ```

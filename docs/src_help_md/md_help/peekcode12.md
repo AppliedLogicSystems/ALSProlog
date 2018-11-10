@@ -4,9 +4,6 @@ predicates:
  - 'peek_code/1' : obtain char code from stream
  - 'peek_code/2' : obtain char from stream
 ---
-`peek_code/1` — obtain char code from current input stream
-
-`peek_code/2` — obtain char code from stream
 
 ## FORMS
 ```
