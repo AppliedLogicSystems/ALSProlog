@@ -36,7 +36,7 @@ compare3.md:  __X___
 compiletime0.md:  __X___
 consult12.md:  __X___
 copyterm2.md:  __X___
-curl123.md:  ______		<< unfinished
+curl123.md:  __X___		<< unfinished
 createobject2.md:  __X___
 curmod1.md:  __X___
 currentinput1.md:  __X___
