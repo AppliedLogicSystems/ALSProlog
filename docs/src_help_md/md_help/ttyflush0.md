@@ -4,8 +4,6 @@ group: Input Output
 predicates:
 - {sig: 'ttyflush/0', desc: 'forces all buffered output to the screen'}
 ---
-`ttyflush/0` — forces all buffered output to the screen
-
 
 ## FORMS
 

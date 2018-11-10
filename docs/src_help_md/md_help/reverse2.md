@@ -5,9 +5,6 @@ predicates:
 - {sig: 'reverse/2', desc: 'list reversal'}
 - {sig: 'dreverse/2', desc: 'determinate list reversal'}
 ---
-`reverse/2` — list reversal
-
-`dreverse/2` — determinate list reversal
 
 ## FORMS
 ```

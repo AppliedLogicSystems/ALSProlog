@@ -5,10 +5,6 @@ predicates:
 - {sig: 'tcl_call/3', desc: 'execute Tcl script'}
 - {sig: 'tcl_eval/3', desc: 'evaluate Tcl script'}
 ---
-`tcl_call/3` — execute Tcl script
-
-`tcl_eval/3` — evaluate Tcl script
-
 
 ## FORMS
 

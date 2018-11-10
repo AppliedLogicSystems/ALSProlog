@@ -4,7 +4,6 @@ group: Terms
 predicates:
 - {sig: 'gensym/2', desc: 'generates families of unique symbolsr'}
 ---
-`gensym/2` — generates families of unique symbolsr
 
 ## FORMS
 ```

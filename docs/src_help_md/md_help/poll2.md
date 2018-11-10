@@ -4,7 +4,6 @@ group: Input Output
 predicates:
 - {sig: 'poll/2', desc: 'Determine whether I/O is possible'}
 ---
-`poll/2` — Determine whether I/O is possible
 
 ## FORMS
 ```

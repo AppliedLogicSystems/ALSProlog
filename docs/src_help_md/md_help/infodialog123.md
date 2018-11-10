@@ -4,7 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'info_dialog/ [1,2,3]', desc: 'present an information dialog'}
 ---
-`info_dialog/ [1,2,3]` — present an information dialog
 
 ## FORMS
 ```

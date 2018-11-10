@@ -4,8 +4,6 @@ group: Terms
 predicates:
 - {sig: 'compare/3', desc: 'compares two terms in the standard order'}
 ---
-`compare/3` — compares two terms in the standard order
-
 
 ## FORMS
 ```

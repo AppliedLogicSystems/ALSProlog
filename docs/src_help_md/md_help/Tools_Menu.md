@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'Tools Menu', desc: 'Invoke various useful tools'}
 ---
-`Tools Menu` — Invoke various useful tools
-
 
 ## FORMS
 

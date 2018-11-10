@@ -4,7 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'create_object/2', desc: 'create an object'}
 ---
-`create_object/2` — create an object
 
 ## FORMS
 ```

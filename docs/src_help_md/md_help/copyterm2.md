@@ -4,7 +4,6 @@ group: Terms
 predicates:
 - {sig: 'copy_term/2', desc: 'make copy of a term'}
 ---
-`copy_term/2` — make copy of a term
 
 ## FORMS
 ```

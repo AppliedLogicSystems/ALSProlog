@@ -4,9 +4,6 @@ predicates:
 - {sig: 'not/1', desc: 'tests whether a goal fails'}
 - {sig: '\+/1', desc: 'tests whether a goal fails'}
 ---
-`not/1` — tests whether a goal fails
-
-`\+/1` — tests whether a goal fails
 
 ## FORMS
 ```

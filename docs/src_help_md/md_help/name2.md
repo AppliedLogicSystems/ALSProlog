@@ -4,7 +4,6 @@ group: Terms
 predicates:
 - {sig: 'name/2', desc: 'converts strings to atoms and atoms to strings'}
 ---
-`name/2` — converts strings to atoms and atoms to strings
 
 ## FORMS
 ```

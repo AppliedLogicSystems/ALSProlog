@@ -5,9 +5,6 @@ predicates:
 - {sig: 'current_input/1', desc: 'retrieve current input stream'}
 - {sig: 'current_output/1', desc: 'retrieve current output stream'}
 ---
-`current_input/1` — retrieve current input stream
-
-`current_output/1` — retrieve current output stream
 
 ## FORMS
 ```

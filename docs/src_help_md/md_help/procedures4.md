@@ -5,12 +5,6 @@ predicates:
 - {sig: 'all_procedures/4', desc: 'retrieves all Prolog- or C-defined procedures'}
 - {sig: 'all_ntbl_entries/4', desc: 'retrieves all name table entries'}
 ---
-`procedures/4` — retrieves all Prolog-defined procedures
-
-`all_procedures/4` — retrieves all Prolog- or C-defined procedures
-
-`all_ntbl_entries/4` — retrieves all name table entries
-
 
 ## FORMS
 ```

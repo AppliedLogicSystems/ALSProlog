@@ -5,9 +5,6 @@ predicates:
 - {sig: 'close/1', desc: 'close an open stream'}
 - {sig: 'close/2', desc: 'close an open stream with options'}
 ---
-`close/1` — close an open stream
-
-`close/2` — close an open stream with options
 
 ## FORMS
 ```

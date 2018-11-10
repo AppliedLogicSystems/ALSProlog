@@ -5,9 +5,6 @@ predicates:
 - {sig: 'put_string/1', desc: 'output a string to the current output stream'}
 - {sig: 'put_string/2', desc: 'output a string to a specific output stream'}
 ---
-`put_string/1` — output a string to the current output stream
-
-`put_string/2` — output a string to a specific output stream
 
 ## FORMS
 ```

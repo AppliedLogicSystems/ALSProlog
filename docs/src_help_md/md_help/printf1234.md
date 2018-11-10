@@ -8,15 +8,6 @@ predicates:
 - {sig: 'printf_opt/3', desc: 'print out string with format, arguments, options'}
 - {sig: 'printf/4', desc: 'print out string with format, arguments, options'}
 ---
-`printf/1` — print out a string to the current output
-
-`printf/2` — print out a string with arguments
-
-`printf/3` — print out a string with a format and arguments
-
-`printf_opt/3` — print out string with format, arguments, options
-
-`printf/4` — print out string with format, arguments, options
 
 ## FORMS
 ```

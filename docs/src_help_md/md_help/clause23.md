@@ -6,11 +6,6 @@ predicates:
 - {sig: 'clause/3', desc: 'retrieve a clause with a database reference'}
 - {sig: 'instance/2', desc: 'retrieve a clause from the database reference'}
 ---
-`clause/2` — retrieve a clause
-
-`clause/3` — retrieve a clause with a database reference
-
-`instance/2` — retrieve a clause from the database reference
 
 ## FORMS
 ```

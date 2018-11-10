@@ -6,13 +6,6 @@ predicates:
 - {sig: '$c_set/2', desc: 'Modifies the contents of a C data area or a UIA'}
 - {sig: '$c_examine/2', desc: 'Examines the contents of a C data area or a UIA'}
 ---
-`$c_malloc/2` — Allocates a C data area using the system malloc call
-
-`$c_free/1` — Frees a C data area
-
-`$c_set/2` — Modifies the contents of a C data area or a UIA
-
-`$c_examine/2` — Examines the contents of a C data area or a UIA
 
 ## FORMS
 ```

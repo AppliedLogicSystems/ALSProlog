@@ -5,10 +5,6 @@ predicates:
 - {sig: 'sort/2', desc: 'sorts a list of terms'}
 - {sig: 'keysort/2', desc: 'sorts a list of Key-Data pairs'}
 ---
-`sort/2` — sorts a list of terms
-
-`keysort/2` — sorts a list of Key-Data pairs
-
 
 ## FORMS
 

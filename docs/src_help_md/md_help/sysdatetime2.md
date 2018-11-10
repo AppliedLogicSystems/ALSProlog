@@ -13,25 +13,6 @@ predicates:
 - {sig: 'time_less/2', desc: 'compares two times'}
 - {sig: 'datetime_less/2', desc: 'compares two datetimes'}
 ---
-`datetime/2` — gets the local system date and time
-
-`time/1` — gets the local system time
-
-`date/1` — gets the local date
-
-`gm_datetime/2` — gets the Greenwich mean time(UTC)
-
-`date_less/2` – compares two dates
-
-`date_pattern/4` – describes the pattern term for date display
-
-`set_date_pattern/1` – changes the pattern term for date display
-
-`valid_date/[1,3]` – determines if a date pattern represents a valid date
-
-`time_less/2` – compares two times
-
-`datetime_less/2` – compares two datetimes
 
 ## FORMS
 ```

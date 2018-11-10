@@ -4,7 +4,6 @@ group: Terms
 predicates:
 - {sig: 'char_code/2', desc: 'convert between characters and codes'}
 ---
-`char_code/2` — convert between characters and codes
 
 ## FORMS
 ```

@@ -5,9 +5,6 @@ predicates:
 - {sig: 'atom_chars/2', desc: 'convert between atoms and the list of characters representing the atom'}
 - {sig: 'atom_codes/2', desc: 'convert between atoms and the list of character codes representing the atom'}
 ---
-`atom_chars/2` — convert between atoms and the list of characters representing the atom
-
-`atom_codes/2` — convert between atoms and the list of character codes representing the atom
 
 ## FORMS
 ```

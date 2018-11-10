@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'Preferences Dialog', desc: 'Set various IDE preferences'}
 ---
-`Preferences Dialog` — Set various IDE preferences
-
 
 ## FORMS
 

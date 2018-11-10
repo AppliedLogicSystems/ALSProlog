@@ -5,12 +5,6 @@ predicates:
 - {sig: 'trace/1', desc: 'trace the execution of a goal'}
 - {sig: 'notrace/0', desc: 'turn off tracing'}
 ---
-`trace/0` — turn on tracing
-
-`trace/1` — trace the execution of a goal
-
-`notrace/0` — turn off tracing
-
 
 ## FORMS
 

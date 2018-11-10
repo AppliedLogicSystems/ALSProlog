@@ -5,10 +5,6 @@ predicates:
 - {sig: 'peek_char/1', desc: 'obtain char from stream'}
 - {sig: 'peek_char/2', desc: 'obtain char from stream'}
 ---
-`peek_char/1` — obtain char from current input stream
-
-`peek_char/2` — obtain char from stream
-
 
 ## FORMS
 ```

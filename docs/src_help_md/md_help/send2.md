@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'send/2', desc: 'send a message to an object'}
 ---
-`send/2` — send a message to an object
-
 
 ## FORMS
 

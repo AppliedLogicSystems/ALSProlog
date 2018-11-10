@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'yes_no_dialog/[2,3,4]', desc: 'present a yes/no dialog'}
 ---
-`yes_no_dialog/[2,3,4]` — present a yes/no dialog
-
 
 ## FORMS
 

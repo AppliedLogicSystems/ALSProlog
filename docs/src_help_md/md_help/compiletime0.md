@@ -3,7 +3,6 @@ title: 'compiletime/0'
 predicates:
 - {sig: 'compiletime/0', desc: 'Runs goals only at compile time'}
 ---
-`compiletime/0` — Runs goals only at compile time
 
 ## FORMS
 ```

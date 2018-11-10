@@ -4,7 +4,6 @@ group: Input Output
 predicates:
 - {sig: '$access/2', desc: 'determine accessability of a file'}
 ---
-`$access/2` — determine accessability of a file
 
 ## FORMS
 

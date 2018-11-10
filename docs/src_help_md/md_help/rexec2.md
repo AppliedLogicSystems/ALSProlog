@@ -3,7 +3,6 @@ title: 'rexec/2'
 predicates:
 - {sig: 'rexec/2', desc: 'Execute an operating system command remotely, or possibly locally.'}
 ---
-`rexec/2` — Execute an operating system command remotely, &nbsp;or possibly locally.
 
 ## FORMS
 ```

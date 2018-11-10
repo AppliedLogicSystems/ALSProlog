@@ -5,10 +5,6 @@ predicates:
 - {sig: '=/2', desc: 'unify two terms'}
 - {sig: '\=/2', desc: 'test if two items are non-unifiable'}
 ---
-`=/2` — unify two terms
-
-`\=/2` — test if two items are non-unifiable
-
 
 ## FORMS
 

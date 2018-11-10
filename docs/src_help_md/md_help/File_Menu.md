@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'File Menu', desc: 'Select a file for editing'}
 ---
-`File Menu` — Select a file for editing
-
 
 ## FORMS
 

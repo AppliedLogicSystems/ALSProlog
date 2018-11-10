@@ -4,8 +4,6 @@ group: Terms
 predicates:
 - {sig: 'arg/3', desc: 'access the arguments of a structured term'}
 ---
-`arg/3` — access the arguments of a structured term
-
 
 ## FORMS
 ```

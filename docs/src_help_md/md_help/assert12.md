@@ -9,18 +9,6 @@ predicates:
 - {sig: 'assertz/1', desc: 'adds a clause at the end of a procedure'}
 - {sig: 'assertz/2', desc: 'adds a clause at the end of a procedure'}
 ---
-`assert/1` — adds a clause to a procedure
-
-`assert/2` — adds a clause to a procedure
-
-`asserta/1` — adds a clause at the beginning of a procedure
-
-`asserta/2` — adds a clause at the beginning of a procedure
-
-`assertz/1` — adds a clause at the end of a procedure
-
-`assertz/2` — adds a clause at the end of a procedure
-
 
 ## FORMS
 ```

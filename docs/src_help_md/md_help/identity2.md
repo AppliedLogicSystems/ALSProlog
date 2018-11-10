@@ -5,9 +5,6 @@ predicates:
 - {sig: '==/2', desc: 'terms are identical'}
 - {sig: '\==/2', desc: 'terms are not identical'}
 ---
-`==/2` — terms are identical
-
-`\==/2` — terms are not identical
 
 ## FORMS
 ```

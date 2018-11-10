@@ -3,8 +3,6 @@ title: 'save_image/2'
 predicates:
 - {sig: 'save_image/2', desc: 'package an application'}
 ---
-`save_image/2` — package an application
-
 
 ## FORMS
 

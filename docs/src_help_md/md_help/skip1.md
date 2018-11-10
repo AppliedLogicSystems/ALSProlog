@@ -4,7 +4,6 @@ group: Input Output
 predicates:
 - {sig: 'skip/1', desc: 'discard all input characters until specified character'}
 ---
-`skip/1` — discard all input characters until specified character
 
 ## FORMS
 

@@ -5,9 +5,6 @@ predicates:
 - {sig: 'member/2', desc: 'list membership'}
 - {sig: 'dmember/2', desc: 'list membership'}
 ---
-`member/2` — list membership
-
-`dmember/2` — list membership
 
 ## FORMS
 ```

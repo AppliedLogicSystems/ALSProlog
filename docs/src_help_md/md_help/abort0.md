@@ -3,8 +3,6 @@ title: 'abort/0'
 predicates:
 - {sig: 'abort/0', desc: 'return execution immediately to the Prolog shell'}
 ---
-`abort/0` — return execution immediately to the Prolog shell
-
 
 ## FORMS
 

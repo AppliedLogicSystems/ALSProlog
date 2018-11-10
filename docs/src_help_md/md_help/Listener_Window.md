@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'Listener Window', desc: 'Primary interaction window'}
 ---
-`Listener Window` — Primary interaction window
-
 
 ## FORMS
 

@@ -5,9 +5,6 @@ predicates:
 - {sig: 'put_char/1', desc: 'output a character to the current output stream'}
 - {sig: 'put_char/2', desc: 'output a character to a specific output stream'}
 ---
-`put_char/1` — output a character to the current output stream
-
-`put_char/2` — output a character to a specific output stream
 
 ## FORMS
 ```

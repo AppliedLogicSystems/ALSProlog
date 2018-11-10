@@ -12,24 +12,6 @@ predicates:
 - {sig: 'write_term/3', desc: 'write term to specified output stream with options'}
 - {sig: 'display/1', desc: 'write term to current output stream in canonical form'}
 ---
-`write/1` — write term to current output stream
-
-`write/2` — write term to specified stream
-
-`writeq/1` — write term to current output stream so that it may be read back in
-
-`writeq/2` — write term to specified stream so that it may be read back in
-
-`write_canonical/1` — write term to current output stream in canonical form(no operators)
-
-`write_canonical/2` — write term to specified stream in canonical form
-
-`write_term/2` — write term to current output stream with options
-
-`write_term/3` — write term to specified output stream with options
-
-`display/1` — write term to current output stream in canonical form
-
 
 ## FORMS
 

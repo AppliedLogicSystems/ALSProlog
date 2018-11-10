@@ -4,7 +4,6 @@ group: Terms
 predicates:
 - {sig: 'mangle/3', desc: 'destructively modify a structure'}
 ---
-`mangle/3` — destructively modify a structure
 
 ## FORMS
 ```

@@ -3,7 +3,6 @@ title: 'fail/0'
 predicates:
 - {sig: 'fail/0', desc: 'always fails'}
 ---
-`fail/0` — always fails
 
 ## FORMS
 ```

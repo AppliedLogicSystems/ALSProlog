@@ -6,12 +6,6 @@ predicates:
 - {sig: 'bufwrite/2', desc: 'formatted write to strings'}
 - {sig: 'bufwriteq/2', desc: 'formatted write to strings with quoting'}
 ---
-`sprintf/3` — formatted write to atoms and strings
-
-`bufwrite/2` — formatted write to strings
-
-`bufwriteq/2` — formatted write to strings with quoting
-
 
 ## FORMS
 

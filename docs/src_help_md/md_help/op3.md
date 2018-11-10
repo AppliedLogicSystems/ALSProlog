@@ -3,7 +3,6 @@ title: 'op/3'
 predicates:
 - {sig: 'op/3', desc: 'define operator associativity and precedence'}
 ---
-`op/3` — define operator associativity and precedence
 
 ## FORMS
 ```

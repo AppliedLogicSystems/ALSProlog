@@ -5,9 +5,6 @@ predicates:
 - {sig: 'get_code/1', desc: 'read a character code from current input stream'}
 - {sig: 'get_code/2', desc: 'read character code from a specific stream'}
 ---
-`get_code/1` — read a character code from current input stream
-
-`get_code/2` — read character code from a specific stream
 
 ## FORMS
 ```

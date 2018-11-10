@@ -3,7 +3,6 @@ title: 'halt/0'
 predicates:
 - {sig: 'halt/0', desc: 'exit ALS Prolog'}
 ---
-`halt/0` — exit ALS Prolog
 
 ## FORMS
 ```

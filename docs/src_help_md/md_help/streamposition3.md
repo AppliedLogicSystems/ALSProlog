@@ -5,9 +5,6 @@ predicates:
 - {sig: 'stream_position/2', desc: 'reposition a stream'}
 - {sig: 'stream_position/3', desc: 'reposition a stream'}
 ---
-`stream_position/2` — reposition a stream
-
-`stream_position/3` — reposition a stream
 
 ## FORMS
 

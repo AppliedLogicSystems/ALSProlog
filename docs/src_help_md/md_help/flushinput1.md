@@ -4,7 +4,6 @@ group: Input Output
 predicates:
 - {sig: 'flush_input/1', desc: 'discard buffer contents of stream'}
 ---
-`flush_input/1` — discard buffer contents of stream
 
 ## FORMS
 ```

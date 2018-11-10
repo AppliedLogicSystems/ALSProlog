@@ -5,9 +5,6 @@ predicates:
 - {sig: 'flush_output/0', desc: 'flush current output stream'}
 - {sig: 'flush_output/1', desc: 'flush specific output stream'}
 ---
-`flush_output/0` — flush current output stream
-
-`flush_output/1` — flush specific output stream
 
 ## FORMS
 ```

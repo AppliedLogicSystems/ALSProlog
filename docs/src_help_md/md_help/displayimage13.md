@@ -5,9 +5,6 @@ predicates:
 - {sig: 'create_image/ [2, 3]', desc: 'create an image from a GIF file'}
 - {sig: 'display_image/ [1, 3]', desc: 'display an image'}
 ---
-`create_image/ [2, 3]` — create an image from a GIF file
-
-`display_image/ [1, 3]` — display an image
 
 ## FORMS
 ```

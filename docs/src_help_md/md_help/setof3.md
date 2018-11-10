@@ -6,14 +6,6 @@ predicates:
 - {sig: 'findall/3', desc: 'all solutions for a goal, not sorted'}
 - {sig: 'b_findall/4', desc: 'bound list of solutions for a goal, not sorted'}
 ---
-`setof/3` — all unique solutions for a goal, sorted
-
-`bagof/3` — all solutions for a goal, not sorted
-
-`findall/3` — all solutions for a goal, not sorted
-
-`b_findall/4` — bound list of solutions for a goal, not sorted
-
 
 ## FORMS
 

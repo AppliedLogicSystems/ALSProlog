@@ -4,8 +4,6 @@ group: Input Output
 predicates:
 - {sig: 'set_stream_position/2', desc: 'seek to a new position in a stream'}
 ---
-`set_stream_position/2` — seek to a new position in a stream
-
 
 ## FORMS
 

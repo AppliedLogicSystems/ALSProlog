@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'atomic_input_dialog/ [2,3,4]', desc: 'input atoms and numbers'}
 ---
-`atomic_input_dialog/[2,3,4]` — input atoms and numbers
-
 
 ## FORMS
 ```

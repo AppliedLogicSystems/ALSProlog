@@ -6,11 +6,6 @@ predicates:
 - {sig: 'recordz/3', desc: 'records item in internal term database'}
 - {sig: 'recorded/3', desc: 'retrieves item from internal term database'}
 ---
-`recorda/3` — records item in internal term database
-
-`recordz/3` — records item in internal term database
-
-`recorded/3` — retrieves item from internal term database
 
 ## FORMS
 ```

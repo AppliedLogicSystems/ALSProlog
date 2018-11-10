@@ -5,10 +5,6 @@ predicates:
 - {sig: 'append/3', desc: 'append two lists'}
 - {sig: 'dappend/3', desc: 'append two lists'}
 ---
-`append/3` — append two lists
-
-`dappend/3` — append two lists
-
 
 ## FORMS
 

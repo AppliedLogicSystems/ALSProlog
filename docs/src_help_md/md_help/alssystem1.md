@@ -4,10 +4,6 @@ predicates:
 - {sig: 'als_system/1', desc: 'Provides system environmental information.'}
 - {sig: 'sys_env/3', desc: 'Provides brief system environmental information.'}
 ---
-`als_system/1` — Provides system environmental information.
-
-`sys_env/3` — Provides brief system environmental information.
-
 
 ## FORMS
 

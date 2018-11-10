@@ -4,7 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'popup_select_items/ [2,3,4]', desc: 'present popup selection list'}
 ---
-`popup_select_items/ [2,3,4]` — present popup selection list
 
 ## FORMS
 ```

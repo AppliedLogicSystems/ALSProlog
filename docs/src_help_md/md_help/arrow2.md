@@ -3,8 +3,6 @@ title: '->/2(arrow)'
 predicates:
 - {sig: '->/2', desc: 'if-then, and if-then-else'}
 ---
-`->/2` — if-then, and if-then-else
-
 
 ## FORMS
 

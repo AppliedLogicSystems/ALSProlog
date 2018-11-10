@@ -4,8 +4,6 @@ group: Terms
 predicates:
 - {sig: 'sub_atom/5', desc: 'dissect an atom'}
 ---
-`sub_atom/5` — dissect an atom
-
 
 ## FORMS
 

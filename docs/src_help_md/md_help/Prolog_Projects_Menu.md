@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'Prolog Projects Menu', desc: 'Manage prolog projects and settings'}
 ---
-`Prolog Projects Menu` — Manage prolog projects and settings
-
 
 ## FORMS
 

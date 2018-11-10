@@ -7,13 +7,6 @@ predicates:
 - {sig: 'read_term/2', desc: 'read term from current input with options'}
 - {sig: 'read_term/3', desc: 'read term from specified stream with options'}
 ---
-`read/1` — read a term from the current input stream
-
-`read/2` — read a term from specified stream
-
-`read_term/2` — read term from current input with options
-
-`read_term/3` — read term from specified stream with options
 
 ## FORMS
 ```

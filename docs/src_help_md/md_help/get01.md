@@ -5,9 +5,6 @@ predicates:
 - {sig: 'get0/1', desc: 'read the next character'}
 - {sig: 'get/1', desc: 'read the next printable character'}
 ---
-`get0/1` — read the next character
-
-`get/1` — read the next printable character
 
 ## FORMS
 ```

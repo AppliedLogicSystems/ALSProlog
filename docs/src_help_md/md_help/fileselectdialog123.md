@@ -4,8 +4,6 @@ package: ALSDev
 predicates:
 - {sig: 'file_select_dialog/ [1,2,3]', desc: 'select a file'}
 ---
-`file_select_dialog/ [1,2,3]` — select a file
-
 
 ## FORMS
 ```
