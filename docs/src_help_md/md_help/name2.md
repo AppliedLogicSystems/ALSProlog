@@ -1,7 +1,8 @@
 ---
 title: 'name/2'
+group: Terms
 predicates:
- - 'name/2' : converts strings to atoms and atoms to strings
+- {sig: 'name/2', desc: 'converts strings to atoms and atoms to strings'}
 ---
 
 ## FORMS

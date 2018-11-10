@@ -1,7 +1,8 @@
 ---
 title: 'Prolog Menu'
+package: ALSDev
 predicates:
- - 'Prolog Menu' : Manage prolog projects and settings
+- {sig: 'Prolog Menu', desc: 'Manage prolog projects and settings'}
 ---
 
 ## FORMS

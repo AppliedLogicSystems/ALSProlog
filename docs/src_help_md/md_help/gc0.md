@@ -1,7 +1,7 @@
 ---
 title: 'gc/0'
 predicates:
- - 'gc/0' : invokes the garbage compactor
+- {sig: 'gc/0', desc: 'invokes the garbage compactor'}
 ---
 
 ## FORMS

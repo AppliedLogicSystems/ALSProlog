@@ -1,7 +1,7 @@
 ---
 title: 'exists_file/1'
 predicates:
- - 'exists_file/1' : tests whether a file exists
+- {sig: 'exists_file/1', desc: 'tests whether a file exists'}
 ---
 
 ## FORMS

@@ -1,7 +1,7 @@
 ---
 title: 'current_op/3'
 predicates:
- - 'current_op/3' : retrieve current operator definitions
+- {sig: 'current_op/3', desc: 'retrieve current operator definitions'}
 ---
 
 ## FORMS

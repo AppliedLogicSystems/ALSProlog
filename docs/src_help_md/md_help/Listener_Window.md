@@ -1,7 +1,8 @@
 ---
 title: 'ALSDev Listener Window'
+package: ALSDev
 predicates:
- - 'Listener Window' : Primary interaction window
+- {sig: 'Listener Window', desc: 'Primary interaction window'}
 ---
 
 ## FORMS

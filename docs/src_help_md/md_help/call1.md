@@ -1,7 +1,7 @@
 ---
 title: 'call/1'
 predicates:
- - 'call/1' : calls a goal
+- {sig: 'call/1', desc: 'calls a goal'}
 ---
 
 ## FORMS

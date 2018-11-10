@@ -1,7 +1,8 @@
 ---
 title: 'ttyflush/0'
+group: Input Output
 predicates:
- - 'ttyflush/0' : forces all buffered output to the screen
+- {sig: 'ttyflush/0', desc: 'forces all buffered output to the screen'}
 ---
 
 ## FORMS

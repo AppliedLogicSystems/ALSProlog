@@ -1,7 +1,8 @@
 ---
 title: 'char_code/2'
+group: Terms
 predicates:
- - 'char_code/2' : convert between characters and codes
+- {sig: 'char_code/2', desc: 'convert between characters and codes'}
 ---
 
 ## FORMS

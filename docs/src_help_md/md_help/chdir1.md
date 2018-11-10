@@ -1,7 +1,8 @@
 ---
 title: 'chdir/1'
+group: Input Output
 predicates:
- - 'chdir/1' : changes the current directory to the specified directory
+- {sig: 'chdir/1', desc: 'changes the current directory to the specified directory'}
 ---
 
 ## FORMS

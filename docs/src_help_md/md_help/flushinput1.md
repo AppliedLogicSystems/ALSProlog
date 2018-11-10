@@ -1,7 +1,8 @@
 ---
 title: 'flush_input/1'
+group: Input Output
 predicates:
- - 'flush_input/1' : discard buffer contents of stream
+- {sig: 'flush_input/1', desc: 'discard buffer contents of stream'}
 ---
 
 ## FORMS

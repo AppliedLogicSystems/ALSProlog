@@ -1,8 +1,8 @@
 ---
 title: 'setPrologInterrupt/1'
 predicates:
- - 'setPrologInterrupt/1' : establish the type of a Prolog interrupt
- - 'getPrologInterrupt/1' : determine the type of a Prolog interrupt
+- {sig: 'setPrologInterrupt/1', desc: 'establish the type of a Prolog interrupt'}
+- {sig: 'getPrologInterrupt/1', desc: 'determine the type of a Prolog interrupt'}
 ---
 
 ## FORMS

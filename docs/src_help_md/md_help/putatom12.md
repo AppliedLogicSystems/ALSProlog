@@ -1,8 +1,9 @@
 ---
 title: 'put_atom/[1,2]'
+group: Input Output
 predicates:
- - 'put_atom/1' : output an atom to the current output stream
- - 'put_atom/2' : output an atom to a specific output stream
+- {sig: 'put_atom/1', desc: 'output an atom to the current output stream'}
+- {sig: 'put_atom/2', desc: 'output an atom to a specific output stream'}
 ---
 
 ## FORMS

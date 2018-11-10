@@ -1,7 +1,8 @@
 ---
 title: 'dynamic/1'
+group: Prolog Database
 predicates:
- - 'dynamic/1' : declare a procedure to be dynamic
+- {sig: 'dynamic/1', desc: 'declare a procedure to be dynamic'}
 ---
 
 ## FORMS

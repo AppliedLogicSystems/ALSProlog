@@ -1,23 +1,24 @@
 ---
 title: '$uia_alloc/2'
+group: Terms
 predicates:
- - '$uia_alloc/2' : allocates a UIA of specified length
- - '$uia_size/2' : obtains the actual size of a UIA
- - '$uia_clip/2' : clip the given UIA
- - '$uia_pokeb/3' : modifies the specified byte of a UIA
- - '$uia_peekb/3' : returns the specified byte of a UIA
- - '$uia_pokew/3' : modifies the specified word of a UIA
- - '$uia_peekw/3' : returns the specified word of a UIA
- - '$uia_pokel/3' : modifies the specified long word of a UIA
- - '$uia_peekl/3' : returns the specified long word of a UIA
- - '$uia_poked/3' : modifies the specified double of a UIA
- - '$uia_peekd/3' : returns the specified double of a UIA
- - '$uia_pokes/3' : modifies the specified substring of a UIA
- - '$uia_peeks/3' : returns the specified substring of a UIA
- - '$uia_peeks/4' : returns the specified substring of a UIA
- - '$uia_peek/4' : returns the specified region of a UIA
- - '$uia_poke/4' : modifies the specified region of a UIA
- - '$strlen/2' : returns the length of the specified symbol
+- {sig: '$uia_alloc/2', desc: 'allocates a UIA of specified length'}
+- {sig: '$uia_size/2', desc: 'obtains the actual size of a UIA'}
+- {sig: '$uia_clip/2', desc: 'clip the given UIA'}
+- {sig: '$uia_pokeb/3', desc: 'modifies the specified byte of a UIA'}
+- {sig: '$uia_peekb/3', desc: 'returns the specified byte of a UIA'}
+- {sig: '$uia_pokew/3', desc: 'modifies the specified word of a UIA'}
+- {sig: '$uia_peekw/3', desc: 'returns the specified word of a UIA'}
+- {sig: '$uia_pokel/3', desc: 'modifies the specified long word of a UIA'}
+- {sig: '$uia_peekl/3', desc: 'returns the specified long word of a UIA'}
+- {sig: '$uia_poked/3', desc: 'modifies the specified double of a UIA'}
+- {sig: '$uia_peekd/3', desc: 'returns the specified double of a UIA'}
+- {sig: '$uia_pokes/3', desc: 'modifies the specified substring of a UIA'}
+- {sig: '$uia_peeks/3', desc: 'returns the specified substring of a UIA'}
+- {sig: '$uia_peeks/4', desc: 'returns the specified substring of a UIA'}
+- {sig: '$uia_peek/4', desc: 'returns the specified region of a UIA'}
+- {sig: '$uia_poke/4', desc: 'modifies the specified region of a UIA'}
+- {sig: '$strlen/2', desc: 'returns the length of the specified symbol'}
 ---
 
 ## FORMS

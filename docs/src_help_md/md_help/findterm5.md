@@ -1,7 +1,7 @@
 ---
 title: '$findterm/5'
 predicates:
- - '$findterm/5' : locates the given term on the heap
+- {sig: '$findterm/5', desc: 'locates the given term on the heap'}
 ---
 
 ## FORMS

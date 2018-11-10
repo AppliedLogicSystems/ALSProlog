@@ -1,8 +1,9 @@
 ---
 title: 'tcl_new/1'
+package: ALSDev
 predicates:
- - 'tcl_new/1' : create a Tcl interpreter
- - 'tk_new/1' : create a Tcl interpreter initialized for Tk
+- {sig: 'tcl_new/1', desc: 'create a Tcl interpreter'}
+- {sig: 'tk_new/1', desc: 'create a Tcl interpreter initialized for Tk'}
 ---
 
 ## FORMS

@@ -1,7 +1,7 @@
 ---
 title: ',/2 (comma)'
 predicates:
- - ',/2' : conjunction of two goals
+- {sig: ',/2', desc: 'conjunction of two goals'}
 ---
 
 ## FORMS

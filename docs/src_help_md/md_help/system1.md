@@ -1,7 +1,7 @@
 ---
 title: 'system/1'
 predicates:
- - 'system/1' : Executes the specified OS shell command
+- {sig: 'system/1', desc: 'Executes the specified OS shell command'}
 ---
 
 ## FORMS

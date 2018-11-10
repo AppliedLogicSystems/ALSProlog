@@ -1,9 +1,10 @@
 ---
 title: 'tcl_coerce_number/3'
+package: ALSDev
 predicates:
- - 'tcl_coerce_number/3' : convert Tcl entity to Prolog number
- - 'tcl_coerce_atom/3' : convert Tcl entity to Prolog atom
- - 'tcl_coerce_list/3' : convert Tcl entity to Prolog list
+- {sig: 'tcl_coerce_number/3', desc: 'convert Tcl entity to Prolog number'}
+- {sig: 'tcl_coerce_atom/3', desc: 'convert Tcl entity to Prolog atom'}
+- {sig: 'tcl_coerce_list/3', desc: 'convert Tcl entity to Prolog list'}
 ---
 
 ## FORMS

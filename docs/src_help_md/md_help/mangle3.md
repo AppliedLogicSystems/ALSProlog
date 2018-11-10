@@ -1,7 +1,8 @@
 ---
 title: 'mangle/3'
+group: Terms
 predicates:
- - 'mangle/3' : destructively modify a structure
+- {sig: 'mangle/3', desc: 'destructively modify a structure'}
 ---
 
 ## FORMS

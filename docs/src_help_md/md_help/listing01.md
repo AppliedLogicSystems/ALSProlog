@@ -1,8 +1,9 @@
 ---
 title: 'listing/0'
+group: Prolog Database
 predicates:
- - 'listing/0' : Prints all clauses
- - 'listing/1' : Prints clauses matching the specified template
+- {sig: 'listing/0', desc: 'Prints all clauses'}
+- {sig: 'listing/1', desc: 'Prints clauses matching the specified template'}
 ---
 
 ## FORMS

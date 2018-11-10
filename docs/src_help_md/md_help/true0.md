@@ -1,7 +1,7 @@
 ---
 title: 'true/0'
 predicates:
- - 'true/0' : always succeeds
+- {sig: 'true/0', desc: 'always succeeds'}
 ---
 
 ## FORMS

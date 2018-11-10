@@ -1,7 +1,8 @@
 ---
 title: 'file_select_dialog/[1,2,3]'
+package: ALSDev
 predicates:
- - 'file_select_dialog/ [1,2,3]' : select a file
+- {sig: 'file_select_dialog/ [1,2,3]', desc: 'select a file'}
 ---
 
 ## FORMS

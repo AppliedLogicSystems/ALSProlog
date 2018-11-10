@@ -1,7 +1,8 @@
 ---
 title: 'stream_property/2'
+group: Input Output
 predicates:
- - 'stream_property/2' : retrieve streams and their properties
+- {sig: 'stream_property/2', desc: 'retrieve streams and their properties'}
 ---
 
 ## FORMS

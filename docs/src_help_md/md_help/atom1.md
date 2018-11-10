@@ -1,11 +1,12 @@
 ---
 title: 'atom/1'
+group: Terms
 predicates:
- - 'atom/1' : the term is an atom
- - 'atomic/1' : the term is an atom or a number
- - 'float/1' : the term is a floating point number
- - 'integer/1' : the term is an integer
- - 'number/1' : the term is an integer or a floating point
+- {sig: 'atom/1', desc: 'the term is an atom'}
+- {sig: 'atomic/1', desc: 'the term is an atom or a number'}
+- {sig: 'float/1', desc: 'the term is a floating point number'}
+- {sig: 'integer/1', desc: 'the term is an integer'}
+- {sig: 'number/1', desc: 'the term is an integer or a floating point'}
 ---
 
 ## FORMS

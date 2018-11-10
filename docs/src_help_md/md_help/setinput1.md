@@ -1,8 +1,9 @@
 ---
 title: 'set_input/1'
+group: Input Output
 predicates:
- - 'set_input/1' : set current input stream
- - 'set_output/1' : set current output stream
+- {sig: 'set_input/1', desc: 'set current input stream'}
+- {sig: 'set_output/1', desc: 'set current output stream'}
 ---
 
 ## FORMS

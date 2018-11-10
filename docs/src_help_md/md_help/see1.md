@@ -1,9 +1,10 @@
 ---
 title: 'see/1'
+group: Input Output
 predicates:
- - 'see/1' : sets the current input stream
- - 'seeing/1' : returns the name of the current input stream
- - 'seen/0' : closes the current input stream
+- {sig: 'see/1', desc: 'sets the current input stream'}
+- {sig: 'seeing/1', desc: 'returns the name of the current input stream'}
+- {sig: 'seen/0', desc: 'closes the current input stream'}
 ---
 
 ## FORMS

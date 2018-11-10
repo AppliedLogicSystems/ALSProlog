@@ -1,7 +1,8 @@
 ---
 title: 'defStruct/2'
+package: ALSDev
 predicates:
- - 'defStruct/2' : specify an abstract data type
+- {sig: 'defStruct/2', desc: 'specify an abstract data type'}
 ---
 
 ## FORMS

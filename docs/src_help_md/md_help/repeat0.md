@@ -1,7 +1,7 @@
 ---
 title: 'repeat/0'
 predicates:
- - 'repeat/0' : always succeed upon backtracking
+- {sig: 'repeat/0', desc: 'always succeed upon backtracking'}
 ---
 
 ## FORMS

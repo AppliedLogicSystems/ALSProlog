@@ -1,8 +1,8 @@
 ---
 title: 'statistics/[0,2]'
 predicates:
- - 'statistics/0' : display memory allocation information
- - 'statistics/2' : display runtime statistics
+- {sig: 'statistics/0', desc: 'display memory allocation information'}
+- {sig: 'statistics/2', desc: 'display runtime statistics'}
 ---
 
 ## FORMS

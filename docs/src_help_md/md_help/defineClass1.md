@@ -1,7 +1,8 @@
 ---
 title: 'defineClass/1'
+package: ALSDev
 predicates:
- - 'defineClass/1' : specify an ObjectPro class
+- {sig: 'defineClass/1', desc: 'specify an ObjectPro class'}
 ---
 
 ## FORMS

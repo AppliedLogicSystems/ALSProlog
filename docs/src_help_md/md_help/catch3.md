@@ -1,8 +1,8 @@
 ---
 title: 'catch/3'
 predicates:
- - 'catch/3' : execute a goal, specifying an exception handler
- - 'throw/1' : give control to an exception handler
+- {sig: 'catch/3', desc: 'execute a goal, specifying an exception handler'}
+- {sig: 'throw/1', desc: 'give control to an exception handler'}
 ---
 
 ## FORMS

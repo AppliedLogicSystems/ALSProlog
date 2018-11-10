@@ -1,7 +1,8 @@
 ---
 title: 'gensym/2'
+group: Terms
 predicates:
- - 'gensym/2' : generates families of unique symbolsr
+- {sig: 'gensym/2', desc: 'generates families of unique symbolsr'}
 ---
 
 ## FORMS

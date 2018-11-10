@@ -1,8 +1,9 @@
 ---
 title: 'member/2'
+group: Terms
 predicates:
- - 'member/2' : list membership
- - 'dmember/2' : list membership
+- {sig: 'member/2', desc: 'list membership'}
+- {sig: 'dmember/2', desc: 'list membership'}
 ---
 
 ## FORMS

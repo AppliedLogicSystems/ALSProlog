@@ -1,7 +1,8 @@
 ---
 title: 'Find Dialog'
+package: ALSDev
 predicates:
- - 'Find Dialog' : Search and replace in edit windows
+- {sig: 'Find Dialog', desc: 'Search and replace in edit windows'}
 ---
 
 ## FORMS
