@@ -1,6 +1,6 @@
 ---
 title: '$uia_alloc/2'
-group: Terms
+group: UIAs
 predicates:
 - {sig: '$uia_alloc/2', desc: 'allocates a UIA of specified length'}
 - {sig: '$uia_size/2', desc: 'obtains the actual size of a UIA'}
@@ -25,21 +25,30 @@ predicates:
 
 ```
 '$uia_alloc'(BufLen, UIABuf)
+
 '$uia_size'(UIABuf, Size)
+
 '$uia_clip'(UIABuf, Size)
+
 '$uia_pokeb'(UIABuf, Offset, Value)
 '$uia_peekb'(UIABuf, Offset, Value)
+
 '$uia_pokew'(UIABuf, Offset, Value)
 '$uia_peekw'(UIABuf, Offset, Value)
+
 '$uia_pokel'(UIABuf, Offset, Value)
 '$uia_peekl'(UIABuf, Offset, Value)
+
 '$uia_poked'(UIABuf, Offset, Value)
 '$uia_peekd'(UIABuf, Offset, Value)
+
 '$uia_pokes'(UIABuf, Offset, Symbol)
 '$uia_peeks'(UIABuf, Offset, Symbol)
 '$uia_peeks'(UIABuf, Offset, Size, Symbol)
+
 '$uia_peek'(UIABuf, Offset, Size, Value)
 '$uia_poke'(UIABuf, Offset, Size, Value)
+
 '$strlen'(Symbol, Size)
 ```
 
