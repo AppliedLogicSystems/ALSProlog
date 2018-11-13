@@ -6,9 +6,7 @@ layout: default
 
 <p>
 {%- for p in page.predicates %}
-	{%- for kv in p %}
-<code>{{ kv[0] | escape}}</code> — {{ kv[1] | escape }}<br>
-	{%- endfor %}
+<code>{{ p.sig | escape}}</code> — {{ p.desc | escape }}<br>
 {%- endfor %}
 </p>
 
