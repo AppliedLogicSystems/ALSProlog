@@ -3,8 +3,6 @@
 atom_length/2
 atom_concat/3
 
-curl123.md -- needs to be fleshed out
-
 The Development Env. > Tools page contains the following, which needs to be handled:
 
     Selecting **Debugger** provides access to the GUI Debugger; this will be described     in detail in [Chapter 18(_[Using,the,ALS,IDE,Debugger]_)](href = start.htm).
@@ -20,7 +18,8 @@ Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to b
 Determine whether the following Note from catch/3 is still true:
 catch/3 leaves a choice point....
 
-Marked cmalloc2.md:  __X___  -- however, cmalloc2.md references pages for c_alloc/[2,3] and c_create/3; if these are not included, those references should be removed.
+calloc23.md needs both EXAMPLES and ERRORS
+ccreate3.md needs both EXAMPLES and ERRORS
 
 commandline1.md: ?-builtins:command_line(X). still returns X=[_A,zip].  Could only find 2 discussions labelled
 -P switch k->c (7/27/18) and c->k (7/28/18); thought there had been more. 
