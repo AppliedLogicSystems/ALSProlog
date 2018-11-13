@@ -10,7 +10,7 @@
 
 src_folder_md_files('./md_help').
 
-packages([core_prolog, alsdev, library, fi]).
+packages([core_prolog, alsdev, library, c_intf]).
 
 pack_kid(control, core_prolog).
 pack_kid(prolog_database, core_prolog).
@@ -22,9 +22,11 @@ pack_kid(gui_library, alsdev).
 pack_kid(prolog_objects, alsdev).
 pack_kid(tcltk_interface, alsdev).
 
+	%% will probably grow:
+pack_kid(c_intf, c_intf).
+
 %future:
 %pack_kid(..., library).
-%pack_kid(..., fi).
 
 	/* ------------------------------------------------------ *
 	 |	    toc_from_docsdb
@@ -260,7 +262,7 @@ check_group(Group, Package)
 
 check_group(Group, Package)
 	:-
-	printf('Bad Group %t for package %t\n', [Group,Package]),
+	printf('Bad Group: %t -- for package: %t\n', [Group,Package]),
 	abort.
 
 check_file(FileName)
@@ -291,8 +293,14 @@ check_pad(p(QR, Desc))
 	!,
 	QRTerm = Q/R,
 	atom(Q), 
-	integer(R),
+	(integer(R); integer_list(R) ),
 	atom(Desc).
+
+integer_list([]).
+integer_list([N | Tail])
+	:-
+	integer(N),
+	integer_list(Tail).
 
 make_new_page(Package, Group, Title, FileName, PAsWithDescs)
 	:-
@@ -305,19 +313,25 @@ make_new_page(Package, Group, Title, FileName, PAsWithDescs)
 
 write_out_new_page(Package, Group, Title, PAsWithDescs, OS)
 	:-
-	yaml(Title, PAsWithDescs, OS),
+	yaml(Title, Package, Group, PAsWithDescs, OS),
 %	printf(OS, '# %t\n\n', [Title]),
 %	short_descs(StrippedPreds, OS),
-	short_descs(PAsWithDescs, OS),
+%	short_descs(PAsWithDescs, OS),
 	length(PAsWithDescs, MinNumForms),
         printf(OS, '\n## FORMS\n\n', []),
 	do_forms_skels(MinNumForms, OS),
 	finish_skeleton(OS).
 
-yaml(Title, Preds, OS)
+yaml(Title, Package, Group, Preds, OS)
         :-
         printf(OS, '---\n', []),
         printf(OS, 'title: \'%t\'\n', [Title]),
+	(Package == '' -> true;
+		printf(OS, 'package: %t\n', [Package])
+	),
+	(Group == '' -> true;
+		printf(OS, 'group: %t\n', [Group])
+	),
         printf(OS, 'predicates:\n', []),
         yaml_preds(Preds, OS),
         printf(OS, '---\n', []).
@@ -325,7 +339,8 @@ yaml(Title, Preds, OS)
 yaml_preds([], _).
 yaml_preds([p(PA,DescAtom) | Preds], OS)
         :-
-        printf(OS, ' - \'%t\' : %t\n', [PA,DescAtom]),
+%        printf(OS, ' - \'%t\' : %t\n', [PA,DescAtom]),
+        printf(OS, '- {sig: \'%t\', desc: \'%t\'}\n', [PA,DescAtom]),
         yaml_preds(Preds, OS).
 
 short_descs([], OS).
