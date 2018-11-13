@@ -4,7 +4,7 @@ group: Prolog Database
 predicates:
 - {sig: 'assert/1', desc: 'adds a clause to a procedure'}
 - {sig: 'assert/2', desc: 'adds a clause to a procedure'}
-- {sig: 'asserta/1', desc: 'adds a clause at the beginning of a procedure'}
+- {sig: 'asserta/[1,2]', desc: 'adds a clause at the beginning of a procedure'}
 - {sig: 'asserta/2', desc: 'adds a clause at the beginning of a procedure'}
 - {sig: 'assertz/1', desc: 'adds a clause at the end of a procedure'}
 - {sig: 'assertz/2', desc: 'adds a clause at the end of a procedure'}
