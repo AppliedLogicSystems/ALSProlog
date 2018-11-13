@@ -1,5 +1,6 @@
 ---
 title: '$c_malloc/2'
+package: C Interface
 predicates:
 - {sig: '$c_malloc/2', desc: 'Allocates a C data area using the system malloc call'}
 - {sig: '$c_free/1', desc: 'Frees a C data area'}
