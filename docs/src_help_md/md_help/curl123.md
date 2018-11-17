@@ -2,19 +2,11 @@
 title: 'curl/[1,2,3]'
 group: Input Output
 predicates:
-- {sig: 'curl/1', desc:  'Access to the internet via the curl package'}
-- {sig: 'curl/2', desc:  'Access to the internet via the curl package'}
-- {sig: 'curl/3', desc:  'Access to the internet via the curl package'}
+- {sig: 'curl/1', desc:  'Access to the internet via the curl package with URL, Options, Target in one list'}
+- {sig: 'curl/2', desc:  'Access to the internet via the curl package with separate URL arg, combined Options, Target in one list'}
+- {sig: 'curl/3', desc:  'Access to the internet via the curl package with separate URL, Options, Target args'}
 - {sig: 'http/3', desc:  'REST-inspired user-level interface for curl'}
 ---
-`curl/1` — Access to the internet via the curl package.
-
-`curl/2` — Access to the internet via the curl package.
-
-`curl/3` — Access to the internet via the curl package.
-
-`http/3` — REST-inspired user-level interface for curl.
-
 
 ## FORMS
 
