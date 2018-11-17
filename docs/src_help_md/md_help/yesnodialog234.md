@@ -1,8 +1,8 @@
 ---
-title: 'yes_no_dialog/[2,3,4]'
+title: 'yes_no_dialog/[2,3,4,6]'
 package: ALSDev
 predicates:
-- {sig: 'yes_no_dialog/[2,3,4]', desc: 'present a yes/no dialog'}
+- {sig: 'yes_no_dialog/[2,3,4,6]', desc: 'present a yes/no dialog'}
 ---
 
 ## FORMS
@@ -74,4 +74,12 @@ produces the popup dialog:
 
 Clicking " OK " yields `Answer = OK` while clicking " Cancel " yeilds
 `Answer = Cancel`.
+
+## NOTES
+
+The default Tcl interpreter for `yes_no_dialog/4` and `yes_no_dialog/6` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run `init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`.  If you wish to run `yes_no_dialog/4` or `yes_no_dialog/6` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
+
+## SEE ALSO
+
+- init_tk_alslib/[0,1,2]
 

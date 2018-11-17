@@ -2,8 +2,8 @@
 title: 'display_image/[1,3]'
 package: ALSDev
 predicates:
-- {sig: 'create_image/ [2, 3]', desc: 'create an image from a GIF file'}
-- {sig: 'display_image/ [1, 3]', desc: 'display an image'}
+- {sig: 'create_image/[2,3]', desc: 'create an image from a GIF file'}
+- {sig: 'display_image/[1,3]', desc: 'display an image'}
 ---
 
 ## FORMS
@@ -56,4 +56,11 @@ x=X, default = 75,
 y=Y, default = 75,
 border_width=BorderWidth, default = 2
 ```
+## NOTES
+
+The default Tcl interpreter for `create_image/3` and `display_image/3` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run `init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`.  If you wish to run `create_image/3` or `display_image/3` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
+
+## SEE ALSO
+
+- init_tk_alslib/[0,1,2]
 
