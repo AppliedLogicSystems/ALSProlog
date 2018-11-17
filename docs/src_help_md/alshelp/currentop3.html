@@ -1,31 +1,12 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>current_op/3</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">current_op/3</h1>
-</header>
-<p><code>current_op/3</code> — retrieve current operator definitions</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>current_op(Priority, Specifier, Operator)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>current_op(Priority, Specifier, Operator)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>current_op/3</code> is used to retrieve operator definitions. Each parameter to current_op may be used as either an input or output argument. Logically, <code>current_op(Priority, Specifier, Operator)</code> is true if and only if <code>Operator</code> is an operator with properties defined by <code>Specifier</code> and <code>Priority</code>.</p>
+
+<p><code class="highlighter-rouge">current_op/3</code> is used to retrieve operator definitions. Each parameter to current_op may be used as either an input or output argument. Logically, <code class="highlighter-rouge">current_op(Priority, Specifier, Operator)</code> is true if and only if <code class="highlighter-rouge">Operator</code> is an operator with properties defined by <code class="highlighter-rouge">Specifier</code> and <code class="highlighter-rouge">Priority</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- current_op(P,S,-).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- current_op(P,S,-).
 
 P=500 
 S=yfx ;
@@ -45,13 +26,18 @@ Op=-  ;
 S=yfx 
 Op=/\ 
 
-yes.</code></pre>
-<p>Above, we hit return after <code>Op=/\</code> to skip further answers</p>
+yes.
+</code></pre></div></div>
+<p>Above, we hit return after <code class="highlighter-rouge">Op=/\</code> to skip further answers</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>op/3</code><br />
-<code>read_term/[2,3]</code></p></li>
-<li><p>`User Guide (Prolog I/O)</p></li>
+  <li>
+    <p><code class="highlighter-rouge">op/3</code><br />
+<code class="highlighter-rouge">read_term/[2,3]</code></p>
+  </li>
+  <li>
+    <p>`User Guide (Prolog I/O)</p>
+  </li>
 </ul>
-</body>
-</html>

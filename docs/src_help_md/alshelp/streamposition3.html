@@ -1,0 +1,45 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>set_stream_position(Stream_or_alias, Current_position, New_position)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p>If the stream associated with <code class="highlighter-rouge">Stream_or_alias</code> supports repositioning, <code class="highlighter-rouge">Current_position</code> is unified with the current stream position of the stream, and, as a side effect, the stream position of this stream is set to the position represented by <code class="highlighter-rouge">New_position</code>. <code class="highlighter-rouge">New_position</code> may be one of the following values:</p>
+
+<ul>
+  <li>An absolute integer which represents the address of a character in the stream. The beginning of the stream or the first character in the stream has position 0 The second character in the stream has position 1 and so on.</li>
+  <li>The atom <code class="highlighter-rouge">beginning_of_stream</code>.</li>
+  <li>The term <code class="highlighter-rouge">beginning_of_stream(N)</code> where <code class="highlighter-rouge">N</code> is an integer greater than zero. The position represented by this term is the beginning of the stream plus <code class="highlighter-rouge">N</code> bytes.</li>
+  <li>The atom <code class="highlighter-rouge">end_of_stream</code>.</li>
+  <li>The term <code class="highlighter-rouge">end_of_stream(N)</code> where <code class="highlighter-rouge">N</code> is an integer less than or equal to zero. This allows positions (earlier than the end of stream) to be specified relative to the end of the stream. The position represented by this term is the end-of-stream position plus <code class="highlighter-rouge">N</code> bytes.</li>
+  <li>The atom <code class="highlighter-rouge">current_position</code>.</li>
+  <li>The term <code class="highlighter-rouge">current_position(N)</code> where <code class="highlighter-rouge">N</code> is an integer. This allows positions to be specified relative to the current position in the file.</li>
+</ul>
+
+<h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">New_Position</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(stream_position, Position)</code></p>
+
+<p><code class="highlighter-rouge">New_Position</code> is neither a variable nor a stream position</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(stream_position, Position)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">existence_error(stream, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> has stream property <code class="highlighter-rouge">reposition(false)</code></p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">permission_error(reposition, stream, Stream_or_Alias)</code></p>
+

@@ -1,45 +1,27 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>listing/0</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">listing/0</h1>
-</header>
-<p><code>listing/0</code> — Prints all clauses</p>
-<p><code>listing/1</code> — Prints clauses matching the specified template</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>listing
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>listing
 
 listing(Pred)
 
 listing(Pred/Arity)
 
-listing(Mod:Pred/Arity)</code></pre>
+listing(Mod:Pred/Arity)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>listing/0</code> lists on the the current output stream all the clauses in the database except those in the <code>builtins module</code> and several other system modules.</p>
-<p>If <code>Pred</code> is the name of a predicate, <code>listing(Pred)</code> causes all the clauses for <code>Pred</code> of any arity and residing in any module other than builtins or other system modules to be listed to the current output stream. The argument <code>Pred</code> may also be a predicate specification of the form <code>Name/Arity</code>, in which case only the clauses for the specified predicate of arity <code>Arity</code> are listed. If <code>P</code> is the name of a predicate of arity <code>A</code> which is defined in module <code>M</code>, then</p>
-<pre><code>?- listing(M:P/A).</code></pre>
+
+<p><code class="highlighter-rouge">listing/0</code> lists on the the current output stream all the clauses in the database except those in the <code class="highlighter-rouge">builtins module</code> and several other system modules.</p>
+
+<p>If <code class="highlighter-rouge">Pred</code> is the name of a predicate, <code class="highlighter-rouge">listing(Pred)</code> causes all the clauses for <code class="highlighter-rouge">Pred</code> of any arity and residing in any module other than builtins or other system modules to be listed to the current output stream. The argument <code class="highlighter-rouge">Pred</code> may also be a predicate specification of the form <code class="highlighter-rouge">Name/Arity</code>, in which case only the clauses for the specified predicate of arity <code class="highlighter-rouge">Arity</code> are listed. If <code class="highlighter-rouge">P</code> is the name of a predicate of arity <code class="highlighter-rouge">A</code> which is defined in module <code class="highlighter-rouge">M</code>, then</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing(M:P/A).
+</code></pre></div></div>
 <p>will cause only the clauses of the definition of P/A in M to be listed to the current output stream. A form of wildcards can be used if some of the arguments are left as uninstantiated variables. The following example lists all the eggs clauses in module dairy regardless of what their arity is :</p>
-<pre><code>?- listing(dairy:eggs/_).</code></pre>
-<p>To list all of the clauses in the <code>module dairy</code>, you could submit the goal :</p>
-<pre><code>?- listing(dairy:_).</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing(dairy:eggs/_).
+</code></pre></div></div>
+<p>To list all of the clauses in the <code class="highlighter-rouge">module dairy</code>, you could submit the goal :</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing(dairy:_).
+</code></pre></div></div>
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li>[Clocksin 81, 6.4]</li>
+  <li>[Clocksin 81, 6.4]</li>
 </ul>
-</body>
-</html>

@@ -1,33 +1,14 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>gensym/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">gensym/2</h1>
-</header>
-<p><code>gensym/2</code> — generates families of unique symbolsr</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>gensym(Prefix, Symbol)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gensym(Prefix, Symbol)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>If <code>Prefix</code> is a symbol (either an interned or uninterned atom), then <code>Symbol</code> is a new UIA which has not previously existed in the system and which involves <code>Prefix</code> as a subsymbol. . The string also involves the system time that the current ALS Prolog image was started, together with the value of a counter for these generated symbols. Consequently, the symbols are almost guaranteed to be unique across invokations of the system, execpt for the possibility of the system clock wrapping around.</p>
-<h2 id="examples">EXAMPLES</h2>
-<pre><code>?- gensym(&#39;&lt;Prefix&gt;&#39;, Symbol).
 
-Symbol=&#39;?&lt;Prefix&gt;_1540251652_0&#39; 
+<p>If <code class="highlighter-rouge">Prefix</code> is a symbol (either an interned or uninterned atom), then <code class="highlighter-rouge">Symbol</code> is a new UIA which has not previously existed in the system and which involves <code class="highlighter-rouge">Prefix</code> as a subsymbol. . The string also involves the system time that the current ALS Prolog image was started, together with the value of a counter for these generated symbols. Consequently, the symbols are almost guaranteed to be unique across invokations of the system, execpt for the possibility of the system clock wrapping around.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- gensym('&lt;Prefix&gt;', Symbol).
+
+Symbol='?&lt;Prefix&gt;_1540251652_0' 
 
 yes.
 
@@ -35,6 +16,5 @@ yes.
 
 X=?airplane_1540251652_1
 
-yes.</code></pre>
-</body>
-</html>
+yes.
+</code></pre></div></div>

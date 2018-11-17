@@ -1,58 +1,61 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>close/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">close/1</h1>
-</header>
-<p><code>close/1</code> — close an open stream</p>
-<p><code>close/2</code> — close an open stream with options</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>close(Stream_or_Alias)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>close(Stream_or_Alias)
 
-close(Stream_or_Alias, CloseOptions)</code></pre>
+close(Stream_or_Alias, CloseOptions)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>close/1</code> and <code>close/2</code> close a stream previously opened with <code>open/3</code> or <code>open/4</code>. Closing a stream consists of flushing the buffer associated with the stream and freeing resources associated with maintaining an open stream. If there is an alias associated with the stream, this alias is disassociated and freed up for potential use by some other stream. If the stream to be closed is the current input stream, then the current input stream is set to the stream associated with the alias <code>user_input</code>. If the stream to be closed is associated with the current output stream, then the current output stream is set to the stream associated with the alias <code>user_output</code>.</p>
-<p>Certain types of streams may have other actions performed. <code>Atom</code> streams opened for write will have the stream contents unified with the atom <code>A</code> which appeared in the sink specification in the call to <code>open</code>.</p>
-<p><code>Stream_or_Alias</code> is either a stream descriptor or an alias established via a call to <code>open/3</code> or <code>open/4</code>.</p>
-<p><code>CloseOptions</code> is a list consisting of options to <code>close/2</code>. The close options are :</p>
-<p><code>force(false)</code> – This is the default. A system error or resource error which occurs while closing the stream may prevent the stream from being closed.</p>
-<p><code>force(true)</code> – Errors occuring while closing the stream are ignored and resources associated with the stream are freed anyway.</p>
+
+<p><code class="highlighter-rouge">close/1</code> and <code class="highlighter-rouge">close/2</code> close a stream previously opened with <code class="highlighter-rouge">open/3</code> or <code class="highlighter-rouge">open/4</code>. Closing a stream consists of flushing the buffer associated with the stream and freeing resources associated with maintaining an open stream. If there is an alias associated with the stream, this alias is disassociated and freed up for potential use by some other stream. If the stream to be closed is the current input stream, then the current input stream is set to the stream associated with the alias <code class="highlighter-rouge">user_input</code>. If the stream to be closed is associated with the current output stream, then the current output stream is set to the stream associated with the alias <code class="highlighter-rouge">user_output</code>.</p>
+
+<p>Certain types of streams may have other actions performed. <code class="highlighter-rouge">Atom</code> streams opened for write will have the stream contents unified with the atom <code class="highlighter-rouge">A</code> which appeared in the sink specification in the call to <code class="highlighter-rouge">open</code>.</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is either a stream descriptor or an alias established via a call to <code class="highlighter-rouge">open/3</code> or <code class="highlighter-rouge">open/4</code>.</p>
+
+<p><code class="highlighter-rouge">CloseOptions</code> is a list consisting of options to <code class="highlighter-rouge">close/2</code>. The close options are :</p>
+
+<p><code class="highlighter-rouge">force(false)</code> – This is the default. A system error or resource error which occurs while closing the stream may prevent the stream from being closed.</p>
+
+<p><code class="highlighter-rouge">force(true)</code> – Errors occuring while closing the stream are ignored and resources associated with the stream are freed anyway.</p>
+
 <h2 id="errors">ERRORS</h2>
-<p><code>Stream_or_Alias</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Stream_or_Alias</code> is neither a variable nor a stream identifier or alias</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream identifier or alias</p>
+
 <p>– – – – &gt; domain_error(stream_or_alias, Stream_or_Alias).</p>
-<p><code>CloseOptions</code> is a variable</p>
+
+<p><code class="highlighter-rouge">CloseOptions</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>CloseOptions</code> is neither variable nor list</p>
+
+<p><code class="highlighter-rouge">CloseOptions</code> is neither variable nor list</p>
+
 <p>– – – – &gt; type_error(list, CloseOptions).</p>
-<p><code>CloseOptions</code> is a list which contains a variable element</p>
+
+<p><code class="highlighter-rouge">CloseOptions</code> is a list which contains a variable element</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>CloseOptions</code> is a list which contains an element E which is neither a variable nor a valid close option</p>
+
+<p><code class="highlighter-rouge">CloseOptions</code> is a list which contains an element E which is neither a variable nor a valid close option</p>
+
 <p>– – – – &gt; domain_error(close_option, E).</p>
+
 <h2 id="notes">NOTES</h2>
+
 <p>Certain streams which are opened at system startup time can not be closed. Among these streams are user_input and user_output. Calling close on these aliases will neither throw an error nor really close the stream.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>open/4</code><br />
-<code>current_input/1</code><br />
-<code>flush_output/1</code></p></li>
-<li><p><code>User Guide (Prolog I/O)</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">open/4</code><br />
+<code class="highlighter-rouge">current_input/1</code><br />
+<code class="highlighter-rouge">flush_output/1</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">User Guide (Prolog I/O)</code></p>
+  </li>
 </ul>
-</body>
-</html>

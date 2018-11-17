@@ -1,61 +1,59 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>file_select_dialog/[1,2,3]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">file_select_dialog/[1,2,3]</h1>
-</header>
-<p><code>file_select_dialog/ [1,2,3]</code> — select a file</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>file_select_dialog(FileName)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file_select_dialog(FileName)
 
 file_select_dialog(Options, FileName)
 
-file_select_dialog(Interp, Options, FileName)</code></pre>
+file_select_dialog(Interp, Options, FileName)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>These predicates allow the user to select a file using the native file selection dialogs on each platform. The shorter versions are defined by :</p>
-<pre><code>file_select_dialog(FileName)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file_select_dialog(FileName)
     :-
-    file_select_dialog(tcli, [title = &#39; Select File &#39; ], FileName) .
+    file_select_dialog(tcli, [title = ' Select File ' ], FileName) .
 
 file_select_dialog(Options, FileName)
     :-
-    file_select_dialog(tcli, Options, FileName) .</code></pre>
+    file_select_dialog(tcli, Options, FileName) .
+</code></pre></div></div>
 <p>For the general call</p>
-<pre><code>file_select_dialog(Interp, Options, FileName)</code></pre>
-<p><code>Interp</code> should be an atom naming a Tcl interpreter, <code>Filename</code> should be an uninstantiated variable, and <code>Options</code> should be a list of options as follows :</p>
-<p><code>defaultname = DefaultName</code>         <em>default file name</em></p>
-<p><code>ext = Ext</code>         <em>to either add or use for selection</em></p>
-<p><code>mode = new/select/save_as</code>         <em>default = <code>select</code></em></p>
-<p><code>initialdir = Initial</code>         <em>dir in which to begin…</em></p>
-<p><code>title = WindowTitle</code></p>
-<p><code>filetypes = FileTypesList</code> <br>        <em>where <code>FileTypesList</code> is a list of the form<br />
-        <code>[[Desc1 [ext1]], [Desc2, [ext2],...]</code><br />
-        and the <code>Desci</code> and <code>exti</code> are all atoms</em></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file_select_dialog(Interp, Options, FileName)
+</code></pre></div></div>
+<p><code class="highlighter-rouge">Interp</code> should be an atom naming a Tcl interpreter, <code class="highlighter-rouge">Filename</code> should be an uninstantiated variable, and <code class="highlighter-rouge">Options</code> should be a list of options as follows :</p>
+
+<p><code class="highlighter-rouge">defaultname = DefaultName</code>
+        <em>default file name</em></p>
+
+<p><code class="highlighter-rouge">ext = Ext</code>
+        <em>to either add or use for selection</em></p>
+
+<p><code class="highlighter-rouge">mode = new/select/save_as</code>
+        <em>default = <code class="highlighter-rouge">select</code></em></p>
+
+<p><code class="highlighter-rouge">initialdir = Initial</code>
+        <em>dir in which to begin…</em></p>
+
+<p><code class="highlighter-rouge">title = WindowTitle</code></p>
+
+<p><code class="highlighter-rouge">filetypes = FileTypesList</code>
+<br />        <em>where <code class="highlighter-rouge">FileTypesList</code> is a list of the form <br />
+        <code class="highlighter-rouge">[[Desc1 [ext1]], [Desc2, [ext2],...]</code>   <br />
+        and the <code class="highlighter-rouge">Desci</code> and <code class="highlighter-rouge">exti</code> are all atoms</em></p>
+
 <h2 id="examples">EXAMPLES</h2>
 <p>The call</p>
-<pre><code>?- file_select_dialog(File).</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- file_select_dialog(File).
+</code></pre></div></div>
 <p>would produce this popup :</p>
-<p><img src="images/file_sel-1.gif" /></p>
+
+<p><img src="images/file_sel-1.gif" alt="" /></p>
+
 <h2 id="notes">NOTES</h2>
-<p>The default Tcl interpreter for <code>file_select_dialog/[1,2]</code> is <code>tcli</code> as shown above. This interpreter is <em><em>NOT</em></em> automatically intialized by alsdev. You must first run <code>init_tk_alslib/0</code> or <code>init_tk_alslib/1</code>, or run <code>init_tk_alslib/2</code> with <code>Interp = tcli</code>. If you wish to run <code>file_select_dialog/3</code> with <code>Interp</code> bound to a Tcl interpreter <code>I</code> other than <code>tcli</code>, you must first run <code>init_tk_alslib/2</code> with <code>Interp</code> bound to this same <code>I</code> (only once is necessary).</p>
+
+<p>The default Tcl interpreter for <code class="highlighter-rouge">file_select_dialog/[1,2]</code> is <code class="highlighter-rouge">tcli</code> as shown above.  This interpreter is <em>_NOT_</em> automatically intialized by alsdev.  You must first run <code class="highlighter-rouge">init_tk_alslib/0</code> or <code class="highlighter-rouge">init_tk_alslib/1</code>, or run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp = tcli</code>.  If you wish to run <code class="highlighter-rouge">file_select_dialog/3</code> with <code class="highlighter-rouge">Interp</code> bound to a Tcl interpreter <code class="highlighter-rouge">I</code> other than <code class="highlighter-rouge">tcli</code>, you must first run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp</code> bound to this same <code class="highlighter-rouge">I</code> (only once is necessary).</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li>init_tk_alslib/[0,1,2]</li>
+  <li>init_tk_alslib/[0,1,2]</li>
 </ul>
-</body>
-</html>

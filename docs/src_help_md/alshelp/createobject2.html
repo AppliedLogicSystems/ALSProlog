@@ -1,54 +1,51 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>create_object/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">create_object/2</h1>
-</header>
-<p><code>create_object/2</code> — create an object</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>create_object(Eqns, Obj)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>create_object(Eqns, Obj)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>The call</p>
-<p>      <code>create_object(Eqns, Obj)</code></p>
-<p>creates an object <code>Obj</code> as specified by <code>Eqns</code>, which is a list of equations of the form</p>
-<p>      <code>Keyword = Value</code>.</p>
-<p>The acceptable keywords, together with their associated <code>Value</code> types, are:</p>
-<p>      <code>instanceOf =</code> &lt;atom&gt; <em>(name of a class)</em></p>
-<p>      <code>values =</code> &lt;list of equations&gt;</p>
-<p>The <code>instanceOf</code> keyword equation is the only required equation; the value on the right side of this equation must be an atom which is the name of a previously defined class which is visible from the module in which the <code>create_object</code> call is made.</p>
+
+<p>      <code class="highlighter-rouge">create_object(Eqns, Obj)</code></p>
+
+<p>creates an object <code class="highlighter-rouge">Obj</code> as specified by <code class="highlighter-rouge">Eqns</code>, which is a list of equations of the form</p>
+
+<p>      <code class="highlighter-rouge">Keyword = Value</code>.</p>
+
+<p>The acceptable keywords, together with their associated <code class="highlighter-rouge">Value</code> types, are:</p>
+
+<p>      <code class="highlighter-rouge">instanceOf =</code> &lt;atom&gt; <em>(name of a class)</em></p>
+
+<p>      <code class="highlighter-rouge">values =</code> &lt;list of equations&gt;</p>
+
+<p>The <code class="highlighter-rouge">instanceOf</code> keyword equation is the only required equation; the value on the right side of this equation must be an atom which is the name of a previously defined class which is visible from the module in which the <code class="highlighter-rouge">create_object</code> call is made.</p>
+
 <p>The equations appearing on the list which is the right side of a</p>
-<p>      <code>values = ValuesList</code></p>
+
+<p>      <code class="highlighter-rouge">values = ValuesList</code></p>
+
 <p>equation are expressions of the form</p>
-<p>      <code>SlotName = SlotValue</code></p>
-<p>where <code>SlotName</code> is one of the named slots in the structure defining the object’s state. These slots are determined by the class to which the object belongs, and may be slots from the state-schema of the immediate class parent, or may also be slots from any of the state-schemata of ancestor classes. Entries in <code>values equations</code> prescribe initial values for some of the object’s slots when it is created.</p>
+
+<p>      <code class="highlighter-rouge">SlotName = SlotValue</code></p>
+
+<p>where <code class="highlighter-rouge">SlotName</code> is one of the named slots in the structure defining the object’s state. These slots are determined by the class to which the object belongs, and may be slots from the state-schema of the immediate class parent, or may also be slots from any of the state-schemata of ancestor classes. Entries in <code class="highlighter-rouge">values equations</code> prescribe initial values for some of the object’s slots when it is created.</p>
+
 <p>When a global atomic name for the object is required, Eqns includes an equation of the form</p>
-<p>      <code>name =</code> &lt;atom&gt;.</p>
+
+<p>      <code class="highlighter-rouge">name =</code> &lt;atom&gt;.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>      <em>From ~examples/objectpro/oopex_stack.pro:</em></p>
-<pre><code>..., create_object([instanceOf = stacker ], Obj), ...</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>..., create_object([instanceOf = stacker ], Obj), ...
+</code></pre></div></div>
 <p>      <em>From ~examples/objectpro/oopex_vehicles.pro:</em></p>
-<pre><code>..., create_object([instanceOf = iC_Engine ], Engine1),
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>..., create_object([instanceOf = iC_Engine ], Engine1),
      create_object([instanceOf = automobile,
-     values = [engine = Engine1] ], Auto1),...</code></pre>
+     values = [engine = Engine1] ], Auto1),...
+</code></pre></div></div>
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><code>defStruct/2</code><br />
-<code>defineClass/1</code></li>
+  <li><code class="highlighter-rouge">defStruct/2</code><br />
+<code class="highlighter-rouge">defineClass/1</code></li>
 </ul>
-</body>
-</html>

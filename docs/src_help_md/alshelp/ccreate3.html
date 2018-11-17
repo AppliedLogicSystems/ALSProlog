@@ -1,0 +1,59 @@
+<h2 id="forms">FORMS</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_create(Type, Val, UIA)
+
+c_create_abs(Type, Val, Ptr)
+
+c_createn(Type, Num,[ Val,...], UIA)
+
+c_createn_abs(Type, Num,[ Val,...], Ptr)
+
+c_create_arglist([Name, Val,...], Ptr)
+
+c_free_arglist(PtrList)
+
+c_call(CFuncPtr, Arglist, RetVal)
+</code></pre></div></div>
+<h2 id="description">DESCRIPTION</h2>
+
+<p><strong><code class="highlighter-rouge">c_create(Type, Val, UIA)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_create(SType,[ FieldName, Val,...], UIA)</code></strong> equivalent to <code class="highlighter-rouge">c_alloc/2</code> plus <code class="highlighter-rouge">c_set/3</code>. <code class="highlighter-rouge">Type</code> can be an integral type or <code class="highlighter-rouge">'str'</code>. <code class="highlighter-rouge">SType</code> must be a structure type.</p>
+
+<p><strong><code class="highlighter-rouge">c_create_abs(Type, Val, Ptr)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_create_abs(SType,[ FieldName, Val,...], Ptr)</code></strong> equivalent to <code class="highlighter-rouge">c_alloc_abs/2</code> plus <code class="highlighter-rouge">c_set/3</code>. <code class="highlighter-rouge">Type</code> can be an integral type or <code class="highlighter-rouge">'str'</code>. <code class="highlighter-rouge">SType</code> must be a structure type.</p>
+
+<p><strong><code class="highlighter-rouge">c_createn(Type, Num,[ Val,...], UIA)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_createn( SType, Num,[[ FieldName, Val,...], ...],  UIA)</code></strong> allocate and initialize an array of data valuesin a UIA.  equivalent to <code class="highlighter-rouge">c_allocn/3</code> plus several <code class="highlighter-rouge">c_setn/4</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_createn_abs(Type, Num,[ Val,...], Ptr)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_createn_abs( SType, Num,[[ FieldName, Val,...], ...],  Ptr)</code></strong> same as <code class="highlighter-rouge">c_createn/4</code>, except that the data is created in a C malloced area.</p>
+
+<p><strong><code class="highlighter-rouge">c_create_arglist([Name, Val,...], Ptr)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_create_arglist([Name, Val,...], Ptr, PtrList)</code></strong> create an initialized ARGLIST structure for X Toolkit and return a pointer to the arg structure in <code class="highlighter-rouge">Ptr</code> and a list of pointers that can be freed using <code class="highlighter-rouge">c_free_arglist/1</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_free_arglist(PtrList)</code></strong> performs <code class="highlighter-rouge">c_free_abs</code> on each item of <code class="highlighter-rouge">PtrList</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_call(CFuncPtr, Arglist, RetVal)</code></strong> calls the C function whose address is <code class="highlighter-rouge">CFuncPtr</code> with arguments from <code class="highlighter-rouge">Arglist</code> that are assumed to be longs and binds <code class="highlighter-rouge">RetVal</code> with the return value of function.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1st example
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2nd example
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p>Errors text…</p>
+
+<h2 id="notes">NOTES</h2>
+
+<p>Implemented in ~builtins/cutils.pro over the predicates in <a href="cmalloc2.html">‘$c_malloc’/2</a>.</p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><a href="cmalloc2.html">‘$c_malloc’/2</a></li>
+  <li><a href="calloc23.html">c_alloc/[2,3]</a></li>
+</ul>
+

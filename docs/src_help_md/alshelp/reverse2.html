@@ -1,41 +1,24 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>reverse/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">reverse/2</h1>
-</header>
-<p><code>reverse/2</code> — list reversal</p>
-<p><code>dreverse/2</code> — determinate list reversal</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>reverse(List1, List2)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reverse(List1, List2)
 
-dreverse(List1, List2)</code></pre>
+dreverse(List1, List2)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>reverse/2</code> succeeds when <code>List2</code> can be unified with the result of reversing <code>List1</code>. <code>dreverse/2</code> is the determinate version of <code>reverse/2</code>.</p>
+
+<p><code class="highlighter-rouge">reverse/2</code> succeeds when <code class="highlighter-rouge">List2</code> can be unified with the result of reversing <code class="highlighter-rouge">List1</code>. <code class="highlighter-rouge">dreverse/2</code> is the determinate version of <code class="highlighter-rouge">reverse/2</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- reverse([a,b,c],List2).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- reverse([a,b,c],List2).
 
 List2=[c,b,a]
 
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <h2 id="notes">NOTES</h2>
+
 <p>These predicates are defined by the following clauses:</p>
-<pre><code>reverse(List, Rev) 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>reverse(List, Rev) 
     :-
     reverse(List, [], Rev).
 
@@ -54,6 +37,5 @@ dreverse([], Rev, Rev)
 
 dreverse([A | Rest], SoFar, Rev)
     :- 
-    dreverse(Rest, [A| SoFar], Rev).</code></pre>
-</body>
-</html>
+    dreverse(Rest, [A| SoFar], Rev).
+</code></pre></div></div>

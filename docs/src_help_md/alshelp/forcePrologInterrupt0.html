@@ -1,41 +1,26 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>forcePrologInterrupt/0</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">forcePrologInterrupt/0</h1>
-</header>
-<p><code>forcePrologInterrupt/0</code> — force interrupt on next call</p>
-<p><code>callWithDelayedInterrupt/1</code> — call goal, setting delayed interrupt</p>
-<p><code>callWithDelayedInterrupt/2</code> — call goal, setting delayed interrupt</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>forcePrologInterrupt
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>forcePrologInterrupt
 
 callWithDelayedInterrupt(Call)
 
-callWithDelayedInterrupt(Module, Call)</code></pre>
+callWithDelayedInterrupt(Module, Call)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>forcePrologInterrupt</code> forces an interrupt on the next call by setting the heap safety margin to a sufficiently large number which is guaranteed to be larger than the actual heap margin.</p>
-<p><code>callWithDelayedInterrupt(Call)</code> acts like <code>call/1</code>, invoking <code>Call</code>. However, it arranges the system so that an interrupt will take place on the first call occurring after the invocation of <code>Call</code>.</p>
-<p><code>callWithDelayedInterrupt(Module, Call)</code> acts like <code>callWithDelayedInterrupt/1</code>, except that it invokes <code>Call</code> within module <code>Module</code>.</p>
+
+<p><code class="highlighter-rouge">forcePrologInterrupt</code> forces an interrupt on the next call by setting the heap safety margin to a sufficiently large number which is guaranteed to be larger than the actual heap margin.</p>
+
+<p><code class="highlighter-rouge">callWithDelayedInterrupt(Call)</code> acts like <code class="highlighter-rouge">call/1</code>, invoking <code class="highlighter-rouge">Call</code>. However, it arranges the system so that an interrupt will take place on the first call occurring after the invocation of <code class="highlighter-rouge">Call</code>.</p>
+
+<p><code class="highlighter-rouge">callWithDelayedInterrupt(Module, Call)</code> acts like <code class="highlighter-rouge">callWithDelayedInterrupt/1</code>, except that it invokes <code class="highlighter-rouge">Call</code> within module <code class="highlighter-rouge">Module</code>.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>setPrologInterrupt/1</code> <code>getPrologInterrupt/1</code></p></li>
-<li><p><code>User Guide (Prolog Interrupts)</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">setPrologInterrupt/1</code>
+<code class="highlighter-rouge">getPrologInterrupt/1</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">User Guide (Prolog Interrupts)</code></p>
+  </li>
 </ul>
-</body>
-</html>

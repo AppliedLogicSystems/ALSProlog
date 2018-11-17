@@ -1,49 +1,37 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>append/3</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">append/3</h1>
-</header>
-<p><code>append/3</code> — append two lists</p>
-<p><code>dappend/3</code> — append two lists</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>append(List1, List2, List3)
 
-dappend(List1, List2, List3)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>append(List1, List2, List3)
+
+dappend(List1, List2, List3)
+</code></pre></div></div>
+
 <h2 id="description">DESCRIPTION</h2>
-<p><code>List3</code> is the result of appending <code>List2</code> to the end of <code>List1</code>. <code>dappend</code> is the determinate version of <code>append</code>.</p>
+
+<p><code class="highlighter-rouge">List3</code> is the result of appending <code class="highlighter-rouge">List2</code> to the end of <code class="highlighter-rouge">List1</code>. <code class="highlighter-rouge">dappend</code> is the determinate version of <code class="highlighter-rouge">append</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- append([a,b],[c,d],E).
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- append([a,b],[c,d],E).
 E=[a,b,c,d]
-yes.</code></pre>
-<pre><code>?- append([a,b],[C,D],[a,b,c,d]).
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- append([a,b],[C,D],[a,b,c,d]).
 C=c
 D=d
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <h2 id="notes">NOTES</h2>
+
 <p>append and dappend are defined by :</p>
-<pre><code>append([ ], L, L) .
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>append([ ], L, L) .
 
 append([H | T ], L, [H | TL ]) :- append(T, L, TL) .
 
 
 dappend([ ], L, L) :- !.
 
-dappend([H | T ], L, [H | TL ]) :- dappend(T, L, TL) .</code></pre>
-</body>
-</html>
+dappend([H | T ], L, [H | TL ]) :- dappend(T, L, TL) .
+</code></pre></div></div>

@@ -1,130 +1,166 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>read/[1,2]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">read/[1,2]</h1>
-</header>
-<p><code>read/1</code> — read a term from the current input stream</p>
-<p><code>read/2</code> — read a term from specified stream</p>
-<p><code>read_term/2</code> — read term from current input with options</p>
-<p><code>read_term/3</code> — read term from specified stream with options</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>read(Term)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>read(Term)
 
 read(Stream_or_Alias, Term)
 
 
 read_term(Term, Options)
 
-read_term(Stream_or_Alias, Term, Options)</code></pre>
+read_term(Stream_or_Alias, Term, Options)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>These predicates are used to read a term from a stream using the operator declarations in effect at the time of the read. The end of the term read from the stream is indicated by a fullstop token appearing in the stream. The fullstop token is a period(’ . ’) followed by a newline, white space character, or line comment character. If the stream is positioned so that there are no more terms to be read and the stream has the property <code>eof_action(eof_code)</code>, then <code>Term</code> will be unified with the atom <code>end_of_file</code>.</p>
-<p><code>read/1</code> reads a term from the current input stream and unifies it with <code>Term</code>.</p>
-<p><code>read/2</code> reads a term from the input stream specified by <code>Stream_or_Alias</code> and unifies it with <code>Term</code>.</p>
-<p><code>read_term/2</code> reads a term from the current input stream with options <code>Options</code> (see below) and unifies the term read with <code>Term</code>.</p>
-<p><code>read_term/3</code> reads a term from the input stream specified by <code>Stream_or_Alias</code> and unifies it with <code>Term</code>. The options specified by <code>Options</code> are used in the process of reading the term.</p>
-<p><code>read_term/2</code> and <code>read_term/</code>3 take the parameter <code>Options</code> which is a list of options to <code>read_term</code>. These options either affect the behavior of <code>read_term</code> or are used to retrieve additional information about the term which was read.</p>
+
+<p>These predicates are used to read a term from a stream using the operator declarations in effect at the time of the read. The end of the term read from the stream is indicated by a fullstop token appearing in the stream. The fullstop token is a period(‘ . ‘) followed by a newline, white space character, or line comment character. If the stream is positioned so that there are no more terms to be read and the stream has the property <code class="highlighter-rouge">eof_action(eof_code)</code>, then <code class="highlighter-rouge">Term</code> will be unified with the atom <code class="highlighter-rouge">end_of_file</code>.</p>
+
+<p><code class="highlighter-rouge">read/1</code> reads a term from the current input stream and unifies it with <code class="highlighter-rouge">Term</code>.</p>
+
+<p><code class="highlighter-rouge">read/2</code> reads a term from the input stream specified by <code class="highlighter-rouge">Stream_or_Alias</code> and unifies it with <code class="highlighter-rouge">Term</code>.</p>
+
+<p><code class="highlighter-rouge">read_term/2</code> reads a term from the current input stream with options <code class="highlighter-rouge">Options</code> (see below) and unifies the term read with <code class="highlighter-rouge">Term</code>.</p>
+
+<p><code class="highlighter-rouge">read_term/3</code> reads a term from the input stream specified by <code class="highlighter-rouge">Stream_or_Alias</code> and unifies it with <code class="highlighter-rouge">Term</code>. The options specified by <code class="highlighter-rouge">Options</code> are used in the process of reading the term.</p>
+
+<p><code class="highlighter-rouge">read_term/2</code> and <code class="highlighter-rouge">read_term/</code>3 take the parameter <code class="highlighter-rouge">Options</code> which is a list of options to <code class="highlighter-rouge">read_term</code>. These options either affect the behavior of <code class="highlighter-rouge">read_term</code> or are used to retrieve additional information about the term which was read.</p>
+
 <p>The following options supported by ALS Prolog are options specified by the March’93 ISO Prolog Standard:</p>
+
 <ul>
-<li><code>variables(Vars)</code> – After reading a term, <code>Vars</code> shall be a list of the variables in the term read in left-to-right traversal order.</li>
-<li><p><code>variable_names(VN_list)</code> – After reading a term, <code>VN_list</code> will be unified with a list of elements of the form <code>V = A</code> where <code>V</code> is a variable in the term and <code>A</code> is an atom representing the name of the variable. Anonymous variables (variables whose name is <code>'_'</code>) will not appear in this list.</p></li>
-<li><p><code>singletons(VN_list)</code> – After reading a term, <code>VN_list</code> will be unified with a list of elements of the form <code>V = A</code>, where <code>V</code> is a variable occurring in the term only once and <code>A</code> is an atom which represents the name of the variable. Anonymous variables will not appear in this list.</p></li>
+  <li><code class="highlighter-rouge">variables(Vars)</code> – After reading a term, <code class="highlighter-rouge">Vars</code> shall be a list of the variables in the term read in left-to-right traversal order.</li>
+  <li>
+    <p><code class="highlighter-rouge">variable_names(VN_list)</code> – After reading a term, <code class="highlighter-rouge">VN_list</code> will be unified with a list of elements of the form <code class="highlighter-rouge">V = A</code> where <code class="highlighter-rouge">V</code> is a variable in the term and <code class="highlighter-rouge">A</code> is an atom representing the name of the variable. Anonymous variables (variables whose name is <code class="highlighter-rouge">'_'</code>) will not appear in this list.</p>
+  </li>
+  <li><code class="highlighter-rouge">singletons(VN_list)</code> – After reading a term, <code class="highlighter-rouge">VN_list</code> will be unified with a list of elements of the form <code class="highlighter-rouge">V = A</code>, where <code class="highlighter-rouge">V</code> is a variable occurring in the term only once and <code class="highlighter-rouge">A</code> is an atom which represents the name of the variable. Anonymous variables will not appear in this list.</li>
 </ul>
+
 <p>The following additional options are supported by ALS Prolog:</p>
+
 <ul>
-<li><p><code>vars_and_names(Vars,Names)</code> – After reading a term, <code>Vars</code> shall be a list of the variables in the term read in left-to-right traversal order, <code>Names</code> is a list of the associated names of the variables. <code>’_’</code> is the only variable name which may occur more than once on the list <code>Names</code>.</p></li>
-<li><p><code>attach_fullstop(Bool)</code> – <code>Bool</code> is either <code>true</code> or <code>false</code>. The default is <code>false</code>. When <code>Bool</code> is <code>true</code>, a fullstop is inserted before the end of the stream. This option is most useful for reading single terms from atom, character, and character code streams.</p></li>
-<li><p><code>blocking(Bool)</code> – For streams such as socket streams or IPC queue streams, it is possible for the stream to remain open, yet there be no characters available at the time a read is issued. The value of <code>Bool</code> controls the behavior of the read in this setting. The values of <code>Bool</code> are as follows:</p>
-<p><strong><code>true</code></strong> In this type of read, the read susends or waits until enough characters are available to parse as a valid Prolog term.</p>
-<p><strong><code>false</code></strong> In this type of read, if no characters are available, the read will immediately return with success, unifying the ’read term argument’ (which is argument 1 for <code>read_term/2</code> and is argument 2 for <code>read_term/3</code>) with the term <code>unfinished_read</code>; any tokens consumed in the read attempt are saved in the stream data structure, and subsequent attempts to read from this stream begin with these tokens, followed by tokens created from further characters which arrive at later times.</p></li>
-<li><p><code>syntax_errors(Val)</code> – Val indicates how the system is to handle any syntax errors which occur during the reading of <code>Term</code>. The possible values of <code>Val</code> and their interpretations are:</p>
-<p><strong><code>error</code></strong> Occurrence of a sysntax error will cause the system to raise an exception, which includes outputing a warning message. This is the default.</p>
-<p><strong><code>fail</code></strong> Occurrence of a syntax error will cause the attempt to read <code>Term</code> to fail, and and error message will be output.</p>
-<p><strong><code>quiet</code></strong> Occurrence of a syntax error will cause the attempt to read <code>Term</code> to fail quietly, with no message output.</p>
-<p><strong><code>dec10</code></strong> Occurrence of a syntax error will cause the attempt to read <code>Term</code> to output an error message, to skip over the offending input charaters, and attempt to re-read <code>Term</code> from the source stream.</p></li>
+  <li>
+    <p><code class="highlighter-rouge">vars_and_names(Vars,Names)</code> – After reading a term, <code class="highlighter-rouge">Vars</code> shall be a list of the variables in the term read in left-to-right traversal order, <code class="highlighter-rouge">Names</code> is a list of the associated names of the variables. <code class="highlighter-rouge">’_’</code> is the only variable name which may occur more than once on the list <code class="highlighter-rouge">Names</code>.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">attach_fullstop(Bool)</code> – <code class="highlighter-rouge">Bool</code> is either <code class="highlighter-rouge">true</code> or <code class="highlighter-rouge">false</code>. The default is <code class="highlighter-rouge">false</code>. When <code class="highlighter-rouge">Bool</code> is <code class="highlighter-rouge">true</code>, a fullstop is inserted before the end of the stream. This option is most useful for reading single terms from atom, character, and character code streams.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">blocking(Bool)</code> – For streams such as socket streams or IPC queue streams, it is possible for the stream to remain open, yet there be no characters available at the time a read is issued. The value of <code class="highlighter-rouge">Bool</code> controls the behavior of the read in this setting. The values of <code class="highlighter-rouge">Bool</code> are as follows:</p>
+
+    <p><strong><code class="highlighter-rouge">true</code></strong> In this type of read, the read susends or waits until enough characters are available to parse as a valid Prolog term.</p>
+
+    <p><strong><code class="highlighter-rouge">false</code></strong> In this type of read, if no characters are available, the read will immediately return with success, unifying the ’read term argument’ (which is argument 1 for <code class="highlighter-rouge">read_term/2</code> and is argument 2 for <code class="highlighter-rouge">read_term/3</code>) with the term <code class="highlighter-rouge">unfinished_read</code>; any tokens consumed in the read attempt are saved in the stream data structure, and subsequent attempts to read from this stream begin with these tokens, followed by tokens created from further characters which arrive at later times.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">syntax_errors(Val)</code> – Val indicates how the system is to handle any syntax errors which occur during the reading of <code class="highlighter-rouge">Term</code>.  The possible values of <code class="highlighter-rouge">Val</code> and their interpretations are:</p>
+
+    <p><strong><code class="highlighter-rouge">error</code></strong> Occurrence of a sysntax error will cause the system to raise an exception, which includes outputing a warning message. This is the default.</p>
+
+    <p><strong><code class="highlighter-rouge">fail</code></strong> Occurrence of a syntax error will cause the attempt to read <code class="highlighter-rouge">Term</code> to fail, and and error message will be output.</p>
+
+    <p><strong><code class="highlighter-rouge">quiet</code></strong> Occurrence of a syntax error will cause the attempt to read <code class="highlighter-rouge">Term</code> to fail quietly, with no message output.</p>
+
+    <p><strong><code class="highlighter-rouge">dec10</code></strong> Occurrence of a syntax error will cause the attempt to read <code class="highlighter-rouge">Term</code> to output an error message, to skip over the offending input charaters, and attempt to re-read <code class="highlighter-rouge">Term</code> from the source stream.</p>
+  </li>
 </ul>
+
 <h2 id="examples">EXAMPLES</h2>
-<p><code>?- read(Term).</code> <br><code>[+(3,4),9+8].        &lt;&lt;</code> <em>Typed on console (current input)</em></p>
-<pre><code>Term=[3+4,9+8]
+<p><code class="highlighter-rouge">?- read(Term).</code>
+<br /><code class="highlighter-rouge">[+(3,4),9+8].        &lt;&lt;</code>          <em>Typed on console (current input)</em></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Term=[3+4,9+8]
 
-yes.</code></pre>
-<p><code>?- read_term(Term,[variables(V),variable_names(VN),singletons(SVN)]).</code> <br><code>f(X,[Y,Z,W],g(X,Z),[_,U1,_,U2]).        &lt;&lt;</code> <em>Typed on console (current input)</em></p>
-<pre><code>Term=f(_A,[_B,_C,_D],g(_A,_C),[_E,_F,_G,_H]) 
+yes.
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">?- read_term(Term,[variables(V),variable_names(VN),singletons(SVN)]).</code>
+<br /><code class="highlighter-rouge">f(X,[Y,Z,W],g(X,Z),[_,U1,_,U2]).        &lt;&lt;</code>          <em>Typed on console (current input)</em></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Term=f(_A,[_B,_C,_D],g(_A,_C),[_E,_F,_G,_H]) 
 V=[_A,_B,_C,_D,_E,_F,_G,_H] 
-VN=[_A = &#39;X&#39;,_B = &#39;Y&#39;,_C = &#39;Z&#39;,_D = &#39;W&#39;,_F = &#39;U1&#39;,_H = &#39;U2&#39;] 
-SVN=[_B = &#39;Y&#39;,_D = &#39;W&#39;,_F = &#39;U1&#39;,_H = &#39;U2&#39;] 
+VN=[_A = 'X',_B = 'Y',_C = 'Z',_D = 'W',_F = 'U1',_H = 'U2'] 
+SVN=[_B = 'Y',_D = 'W',_F = 'U1',_H = 'U2'] 
 
-yes.</code></pre>
-<pre><code>?- open(atom(&#39;[X,2,3]&#39;),read,S),
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- open(atom('[X,2,3]'),read,S),
 ?_ read_term(S,Term,[attach_fullstop(true)]), close(S).
 
-S=stream_descriptor(&#39;\002&#39;,closed,atom,atom(&#39;[X,2,3]&#39;),[input|nooutput],
-    false,42,&#39;[X,2,3]&#39;,7,7,0,true,0,wt_opts(78,400,flat),[],wait,text,
+S=stream_descriptor('\002',closed,atom,atom('[X,2,3]'),[input|nooutput],
+    false,42,'[X,2,3]',7,7,0,true,0,wt_opts(78,400,flat),[],wait,text,
     eof_code,true,0) 
 Term=[_A,2,3] 
 
-yes.</code></pre>
-<pre><code>?- read_term(user_input,Term,not_an_option_list). 
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- read_term(user_input,Term,not_an_option_list). 
 Error: Argument of type list expected instead of not_an_option_list.
 - Goal:          sio:read_term(user_input,_A,not_an_option_list)
 - Throw pattern: error(type_error(list,not_an_option_list),
-                     [sio:read_term(user_input,_A,not_an_option_list)])</code></pre>
-<p><code>?- read(X).</code> <br><code>foobar        &lt;&lt;</code> <em>Typed on console (current input)</em> <br><code>zipper.        &lt;&lt;</code> <em>Typed on console (current input)</em></p>
-<pre><code>zipper.
+                     [sio:read_term(user_input,_A,not_an_option_list)])
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">?- read(X).</code>
+<br /><code class="highlighter-rouge">foobar        &lt;&lt;</code>          <em>Typed on console (current input)</em>
+<br /><code class="highlighter-rouge">zipper.        &lt;&lt;</code>          <em>Typed on console (current input)</em></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zipper.
 ^Syntax error 
-    &#39;standard input&#39;, line 9: Fullstop (period) expected</code></pre>
+	'standard input', line 9: Fullstop (period) expected
+</code></pre></div></div>
+
 <h2 id="errors">ERRORS</h2>
-<p><code>Stream_or_Alias</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
 <p>– – – – &gt; domain_error(stream_or_Alias, Stream_or_Alias) .</p>
-<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
 <p>– – – – &gt; existence_error(stream, Stream_or_Alias) .</p>
-<p><code>Stream_or_Alias</code> is not an input stream</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an input stream</p>
+
 <p>– – – – &gt; permission_error(input, stream, Stream_or_Alias) .</p>
-<p><code>Options</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Options</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Options</code> is neither a variable nor a list</p>
+
+<p><code class="highlighter-rouge">Options</code> is neither a variable nor a list</p>
+
 <p>– – – – &gt; type_error(list, Option) .</p>
-<p><code>Options</code> is a list an element of which is a variable</p>
+
+<p><code class="highlighter-rouge">Options</code> is a list an element of which is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Options</code> is a list containing an element E which is neithera variable nor a valid read option</p>
+
+<p><code class="highlighter-rouge">Options</code> is a list containing an element E which is neithera variable nor a valid read option</p>
+
 <p>– – – – &gt; domain_error(read_option, E)</p>
+
 <p>The stream associated with Stream_or_Alias is at the end of the stream and the stream has the property eof_action(error)</p>
+
 <p>– – – – &gt; existence_error(past_end_of_stream, Stream_or_Alias) .</p>
+
 <p>The stream associated with Stream_or_Alias has no input ready to be read and the stream has the property snr_action(error)</p>
+
 <p>– – – – &gt; existence_error(stream_not_ready, Stream_or_Alias) .</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>write/[1,2]</code><br />
-<code>write_term/[2,3]</code><br />
-<code>open/4</code><br />
-<code>close/1</code><br />
-<code>get_char/[1,2]</code><br />
-<code>get_code/[1,2]</code></p></li>
-<li>User Guide (Prolog I/O)</li>
-<li>[Bowen 91, 7.8]<br />
-</li>
-<li>[Sterling 86, 12.2]<br />
-</li>
-<li>[Bratko 86, 6.2.1]<br />
-</li>
-<li><p>[Clocksin 81, 5.1]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">write/[1,2]</code><br />
+<code class="highlighter-rouge">write_term/[2,3]</code><br />
+<code class="highlighter-rouge">open/4</code><br />
+<code class="highlighter-rouge">close/1</code><br />
+<code class="highlighter-rouge">get_char/[1,2]</code><br />
+<code class="highlighter-rouge">get_code/[1,2]</code></p>
+  </li>
+  <li>User Guide (Prolog I/O)</li>
+  <li>[Bowen 91, 7.8]</li>
+  <li>[Sterling 86, 12.2]</li>
+  <li>[Bratko 86, 6.2.1]</li>
+  <li>[Clocksin 81, 5.1]</li>
 </ul>
-</body>
-</html>

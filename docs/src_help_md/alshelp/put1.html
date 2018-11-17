@@ -1,43 +1,29 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>put/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">put/1</h1>
-</header>
-<p><code>put/1</code> — write out a character</p>
-<p><code>tab/1</code> — prints out a specified number of spaces</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>put(Char)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>put(Char)
 
-tab(N)</code></pre>
+tab(N)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>If <code>Char</code> is bound to an integer within the range 0 – 255, <code>put/1</code> will write out the character whose ASCII code is <code>Char</code> to the current output stream.</p>
-<p><code>tab/1</code> will write out <code>N</code> space characters(ASCII 32) to the standard output stream.</p>
+
+<p>If <code class="highlighter-rouge">Char</code> is bound to an integer within the range 0 – 255, <code class="highlighter-rouge">put/1</code> will write out the character whose ASCII code is <code class="highlighter-rouge">Char</code> to the current output stream.</p>
+
+<p><code class="highlighter-rouge">tab/1</code> will write out <code class="highlighter-rouge">N</code> space characters(ASCII 32) to the standard output stream.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- put(0&#39;(),tab(15),put(0&#39;)).
-(               )</code></pre>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- put(0'(),tab(15),put(0')).
+(               )
+</code></pre></div></div>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><code>nl/0</code></li>
+  <li><code class="highlighter-rouge">nl/0</code></li>
 </ul>
-<p><code>User Guide (Prolog I/O)</code><br />
-- [Bowen 91, 7.8]<br />
-- [Clocksin 81, 5.2]<br />
-- [Bratko 86, 6.3]</p>
-</body>
-</html>
+
+<p><code class="highlighter-rouge">User Guide (Prolog I/O)</code></p>
+<ul>
+  <li>[Bowen 91, 7.8]</li>
+  <li>[Clocksin 81, 5.2]</li>
+  <li>[Bratko 86, 6.3]</li>
+</ul>

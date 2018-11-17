@@ -1,41 +1,25 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>retract/[1,2]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">retract/[1,2]</h1>
-</header>
-<p><code>retract/1</code> — removes a clause from the database</p>
-<p><code>retract/2</code> — removes a clause specified by a database reference</p>
-<p><code>erase/1</code> — removes a clause from the database</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>retract(Clause)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>retract(Clause)
 
 retract(Clause, DBRef)
 
-erase(DBRef)</code></pre>
+erase(DBRef)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>When <code>Clause</code> is bound to an atom or a structured term, <code>retract/1</code> searches the current module for a clause that will unify with <code>Clause</code>. When a matching clause is found in the database, <code>Clause</code> is unified with the structure corresponding to the clause. The clause is then removed from the database.</p>
-<p><code>retract/2</code> additionally unifies <code>DBRef</code> with the database reference of the clause.</p>
-<p><code>erase/1</code> removes the clause associated with <code>DBRef</code> from the database. Note that <code>erase(DBRef)</code> should never be called following <code>retract(Clause, DBRef)</code> since at that point <code>DBRef</code> is no longer a valid database reference.</p>
-<p><code>retract/1</code> and <code>retract/2</code> will repeatedly generate and remove clauses upon backtracking. <code>:/2</code> can be used to specify which module should be searched.</p>
+
+<p>When <code class="highlighter-rouge">Clause</code> is bound to an atom or a structured term, <code class="highlighter-rouge">retract/1</code> searches the current module for a clause that will unify with <code class="highlighter-rouge">Clause</code>. When a matching clause is found in the database, <code class="highlighter-rouge">Clause</code> is unified with the structure corresponding to the clause. The clause is then removed from the database.</p>
+
+<p><code class="highlighter-rouge">retract/2</code> additionally unifies <code class="highlighter-rouge">DBRef</code> with the database reference of the clause.</p>
+
+<p><code class="highlighter-rouge">erase/1</code> removes the clause associated with <code class="highlighter-rouge">DBRef</code> from the database. Note that <code class="highlighter-rouge">erase(DBRef)</code> should never be called following <code class="highlighter-rouge">retract(Clause, DBRef)</code> since at that point <code class="highlighter-rouge">DBRef</code> is no longer a valid database reference.</p>
+
+<p><code class="highlighter-rouge">retract/1</code> and <code class="highlighter-rouge">retract/2</code> will repeatedly generate and remove clauses upon backtracking. <code class="highlighter-rouge">:/2</code> can be used to specify which module should be searched.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<p>The following example shows how <code>retract/1</code> and <code>retract/2</code> can be used to get rid of all the comic book heroes that live in our modules. First we create all the heroes by consulting <code>user</code>, typing in facts from the console. Then we get rid of <code>hero(spiderman)</code> by using a simple call to <code>retract/1</code>:</p>
-<pre><code>?- [user].
+
+<p>The following example shows how <code class="highlighter-rouge">retract/1</code> and <code class="highlighter-rouge">retract/2</code> can be used to get rid of all the comic book heroes that live in our modules. First we create all the heroes by consulting <code class="highlighter-rouge">user</code>, typing in facts from the console.  Then we get rid of <code class="highlighter-rouge">hero(spiderman)</code> by using a simple call to <code class="highlighter-rouge">retract/1</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- [user].
 hero(spiderman).
 hero(superman).
 hero(batman).
@@ -47,9 +31,11 @@ yes.
 
 ?- retract(hero(spiderman)).
 
-yes.</code></pre>
-<p>Continuing the example, we show what heroes are left by using the <code>listing/1</code> procedure. After that, we remove <code>hero(superman)</code> with a <code>retract/2</code> call. The old database reference to the man of steel is instantiated to <code>Ref</code>.</p>
-<pre><code>?- listing(hero/1).
+yes.
+</code></pre></div></div>
+<p>Continuing the example, we show what heroes are left by using the <code class="highlighter-rouge">listing/1</code> procedure. After that, we remove <code class="highlighter-rouge">hero(superman)</code> with a <code class="highlighter-rouge">retract/2</code> call. The old database reference to the man of steel is instantiated to <code class="highlighter-rouge">Ref</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing(hero/1).
 %user:hero/1
 hero(superman).
 hero(batman).
@@ -59,22 +45,26 @@ yes.
 
 ?- retract(hero(superman),Ref).
 
-Ref=&#39;$dbref&#39;(5208,15,2384,1)
+Ref='$dbref'(5208,15,2384,1)
 
-yes.</code></pre>
-<p>Next, we use <code>clause/3</code> to find the database reference of hero(batman). With this, we use the database reference in a <code>retract/2</code> call to remove <code>hero(batman)</code> from the database. Note that when the call to <code>retract/2</code> is made, the <code>Clause</code> argument is uninstantiated. After the call to <code>retract/2</code> has succeeded, <code>Clause</code> is instantiated to the clause that was removed.</p>
-<pre><code>?- clause(hero(batman),Body,Ref).
+yes.
+</code></pre></div></div>
+<p>Next, we use <code class="highlighter-rouge">clause/3</code> to find the database reference of hero(batman). With this, we use the database reference in a <code class="highlighter-rouge">retract/2</code> call to remove <code class="highlighter-rouge">hero(batman)</code> from the database. Note that when the call to  <code class="highlighter-rouge">retract/2</code> is made,
+the <code class="highlighter-rouge">Clause</code> argument is uninstantiated. After the call to <code class="highlighter-rouge">retract/2</code> has succeeded, <code class="highlighter-rouge">Clause</code> is instantiated to 
+the clause that was removed.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- clause(hero(batman),Body,Ref).
 Body=true
-Ref=&#39;$dbref&#39;(5052,15,2384,2)
+Ref='$dbref'(5052,15,2384,2)
 
 yes.
 
-?- retract(Clause,&#39;$dbref&#39;(5052,15,2384,2)).
+?- retract(Clause,'$dbref'(5052,15,2384,2)).
 Clause=hero(batman)
 
-yes.</code></pre>
-<p>Now, we list the heroes left in the database. Only <code>hero(superwoman)</code> is left, but she’s in a different module. However, using the Mod:Goal construct, we can remove her too:</p>
-<pre><code>?- listing(hero/1).
+yes.
+</code></pre></div></div>
+<p>Now, we list the heroes left in the database. Only <code class="highlighter-rouge">hero(superwoman)</code> is left, but she’s in a different module. However, using the Mod:Goal construct, we can remove her too:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing(hero/1).
 %women:hero/1
 hero(superwoman).
 
@@ -85,17 +75,20 @@ X=superwoman
 yes.
 
 ?- listing(hero/1).
-yes.</code></pre>
-<p>As the last call to <code>listing/1</code> shows, there are no more heroes left in the database. (Who knows what evil may be lurking in the garbage collector though!)</p>
+yes.
+</code></pre></div></div>
+<p>As the last call to <code class="highlighter-rouge">listing/1</code> shows, there are no more heroes left in the database. (Who knows what evil may be lurking in the garbage collector though!)</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>abolish/1</code><br />
-<code>clause/1</code></p></li>
-<li>[Bowen 91, 7.3]</li>
-<li>[Clocksin 81, 6.4]</li>
-<li>[Bratko 86, 7.4]<br />
-</li>
-<li><p>[Sterling 86, 12.2]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">abolish/1</code><br />
+<code class="highlighter-rouge">clause/1</code></p>
+  </li>
+  <li>[Bowen 91, 7.3]</li>
+  <li>[Clocksin 81, 6.4]</li>
+  <li>[Bratko 86, 7.4]</li>
+  <li>[Sterling 86, 12.2]</li>
 </ul>
-</body>
-</html>
+

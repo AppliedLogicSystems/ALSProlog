@@ -1,39 +1,22 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>dynamic/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">dynamic/1</h1>
-</header>
-<p><code>dynamic/1</code> — declare a procedure to be dynamic</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>dynamic(Pred/Arity)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dynamic(Pred/Arity)
 
-dynamic(Module:Pred/Arity)</code></pre>
+dynamic(Module:Pred/Arity)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>dynamic/1</code> is a procedure intended to be used in directives in source code. It will declare a procedure given by the form <code>Pred/Arity</code> or <code>Module:Pred/Arity</code> to be dynamic. Such a procedure will be considered to be defined even if it contains no clauses. Non-dynamic procedures which have no clauses are considered to be undefined and if called as such will generate a warning or error(depending on the value of the <code>undefined_predicate flag</code>). In the future, procedures declared to be dynamic will also be subject to the so called “logical database” semantics where the database will appear to be frozen once a procedure is called. Only calls that occur (temporally) after the database modification will be affected by that modification.</p>
+
+<p><code class="highlighter-rouge">dynamic/1</code> is a procedure intended to be used in directives in source code. It will declare a procedure given by the form <code class="highlighter-rouge">Pred/Arity</code> or <code class="highlighter-rouge">Module:Pred/Arity</code> to be dynamic. Such a procedure will be considered to be defined even if it contains no clauses. Non-dynamic procedures which have no clauses are considered to be undefined and if called as such will generate a warning or error(depending on the value of the <code class="highlighter-rouge">undefined_predicate flag</code>). In the future, procedures declared to be dynamic will also be subject to the so called "logical database" semantics where the database will appear to be frozen once a procedure is called. Only calls that occur (temporally) after the database modification will be affected by that modification.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>:- dynamic(foo/1) .</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>:- dynamic(foo/1) .
+</code></pre></div></div>
 <h2 id="notes">NOTES</h2>
-<p>Calling <code>assert/1</code> or one of its variants for an undefined procedure will also effectively declare the procedure to be dynamic.</p>
+
+<p>Calling <code class="highlighter-rouge">assert/1</code> or one of its variants for an undefined procedure will also effectively declare the procedure to be dynamic.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><code>consult/1</code><br />
-<code>assert/[1,2]</code></li>
+  <li><code class="highlighter-rouge">consult/1</code><br />
+<code class="highlighter-rouge">assert/[1,2]</code></li>
 </ul>
-</body>
-</html>

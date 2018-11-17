@@ -1,38 +1,18 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>recorda/3</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">recorda/3</h1>
-</header>
-<p><code>recorda/3</code> — records item in internal term database</p>
-<p><code>recordz/3</code> — records item in internal term database</p>
-<p><code>recorded/3</code> — retrieves item from internal term database</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>recorda(Key, Term, Ref)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>recorda(Key, Term, Ref)
 
 recordz(Key, Term, Ref)
 
-recorded(Key, Term, Ref)</code></pre>
+recorded(Key, Term, Ref)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>Key</code> may be an atom or a compound term, but in the latter case, only its functor is significant. Both predicates will fail in all other cases of <code>Key</code>. <code>recorda(Key, Term, Ref)</code> enters <code>Term</code> into the internal term database at the first item associated with <code>Key</code>, and returns a database reference <code>Ref</code>. <code>recordz(Key, Term, Ref)</code> enters <code>Term</code> as the last item associated with <code>Key</code>.</p>
-<p><code>recorded(Key, Term, Ref)</code> searches the internal term database for an item <code>Term</code> associated with <code>Key</code> such that the associated database reference unifies with <code>Ref</code>.</p>
+
+<p><code class="highlighter-rouge">Key</code> may be an atom or a compound term, but in the latter case, only its functor is significant. Both predicates will fail in all other cases of <code class="highlighter-rouge">Key</code>. <code class="highlighter-rouge">recorda(Key, Term, Ref)</code> enters <code class="highlighter-rouge">Term</code> into the internal term database at the first item associated with <code class="highlighter-rouge">Key</code>, and returns a database reference <code class="highlighter-rouge">Ref</code>. <code class="highlighter-rouge">recordz(Key, Term, Ref)</code> enters <code class="highlighter-rouge">Term</code> as the last item associated with <code class="highlighter-rouge">Key</code>.</p>
+
+<p><code class="highlighter-rouge">recorded(Key, Term, Ref)</code> searches the internal term database for an item <code class="highlighter-rouge">Term</code> associated with <code class="highlighter-rouge">Key</code> such that the associated database reference unifies with <code class="highlighter-rouge">Ref</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- recordz(sing,slowly,_),
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- recordz(sing,slowly,_),
 ?_ recorda(sing,sweetly,_),
 ?_ recorda(sing(along),loudly,_).
 
@@ -47,10 +27,13 @@ Term=sweetly ;
 
 Term=slowly ;
 
-no.</code></pre>
+no.
+</code></pre></div></div>
+
 <h2 id="notes">NOTES</h2>
+
 <p>Provided for compatibility. These predicates are defined by:</p>
-<pre><code>recorda(Key, Term, Ref) 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>recorda(Key, Term, Ref) 
     :-
     rec_getkey(Key, KeyFuncotr),
     asserta(recorded(KeyFuncotr, Term), Ref).
@@ -72,6 +55,5 @@ rec_getkey(Key, Key)
 rec_getkey(S, Key) 
     :- 
     functor(S, Key, _) .
-</code></pre>
-</body>
-</html>
+
+</code></pre></div></div>

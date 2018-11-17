@@ -1,47 +1,34 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>arg/3</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">arg/3</h1>
-</header>
-<p><code>arg/3</code> — access the arguments of a structured term</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>arg(Nth, Structure, Argument)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>arg(Nth, Structure, Argument)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>‘Argument’ will be unified with the ‘Nth’ argument of ‘Structure’. ‘Nth’ must be a positive integer. ‘Structure’ should be a compound term whose arity is greater than or equal to ‘Nth’. When these conditions hold, ‘Argument’ will be unified with the ‘Nth’ argument of ‘Structure’.</p>
+
+<p><code class="highlighter-rouge">Argument</code> will be unified with the <code class="highlighter-rouge">Nth</code> argument of <code class="highlighter-rouge">Structure</code>. <code class="highlighter-rouge">Nth</code> must be a positive integer. <code class="highlighter-rouge">Structure</code> should be a compound term whose arity is greater than or equal to <code class="highlighter-rouge">Nth</code>. When these conditions hold, <code class="highlighter-rouge">Argument</code> will be unified with the <code class="highlighter-rouge">Nth</code> argument of <code class="highlighter-rouge">Structure</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- arg(2,stooges(larry,moe,curly),X).
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- arg(2,stooges(larry,moe,curly),X).
 X=moe
 yes.
 
 ?- arg(2,[a,b,c],X).
 X=[b,c]
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <h2 id="errors">ERRORS</h2>
-<p>If <code>Nth</code> is not an integer greater than <code>0</code> and less than or equal to the arity of <code>Structure</code>, <code>arg/3</code> will fail. <code>Structure</code> must be instantiated to a structured term.</p>
+
+<p>If <code class="highlighter-rouge">Nth</code> is not an integer greater than <code class="highlighter-rouge">0</code> and less than or equal to the arity of <code class="highlighter-rouge">Structure</code>, <code class="highlighter-rouge">arg/3</code> will fail. <code class="highlighter-rouge">Structure</code> must be instantiated to a structured term.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>functor/3</code><br />
-<code>=../2</code></p></li>
-<li>[Bowen 91, 7.6]</li>
-<li>[Sterling 86, 9.2]</li>
-<li>[Bratko 86, 7.2]</li>
-<li><p>[Clocksin 81, 6.5]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">functor/3</code><br />
+<code class="highlighter-rouge">=../2</code></p>
+  </li>
+  <li>[Bowen 91, 7.6]</li>
+  <li>[Sterling 86, 9.2]</li>
+  <li>[Bratko 86, 7.2]</li>
+  <li>[Clocksin 81, 6.5]</li>
 </ul>
-</body>
-</html>

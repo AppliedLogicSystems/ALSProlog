@@ -1,0 +1,35 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>statistics
+
+statistics(runtime, X)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">statistics/0</code> shows the current allocations and amounts used for the working areas of ALS Prolog. <code class="highlighter-rouge">statistics(runtime, X)</code> unifies <code class="highlighter-rouge">X</code> with a two-element list</p>
+
+<p><code class="highlighter-rouge">[Total, SinceLast]</code></p>
+
+<p>where <code class="highlighter-rouge">Total</code> is the elapsed cpu time since the start of Prolog execution, and <code class="highlighter-rouge">SinceLast</code> is the cpu time which has elapsed since the last call to <code class="highlighter-rouge">statistics/2</code>.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- statistics.
+Machine State:
+E=ef7fd94 B=efffe1c H=ef7fe44 HB=ef7fe44 TR=efffe1c
+MSP=ef7fd8c SPB=ef7fd94
+Clause Space: 55540/262144 (bytes used/total bytes)
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- statistics(runtime, [Total, SinceLast]).
+Total = 1.95
+SinceLast = 0.033333333
+yes.
+</code></pre></div></div>
+
+<h2 id="notes">NOTES</h2>
+
+<p>E, B, H, HB, TR, MSP, SPB are registers in the Warren Abstract Machine(WAM) ; cf. [Warren 83], [Warren 86], [Maier 88], Chapter 11.8, [Tick 88].</p>
+

@@ -1,49 +1,43 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>put_atom/[1,2]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">put_atom/[1,2]</h1>
-</header>
-<p><code>put_atom/1</code> — output an atom to the current output stream</p>
-<p><code>put_atom/2</code> — output an atom to a specific output stream</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>put_atom(Atom)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>put_atom(Atom)
 
-put_atom(Stream_or_Alias, Atom)</code></pre>
+put_atom(Stream_or_Alias, Atom)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>put_atom/1</code> will write out the atom bound to <code>Atom</code> to the current output stream.</p>
-<p><code>put_atom/2</code> will write out the atom bound to <code>Atom</code> to the output stream associated with <code>Stream_or_Alias</code>.</p>
+
+<p><code class="highlighter-rouge">put_atom/1</code> will write out the atom bound to <code class="highlighter-rouge">Atom</code> to the current output stream.</p>
+
+<p><code class="highlighter-rouge">put_atom/2</code> will write out the atom bound to <code class="highlighter-rouge">Atom</code> to the output stream associated with <code class="highlighter-rouge">Stream_or_Alias</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- put_atom(ice),put_atom(cream).
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- put_atom(ice),put_atom(cream).
 icecream
-yes.</code></pre>
+yes.
+</code></pre></div></div>
 <h2 id="errors">ERRORS</h2>
-<p><code>Stream_or_Alias</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
 <p>– – – – &gt; domain_error(stream_or_alias, `Stream_or_Alias) .</p>
-<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
 <p>– – – – &gt; existence_error(stream, Stream_or_Alias) .</p>
-<p><code>Stream_or_Alias</code> is not an output stream</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an output stream</p>
+
 <p>– – – – &gt; permission_error(output, stream, Stream_or_Alias) .</p>
-<p><code>Atom</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Atom</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Atom</code> is neither a variable nor an atom</p>
+
+<p><code class="highlighter-rouge">Atom</code> is neither a variable nor an atom</p>
+
 <p>– – – – &gt; type_error(atom, Atom) .</p>
-</body>
-</html>
+

@@ -1,30 +1,41 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>at_end_of_stream/[0,1]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">at_end_of_stream/[0,1]</h1>
-</header>
-<p><code>at_end_of_stream/0</code> —</p>
-<p><code>at_end_of_stream/1</code> — test for end of a specific input stream</p>
 <h2 id="forms">FORMS</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>at_end_of_stream
+
+at_end_of_stream(Stream_or_Alias)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">at_end_of_stream/0</code> will succeed when the stream position associated with the current input stream is located at or past the end of stream.</p>
+
+<p><code class="highlighter-rouge">at_end_of_stream/1</code> will succeed when the stream position associated with <code class="highlighter-rouge">Stream_or_Alias</code> is located at or past the end of stream.</p>
+
 <h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable.</p>
+
+<p>––––&gt; instantiation_error.</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p>––––&gt; domain_error(stream_or_alias,Stream_or_Alias)</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p>––––&gt; existence_error(stream,Stream_or_Alias)</p>
+
 <h2 id="notes">NOTES</h2>
+
+<p>Calling <code class="highlighter-rouge">at_end_of_stream</code> may cause an input operation to take place. Thus a call to this predicate could block.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
-</body>
-</html>
+
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">open/4</code> <br />
+<code class="highlighter-rouge">current_input/1</code><br />
+<code class="highlighter-rouge">flush_output/1</code></p>
+  </li>
+  <li>
+    <p>User Guide (Prolog I/O)</p>
+  </li>
+</ul>

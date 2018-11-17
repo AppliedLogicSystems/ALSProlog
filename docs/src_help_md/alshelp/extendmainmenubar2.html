@@ -1,31 +1,5 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>extend_main_menubar/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">extend_main_menubar/2</h1>
-</header>
-<p><code>extend_main_menubar/2</code> — add entries to the main menubar</p>
-<p><code>menu_entries_list/[2,3]</code> — obtain menu entries</p>
-<p><code>path_to_menu_entry/[2,3,4]</code> — obtain path to a menu entry</p>
-<p><code>add_to_main_menu_entry/2</code> — add an item to a menu entry</p>
-<p><code>extend_cascade/3</code> — extend a menu cascade</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>extend_main_menubar(Label, MenuEntriesList)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extend_main_menubar(Label, MenuEntriesList)
 
 menu_entries_list(MenuPath, EntriesList)
 
@@ -39,69 +13,104 @@ path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
 
 add_to_main_menu_entry(Index, Entry)
 
-extend_cascade(Entry, MenuPath, Interp)</code></pre>
+extend_cascade(Entry, MenuPath, Interp)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>The general call</p>
-<pre><code>     extend_main_menubar(Label, MenuEntriesList)</code></pre>
-<p>adds entries to the main menubar in the ALS Prolog development environment. <code>Label</code> should be the label which will appear on the menu bar, and <code>MenuEntriesList</code> is a Prolog list containing menu entry descriptors, which are either an <code>Atom</code> alone, or an expression of the form</p>
-<pre><code>     Atom + Expr</code></pre>
-<p>where <code>Atom</code> is a prolog atom which will serve as the new menu entry, and <code>Expr</code> is a menu entry action expression, which can be one of the following :</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     extend_main_menubar(Label, MenuEntriesList)
+</code></pre></div></div>
+<p>adds entries to the main menubar in the ALS Prolog development environment.  <code class="highlighter-rouge">Label</code> should be the label which will appear on the menu bar, and <code class="highlighter-rouge">MenuEntriesList</code> is a Prolog list containing menu entry descriptors, which are either an <code class="highlighter-rouge">Atom</code> alone, or an expression of the form</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     Atom + Expr
+</code></pre></div></div>
+<p>where <code class="highlighter-rouge">Atom</code> is a prolog atom which will serve as the new menu entry, and <code class="highlighter-rouge">Expr</code> is a menu entry action expression, which can be one of the following :</p>
+
 <ul>
-<li><p><code>tcl(TclExpr)</code></p></li>
-<li><p><code>cascade(SubLabel, SubList)</code></p></li>
-<li><p>PrologCall</p></li>
+  <li>
+    <p><code class="highlighter-rouge">tcl(TclExpr)</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">cascade(SubLabel, SubList)</code></p>
+  </li>
+  <li>
+    <p>PrologCall</p>
+  </li>
 </ul>
-<p>Here, <code>TclExpr</code> can be any Tcl/Tk expression for evaulation, and <code>PrologCall</code> is any ground Prolog goal. The entry</p>
-<pre><code>cascade(SubLabel, SubList)</code></pre>
-<p>allows one to create menu entries which are themselves cascades. In this case, <code>SubLabel</code> must be an atom which will serve as the entry’s label, and <code>SubList</code> is (recursively) a list of menu entry descriptors.</p>
-<p>If <code>MenuPath</code> is a Tk path to a menu (top level or subsidiary), then the call</p>
-<pre><code>menu_entries_list(MenuPath, EntriesList)</code></pre>
-<p>will succeed if <code>EntriesList</code> is the list of labels for the entries on that menu, in order. As usual,</p>
-<pre><code>menu_entries_list(MenuPath, EntriesList)
+
+<p>Here, <code class="highlighter-rouge">TclExpr</code> can be any Tcl/Tk expression for evaulation, and <code class="highlighter-rouge">PrologCall</code> is any ground Prolog goal. The entry</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cascade(SubLabel, SubList)
+</code></pre></div></div>
+<p>allows one to create menu entries which are themselves cascades. In this case, <code class="highlighter-rouge">SubLabel</code> must be an atom which will serve as the entry’s label, and <code class="highlighter-rouge">SubList</code> is (recursively) a list of menu entry descriptors.</p>
+
+<p>If <code class="highlighter-rouge">MenuPath</code> is a Tk path to a menu (top level or subsidiary), then the call</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>menu_entries_list(MenuPath, EntriesList)
+</code></pre></div></div>
+<p>will succeed if <code class="highlighter-rouge">EntriesList</code> is the list of labels for the entries on that menu, in order. As usual,</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>menu_entries_list(MenuPath, EntriesList)
      :-
-     menu_entries_list(tcli, MenuPath, EntriesList).</code></pre>
-<p>Paths to menu entries are lists of integers representing the path from the root of the menu tree to a particular entry. When one indexes menu entries, the indicies are integers beginning at <code>0</code>. If<code>MenuPath</code> is a Tk path to a menu (top level or subsidiary), and if <code>Index</code> is an integer <code>&gt;= 0</code>, and if the <code>Index'th</code> entry of <code>MenuPath</code> is a cascade, so that it has an associated menu, then <code>SubMenuPath</code> is a path to that associated menu.</p>
+     menu_entries_list(tcli, MenuPath, EntriesList).
+</code></pre></div></div>
+<p>Paths to menu entries are lists of integers representing the path from the root of the menu tree to a particular entry. When one indexes menu entries, the indicies are integers beginning at <code class="highlighter-rouge">0</code>. If<code class="highlighter-rouge"> MenuPath</code> is a Tk path to a menu (top level or subsidiary), and if <code class="highlighter-rouge">Index</code> is an integer <code class="highlighter-rouge">&gt;= 0</code>, and if the <code class="highlighter-rouge">Index'th</code> entry of <code class="highlighter-rouge">MenuPath</code> is a cascade, so that it has an associated menu, then <code class="highlighter-rouge">SubMenuPath</code> is a path to that associated menu.</p>
+
 <p>As usual,</p>
-<pre><code>path_to_main_menu_entry(Index, SubMenuPath)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>path_to_main_menu_entry(Index, SubMenuPath)
     :-
-    path_to_menu_entry(shl_tcli, &#39;.topals.mmenb&#39;, Index, SubMenuPath).
+    path_to_menu_entry(shl_tcli, '.topals.mmenb', Index, SubMenuPath).
 
 path_to_menu_entry(MenuPath, Index, SubMenuPath)
     :-
-    path_to_menu_entry(tcli, MenuPath, Index, SubMenuPath).</code></pre>
+    path_to_menu_entry(tcli, MenuPath, Index, SubMenuPath).
+</code></pre></div></div>
+
 <p>Finally, one can add new entries at the ends(bottoms) of existing menu cascades, as follows:</p>
-<pre><code>add_to_main_menu_entry(Index, Entry)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>add_to_main_menu_entry(Index, Entry)
     :-
     path_to_main_menu_entry(Index, MenuPath),
-    extend_cascade(Entry, MenuPath, shl_tcli).</code></pre>
+    extend_cascade(Entry, MenuPath, shl_tcli).
+</code></pre></div></div>
 <p>The predicate</p>
-<pre><code>extend_cascade(Entry, MenuPath, Interp)</code></pre>
-<p>adds <code>Entry</code> to the end of menu <code>MenuPath</code> under interpreter <code>Interp</code>.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extend_cascade(Entry, MenuPath, Interp)
+</code></pre></div></div>
+<p>adds <code class="highlighter-rouge">Entry</code> to the end of menu <code class="highlighter-rouge">MenuPath</code> under interpreter <code class="highlighter-rouge">Interp</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>After executing the call</p>
-<pre><code>?- extend_main_menubar(&#39;Test Extend&#39;, [&#39;Test Entry #1&#39;, &#39;Test Entry #2&#39;]).</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- extend_main_menubar('Test Extend', ['Test Entry #1', 'Test Entry #2']).
+</code></pre></div></div>
 <p>the main listener window would look like this when clicking on the newly added menubar entry:</p>
-<p><img src="images/x_menu-1.gif" /></p>
+
+<p><img src="images/x_menu-1.gif" alt="" /></p>
+
 <p>Suppose we define</p>
-<pre><code>test_write
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>test_write
     :-
-    printf(user_output, &#39;This is a test ...\n&#39;, []),
-    flush_input(user_input).</code></pre>
+    printf(user_output, 'This is a test ...\n', []),
+    flush_input(user_input).
+</code></pre></div></div>
 <p>and replace the call considered above by:</p>
-<p>?- extend_main_menubar(‘Test Extend’, [‘Test Entry #1’ + tcl(‘bell’), ‘Test Entry #2’ + test_write]).</p>
-<p>Then the appearance of the main menu and the new pulldown will be the same, but chooseing <code>Test Entry #1</code> will cause the bell to ring, and choosing <code>Test Entry #2</code> will cause</p>
-<pre><code>This is a test ...</code></pre>
+
+<p>?- extend_main_menubar(‘Test Extend’, 
+                [‘Test Entry #1’ + tcl(‘bell’), 
+                 ‘Test Entry #2’ + test_write]).</p>
+
+<p>Then the appearance of the main menu and the new pulldown will be the same, but chooseing <code class="highlighter-rouge">Test Entry #1</code> will cause the bell to ring, and choosing <code class="highlighter-rouge">Test Entry #2</code> will cause</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>This is a test ...
+</code></pre></div></div>
 <p>to be written on the listener console.</p>
+
 <p>Note that the following is the case :</p>
-<pre><code>?- menu_entries_list(shl_tcli, &#39; .topals.mmenb &#39;, EntriesList).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- menu_entries_list(shl_tcli, ' .topals.mmenb ', EntriesList).
 
-EntriesList = [File, Edit, Prolog, Tools, Help].</code></pre>
+EntriesList = [File, Edit, Prolog, Tools, Help].
+</code></pre></div></div>
 <p>And,</p>
-<pre><code>?- path_to_main_menu_entry(4, SubMenuPath).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- path_to_main_menu_entry(4, SubMenuPath).
 
-SubMenuPath = .topals.mmenb.help</code></pre>
+SubMenuPath = .topals.mmenb.help
+</code></pre></div></div>
 <p>Finally,</p>
-<pre><code>?- add_to_main_menu_entry(3, &#39;My Entry&#39; + test_write).</code></pre>
-<p>will add an entry at the end of the <code>Tools</code> cascade.</p>
-</body>
-</html>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- add_to_main_menu_entry(3, 'My Entry' + test_write).
+</code></pre></div></div>
+<p>will add an entry at the end of the <code class="highlighter-rouge">Tools</code> cascade.</p>
+

@@ -1,62 +1,59 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>call/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">call/1</h1>
-</header>
-<p><code>call/1</code> — calls a goal</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>call(Goal)
 
-Goal</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>call(Goal)
+
+Goal
+</code></pre></div></div>
+
 <h2 id="description">DESCRIPTION</h2>
-<p>If <code>Goal</code> is instantiated to a structured term or atom which would be acceptable as the body of a clause, the goal <code>call(Goal)</code> is executed exactly as if that term appeared textually in place of the expression <code>call(Goal)</code>.</p>
+
+<p>If <code class="highlighter-rouge">Goal</code> is instantiated to a structured term or atom which would be acceptable as the body of a clause, the goal <code class="highlighter-rouge">call(Goal)</code> is executed exactly as if that term appeared textually in place of the expression <code class="highlighter-rouge">call(Goal)</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<p>The following example illustrates the use of <code>call/1</code>; first we consult user to input some clauses (note that a newline must be input after each line, and that ^D indicates typing control-D to close user):</p>
-<pre><code>?- [user].
-jim :- printf(&quot;Hello this is Jim Rockford.\n&quot;),
-printf(&quot;Please leave your name and number,\n&quot;),
-printf(&quot;and I&#39;ll get back to you.\n&quot;).
+
+<p>The following example illustrates the use of <code class="highlighter-rouge">call/1</code>; first we consult user to input some clauses (note that
+a newline must be input after each line, and that ^D indicates typing control-D to close user):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- [user].
+jim :- printf("Hello this is Jim Rockford.\n"),
+printf("Please leave your name and number,\n"),
+printf("and I'll get back to you.\n").
 ^D
-yes.</code></pre>
-<pre><code>?- call(jim).
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- call(jim).
 Hello this is Jim Rockford.
 Please leave your name and number,
-and I&#39;ll get back to you.
-yes.</code></pre>
+and I'll get back to you.
+yes.
+</code></pre></div></div>
+
 <p>The following example shows how an instantiated variable can be used to run a goal:</p>
-<pre><code>?- Goal=write(Message), Message=&#39;WrongWay!&#39;, Goal, nl.
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- Goal=write(Message), Message='WrongWay!', Goal, nl.
 WrongWay!
 
-Goal=write(&#39;WrongWay!&#39;)
-Message=&#39;WrongWay!&#39;
+Goal=write('WrongWay!')
+Message='WrongWay!'
 
-yes.</code></pre>
-<p>Note that the last two lines <code>Goal=...</code> and <code>Message=..</code> are the Prolog interpreter providing answer values for the variables in the successful query.</p>
+yes.
+</code></pre></div></div>
+<p>Note that the last two lines <code class="highlighter-rouge">Goal=...</code> and <code class="highlighter-rouge">Message=..</code> are the Prolog interpreter providing answer values for the variables in the successful query.</p>
+
 <h2 id="errors">ERRORS</h2>
+
 <p>If Goal is an uninstantiated variable or a number, call/1 will fail.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>!/0</code><br />
-<code>:/2</code></p></li>
-<li>[Clocksin 81, 6.7]</li>
-<li>[Bratko 86, 7.2]</li>
-<li><p>[Sterling 86, 10.4]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">!/0</code><br />
+<code class="highlighter-rouge">:/2</code></p>
+  </li>
+  <li>[Clocksin 81, 6.7]</li>
+  <li>[Bratko 86, 7.2]</li>
+  <li>[Sterling 86, 10.4]</li>
 </ul>
-</body>
-</html>
+

@@ -1,0 +1,54 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Arg1 = Arg2
+
+Arg1 \= Arg2
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p>The procedure <code class="highlighter-rouge">=/2</code> calls the Prolog unifier to unify <code class="highlighter-rouge">Arg1</code> and <code class="highlighter-rouge">Arg2</code>, binding variables if necessary. The occurs check is not performed. <code class="highlighter-rouge">=/2</code> is defined as if by the clause :</p>
+
+<p><code class="highlighter-rouge">Term = Term.</code></p>
+
+<p>If the two terms cannot be unified, <code class="highlighter-rouge">=</code> fails. The procedure <code class="highlighter-rouge">\=</code> succeeds if the two terms cannot be unified. This is different than the <code class="highlighter-rouge">=\=</code> and the <code class="highlighter-rouge">\==</code> procedures.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<p>The following examples illustrate the use of <code class="highlighter-rouge">=</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- f(A,A)=f(a,B).
+A=a
+B=a
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- f(A,A)=f(a,b).
+no.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- X=f(X).
+X=f(f(f(f(f(f(f(f(f(f(f(...)))))))))))
+?- X\=1
+no.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- X\==1
+X=_3
+yes.
+</code></pre></div></div>
+
+<p>Note that in the next to last example, the depth of the printing is much deeper than shown here.</p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">==/2</code></li>
+  <li><code class="highlighter-rouge">\==/2</code></li>
+  <li><code class="highlighter-rouge">eq</code></li>
+  <li><code class="highlighter-rouge">noneq</code></li>
+  <li>[Bowen 91, 4.6]</li>
+  <li>[Bratko 86, 2.7]</li>
+  <li>[Clocksin 81, 6.8]</li>
+  <li>[Sterling 86, 4.1]</li>
+</ul>

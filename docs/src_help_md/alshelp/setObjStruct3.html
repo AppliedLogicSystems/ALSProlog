@@ -1,0 +1,47 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>setObjStruct(SlotDescrip, State, Value)
+
+accessObjStruct(SlotDescrip, State, VarOrValue)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p>The predicates provide access to the slots of objects. The call</p>
+
+<p><code class="highlighter-rouge">setObjStruct(SlotName, State, Value)</code></p>
+
+<p>destructively updates the slot <code class="highlighter-rouge">SlotName</code> of <code class="highlighter-rouge">State</code> to contain <code class="highlighter-rouge">Value</code>, which cannot be an uninstantiated variable, provided that any constraints imposed on this slot by the class are satisfied by the incoming <code class="highlighter-rouge">Value</code>. However, <code class="highlighter-rouge">Value</code> can contain uninstantiated variables. The second call</p>
+
+<p><code class="highlighter-rouge">accessObjStruct(SlotName, State, Value)</code></p>
+
+<p>accesses the slot <code class="highlighter-rouge">SlotName</code> of <code class="highlighter-rouge">State</code> and unifies the value obtained with <code class="highlighter-rouge">VarOrValue</code>.
+<code class="highlighter-rouge">SlotDescrip</code> is a slot description, which is either a slot name, or an expression of the form</p>
+
+<p><code class="highlighter-rouge">SlotName^SlotDescrip</code></p>
+
+<p>The latter is used in cases of compound objects in which the value installed in a slot may be the state of another object. Thus,</p>
+
+<p><code class="highlighter-rouge">&lt;what&gt;ObjStruct(Slot1^Slot2, State, Value)</code></p>
+
+<p>is equivalent to</p>
+
+<p><code class="highlighter-rouge">accessObjStruct(Slot1, State, Obj1),</code>  <br />
+<code class="highlighter-rouge">&lt;what&gt;ObjStruct(Slot2, Obj1, Value)</code></p>
+
+<p>For compactness, the following syntactic sugar is provided:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>State^SlotDescrip := Value
+for
+setObjStruct(SlotDescrip, State, Value)
+and
+VarOrValue := State^SlotDescrip
+for
+accessObjStruct(SlotDescrip, State, VarOrValue)
+</code></pre></div></div>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>setObjStruct(theStack, State, [Item | CurStack])
+accessObjStruct(theStack, State, Stack)
+</code></pre></div></div>

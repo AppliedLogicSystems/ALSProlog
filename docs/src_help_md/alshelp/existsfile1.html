@@ -1,36 +1,17 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>exists_file/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">exists_file/1</h1>
-</header>
-<p><code>exists_file/1</code> — tests whether a file exists</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>exists_file(Filename)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>exists_file(Filename)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>Filename</code> is an atom representing a file name, or a path name (possibly to a directory). <code>exists_file/1</code> succeeds if the indicated file or directory actually exists, and fails otherwise.</p>
+
+<p><code class="highlighter-rouge">Filename</code> is an atom representing a file name, or a path name (possibly to a directory). <code class="highlighter-rouge">exists_file/1</code> succeeds if the indicated file or directory actually exists, and fails otherwise.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?-exists_file(&#39;foo.pro&#39;).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?-exists_file('foo.pro').
 
 yes.
 
-?-exists_file(&#39;../mydir/test.pro&#39;).
+?-exists_file('../mydir/test.pro').
 
-yes.</code></pre>
-</body>
-</html>
+yes.
+</code></pre></div></div>
+

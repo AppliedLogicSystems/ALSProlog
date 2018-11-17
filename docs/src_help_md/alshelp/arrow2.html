@@ -1,59 +1,65 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>-&gt;/2(arrow)</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">-&gt;/2(arrow)</h1>
-</header>
-<p><code>-&gt;/2</code> — if-then, and if-then-else</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>Condition -&gt; TrueGoal
 
-Condition -&gt; TrueGoal ; FalseGoal</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Condition -&gt; TrueGoal
+
+Condition -&gt; TrueGoal ; FalseGoal
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>If <code>Condition</code> succeeds, then <code>TrueGoal</code> will be executed. <code>If-then</code> implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to -&gt;/2 fails. The second form, results from the interaction between ;/2 and -&gt;/2 because</p>
-<pre><code>Condition -&gt; TrueGoal ; FalseGoal</code></pre>
+
+<p>If <code class="highlighter-rouge">Condition</code> succeeds, then <code class="highlighter-rouge">TrueGoal</code> will be executed. <code class="highlighter-rouge">If-then</code> implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to -&gt;/2 fails. The second form, results from the interaction between ;/2 and
+-&gt;/2 because</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Condition -&gt; TrueGoal ; FalseGoal
+</code></pre></div></div>
+
 <p>is actually executed as :</p>
-<pre><code>( Condition -&gt; TrueGoal) ; FalseGoal</code></pre>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>( Condition -&gt; TrueGoal) ; FalseGoal
+</code></pre></div></div>
+
 <p>In this case, FalseGoal will be executed instead of TrueGoal when Condition fails.</p>
+
 <p>Cuts occurring in</p>
+
 <ul>
-<li><p><code>Condition</code></p></li>
-<li><p><code>TrueGoal</code></p></li>
-<li><p><code>FalseGoal</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">Condition</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">TrueGoal</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">FalseGoal</code></p>
+  </li>
 </ul>
+
 <p>cut back to the head of the parent clause.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- true-&gt;write(a).
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- true-&gt;write(a).
 a
-yes.</code></pre>
-<pre><code>?- fail-&gt;write(a).
-no.</code></pre>
-<pre><code>?- fail-&gt;write(a);write(b).
+yes.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- fail-&gt;write(a).
+no.
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- fail-&gt;write(a);write(b).
 b
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>!/0</code><br />
-<code>not/1</code></p></li>
-<li>[Bowen 91, 7.1]</li>
-<li>[Sterling 86, 11]</li>
-<li>[Bratko 86, 5.1]</li>
-<li><p>[Clocksin 81, 4.2]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">!/0</code><br />
+<code class="highlighter-rouge">not/1</code></p>
+  </li>
+  <li>[Bowen 91, 7.1]</li>
+  <li>[Sterling 86, 11]</li>
+  <li>[Bratko 86, 5.1]</li>
+  <li>[Clocksin 81, 4.2]</li>
 </ul>
-</body>
-</html>

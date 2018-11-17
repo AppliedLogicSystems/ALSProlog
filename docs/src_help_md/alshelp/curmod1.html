@@ -1,35 +1,17 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>curmod/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">curmod/1</h1>
-</header>
-<p><code>curmod/1</code> — get the current module</p>
-<p><code>modules/2</code> — get the use list of a module</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>curmod(Module)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curmod(Module)
 
-modules(Module, Uselist)</code></pre>
+modules(Module, Uselist)
+</code></pre></div></div>
+
 <h2 id="description">DESCRIPTION</h2>
-<p><code>curmod/1</code> instantiates Module to the current module.</p>
-<p><code>modules(Module, Uselist)</code> instantiates <code>Uselist</code> to the list of modules declared to be used by <code>Module</code>, provided Module is a valid module, and fails otherwise. Note that the list of modules explicitly used by <code>Module</code> is extended by the list of implicitly used modules, which include: <code>xconsult,debugger,sio,builtins,user</code>.</p>
+
+<p><code class="highlighter-rouge">curmod/1</code> instantiates Module to the current module.</p>
+
+<p><code class="highlighter-rouge">modules(Module, Uselist)</code> instantiates <code class="highlighter-rouge">Uselist</code> to the list of modules declared to be used by <code class="highlighter-rouge">Module</code>, provided Module is a valid module, and fails otherwise. Note that the list of modules explicitly used by <code class="highlighter-rouge">Module</code> is extended by the list of implicitly used modules, which include:  <code class="highlighter-rouge">xconsult,debugger,sio,builtins,user</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- curmod(Module).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- curmod(Module).
 
 Module = user
 
@@ -56,6 +38,5 @@ m = foobar
 
 Y=a 
 
-yes.</code></pre>
-</body>
-</html>
+yes.
+</code></pre></div></div>

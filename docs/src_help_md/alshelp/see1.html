@@ -1,0 +1,54 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>see(File)
+
+seeing(File)
+
+seen
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">see/1</code> sets the current input stream to the file named <code class="highlighter-rouge">File</code>. If <code class="highlighter-rouge">File</code> is already open for input, the existing file descriptor will be used. Otherwise, a new file descriptor will be allocated, and input operations will start at the beginning of the file.</p>
+
+<p><code class="highlighter-rouge">seeing/1</code> unifies <code class="highlighter-rouge">File</code> with the name of the current input stream. If no stream has been explicitly opened by <code class="highlighter-rouge">see/1</code>, then file will be unified with the atom user.</p>
+
+<p><code class="highlighter-rouge">seen/0</code> closes the current input stream and deallocates its file descriptor. The current input stream is then set to the special file
+<code class="highlighter-rouge">user</code>.</p>
+
+<p><code class="highlighter-rouge">user</code> is the name of the default input stream which is normally connected to the keyboard. The special file user is always present, and <code class="highlighter-rouge">seen/0</code> can never close it. Although <code class="highlighter-rouge">seen/0</code> can never close the file <code class="highlighter-rouge">user</code>, <code class="highlighter-rouge">seen/0</code> will reset the user I/O descriptor as follows. If a <code class="highlighter-rouge">read/n</code> has been executed from <code class="highlighter-rouge">user</code>, and if an end of file character sequence is encountered (Control-D on Unix or the Mac, or Control-Z on Windows), then the <code class="highlighter-rouge">read/n</code> returns <code class="highlighter-rouge">end_of_file</code> and a subsequent <code class="highlighter-rouge">seen/0</code> on user will reset the I/O descriptor for <code class="highlighter-rouge">user</code> so that the EOF condition is no longer present.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<p>The following program will</p>
+
+<ul>
+  <li>preserve the current input stream</li>
+  <li>open a file</li>
+  <li>read one term from it</li>
+  <li>restore the previous input stream</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>firstTerm(File, Term) :-
+    seeing(CurrentInput),
+    see(File),
+    read(Term),
+    seen,
+    see(CurrentInput).
+</code></pre></div></div>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">see/1</code></li>
+  <li><code class="highlighter-rouge">seeing/1</code></li>
+  <li><code class="highlighter-rouge">seen/1</code></li>
+  <li><code class="highlighter-rouge">open/3</code></li>
+  <li><code class="highlighter-rouge">open/4</code></li>
+  <li><code class="highlighter-rouge">close/1</code></li>
+  <li><code class="highlighter-rouge">close/2</code></li>
+  <li>User Guide (Prolog I/O)</li>
+  <li>[Bowen 91, 7.8]</li>
+  <li>[Clocksin 81, 5.4]</li>
+  <li>[Bratko 86, 6.1]</li>
+</ul>

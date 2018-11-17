@@ -1,40 +1,28 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>halt/0</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">halt/0</h1>
-</header>
-<p><code>halt/0</code> — exit ALS Prolog</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>halt</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>halt
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>halt/0</code> causes the ALS Prolog system to exit, returning control to the operating system shell. It can either be invoked from the top level of the ALS Prolog shell, or from within a running program.</p>
+
+<p><code class="highlighter-rouge">halt/0</code> causes the ALS Prolog system to exit, returning control to the operating system shell. It can either be invoked from the top level of the ALS Prolog shell, or from within a running program.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>In this example, halt/0 is called from the Prolog shell on a Unix C shell system on a machine named ‘wizard’:</p>
-<pre><code>?- halt.
-wizard%</code></pre>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- halt.
+wizard%
+</code></pre></div></div>
 <h2 id="notes">NOTES</h2>
-<p>On most systems, typing the end of file characters after the <code>?-</code> prompt of the Prolog shell will also cause ALS Prolog to exit to the operating system shell. On Unix, the end of file character is entered by typing <code>Control-D</code>. On DOS and Win32, the end of file character is <code>Control-Z</code>. On the Mac, either <code>Control-D</code> or <code>Control-Z</code> can be used as the end of file character; in addition, the <code>Quit</code> menu can also be used.</p>
+
+<p>On most systems, typing the end of file characters after the <code class="highlighter-rouge">?-</code> prompt of the Prolog shell will also cause ALS Prolog to exit to the operating system shell. On Unix, the end of file character is entered by typing <code class="highlighter-rouge">Control-D</code>. On DOS and Win32, the end of file character is <code class="highlighter-rouge">Control-Z</code>. On the Mac, either <code class="highlighter-rouge">Control-D</code> or <code class="highlighter-rouge">Control-Z</code> can be used as the end of file character; in addition, the <code class="highlighter-rouge">Quit</code> menu can also be used.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><code>abort/0</code></li>
+  <li><code class="highlighter-rouge">abort/0</code></li>
 </ul>
+
 <h2 id="bugs">BUGS</h2>
-<p><code>halt/0</code> does not close any streams nor does it flush their output buffers.</p>
-</body>
-</html>
+
+<p><code class="highlighter-rouge">halt/0</code> does not close any streams nor does it flush their output buffers.</p>
+

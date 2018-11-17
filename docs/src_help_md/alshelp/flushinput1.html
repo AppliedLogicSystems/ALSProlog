@@ -1,44 +1,38 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>flush_input/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">flush_input/1</h1>
-</header>
-<p><code>flush_input/1</code> — discard buffer contents of stream</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>flush_input(Stream_or_Alias)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>flush_input(Stream_or_Alias)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>flush_input/1</code> will cause the buffer contents associated with the input stream <code>Stream_or_Alias</code> to be discarded. This will cause the next input operation to read in a new buffer from the source attached to <code>Stream_or_Alias</code>.</p>
+
+<p><code class="highlighter-rouge">flush_input/1</code> will cause the buffer contents associated with the input stream <code class="highlighter-rouge">Stream_or_Alias</code> to be discarded. This will cause the next input operation to read in a new buffer from the source attached to <code class="highlighter-rouge">Stream_or_Alias</code>.</p>
+
 <h2 id="errors">ERRORS</h2>
-<p><code>Stream_or_Alias</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
 <p>– – – – &gt; domain_error(stream_or_alias, Stream_or_Alias)</p>
-<p><code>Stream_or_Alias</code> is not an input stream</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an input stream</p>
+
 <p>– – – – &gt; permission_error(input, stream, Stream_or_Alias)</p>
+
 <h2 id="notes">NOTES</h2>
+
 <p>This operation is useful on streams which have an associated output stream on which prompts are being written to. Flushing the input and then performing the requisite input operation will cause a prompt to be written out prior to reading input.</p>
-<p>This operation is also useful for use with datagram sockets. The buffer contents associated with a datagram socket represent the entire datagram. When the end of the datagram is reached, an <code>end-of-file</code> condition will be triggered so that the program reading the datagram will not inadvertently read beyond the datagram into the next datagram (if any). <code>flush_input/1</code> should be used to reset the <code>end-of-file</code> indication after the datagram has been processed.</p>
+
+<p>This operation is also useful for use with datagram sockets. The buffer contents associated with a datagram socket represent the entire datagram. When the end of the datagram is reached, an <code class="highlighter-rouge">end-of-file</code> condition will be triggered so that the program reading the datagram will not inadvertently read beyond the datagram into the next datagram (if any). <code class="highlighter-rouge">flush_input/1</code> should be used to reset the <code class="highlighter-rouge">end-of-file</code> indication after the datagram has been processed.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>open/[3,4]</code><br />
-`flush_output/[0,1]</p></li>
-<li><p><code>User Guide (Prolog I/O)</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">open/[3,4]</code><br />
+`flush_output/[0,1]</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">User Guide (Prolog I/O)</code></p>
+  </li>
 </ul>
-</body>
-</html>

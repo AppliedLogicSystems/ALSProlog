@@ -1,34 +1,14 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>==/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">==/2</h1>
-</header>
-<p><code>==/2</code> — terms are identical</p>
-<p><code>\==/2</code> — terms are not identical</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>Term1 == Term2
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Term1 == Term2
 
-Term1 \== Term2</code></pre>
+Term1 \== Term2
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>Term1</code> is identical to <code>Term2</code> (<code>Term1 == Term2</code>) if they can be unified, and variables occupying equivalent positions in both terms are identical. For atoms and variables, this is an absolute identity check. Viewing Prolog terms as trees in memory, <code>==/2</code> determines whether <code>Term1</code> and <code>Term2</code> are isomorphic trees whose leaves are identical. Unlike <code>=/2</code>, no variables are bound inside a call to <code>==/2</code>. <code>\==/2</code> fails when <code>==/2</code> succeeds, and conversely.</p>
+
+<p><code class="highlighter-rouge">Term1</code> is identical to <code class="highlighter-rouge">Term2</code> (<code class="highlighter-rouge">Term1 == Term2</code>) if they can be unified, and variables occupying equivalent positions in both terms are identical. For atoms and variables, this is an absolute identity check. Viewing Prolog terms as trees in memory, <code class="highlighter-rouge">==/2</code> determines whether <code class="highlighter-rouge">Term1</code> and <code class="highlighter-rouge">Term2</code> are isomorphic trees whose leaves are identical. Unlike <code class="highlighter-rouge">=/2</code>, no variables are bound inside a call to <code class="highlighter-rouge">==/2</code>.   <code class="highlighter-rouge">\==/2</code>  fails when <code class="highlighter-rouge">==/2</code> succeeds, and conversely.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- bar \== foo.
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- bar \== foo.
 
 yes.
 
@@ -45,12 +25,13 @@ no.
 no.
 
 ?- [a,b,c]\==[a,b,c].
-no.</code></pre>
+no.
+</code></pre></div></div>
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li>[Bowen 91, 7.4]</li>
-<li>[Clocksin 81, 6.8]</li>
-<li>[Bratko 86, 3.4]</li>
+  <li>[Bowen 91, 7.4]</li>
+  <li>[Clocksin 81, 6.8]</li>
+  <li>[Bratko 86, 3.4]</li>
 </ul>
-</body>
-</html>
+

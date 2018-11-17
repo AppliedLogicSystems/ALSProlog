@@ -1,0 +1,182 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>write(Term)
+
+write(Stream_or_Alias, Term)
+
+writeq(Term)
+
+writeq(Stream_or_Alias, Term)
+
+write_canonical(Term)
+
+write_canonical(Stream_or_Alias, Term)
+
+write_term(Term, Options)
+
+write_term(Stream_or_Alias, Term, Options)
+
+display(Term)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p>These predicates will output the term bound to <code class="highlighter-rouge">Term</code> to a stream. The format of the term is controlled by which variant is called or by an option given to <code class="highlighter-rouge">write_term</code>. None of these procedures output a fullstop after the term written.</p>
+
+<p><code class="highlighter-rouge">write/1</code> behaves as if <code class="highlighter-rouge">write/2</code> were called with the current output stream as the <code class="highlighter-rouge">Stream_or_Alias</code> argument.</p>
+
+<p><code class="highlighter-rouge">write/2</code> behaves as if <code class="highlighter-rouge">write_term/3</code> were called with <code class="highlighter-rouge">Options</code> bound to</p>
+
+<p><code class="highlighter-rouge">[quoted(false), numbervars(true), lettervars(false), line_length(1024)]</code></p>
+
+<p>In addition, the default line length is ignored and set to a large number, causing the output of long terms to not be pretty printed. Variables are printed as underscore followed by some number.</p>
+
+<p><code class="highlighter-rouge">writeq/1</code> behaves as if <code class="highlighter-rouge">writeq/2</code> were called with the current output stream as the <code class="highlighter-rouge">Stream_or_Alias</code> argument.</p>
+
+<p><code class="highlighter-rouge">writeq/2</code> behaves as if <code class="highlighter-rouge">write_term/3</code> were called with <code class="highlighter-rouge">Options</code> bound to</p>
+
+<p><code class="highlighter-rouge">[quoted(true), numbervars(true), lettervars(true) ]</code></p>
+
+<p>The line length is set to the default line length for the stream which is being output to. Variables are printed as an underscore followed by a capital letter. writeq is useful for outputting a term whichmight be later subject to a read from Prolog.</p>
+
+<p><code class="highlighter-rouge">write_canonical/1</code> behaves as if <code class="highlighter-rouge">write_canonical/2</code> were called with the current output stream bound to the <code class="highlighter-rouge">Stream_or_Alias</code> argument.</p>
+
+<p><code class="highlighter-rouge">write_canonical/2</code> behaves as if <code class="highlighter-rouge">write_term/3</code> were called with <code class="highlighter-rouge">Options</code> bound to</p>
+
+<p><code class="highlighter-rouge">[quoted(true), ignore_ops(true), lettervars(true) ]</code></p>
+
+<p>This is the same behavior supplied by the DEC-10 compatiblity predicate <code class="highlighter-rouge">display/1</code>. <code class="highlighter-rouge">write_canonical</code> is useful in situations where it is desirable to output a term in a format which may subsequently read in without regard to operator definitions. Such terms are not particularly pleasing to look at, however.</p>
+
+<p><code class="highlighter-rouge">write_term/2</code> behaves as if <code class="highlighter-rouge">write_term/3</code> were called with the current output stream bound to <code class="highlighter-rouge">Stream_or_Alias</code>.</p>
+
+<p><code class="highlighter-rouge">write_term/3</code> writes out the term <code class="highlighter-rouge">Term</code> to the output stream associated with <code class="highlighter-rouge">Stream_or_Alias</code> and subject to the options in the write option list <code class="highlighter-rouge">Options</code>. The options in the write options list control how a term is output.</p>
+
+<p>The options mandated by the draft standard are :</p>
+
+<p><code class="highlighter-rouge">quoted(Bool)</code> – <code class="highlighter-rouge">Bool</code> is true or false. When <code class="highlighter-rouge">Bool</code> is true, atoms and functors are written out in such a manner so that <code class="highlighter-rouge">read/[1, 2]</code> may be used to read them back in; when <code class="highlighter-rouge">Bool</code> is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.</p>
+
+<p><code class="highlighter-rouge">ignore_ops(Bool)</code> – <code class="highlighter-rouge">Bool</code> may be true or false. When <code class="highlighter-rouge">Bool</code> is true, compound terms are output in functional notation.</p>
+
+<p><code class="highlighter-rouge">numbervars(Bool)</code> – When <code class="highlighter-rouge">Bool</code> is true, a term of the form <code class="highlighter-rouge">' $VAR '(N)</code>, where <code class="highlighter-rouge">N</code> is a non-negative integer, will be output as a variable name consisting of a capital letter possibly followed by an integer. The capital letter is the (i + 1) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N div 26 The integer j is omitted if it is zero.</p>
+
+<p>Other options not mandated by the draft standard but supported by ALS Prolog are :</p>
+
+<p><code class="highlighter-rouge">lettervars(Bool)</code> – If <code class="highlighter-rouge">Bool</code> is true, variables will be printed out as an underscore followed by a letter and digits if necessary. If <code class="highlighter-rouge">Bool</code> is false, variables will be printed as <code class="highlighter-rouge">_N</code>, where <code class="highlighter-rouge">N</code> is computed using the address where the variable lives at. This latter mode is more suited to debugging purposes where correspondences between variables in various calls is required.</p>
+
+<p><code class="highlighter-rouge">maxdepth(N, Atom1, Atom2)</code> – <code class="highlighter-rouge">N</code> is the maximum depth to print to. <code class="highlighter-rouge">Atom1</code> is the atom to output when this depth has been reached. <code class="highlighter-rouge">Atom2</code> is the atom to output when this depth has been reached at the tail of a list.</p>
+
+<p><code class="highlighter-rouge">maxdepth(N)</code> – same as <code class="highlighter-rouge">maxdepth(N, *, ...)</code></p>
+
+<p><code class="highlighter-rouge">depth_computation(Val)</code> – <code class="highlighter-rouge">Val</code> may be either flat or nonflat. This indicates the method of depth computation. If <code class="highlighter-rouge">Val</code> is bound to flat, all arguments of a term or list will be treated as being at the same depth. If <code class="highlighter-rouge">Val</code> is nonflat, then each subsequent argument in a term (or each subsequent element of a list) will be considered to be at a depth one greater than the preceding structure argument (or list element).</p>
+
+<p><code class="highlighter-rouge">line_length(N)</code> – <code class="highlighter-rouge">N</code> is the length in characters of the output line. The pretty printer will attempt to break lines before they exceed the given line length.</p>
+
+<p><code class="highlighter-rouge">indent(N)</code> – <code class="highlighter-rouge">N</code> specifies the initial indentation in characters to use for the second and subsequent lines output (if any).</p>
+
+<p><code class="highlighter-rouge">quoted_strings(Bool)</code> – If <code class="highlighter-rouge">Bool</code> is true, lists of suitable character codes will print out as double quoted strings. If false, these lists will print out as lists of small integers.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- X='Hello\tthere',
+?-_write(X),nl,
+?-_writeq(X),nl,
+?-_write_canonical(X),nl.
+Hellothere
+'Hello\tthere'
+'Hello\tthere'
+X='Hello\tthere'
+
+?- T=[3+4,'$VAR'(26)*X-'Y'],
+?-_write(T),nl,
+?-_writeq(T),nl,
+?-_write_canonical(T),nl.
+[3+4,A1*_4100-Y]
+[3+4,A1*_A-'Y']
+.(+(3,4),.(-(*('$VAR'(26),_A),'Y'),[]))
+T=[3+4,'$VAR'(26)*X-'Y']
+X=X
+
+?- L=
+[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z],
+
+?-_write_term(L,[line_length(20)]),nl,
+?-_write('list:'),
+?-_write_term(L,[line_length(26),indent(6)]),nl.
+[a,b,c,d,e,f,g,h,i,
+j,k,l,m,n,o,p,
+q,r,s,t,u,v,w,
+x,y,z]
+list:[a,b,c,d,e,f,g,h,i,
+j,k,l,m,n,o,p,
+q,r,s,t,u,v,w,
+x,y,z]
+L=[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]
+
+?- S="Astring",
+?-_write_term(S,[quoted_strings(true)]),nl,
+?-_write_term(S,[quoted_strings(false)]),nl.
+"Astring"
+[65,32,115,116,114,105,110,103]
+S="Astring"
+
+?- T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))],
+?-_write_term(T,[maxdepth(3),depth_computation(flat)]),nl,
+?-_write_term(T,[maxdepth(3),depth_computation(nonflat)]),nl.
+[a(b(*)),a(b(*)),a(b(*)),a(b(*))]
+[a(b(*)),a(*),*,...]
+T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(stream_or_alias, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">existence_error(stream, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an output stream</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">permission_error(output, stream, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Options</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Options</code> is neither a variable nor a list</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(list, Option)</code></p>
+
+<p><code class="highlighter-rouge">Options</code> is a list an element of which is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Options</code> is a list containing an element <code class="highlighter-rouge">E</code> which is neither a variable nor a valid write option</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(write_option, E)</code></p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">read_term/[2,3]</code></li>
+  <li><code class="highlighter-rouge">read/[1,2]</code></li>
+  <li><code class="highlighter-rouge">open/4</code></li>
+  <li><code class="highlighter-rouge">close/1</code></li>
+  <li><code class="highlighter-rouge">nl/[0,1]</code></li>
+  <li><code class="highlighter-rouge">put_char/[1,2]</code></li>
+  <li><code class="highlighter-rouge">put_code/[1,2]</code></li>
+  <li><code class="highlighter-rouge">set_line_length/2</code></li>
+  <li><code class="highlighter-rouge">op/3</code></li>
+  <li><code class="highlighter-rouge">tell/1</code></li>
+  <li>User Guide (Prolog I/O)</li>
+  <li>[Bowen 91, 7.8]</li>
+  <li>[Clocksin 81, 6.9]</li>
+  <li>[Sterling 86, 12.1]</li>
+  <li>[Bratko 86, 6.2.1]</li>
+</ul>

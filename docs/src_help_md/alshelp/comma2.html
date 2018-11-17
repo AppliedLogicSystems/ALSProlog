@@ -1,32 +1,16 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>,/2 (comma)</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">,/2 (comma)</h1>
-</header>
-<p><code>,/2</code> — conjunction of two goals</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>FirstGoal, SecondGoal</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FirstGoal, SecondGoal
+</code></pre></div></div>
+
 <h2 id="description">DESCRIPTION</h2>
-<p>The first argument, <code>FirstGoal</code>, is called as a goal. If it succeeds, then the <code>SecondGoal</code> will be run. If either goal fails, the most recent alternative will be attempted after backtracking.</p>
+
+<p>The first argument, <code class="highlighter-rouge">FirstGoal</code>, is called as a goal. If it succeeds, then the <code class="highlighter-rouge">SecondGoal</code> will be run. If either goal fails, the most recent alternative will be attempted after backtracking.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<p>The following example shows the use of the ‘,’ connector :</p>
-<pre><code>?- listing.
+
+<p>The following example shows the use of the ‘, ‘ connector :</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing.
 lucky(mick,love).
 boss(mick,jerri).
 yes.
@@ -35,26 +19,42 @@ yes.
 Who=mick
 What=love
 Boss=jerri
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <p>The goal submitted to the Prolog shell consists of two subgoals</p>
+
 <ul>
-<li><p><code>lucky(Who, What)</code></p></li>
-<li><p><code>boss(Who, Boss)</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">lucky(Who, What)</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">boss(Who, Boss)</code></p>
+  </li>
 </ul>
-<p>The subgoals are connected together by using the <code>','</code> connective. In the next example, the first subgoal fails, so the second subgoal is not executed :</p>
-<pre><code>?- fail,write(&#39;Help, I am stuck in an example&#39;),nl.
-no.</code></pre>
-<p>The following shows that ‘,’ works the same in call/1 :</p>
-<pre><code>?- call((fail,write(&#39;Help, I am stuck in an example&#39;),nl)).
-no.</code></pre>
+
+<p>The subgoals are connected together by using the <code class="highlighter-rouge">','</code> connective. In the next example, the first subgoal fails, so the second subgoal is not executed :</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- fail,write('Help, I am stuck in an example'),nl.
+no.
+</code></pre></div></div>
+
+<p>The following shows that ‘, ‘ works the same in call/1 :</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- call((fail,write('Help, I am stuck in an example'),nl)).
+no.
+</code></pre></div></div>
+
 <p>Note that the parentheses around the argument to call/1 are to keep the parser from creating a call to call/3.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>call/1</code><br />
-<code>:/2</code><br />
-<code>;/2</code></p></li>
-<li>[Bratko 86, 2.3]</li>
-<li><p>[Clocksin 81, 6.7]`</p></li>
+  <li>
+    <p><code class="highlighter-rouge">call/1</code><br />
+<code class="highlighter-rouge">:/2</code><br />
+<code class="highlighter-rouge">;/2</code></p>
+  </li>
+  <li>[Bratko 86, 2.3]</li>
+  <li>[Clocksin 81, 6.7]`</li>
 </ul>
-</body>
-</html>

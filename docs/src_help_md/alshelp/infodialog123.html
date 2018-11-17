@@ -1,51 +1,39 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>info_dialog/[1,2,3]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">info_dialog/[1,2,3]</h1>
-</header>
-<p><code>info_dialog/ [1,2,3]</code> — present an information dialog</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>info_dialog(Msg)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>info_dialog(Msg)
 
 info_dialog(Msg, Title)
 
-info_dialog(Interp, Msg, Title)</code></pre>
+info_dialog(Interp, Msg, Title)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>These information dialogs present popup dialogs, with information and a single button, to the user. The shorter versions are defined by :</p>
-<pre><code>info_dialog(Msg) 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>info_dialog(Msg) 
     :-
-    info_dialog(Msg, &#39;Info&#39;).
+    info_dialog(Msg, 'Info').
 
 info_dialog(Msg, Title) 
     :-
-    info_dialog(tcli, Msg, Title).</code></pre>
-<p>Here <code>Msg, Title,</code> and <code>Interp</code> are all prolog atoms.</p>
+    info_dialog(tcli, Msg, Title).
+</code></pre></div></div>
+
+<p>Here <code class="highlighter-rouge">Msg, Title,</code> and <code class="highlighter-rouge">Interp</code> are all prolog atoms.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>The call</p>
-<pre><code>?- info_dialog(&#39;Message for the User&#39;, &#39;Dialog Box Title&#39;).</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- info_dialog('Message for the User', 'Dialog Box Title').
+</code></pre></div></div>
 <p>produces this information dialog:</p>
-<p><img src="images/info_dialog_box.gif" /></p>
+
+<p><img src="images/info_dialog_box.gif" alt="" /></p>
+
 <h2 id="notes">NOTES</h2>
-<p>The default Tcl interpreter for <code>info_dialog/[1,2]</code> is <code>tcli</code> as shown above. This interpreter is <em><em>NOT</em></em> automatically intialized by alsdev. You must first run <code>init_tk_alslib/0</code> or <code>init_tk_alslib/1</code>, or run <code>init_tk_alslib/2</code> with <code>Interp = tcli</code>. If you wish to run <code>info_dialog/3</code> with <code>Interp</code> bound to a Tcl interpreter <code>I</code> other than <code>tcli</code>, you must first run <code>init_tk_alslib/2</code> with <code>Interp</code> bound to this same <code>I</code> (only once is necessary).</p>
+
+<p>The default Tcl interpreter for <code class="highlighter-rouge">info_dialog/[1,2]</code> is <code class="highlighter-rouge">tcli</code> as shown above.  This interpreter is <em>_NOT_</em> automatically intialized by alsdev.  You must first run <code class="highlighter-rouge">init_tk_alslib/0</code> or <code class="highlighter-rouge">init_tk_alslib/1</code>, or run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp = tcli</code>.  If you wish to run <code class="highlighter-rouge">info_dialog/3</code> with <code class="highlighter-rouge">Interp</code> bound to a Tcl interpreter <code class="highlighter-rouge">I</code> other than <code class="highlighter-rouge">tcli</code>, you must first run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp</code> bound to this same <code class="highlighter-rouge">I</code> (only once is necessary).</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li>init_tk_alslib/[0,1,2]</li>
+  <li>init_tk_alslib/[0,1,2]</li>
 </ul>
-</body>
-</html>

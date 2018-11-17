@@ -1,46 +1,55 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>compare/3</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">compare/3</h1>
-</header>
-<p><code>compare/3</code> — compares two terms in the standard order</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>compare(Relation, TermL, TermR)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>compare(Relation, TermL, TermR)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><code>TermL</code> and <code>TermR</code> are compared according to the <strong><em>[standard,order]</em></strong> defined below. <code>Relation</code> is unified with an atom representing the result of the comparison. <code>Relation</code> is unified with:</p>
-<p><code>=</code> when <code>TermL</code> is identical to <code>TermR</code></p>
-<p><code>&lt;</code> when <code>TermL</code> is before <code>TermR</code></p>
-<p><code>&gt;</code> when <code>TermL</code> is after <code>TermR</code></p>
-<p>The <strong><em>[standard,order]</em></strong> provides a means to compare and sort general Prolog terms. The order is somewhat arbitrary in how it sorts terms of different types. For example, an atom is always &quot; less than &quot; a structure. Here ’ s the entire order :</p>
+
+<p><code class="highlighter-rouge">TermL</code> and <code class="highlighter-rouge">TermR</code> are compared according to the
+<strong><em>[standard,order]</em></strong>
+defined below. <code class="highlighter-rouge">Relation</code> is unified with an atom representing the result of the comparison. <code class="highlighter-rouge">Relation</code> is unified with:</p>
+
+<p><code class="highlighter-rouge">=</code> when <code class="highlighter-rouge">TermL</code> is identical to <code class="highlighter-rouge">TermR</code></p>
+
+<p><code class="highlighter-rouge">&lt;</code> when <code class="highlighter-rouge">TermL</code> is before <code class="highlighter-rouge">TermR</code></p>
+
+<p><code class="highlighter-rouge">&gt;</code> when <code class="highlighter-rouge">TermL</code> is after <code class="highlighter-rouge">TermR</code></p>
+
+<p>The
+<strong><em>[standard,order]</em></strong>
+provides a means to compare and sort general Prolog terms. The order is somewhat arbitrary in how it sorts terms of different types. For example, an atom is always “ less than “ a structure. Here ‘ s the entire order :</p>
+
 <p>Variables &lt; Numbers &lt; Atoms &lt; Structured Terms</p>
-<p><strong><em>[Variables]</em></strong> are compared according to their relative locations in the Prolog data areas. Usually a recently created variable will be greater than an older variable. However, the apparent age of a variable can change without notice during a computation; this makes using the comparison of uninstantiated (but not instantiated) variables extremely tricky.</p>
-<p><strong><em>[Numbers]</em></strong> are ordered according to their signed magnitude. Integers and floating point values are ordered correctly, so <code>compare/3</code> can be used to sort numbers.</p>
-<p><strong><em>[Atoms]</em></strong> are sorted by the ASCII order of their print names. If one atom is an initial substring of another, the longer atom will appear later in the standard order.</p>
-<p><strong><em>[Structured,terms]</em></strong> are ordered first by arity, then by the ASCII order of their principal functor. If two terms have the same functor and arity, then compare/3 will recursively compare their arguments to determine the order of the two.</p>
-<p>More precisely, if <code>TermL</code> and <code>TermR</code> are structured terms, then</p>
-<p><code>TermL @&lt; TermR</code> holds if and only if :</p>
-<p>the arity of <code>TermL</code> is less than the arity of <code>TermR</code>, or</p>
-<p><code>TermL</code> and <code>TermR</code> have the same arity, and the functor name of <code>TermL</code> preceeds the functor name of <code>TermR</code> in the standard order, or</p>
-<p><code>TermL</code> and <code>TermR</code> have the same arity and functor name, and there is an integer N less than or equal to the arity of <code>TermL</code> such that for all i less than N, the ith arguments of <code>TermL</code> and <code>TermR</code> are identical, and the Nth argument of <code>TermL</code> preceeds the Nth argument of <code>TermR</code> in the standard order.</p>
+
+<p><strong><em>[Variables]</em></strong>
+are compared according to their relative locations in the Prolog data areas. Usually a recently created variable will be greater than an older variable. However, the apparent age of a variable can change without notice during a computation; this makes using the comparison of uninstantiated (but not instantiated) variables extremely tricky.</p>
+
+<p><strong><em>[Numbers]</em></strong>
+are ordered according to their signed magnitude. Integers and floating point values are ordered correctly, so <code class="highlighter-rouge">compare/3</code> can be used to sort numbers.</p>
+
+<p><strong><em>[Atoms]</em></strong>
+are sorted by the ASCII order of their print names. If one atom is an initial substring of another, the longer atom will appear later in the standard order.</p>
+
+<p><strong><em>[Structured,terms]</em></strong>
+are ordered first by arity, then by the ASCII order of their principal functor. If two terms have the same functor and arity, then compare/3 will recursively compare their arguments to determine the order of the two.</p>
+
+<p>More precisely, if <code class="highlighter-rouge">TermL</code> and <code class="highlighter-rouge">TermR</code> are structured terms, then</p>
+
+<p><code class="highlighter-rouge">TermL @&lt; TermR</code> holds if and only if :</p>
+
+<p>the arity of <code class="highlighter-rouge">TermL</code> is less than the arity of <code class="highlighter-rouge">TermR</code>, or</p>
+
+<p><code class="highlighter-rouge">TermL</code> and <code class="highlighter-rouge">TermR</code> have the same arity, and the functor name of <code class="highlighter-rouge">TermL</code> preceeds
+the functor name of <code class="highlighter-rouge">TermR</code> in the standard order, or</p>
+
+<p><code class="highlighter-rouge">TermL</code> and <code class="highlighter-rouge">TermR</code> have the same arity and functor name, 
+and there is an integer N less than or equal to the arity of <code class="highlighter-rouge">TermL</code> such that for all i less than N,
+the ith arguments of <code class="highlighter-rouge">TermL</code> and <code class="highlighter-rouge">TermR</code> are identical, and
+the Nth argument of <code class="highlighter-rouge">TermL</code> preceeds the Nth argument of <code class="highlighter-rouge">TermR</code> in the standard order.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>The following examples show the use of compare/3 :</p>
-<pre><code>?- Myself=I, compare(=,Myself,I).
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- Myself=I, compare(=,Myself,I).
 
 Myself=_4
 I=_4
@@ -51,24 +60,35 @@ yes.
 yes.
 
 ?- compare(&lt;,boy,big(boy)).
-yes.</code></pre>
+yes.
+</code></pre></div></div>
+
 <p>The following example shows the way structures are compared :</p>
-<pre><code>?- compare(Order, and(a,b,c), and(a,b,a,b)).
 
-Order=&#39;&lt;&#39;
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- compare(Order, and(a,b,c), and(a,b,a,b)).
 
-yes.</code></pre>
+Order='&lt;'
+
+yes.
+</code></pre></div></div>
+
 <p>This says that the structure</p>
-<pre><code>    and(a, b, c)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    and(a, b, c)
+</code></pre></div></div>
 <p>comes after the structure</p>
-<pre><code>    and(a, b, a, b)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    and(a, b, a, b)
+</code></pre></div></div>
 <p>in the standard order, because the second structure has a greater arity than the first.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>==/2</code><br />
-<code>@&lt;/2</code><br />
-<code>sort/2</code></p></li>
-<li><p>[Bowen 91, 7.4]</p></li>
+  <li>
+    <p><code class="highlighter-rouge">==/2</code><br />
+<code class="highlighter-rouge">@&lt;/2</code><br />
+<code class="highlighter-rouge">sort/2</code></p>
+  </li>
+  <li>
+    <p>[Bowen 91, 7.4]</p>
+  </li>
 </ul>
-</body>
-</html>

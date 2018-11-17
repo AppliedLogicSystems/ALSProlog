@@ -1,36 +1,5 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>datetime/2</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">datetime/2</h1>
-</header>
-<p><code>datetime/2</code> — gets the local system date and time</p>
-<p><code>time/1</code> — gets the local system time</p>
-<p><code>date/1</code> — gets the local date</p>
-<p><code>gm_datetime/2</code> — gets the Greenwich mean time(UTC)</p>
-<p><code>date_less/2</code> – compares two dates</p>
-<p><code>date_pattern/4</code> – describes the pattern term for date display</p>
-<p><code>set_date_pattern/1</code> – changes the pattern term for date display</p>
-<p><code>valid_date/[1,3]</code> – determines if a date pattern represents a valid date</p>
-<p><code>time_less/2</code> – compares two times</p>
-<p><code>datetime_less/2</code> – compares two datetimes</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>datetime(Date, Time)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>datetime(Date, Time)
 
 time(Time)
 
@@ -51,30 +20,45 @@ valid_date(YY,MM,DD)
 time_less(Time0, Time1)
 
 datetime_less(DateTime0, DateTime1)
-</code></pre>
-<h2 id="description">DESCRIPTION</h2>
-<p><code>date_time(Date, Time)</code> obtains the current system local <code>Date</code> and <code>Time</code> from the same call to the OS/system clock.</p>
-<p><code>gm_date_time(Date, Time)</code> obtains the current Geenwich UTC <code>Date</code> and <code>Time</code> from the same call to the OS/system clock.</p>
-<p>date/1 and time/1 are effectively defined by:</p>
-<pre><code>date(Date) :- date_time(Date, _).
 
-time(Time) :- date_time(_, Time).</code></pre>
-<p><code>date_less(Date0, Date1)</code> holds if and only if Date0 and Date1 are date terms of the form YY/MM/DD and Date0 represents a date earlier than Date1.</p>
-<p><code>date_pattern/4</code> is a single fact which establishes the pattern term to be used for displaying dates. The default value is:</p>
-<pre><code>date_pattern(YY,MM,DD,YY/MM/DD).</code></pre>
-<p><code>set_date_pattern/1</code> is used to change the pattern term to be used for displaying dates, that is, to change the fact defining <code>date_pattern/4</code>. It should be passed a term AA/BB/CC representing the desired date display expression, where the values of AA,BB,CC are atoms beginning with <code>y</code>, <code>m</code>, and <code>d</code> in the desired order. [Note that <code>set_date_pattern(m/d/y), set_date_pattern(mm/dd/yy)</code>, and <code>set_date_pattern(month/day/year)</code> would all set the same date pattern display.]</p>
-<p><code>valid_date(Date)</code> is true if and only if Date represents a meaningful date, that is, whether the numerical values of <code>YY,MM,DD</code> (whatever the date_pattern) are in the correct ranges. If PP is a pattern made out of Y,M,D and ‘-’ matches the current date_pattern [e.g., PP is M-D-Y], then PP is an acceptable input to valid_date/1.</p>
-<p><code>valid_date/1</code> is defined in terms of <code>valid_date/3</code> by:</p>
-<pre><code>valid_date(Date)
+</code></pre></div></div>
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">date_time(Date, Time)</code> obtains the current system local <code class="highlighter-rouge">Date</code> and <code class="highlighter-rouge">Time</code> from the same call to the OS/system clock.</p>
+
+<p><code class="highlighter-rouge">gm_date_time(Date, Time)</code> obtains the current Geenwich UTC <code class="highlighter-rouge">Date</code> and <code class="highlighter-rouge">Time</code> from the same call to the OS/system clock.</p>
+
+<p>date/1 and time/1 are effectively defined by:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>date(Date) :- date_time(Date, _).
+
+time(Time) :- date_time(_, Time).
+</code></pre></div></div>
+<p><code class="highlighter-rouge">date_less(Date0, Date1)</code> holds if and only if Date0 and Date1 are date terms of the form YY/MM/DD 
+and Date0 represents a date earlier than Date1.</p>
+
+<p><code class="highlighter-rouge">date_pattern/4</code> is a single fact which establishes the pattern term to be used for displaying dates.  The default value is:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>date_pattern(YY,MM,DD,YY/MM/DD).
+</code></pre></div></div>
+<p><code class="highlighter-rouge">set_date_pattern/1</code> is used to change the pattern term to be used for displaying dates, that is, to change the fact defining <code class="highlighter-rouge">date_pattern/4</code>.  It should be passed a term AA/BB/CC representing the desired date display expression, where the values of AA,BB,CC are atoms beginning with <code class="highlighter-rouge">y</code>, <code class="highlighter-rouge">m</code>, and <code class="highlighter-rouge">d</code> in the desired order. [Note that 
+<code class="highlighter-rouge">set_date_pattern(m/d/y), set_date_pattern(mm/dd/yy)</code>, and <code class="highlighter-rouge">set_date_pattern(month/day/year)</code> would all set the same date pattern display.]</p>
+
+<p><code class="highlighter-rouge">valid_date(Date)</code> is true if and only if Date represents a meaningful date, that is, whether the numerical values of <code class="highlighter-rouge">YY,MM,DD</code> (whatever the date_pattern) are in the correct ranges.  If PP is a pattern made out of Y,M,D and ‘-‘ matches the current date_pattern [e.g., PP is M-D-Y], then PP is an acceptable input to valid_date/1.</p>
+
+<p><code class="highlighter-rouge">valid_date/1</code> is defined in terms of <code class="highlighter-rouge">valid_date/3</code> by:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>valid_date(Date)
         :-
         date_pattern(YY,MM,DD,Date),
-        valid_date(YY,MM,DD).</code></pre>
-<p><code>time_less(Time0, Time1)</code> holds if and only if <code>Time0</code> and <code>Time1</code> are time terms of the form <code>HH:MM:SS</code> and <code>Time0</code> represents a time earlier than <code>Time1</code>.</p>
-<p><code>datetime_less(DateTime0, DateTime1)</code> holds if and only if <code>DateTime0</code> and <code>DateTime1</code> are time terms of the forms</p>
-<pre><code>(Date0,Time0), (Date1,Time1)</code></pre>
-<p>and <code>DateTime0</code> preceeds or equals <code>DateTime1</code>.</p>
+        valid_date(YY,MM,DD).
+</code></pre></div></div>
+<p><code class="highlighter-rouge">time_less(Time0, Time1)</code> holds if and only if <code class="highlighter-rouge">Time0</code> and <code class="highlighter-rouge">Time1</code> are time terms of the form <code class="highlighter-rouge">HH:MM:SS</code> and  <code class="highlighter-rouge">Time0</code> represents a time earlier than <code class="highlighter-rouge">Time1</code>.</p>
+
+<p><code class="highlighter-rouge">datetime_less(DateTime0, DateTime1)</code> holds if and only if <code class="highlighter-rouge">DateTime0</code> and <code class="highlighter-rouge">DateTime1</code> are time terms of the forms</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(Date0,Time0), (Date1,Time1)
+</code></pre></div></div>
+<p>and <code class="highlighter-rouge">DateTime0</code> preceeds or equals <code class="highlighter-rouge">DateTime1</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>?- time(T).
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- time(T).
 
 T=12:47:57 
 
@@ -169,6 +153,6 @@ yes.
 ?- datetime_less((2000/1/14,9:22:01), (2000/3/14,1:48:53)).
 
 yes.
-</code></pre>
-</body>
-</html>
+
+</code></pre></div></div>
+

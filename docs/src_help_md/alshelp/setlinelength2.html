@@ -1,0 +1,98 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>set_line_length(Stream_or_Alias, Length)
+
+set_maxdepth(Stream_or_Alias, Depth)
+
+set_depth_computation(Stream_or_Alias, Flat_Nonflat)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">set_line_length/2</code> sets the default line length for the output stream associated with <code class="highlighter-rouge">Stream_or_Alias</code> to the integer value bound to <code class="highlighter-rouge">Length</code>. The default line length is an integer parameter used by <code class="highlighter-rouge">writeq/[1,2]</code>, <code class="highlighter-rouge">write_canonical/[1,2]</code>, and <code class="highlighter-rouge">write_term/[2,3]</code> to determine where line breaks should occur when outputting a term. A call to <code class="highlighter-rouge">write_term</code> may temporarily overide this parameter by specifying the <code class="highlighter-rouge">line_length</code> option in the <code class="highlighter-rouge">write</code> options list. The default line length may also be set at the time the stream is opened by specifying the <code class="highlighter-rouge">line_length</code> option in the options list to <code class="highlighter-rouge">open/[3,4]</code>.</p>
+
+<p><code class="highlighter-rouge">set_maxdepth/2</code> sets the default depth limit to which terms are output for the output stream associated with <code class="highlighter-rouge">Stream_or_Alias</code> to the integer value bound to <code class="highlighter-rouge">Depth</code>. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to <code class="highlighter-rouge">write_term/[3,4]</code> with the appropriate write option.</p>
+
+<p><code class="highlighter-rouge">set_depth_computation/2</code> sets the manner in which the depth of a term is computed for the output stream associated with <code class="highlighter-rouge">Stream_or_Alias</code> to the atomic value bound to <code class="highlighter-rouge">Flat_Nonflat</code>. As the name of the variable implies, <code class="highlighter-rouge">Flat_Nonflat</code> must be bound to one of the two atoms, flat or nonflat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is nonflat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- set_line_length(user_output,20),
+?-_L=[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z],
+?-_write(L),nl.
+[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]
+L = [a,b,c,d,e,f,g,
+h,i,j,k,l,
+m,n,o,p,q,
+r,s,t,u,v,
+w,x,y,z]
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- set_maxdepth(user_output,8),
+?-_set_depth_computation(user_output,nonflat),
+?-_L=[a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z],
+?-_write(L),nl.
+[a,b,c,d,e,f,g,h,...]
+L = [a,b,c,d,e,f,
+g,...]
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(stream_or_alias, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">existence_error(stream, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an output stream</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">permission_error(output, stream, Stream_or_Alias)</code></p>
+
+<p><code class="highlighter-rouge">Length</code>, <code class="highlighter-rouge">Depth</code>, or <code class="highlighter-rouge">Flat_or_Nonflat</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Length</code> is not a variable or an integer</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(integer, Length)</code></p>
+
+<p><code class="highlighter-rouge">Length</code> is not an integer greater than four</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(line_length, Length)</code></p>
+
+<p><code class="highlighter-rouge">Depth</code> is not a variable or an integer</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(integer, Depth)</code></p>
+
+<p><code class="highlighter-rouge">Depth</code> is an integer, but not a positive integer</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(positive_integer, Depth)</code></p>
+
+<p><code class="highlighter-rouge">Flat_or_Nonflat</code> is neither a variable nor an atom</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(atom, Flat_or_nonflat)</code></p>
+
+<p><code class="highlighter-rouge">Flat_or_Nonflat</code> is an atom, but is neither flat nor nonflat</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(depth_computation, Flat_or_nonflat)</code></p>
+
+<h2 id="notes">NOTES</h2>
+
+<p>Note in the above examples that <code class="highlighter-rouge">write/[1,2]</code> does not pay attention to the line length. It does however, observe the default maximum depth and the method for computing the depth.</p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">stream_property/2</code></li>
+  <li><code class="highlighter-rouge">open/4</code></li>
+  <li><code class="highlighter-rouge">write_term/3</code></li>
+  <li>User Guide (Prolog I/O)</li>
+</ul>
+

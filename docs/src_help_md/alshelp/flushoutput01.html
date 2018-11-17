@@ -1,41 +1,25 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>flush_output/[0,1]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">flush_output/[0,1]</h1>
-</header>
-<p><code>flush_output/0</code> — flush current output stream</p>
-<p><code>flush_output/1</code> — flush specific output stream</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>flush_output
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>flush_output
 
-flush_output(Stream_or_Alias)</code></pre>
+flush_output(Stream_or_Alias)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p>A call to <code>flush_output/0</code> will cause the buffer contents associated with the current output stream to be written out.</p>
-<p>A call to <code>flush_output/1</code> will cause the buffer contents associated with the open output stream <code>Stream_or_Alias</code> to be written out.</p>
-<p>An output operation such as <code>put_char/2</code> or <code>write/2</code> is used to put some data out to a stream. Unless byte buffering <code>[buffering((byte)]</code> is specified when the stream is opened, the data will not be immediately output. Rather, the data will be buffered in an area associated with the open output stream. The <code>flush_output</code> builtins cause this buffer to be written out to the sink associated with the open stream.</p>
+
+<p>A call to <code class="highlighter-rouge">flush_output/0</code> will cause the buffer contents associated with the current output stream to be written out.</p>
+
+<p>A call to <code class="highlighter-rouge">flush_output/1</code> will cause the buffer contents associated with the open output stream <code class="highlighter-rouge">Stream_or_Alias</code> to be written out.</p>
+
+<p>An output operation such as <code class="highlighter-rouge">put_char/2</code> or <code class="highlighter-rouge">write/2</code> is used to put some data out to a stream. Unless byte buffering <code class="highlighter-rouge">[buffering((byte)]</code> is specified when the stream is opened, the data will not be immediately output. Rather, the data will be buffered in an area associated with the open output stream. The <code class="highlighter-rouge">flush_output</code> builtins cause this buffer to be written out to the sink associated with the open stream.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<p>The following two procedures illustrate the use of <code>flush_output</code> to write out a single dot in between potentially long computations.</p>
-<pre><code>?- listing.
+
+<p>The following two procedures illustrate the use of <code class="highlighter-rouge">flush_output</code> to write out a single dot in between potentially long computations.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- listing.
 process(N)
     :-
     N&gt;0,
-    put_char(user_output,&#39;.&#39;),
+    put_char(user_output,'.'),
     flush_output(user_output),
     compute,
     NNisN-1,
@@ -47,31 +31,46 @@ process(_)
 
 compute
     :-
-    system(&#39;sleep2&#39;).
+    system('sleep2').
 
 yes.
 
 ?- process(5).
 .....
 
-yes.</code></pre>
+yes.
+</code></pre></div></div>
 <h2 id="errors">ERRORS</h2>
-<p><code>Stream_or_Alias</code> is a variable</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a variable</p>
+
 <p>– – – – &gt; instantiation_error.</p>
-<p><code>Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
-<p>– – – – &gt; domain_error(stream_or_alias, <code>Stream_or_Alias</code>)</p>
-<p><code>Stream_or_Alias</code> is not associated with an open stream</p>
-<p>– – – – &gt; existence_error(stream, <code>Stream_or_Alias</code>)</p>
-<p><code>Stream_or_Alias</code> is not an output stream</p>
-<p>– – – – &gt; permission_error(output, stream, <code>Stream_or_Alias</code>)</p>
-<p><code>Stream_or_Alias</code> is a valid output stream, but the flush operation could not be completed due to some other problem detected by the operating system</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is neither a variable nor a stream descriptor nor an alias</p>
+
+<p>– – – – &gt; domain_error(stream_or_alias, <code class="highlighter-rouge">Stream_or_Alias</code>)</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not associated with an open stream</p>
+
+<p>– – – – &gt; existence_error(stream, <code class="highlighter-rouge">Stream_or_Alias</code>)</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is not an output stream</p>
+
+<p>– – – – &gt; permission_error(output, stream, <code class="highlighter-rouge">Stream_or_Alias</code>)</p>
+
+<p><code class="highlighter-rouge">Stream_or_Alias</code> is a valid output stream, but the flush operation could not be completed due to some other problem detected by the operating system</p>
+
 <p>– – – – &gt; system_error</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><p><code>open/4</code><br />
-<code>close/1</code><br />
-<code>current_output/1</code></p></li>
-<li><p><code>User Guide (Prolog I/O)</code></p></li>
+  <li>
+    <p><code class="highlighter-rouge">open/4</code><br />
+<code class="highlighter-rouge">close/1</code><br />
+<code class="highlighter-rouge">current_output/1</code></p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">User Guide (Prolog I/O)</code></p>
+  </li>
 </ul>
-</body>
-</html>

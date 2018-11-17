@@ -1,0 +1,73 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sub_atom(Atom, Before, Length, After, SubAtom)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">sub_atom/5</code> is used to take apart an atom. The only instantiation requirement is that <code class="highlighter-rouge">Atom</code> be instantiated to an atom. If any of <code class="highlighter-rouge">Before</code>, <code class="highlighter-rouge">Length</code>, or <code class="highlighter-rouge">After</code> are instantiated, they must be instantatiated to integers. If <code class="highlighter-rouge">SubAtom</code> is instantiated, it must be instantiated to an atom.</p>
+
+<p>The <code class="highlighter-rouge">Before</code> parameter gives the number of characters in <code class="highlighter-rouge">Atom</code> before the start of the atom <code class="highlighter-rouge">SubAtom</code>. <code class="highlighter-rouge">Length</code> is the length of this <code class="highlighter-rouge">SubAtom</code>. <code class="highlighter-rouge">After</code> is the number of characters of <code class="highlighter-rouge">Atom</code> following the end of <code class="highlighter-rouge">SubAtom</code>. The first character of any atom is considered to begin at position 1.</p>
+
+<p><code class="highlighter-rouge">sub_atom/5</code> is resatisfiable. Upon backtracking all possible values of <code class="highlighter-rouge">Before</code>, <code class="highlighter-rouge">Length</code>, <code class="highlighter-rouge">After</code>, and <code class="highlighter-rouge">SubAtom</code> are generated subject to the initial instantiations of these parameters.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- sub_atom(abcdefg, 2, 3, X, Y).
+X=2
+Y=cde
+yes.
+</code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- sub_atom(abcdefg, B, L, A, cde).
+B=2
+L=3
+A=2
+yes.
+</code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- sub_atom(abcdefg, B, 4, A, Y).
+B=0
+A=3
+Y=abcd ;
+B=1
+A=2
+Y=bcde ;
+B=2
+A=1
+Y=cdef ;
+B=3
+A=0
+Y=defg ;
+no.
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">Atom</code> is a variable</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">instantiation_error</code></p>
+
+<p><code class="highlighter-rouge">Atom</code> is neither a variable nor an atom</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(atom, Atom)</code></p>
+
+<p><code class="highlighter-rouge">SubAtom</code> is neither a variable nor an atom</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(atom, SubAtom)</code></p>
+
+<p><code class="highlighter-rouge">Start</code> is neither a variable nor an integer</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(integer, Start)</code></p>
+
+<p><code class="highlighter-rouge">Length</code> is neither a variable nor an integer</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(integer, Length)</code></p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">atom_length/2</code></li>
+  <li><code class="highlighter-rouge">atom_concat/3</code></li>
+  <li><code class="highlighter-rouge">atom_chars/2</code></li>
+  <li><code class="highlighter-rouge">atom_codes/2</code></li>
+  <li>User Guide (Prolog I/O)</li>
+</ul>

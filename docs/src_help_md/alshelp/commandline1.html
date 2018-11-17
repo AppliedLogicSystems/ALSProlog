@@ -1,45 +1,40 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>command_line/1</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">command_line/1</h1>
-</header>
-<p><code>command_line/1</code> — provides access to the prolog system start-up command line</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>command_line(SWITCHES)</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>command_line(SWITCHES)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>When ALS Prolog is started from an operating system shell, the command line can be divided into system-specific and application-specific portions by use of the -p or -P (for Prolog) switch. All command line parameters to the left of the -p switch are treated as ALS Prolog system switches, while those to the right of the -p switch are treated as application switches.</p>
-<p>To make the latter available to Prolog applications, when ALS Prolog is initialized a list, <code>SWITCHES</code>, of atoms and UIAs representing the items to the right of the -p switch is created, and</p>
-<pre><code>command_line(SWITCHES)</code></pre>
-<p>is asserted in module builtins. This assertion is always made, even when -p is not used, in which case the argument of <code>command_line/1</code> is the empty list.</p>
+
+<p>To make the latter available to Prolog applications, when ALS Prolog is initialized a list, <code class="highlighter-rouge">SWITCHES</code>, of atoms and UIAs representing the items to the right of the -p switch is created, and</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>command_line(SWITCHES)
+</code></pre></div></div>
+<p>is asserted in module builtins. This assertion is always made, even when -p is not used, in which case the argument of <code class="highlighter-rouge">command_line/1</code> is the empty list.</p>
+
 <p>The -P switch will force the name of the invoking program to be the argument(usually alspro) .. the switch is useful for developing applications which will eventually be packaged(via save_image/2) . Packaged applications will place the entire command line into command_line/1. In particular, the first element in the list obtained from command_line/1 in a packaged application will be the name of the application.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>$ alspro -p -k fast -s initstate foo</p>
+
 <p>ALS-Prolog Version 2.01</p>
+
 <p>Copyright(c) 1987-94 Applied Logic Systems, Inc.</p>
+
 <p>? - command_line(SW) .</p>
-<p>SW = [ ’ -k ‘, fast,’ -s ’, initstate, foo ]</p>
+
+<p>SW = [ ‘ -k ‘, fast, ‘ -s ‘, initstate, foo ]</p>
+
 <p>yes.</p>
+
 <p>$ alspro -P -k fast -s initstate foo</p>
+
 <p>ALS-Prolog Version 2.01</p>
+
 <p>Copyright(c) 1987-94 Applied Logic Systems, Inc.</p>
+
 <p>? - command_line(SW) .</p>
-<p>SW = [alspro, ’ -k ‘, fast,’ -s ’, initstate, foo ]</p>
+
+<p>SW = [alspro, ‘ -k ‘, fast, ‘ -s ‘, initstate, foo ]</p>
+
 <p>yes.</p>
-</body>
-</html>
+

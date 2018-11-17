@@ -1,0 +1,37 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tcl_new(X)
+
+tk_new(X)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p><code class="highlighter-rouge">tcl_new/1</code> creates a new
+Tcl interpreter. If the Interpreter argument is an uninstantiated (Prolog) variable, then a unique name is generated for the interpreter. If Interpreter is a atom, the new Tcl interpreter is given that name.</p>
+
+<p><code class="highlighter-rouge">tk_new/1</code> functions in the same manner as <code class="highlighter-rouge">tcl_new/1</code>, except that the newly created Tcl interpreter is initialized with the Tk package.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- tcl_new(i).
+%% Succeeds, creating a Tcl interpreter named 'i'.
+
+?- tcl_new(X).
+%% Succeeds, unifying X with the atom 'interp1'.
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p>Interpreter is not an atom or variable.</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">type_error(atom_or_variable)</code></p>
+
+<p>The atom Interpreter has already been use as the name of a Tcl interpreter.</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">permission_error(create, tcl_interpreter, Interpreter)</code></p>
+
+<p>Tcl is unable to create the interpreter.</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">tcl_error(message)</code></p>
+

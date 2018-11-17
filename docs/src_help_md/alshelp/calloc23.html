@@ -1,46 +1,5 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>c_alloc/[2,3]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">c_alloc/[2,3]</h1>
-</header>
-<p><code>c_const/2</code> <code>--</code> get the value of a C defined constant</p>
-<p><code>c_rconst/2</code> <code>--</code> get the value of a C defined runtime constant</p>
-<p><code>c_alloc/2</code> <code>--</code> allocate a UIA that can hold C data</p>
-<p><code>c_alloc_abs/2</code> <code>--</code> allocate a C-malloced data area</p>
-<p><code>c_allocn/3</code> <code>--</code> allocate a UIA to hold Num items</p>
-<p><code>c_allocn_abs/3</code> <code>--</code> allocated a C-malloced area to hold Num items</p>
-<p><code>c_free/1</code> <code>--</code> applied to UIA does nothing (freeing handled by gc)</p>
-<p><code>c_free_abs/1</code> <code>--</code> mfree the C area pointed by Ptr.</p>
-<p><code>c_set/3</code> <code>--</code> modify a UIA or C data area</p>
-<p><code>c_set/3</code> <code>--</code> multiply modify a UIA or C data area</p>
-<p><code>c_set_str/4</code> <code>--</code> insert C string in a UIA or C data area</p>
-<p><code>c_set_raw/4</code> <code>--</code> writes chars from a UIA into a UIA or C data area</p>
-<p><code>c_setn/4</code> <code>--</code> perform c_set/3 on a component of an array</p>
-<p><code>c_setn/4</code> <code>--</code> multiply perform c_set/3 on a component of an array</p>
-<p><code>c_examine/3</code> <code>--</code> examine a UIA or C data area</p>
-<p><code>c_examine/3</code> <code>--</code> multiply examine a UIA or C data area</p>
-<p><code>c_examine_str/4</code> <code>--</code> extract chars from a UIA or C data area</p>
-<p><code>c_examine_raw/4</code> <code>--</code> extract raw chars from a UIA or C data area</p>
-<p><code>c_examinen/4</code> <code>--</code> examine a component of an array</p>
-<p><code>c_examinen/4</code> <code>--</code> multiply examine a component of an array</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>c_const(Name,Val)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c_const(Name,Val)
 
 c_rconst(Name,Val)
 
@@ -78,21 +37,83 @@ c_examine_raw(Obj,Off,Len,Val)
 
 c_examinen(Obj,Type,I,Val)
 
-c_examinen(Obj,SType,I,[FieldName,Val,...])</code></pre>
+c_examinen(Obj,SType,I,[FieldName,Val,...])
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
-<p><strong><code>c_const(Name,Val)</code></strong> unifies <code>Val</code> with the value of the C defined constant <code>Name</code>.</p>
-<p><strong><code>c_rconst(Name,Val)</code></strong> unifies <code>Val</code> with the value of a C defined runtime constant <code>Name</code>. This should not be used to access C globals.</p>
+
+<p>These predicates make use of the same C type encoding as used on <a href="cmalloc2.html">‘$c_malloc’/2</a>:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      1  -- int
+      2  -- unsigned int
+      3  -- long
+      4  -- unsigned long
+      5  -- pointer
+      6  -- char
+      7  -- unsigned char
+      8  -- short
+      9  -- unsigned short
+      10 -- string
+      11 -- string of given length (length is 4th arg)
+      12 -- float
+      13 -- double
+      14 -- far pointer  (DOS only)
+      15 -- raw data of given length
+</code></pre></div></div>
+<p><strong><code class="highlighter-rouge">c_const(Name,Val)</code></strong> unifies <code class="highlighter-rouge">Val</code> with the value of the C defined constant <code class="highlighter-rouge">Name</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_rconst(Name,Val)</code></strong> unifies <code class="highlighter-rouge">Val</code> with the value of a C defined runtime constant <code class="highlighter-rouge">Name</code>. This should not be used to access C globals.</p>
+
+<p><strong><code class="highlighter-rouge">c_alloc(Type,UIA)</code></strong> allocates a <code class="highlighter-rouge">UIA</code> that can hold data of type <code class="highlighter-rouge">Type</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_alloc_abs(Type,Ptr)</code></strong> mallocs a C data area that can hold data of type <code class="highlighter-rouge">Type</code> and unifies Ptr with the address of the first byte of that area.</p>
+
+<p><strong><code class="highlighter-rouge">c_allocn(Type,Num,UIA)</code></strong> allocates a <code class="highlighter-rouge">UIA</code> that can hold <code class="highlighter-rouge">Num</code> items of type <code class="highlighter-rouge">Type</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_allocn_abs(Type,Num,Ptr)</code></strong> mallocs a C data area that can hold data of type <code class="highlighter-rouge">Type</code> and unifies Ptr with the address of the first byte of that area.</p>
+
+<p><strong><code class="highlighter-rouge">c_free(UIA)</code></strong> is a no-op, doing nothing (allowing freeing taken care of by gc).</p>
+
+<p><strong><code class="highlighter-rouge">c_free_abs(Ptr)</code></strong> C mfrees the C data area pointed to by <code class="highlighter-rouge">Ptr</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_set(Entity,Type,Val)</code></strong> destructively modifies an Entity (a UIA or C data area), where <code class="highlighter-rouge">Val</code> is of type <code class="highlighter-rouge">Type</code>, by using <code class="highlighter-rouge">Val</code> to replace a segment of Entity starting at the beginning of Entity.</p>
+
+<p><strong><code class="highlighter-rouge">c_set(Obj,Type2,[FieldName,Val,...])</code></strong> destructively modify a UIA or C data area <code class="highlighter-rouge">Obj</code> with <code class="highlighter-rouge">Val</code> of type <code class="highlighter-rouge">Type2</code>.  <code class="highlighter-rouge">Type2</code> must be a structure type, and <code class="highlighter-rouge">FieldName</code> is the name of a field to be modified with value <code class="highlighter-rouge">Val</code>. Subfields are identified by their (C-style) dot-separated pathname, except when the sub-structure is a type-reference, in which case <code class="highlighter-rouge">FieldName</code> is the name of the field, and <code class="highlighter-rouge">Val</code> is (recursively) a list of <code class="highlighter-rouge">FieldName - Value</code> pairs.</p>
+
+<p><strong><code class="highlighter-rouge">c_set_str(Obj,Off,Len,SymOrUIA)</code></strong> destructively modify a segment of data in the UIA or C data <code class="highlighter-rouge">Obj</code> at an offset <code class="highlighter-rouge">Off</code> by no more than <code class="highlighter-rouge">Len</code> bytes taken from <code class="highlighter-rouge">SymOrUIA</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_set_raw(Obj,Off,Len,UIA)</code></strong> writes <code class="highlighter-rouge">Len</code> characters from UIA into <code class="highlighter-rouge">Obj</code> starting at offset <code class="highlighter-rouge">Off</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_setn(Obj,Type,I,Val)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_setn(Obj,SType,I,[FieldName,Val,...])</code></strong> perform c_set/3 on the <code class="highlighter-rouge">I-th</code> component of an array, where <code class="highlighter-rouge">I=0</code> refers to the first element and so on. In the first form, <code class="highlighter-rouge">Type</code> must be a base type. In the second form <code class="highlighter-rouge">SType</code> must be a structure type (substructures are handled in the same manner as in c_set/3).</p>
+
+<p><strong><code class="highlighter-rouge">c_examine(Obj,Type,Val)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_examine(Obj,SType,[FieldName,Val,...])</code></strong> examine a UIA or C ptr <code class="highlighter-rouge">Obj</code>, assuming its type to be <code class="highlighter-rouge">Type</code>. In the first form, <code class="highlighter-rouge">Type</code> is either an intergral type or <code class="highlighter-rouge">'str'</code>. In the second form, <code class="highlighter-rouge">SType</code> must be a structure type.</p>
+
+<p><strong><code class="highlighter-rouge">c_examine_str(Obj,Off,Len,Val)</code></strong> examine a segment of <code class="highlighter-rouge">Obj</code> starting at offset <code class="highlighter-rouge">Off</code> until first null character or <code class="highlighter-rouge">Len</code> characters have been read, whichever comes first and return the value as as a UIA in <code class="highlighter-rouge">Val</code>.</p>
+
+<p><strong><code class="highlighter-rouge">c_examine_raw(Obj,Off,Len,Val)</code></strong> reads <code class="highlighter-rouge">Len</code> characters starting at offset <code class="highlighter-rouge">Off</code> into <code class="highlighter-rouge">Obj</code> and returns the result as a UIA in <code class="highlighter-rouge">Val</code>.  Note that the resulting UIA can have null and other funny characters.</p>
+
+<p><strong><code class="highlighter-rouge">c_examinen(Obj,Type,I,Val)</code></strong>
+<br /><strong><code class="highlighter-rouge">c_examinen(Obj,SType,I,[FieldName,Val,...])</code></strong> examine the <code class="highlighter-rouge">I-th</code> the component of an array of type <code class="highlighter-rouge">Type/SType</code>.</p>
+
 <h2 id="examples">EXAMPLES</h2>
-<pre><code>1st example</code></pre>
-<pre><code>2nd example</code></pre>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1st example
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2nd example
+</code></pre></div></div>
+
 <h2 id="errors">ERRORS</h2>
+
 <p>Errors text…</p>
+
 <h2 id="notes">NOTES</h2>
+
 <p>Implemented in ~builtins/cutils.pro over the predicates in <a href="cmalloc2.html">‘$c_malloc’/2</a>.</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li><a href="cmalloc2.html">‘$c_malloc’/2</a></li>
-<li><a href="ccreate3.html">c_create/3</a></li>
+  <li><a href="cmalloc2.html">‘$c_malloc’/2</a></li>
+  <li><a href="ccreate3.html">c_create/3</a></li>
 </ul>
-</body>
-</html>

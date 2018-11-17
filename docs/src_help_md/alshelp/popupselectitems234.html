@@ -1,69 +1,66 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>popup_select_items/[2,3,4]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">popup_select_items/[2,3,4]</h1>
-</header>
-<p><code>popup_select_items/ [2,3,4]</code> — present popup selection list</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>popup_select_items(SourceList, ChoiceList)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>popup_select_items(SourceList, ChoiceList)
 
 popup_select_items(SourceList, Options, ChoiceList)
 
-popup_select_items(Interp, SourceList, Options, ChoiceList)</code></pre>
+popup_select_items(Interp, SourceList, Options, ChoiceList)
+</code></pre></div></div>
 <h2 id="description">DESCRIPTION</h2>
+
 <p>These predicates present popup lists to the user, who is expected to choose one or more items. The shorter versions are defined by</p>
-<pre><code>popup_select_items(SourceList, ChoiceList)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>popup_select_items(SourceList, ChoiceList)
     :-
     popup_select_items(tcli, SourceList, [ ], ChoiceList) .
 
 popup_select_items(SourceList, Options, ChoiceList)
     :-
-    popup_select_items(tcli, SourceList, Options, ChoiceList) .</code></pre>
+    popup_select_items(tcli, SourceList, Options, ChoiceList) .
+</code></pre></div></div>
 <p>For the general call</p>
-<pre><code>popup_select_items(Interp, SourceList, Options, ChoiceList)</code></pre>
-<p><code>Interp</code> should be an atom naming a Tcl interpreter, <code>SourceList</code> should be a list of atoms, <code>ChoiceList</code> should be an uninstantiated variable, and <code>Options</code> should be a list of equations of the forms:</p>
-<pre><code>    mode = SelectMode
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>popup_select_items(Interp, SourceList, Options, ChoiceList)
+</code></pre></div></div>
+<p><code class="highlighter-rouge">Interp</code> should be an atom naming a Tcl interpreter, <code class="highlighter-rouge">SourceList</code> should be a list of atoms, <code class="highlighter-rouge">ChoiceList</code> should be an uninstantiated variable, and <code class="highlighter-rouge">Options</code> should be a list of equations of the forms:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    mode = SelectMode
 
-    title = Atom</code></pre>
-<p>where <code>SelectMode</code> is one of: <code>browse single multiple extended</code>.</p>
-<p>If the selection mode is <code>single</code> or <code>browse</code>, at most one element can be selected in the listbox at once. In both of these modes, clicking button 1 on an element selects it and deselects any other selected item. In <code>browse</code> mode it is also possible to drag the selection with button 1.</p>
-<p>If the selection mode is <code>multiple</code> or <code>extended</code>, any number of elements may be selected at once, including discontiguous ranges. In <code>multiple</code> mode, clicking button 1 on an element toggles its selection state without affecting any other elements. In <code>extended</code> mode, pressing button 1 on an element selects it, deselects everything else, and sets the anchor to the element under the mouse; dragging the mouse with button 1 down extends the selection to include all the elements between the anchor and the element under the mouse, inclusive.</p>
+    title = Atom
+</code></pre></div></div>
+<p>where <code class="highlighter-rouge">SelectMode</code> is one of: <code class="highlighter-rouge">browse single multiple extended</code>.</p>
+
+<p>If the selection mode is <code class="highlighter-rouge">single</code> or <code class="highlighter-rouge">browse</code>, at most one element can be selected in the listbox at once. In both of these modes, clicking button 1 on an element selects it and deselects any other selected item. In <code class="highlighter-rouge">browse</code> mode it is also possible to drag the selection with button 1.</p>
+
+<p>If the selection mode is <code class="highlighter-rouge">multiple</code> or <code class="highlighter-rouge">extended</code>, any number of elements may be selected at once, including discontiguous ranges. In <code class="highlighter-rouge">multiple</code> mode, clicking button 1 on an element toggles its selection state without affecting any other elements. In <code class="highlighter-rouge">extended</code> mode, pressing button 1 on an element selects it, deselects everything else, and sets the anchor to the element under the mouse; dragging the mouse with button 1 down extends the selection to include all the elements between the anchor and the element under the mouse, inclusive.</p>
+
 <h2 id="examples">EXAMPLES</h2>
+
 <p>The call</p>
-<pre><code>?- popup_select_items([&#39;The first item&#39;, &#39;Item #2&#39;, &#39;Item three&#39;, the_final_item ], Selection).</code></pre>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- popup_select_items(['The first item', 'Item #2', 'Item three', the_final_item ], Selection).
+</code></pre></div></div>
 <p>produces the popup shown below:</p>
-<p><img src="images/popup_list_select-1.gif" /></p>
-<p>In this case, the user is allowed to select a single item; if the user selected “Item three” and clicked OK, the result would be:</p>
-<pre><code>Selection = [Item three].</code></pre>
-<p>Even though in this case the user was restricted to selection of one item, the <code>popup_select_items/_</code> predicate returns a list of the selected items.</p>
-<p>The <code>Options</code> argument for <code>popup_select_items/[3,4]</code> allows the programmer to place the popup list box in any of the other standard Tk listbox selection modes. For example, the call</p>
-<pre><code>?- popup_select_items([&#39;The first item&#39;, &#39;Item #2&#39;, &#39;Item three&#39;, the_final_item],
-                      [mode = extended, title = &#39;Extended Mode Selection&#39;],
-                      Selection).</code></pre>
+
+<p><img src="images/popup_list_select-1.gif" alt="" /></p>
+
+<p>In this case, the user is allowed to select a single item; if the user selected "Item three" and clicked OK, the result would be:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Selection = [Item three].
+</code></pre></div></div>
+<p>Even though in this case the user was restricted to selection of one item, the <code class="highlighter-rouge">popup_select_items/_</code> predicate returns a list of the selected items.</p>
+
+<p>The <code class="highlighter-rouge">Options</code> argument for <code class="highlighter-rouge">popup_select_items/[3,4]</code> allows the programmer to place the popup list box in any of the other standard Tk listbox selection modes. For example, the call</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- popup_select_items(['The first item', 'Item #2', 'Item three', the_final_item],
+                      [mode = extended, title = 'Extended Mode Selection'],
+                      Selection).
+</code></pre></div></div>
 <p>will popup a list box whose appearance is identical (apart from the different title requested) to the previous listbox. However, it will permit selection of ranges of elements, as seen below</p>
-<p><img src="images/popup_list_choice-2.gif" /></p>
-<p>The result of clicking OK will be: <code>Selection = [Item #2,Item three]</code>.</p>
+
+<p><img src="images/popup_list_choice-2.gif" alt="" /></p>
+
+<p>The result of clicking OK will be: <code class="highlighter-rouge">Selection = [Item #2,Item three]</code>.</p>
+
 <h2 id="notes">NOTES</h2>
-<p>The default Tcl interpreter for <code>popup_select_items/[2,3]</code> is <code>tcli</code> as shown above. This interpreter is <em><em>NOT</em></em> automatically intialized by alsdev. You must first run <code>init_tk_alslib/0</code> or <code>init_tk_alslib/1</code>, or run <code>init_tk_alslib/2</code> with <code>Interp = tcli</code>. If you wish to run <code>popup_select_items/3</code> with <code>Interp</code> bound to a Tcl interpreter <code>I</code> other than <code>tcli</code>, you must first run <code>init_tk_alslib/2</code> with <code>Interp</code> bound to this same <code>I</code> (only once is necessary).</p>
+
+<p>The default Tcl interpreter for <code class="highlighter-rouge">popup_select_items/[2,3]</code> is <code class="highlighter-rouge">tcli</code> as shown above.  This interpreter is <em>_NOT_</em> automatically intialized by alsdev.  You must first run <code class="highlighter-rouge">init_tk_alslib/0</code> or <code class="highlighter-rouge">init_tk_alslib/1</code>, or run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp = tcli</code>.  If you wish to run <code class="highlighter-rouge">popup_select_items/3</code> with <code class="highlighter-rouge">Interp</code> bound to a Tcl interpreter <code class="highlighter-rouge">I</code> other than <code class="highlighter-rouge">tcli</code>, you must first run <code class="highlighter-rouge">init_tk_alslib/2</code> with <code class="highlighter-rouge">Interp</code> bound to this same <code class="highlighter-rouge">I</code> (only once is necessary).</p>
+
 <h2 id="see-also">SEE ALSO</h2>
+
 <ul>
-<li>init_tk_alslib/[0,1,2]</li>
+  <li>init_tk_alslib/[0,1,2]</li>
 </ul>
-</body>
-</html>

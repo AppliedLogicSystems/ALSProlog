@@ -1,0 +1,67 @@
+<h2 id="forms">FORMS</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>term_chars(Term, CharList)
+
+term_codes(Term, CodeList)
+</code></pre></div></div>
+
+<h2 id="description">DESCRIPTION</h2>
+
+<p>If <code class="highlighter-rouge">CharList</code> is bound to a list of characters then it is parsed according to the syntax rules for terms. Should the parse be successful, the resulting value is unified with <code class="highlighter-rouge">Term</code> in a call to <code class="highlighter-rouge">term_chars/2</code>.</p>
+
+<p>If <code class="highlighter-rouge">CodeList</code> is bound to a list of character codes then it is is parsed according to the syntax rules for terms. Should the parse be successful, the resulting value is unified with <code class="highlighter-rouge">Term</code> in a call to <code class="highlighter-rouge">term_codes/2</code>.</p>
+
+<p>Otherwise <code class="highlighter-rouge">CharList</code> (or <code class="highlighter-rouge">CodeList</code>) will be bound to the list of characters (character codes) which would result as output from <code class="highlighter-rouge">write_canonical(Term)</code>.</p>
+
+<h2 id="examples">EXAMPLES</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- term_chars(p(a,X), L).
+X = X
+L = [p,'(',a,',','_','A',')']
+yes.
+</code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- term_codes(A,"X = /* a comment */ 3+4").
+A = (_A = 3+4)
+yes.
+</code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- term_codes(A,"foo bar").
+Error: Syntax error.
+- Goal: builtins:term_codes(_A,"foo bar")
+- Error Attribute: syntax('foo barend_of_file\n ^',
+'Fullstop (period) expected',1,
+stream_descriptor('',closed,string,
+string("foo bar"),[input|nooutput],false,3,
+[],0,0,0,true,1,wt_opts(78,40000,flat),[],
+true,text,eof_code,0,0))
+- Throw pattern: error(syntax_error,
+[builtins:term_codes(_A,*),
+syntax('foo barend_of_file\n ^',
+'Fullstop (period) expected',1,
+stream_descriptor('',closed,string,*,*,
+false,3,[],0,0,0,true,1,*,[],true,
+text,eof_code,0,0))])
+</code></pre></div></div>
+
+<h2 id="errors">ERRORS</h2>
+
+<p><code class="highlighter-rouge">CharList</code> is bound to a list, but the list does not contain characters</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(character_list, CharList)</code></p>
+
+<p><code class="highlighter-rouge">CodeList</code> is bound to a list, but the list does not contain character codes</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">domain_error(character_code_list, CodeList)</code></p>
+
+<p><code class="highlighter-rouge">CharList</code> (or <code class="highlighter-rouge">CodeList</code>) is not parsable as a term</p>
+
+<p>– – – – &gt; <code class="highlighter-rouge">syntax_error</code></p>
+
+<h2 id="see-also">SEE ALSO</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">read_term/3</code></li>
+  <li><code class="highlighter-rouge">write_canonical/2</code></li>
+  <li><code class="highlighter-rouge">number_chars</code></li>
+  <li><code class="highlighter-rouge">atom_chars</code></li>
+  <li>User Guide (Prolog I/O).</li>
+</ul>

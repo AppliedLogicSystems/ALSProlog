@@ -1,49 +1,36 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>init_tk_alslib/[0,1,2]</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<header>
-<h1 class="title">init_tk_alslib/[0,1,2]</h1>
-</header>
-<p><code>init_tk_alslib/[0,1,2]</code> — initialize GUI library, creating Tcl interpreter</p>
 <h2 id="forms">FORMS</h2>
-<pre><code>init_tk_alslib
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>init_tk_alslib
 
 init_tk_alslib(Shared)
 
-init_tk_alslib(Interp,Shared)</code></pre>
+init_tk_alslib(Interp,Shared)
+</code></pre></div></div>
+
 <h2 id="description">DESCRIPTION</h2>
-<p>These predicates are used to initial the TclTk library for alsdev, together with a Tcl interpreter devoted to that library. The default Tcl interpreter is <code>tcli</code>. The shorter versions of these predicates are defined by:</p>
-<pre><code>init_tk_alslib
+
+<p>These predicates are used to initial the TclTk library for alsdev, together with a Tcl interpreter devoted to that library.  The default Tcl interpreter is <code class="highlighter-rouge">tcli</code>.  The shorter versions of these predicates are defined by:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>init_tk_alslib
         :-
         init_tk_alslib(tcli,_).
 
 init_tk_alslib(Shared)
         :-
-        init_tk_alslib(tcli, Shared).</code></pre>
-<p>The full version is <code>init_tk_alslib(Interp,Shared)</code>, where <code>Interp</code> is an atom which is <em>NOT</em> the name of a Tcl interpreter, and <code>Shared</code> is an uninstantiated variable. After successful execution of this predicate, <code>Interp</code> will be the name of a Tcl interpreter, and <code>Shared</code> will be unified with the ALS Prolog shared folder, which is a subfolder of the <code>alsdir</code> folder associated with the ALS Prolog installation:</p>
-<pre><code>        alsdir/
-            builtins/ images/   library/  shared/</code></pre>
+        init_tk_alslib(tcli, Shared).
+</code></pre></div></div>
+
+<p>The full version is <code class="highlighter-rouge">init_tk_alslib(Interp,Shared)</code>, where <code class="highlighter-rouge">Interp</code> is an atom which is <em>NOT</em> the name of a Tcl interpreter, and <code class="highlighter-rouge">Shared</code> is an uninstantiated variable.  After successful execution of this predicate, <code class="highlighter-rouge">Interp</code> will be the name of a Tcl interpreter, and <code class="highlighter-rouge">Shared</code> will be unified with the ALS Prolog shared folder, which is a subfolder of the <code class="highlighter-rouge">alsdir</code> folder associated with the ALS Prolog installation:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        alsdir/
+            builtins/ images/   library/  shared/
+</code></pre></div></div>
+
 <h2 id="examples">EXAMPLES</h2>
-<p>The example below shows the result of first executing <code>?-init_tk_alslib(my_tcli,Shared).</code> in alsdev, and then executing <code>?- info_dialog(my_tcli, 'Just for You', 'Special Msg').</code></p>
-<p><img src="images/info_my_tcli.gif" /></p>
+<p>The example below shows the result of first executing <code class="highlighter-rouge">?-init_tk_alslib(my_tcli,Shared).</code> in alsdev, and then executing <code class="highlighter-rouge">?- info_dialog(my_tcli, 'Just for You', 'Special Msg').</code></p>
+
+<p><img src="images/info_my_tcli.gif" alt="" /></p>
+
 <h2 id="notes">NOTES</h2>
-<p>A number of useful utility predicates are available in the ALS Prolog library for alsdev (<code>alsdir/library/tk_alslib.pro</code>); they are automatically loaded when invoked. They include:</p>
-<pre><code>    popup_select_items/[2,3,4]
+<p>A number of useful utility predicates are available in the ALS Prolog library for alsdev (<code class="highlighter-rouge">alsdir/library/tk_alslib.pro</code>); they are automatically loaded when invoked.  They include:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    popup_select_items/[2,3,4]
     extend_main_menubar/[2,3,4]
     extend_menubar_cascade/[2,4]
     info_dialog/[1,2,3]
@@ -57,7 +44,6 @@ init_tk_alslib(Shared)
     extend_cascade/3
     menu_entries_list/[2,3]
     path_to_main_menu_entry/2
-    path_to_menu_entry/[3,4]</code></pre>
-<p>The (short) versions of these predicates which do not use an <code>Interp</code> argument default their Tcl interpreter to <code>tcli</code>. To use these, you need only ensure that you run one of init_tk_alslib/[0,1] (just once) before calling the short predicates. To use the versions of these predicates with an <code>Interp</code> argument other than <code>tcli</code>, you must ensure that you first run (just once) the predicate init_tk_alslib/2 with <code>Interp</code> set to the name for the interpreter you wish to use.</p>
-</body>
-</html>
+    path_to_menu_entry/[3,4]
+</code></pre></div></div>
+<p>The (short) versions of these predicates which do not use an <code class="highlighter-rouge">Interp</code> argument default their Tcl interpreter to <code class="highlighter-rouge">tcli</code>.  To use these, you need only ensure that you run one of init_tk_alslib/[0,1] (just once) before calling the short predicates.  To use the versions of these predicates with an <code class="highlighter-rouge">Interp</code> argument other than <code class="highlighter-rouge">tcli</code>, you must ensure that you first run (just once) the predicate init_tk_alslib/2 with <code class="highlighter-rouge">Interp</code> set to the name for the interpreter you wish to use.</p>
