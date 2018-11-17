@@ -12,6 +12,11 @@ src_folder_md_files('./md_help').
 
 packages([core_prolog, alsdev, library, c_intf]).
 
+pack_readable(core_prolog, 'Core Prolog').
+pack_readable(alsdev, 'ALSDev').
+pack_readable(library, 'ALS Library').
+pack_readable(c_intf, 'C Interface').
+
 pack_kid(control, core_prolog).
 pack_kid(prolog_database, core_prolog).
 pack_kid(terms, core_prolog).
@@ -21,12 +26,22 @@ pack_kid(development_environment, alsdev).
 pack_kid(gui_library, alsdev).
 pack_kid(prolog_objects, alsdev).
 pack_kid(tcltk_interface, alsdev).
-
 	%% will probably grow:
 pack_kid(c_intf, c_intf).
 
 %future:
 %pack_kid(..., library).
+
+	% Core Prolog
+group_display(control, 'Control').
+group_display(input_output, 'Input Output').
+group_display(prolog_database, 'Prolog Database').
+group_display(terms, 'Terms').
+	% ALSDev
+group_display(development_environment, 'Development Env.').
+group_display(gui_library, 'Gui Library').
+group_display(prolog_objects, 'Prolog Objects').
+group_display(tcltk_interface, 'TclTk Interface').
 
 	/* ------------------------------------------------------ *
 	 |	    toc_from_docsdb
@@ -88,15 +103,6 @@ last_toc_phase( SortedPackageData, OS)
         write_pdata(BrokenOutGroups, OS),
         printf(OS, '</BODY>\n</HTML>\n', []).
         close(OS).
-
-group_display(control, 'Control').
-group_display(input_output, 'Input Output').
-group_display(prolog_database, 'Prolog Database').
-group_display(prolog_objects, 'Prolog Objects').
-group_display(terms, 'Terms').
-group_display(development_environment, 'Development Env.').
-group_display(gui_library, 'Gui Library').
-group_display(tcltk_interface, 'TclTk Interface').
 
 write_toc_header(S)
         :-
@@ -172,17 +178,68 @@ write_pdata([Group-GData | BrokenOutGroups], OS)
         :-
         group_display(Group, GroupDisp),
         printf(OS, '<div class="hentry">%t</div><br>\n', [GroupDisp]),
-        write_group(GData, OS),
+	collapse_PAs(GData, CollapseGData),
+        write_group(CollapseGData, OS),
         write_pdata(BrokenOutGroups, OS).
 
 write_group([], OS).
-write_group([PA-DescAtom-FName| GData], OS)
+write_group([PA-IX-FName| GData], OS)
         :-
         printf(OS,
-            '<div class="eentry"><a class="astyl" target="content" href="%t.html" title="%t -- %t">%t</a></div><br>\n',
-            [FName,PA,DescAtom,PA]),
+            '<div class="eentry"><a class="astyl" target="content" href="%t.html" ix="%t -- %t">%t</a></div><br>\n',
+            [FName,PA,IX,PA]),
         write_group(GData, OS).
 
+collapse_PAs([], []).
+			%% PA-DescAtom-FName
+collapse_PAs([PA-DA-FN | GData], [PCCPA-IX-FN | CollapseGData])
+	:-
+	getPandA(PA, P, A),
+	CPA = [A | TailCPA],
+	collapse_from(GData, P, [DA], TailCPA, IX, TailGData),
+	getPAL(CPA, CCPA),
+	bufwrite(X, P/CCPA),
+	atom_codes(PCCPA, X),
+	collapse_PAs(TailGData, CollapseGData).
+
+getPandA(PA, P, A)
+	:-
+	atomread(PA, PPAA, [syntax_errors(quiet)]),
+	!,
+	PPAA = P/A.
+
+getPandA(PA, P, A)
+	:-
+	atom(PA),
+	sub_atom(PA, Bef, 1, _, '/'), 
+	sub_atom(PA, 0, Bef, AA, P), 
+	C is Bef + 1, 
+	sub_atom(PA, C, _, 0, Natom),
+	atomread(Natom, A).
+
+getPandA(P/A, P, A) :-!.
+
+getPAL([A], A) :-!.
+getPAL(L, L).
+
+collapse_from([], P, DA_List, [], IX, [])
+	:-
+	reverse(DA_List, RDAL),
+	catenate(RDAL, IX).
+collapse_from([PA2-DA2-FN2 | TGData2], P, DA_List, TailCPA, IX, TailGData)
+	:-
+		%% Check whether the predicate (sans arity) in PA is == P:
+	getPandA(PA2, P, A2),
+	!,
+	TailCPA = [A2 | TailCPA2],
+	collapse_from(TGData2, P, [DA2, '; ' | DA_List], TailCPA2, IX, TailGData).
+
+collapse_from(GData, P, DA_List, TailCPA, IX, TailGData)
+	:-
+	reverse(DA_List, RDAL),
+	catenate(RDAL, IX),
+	TailCPA=[],
+	TailGData = GData.
 
 	/* -------------------------------------------------------------------- *
 	 |		new_page(Path)
@@ -314,9 +371,6 @@ make_new_page(Package, Group, Title, FileName, PAsWithDescs)
 write_out_new_page(Package, Group, Title, PAsWithDescs, OS)
 	:-
 	yaml(Title, Package, Group, PAsWithDescs, OS),
-%	printf(OS, '# %t\n\n', [Title]),
-%	short_descs(StrippedPreds, OS),
-%	short_descs(PAsWithDescs, OS),
 	length(PAsWithDescs, MinNumForms),
         printf(OS, '\n## FORMS\n\n', []),
 	do_forms_skels(MinNumForms, OS),
@@ -339,7 +393,6 @@ yaml(Title, Package, Group, Preds, OS)
 yaml_preds([], _).
 yaml_preds([p(PA,DescAtom) | Preds], OS)
         :-
-%        printf(OS, ' - \'%t\' : %t\n', [PA,DescAtom]),
         printf(OS, '- {sig: \'%t\', desc: \'%t\'}\n', [PA,DescAtom]),
         yaml_preds(Preds, OS).
 
@@ -398,7 +451,7 @@ blnk(OS) :- printf(OS, '\n',[]).
 	 |
 	 |	Path is as described above for new_page(Path).
 	 |	ASSUMES that the np(...) at Path has been processed by 
-	 |	new_page(Path) to produce a page in md_/help.
+	 |	new_page(Path) to produce a page in ~/md_help.
 	 |	(The skeletal page may or may not have been fleshed out, and
 	 |	 the corresponding *.html may or may not have been produced
 	 |	 using pandoc or Jekyll.)
@@ -419,6 +472,10 @@ ii :-
 	Path = 'np_for_curl.np',
 	idx_page(Path).
 
+ij :-
+	Path = 'calloc23.np',
+	idx_page(Path).
+
 idx_page(Path)
 	:-
 	(exists_file(Path) ->
@@ -437,20 +494,15 @@ do_new_idx(Path)
 	    % All necessary checks made when new_page(Path) ran:
 	rewrite_idx(Package, Group, Title, FileName, PAsWithDescs).
 
-/*
-rewrite_idx(NewPageTerm)
-	:-
-	file_extension(MDFile, FileName, md),
-	src_folder_md_files(MD_Src_Folder),
-        join_path([MD_Src_Folder, MDFile], TgtMDFile),
-	open(TgtMDFile, write, OS),
-	(rewrite_idx(Package, Group, Title, PAsWithDescs, OS) ->
-		close(OS) ; close(OS) ).
-*/
-
 rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
 	:-
-	catenate(['./docsdb_', Package, '.pro'], PkgFile),
+		%% pack_readable(c_intf, 'C Interface').
+	(pack_readable(PackAbbrev, Package) -> true;
+		pack_readable(Package, _), PackAbbrev = Package ),
+	catenate(['./docsdb_', PackAbbrev, '.pro'], PkgFile),
+	(exists_file(PkgFile) -> true ; 
+		open(PkgFile, write, OOS), printf(OOS, '[].\n', []), close(OOS)
+	),
         open(PkgFile, read, IS),
 	read_term(IS, XPGEList, [attach_fullstop(true)]),
 	close(IS),
@@ -461,7 +513,7 @@ rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
 	sort(NewList, SortedNewList),
 
         toc_locn(TocFolder),
-        catenate(['toc_', Package, '.html'], TocFile),
+        catenate(['toc_', PackAbbrev, '.html'], TocFile),
         join_path([TocFolder, TocFile], TgtTocFile),
         open(TgtTocFile, write, OS),
         write_toc_header(OS),
@@ -484,3 +536,8 @@ xtr_plain_title(Title, PlainPred)
 	read_term(IS, PA, [attach_fullstop(true)]),
 	close(IS),
 	PA = PlainPred/_.
+
+	/* -------------------------------------------------------------------- *
+	 * -------------------------------------------------------------------- */
+
+
