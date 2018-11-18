@@ -43,6 +43,9 @@ group_display(gui_library, 'Gui Library').
 group_display(prolog_objects, 'Prolog Objects').
 group_display(tcltk_interface, 'TclTk Interface').
 
+	% ALS C-Interf
+group_display(c_data, 'C Data').
+
 	/* ------------------------------------------------------ *
 	 |	    toc_from_docsdb
 	 |
@@ -60,6 +63,7 @@ toc_locn('./alshelp').
 td:- toc_from_docsdb.
 tdcore :- tocs_from_docsdbs([core_prolog]).
 tdalsdev :- tocs_from_docsdbs([alsdev]).
+tdcint :- tocs_from_docsdbs([c_intf]).
 
 toc_from_docsdb
         :-
