@@ -317,7 +317,7 @@
     xpge(prolog_database,'var/1',var1,nonvar,
         [p('var/1','the variable is unbound'),
             p('nonvar/1','the variable is instantiated')]),
-    xpge(terms,'$uia_alloc/2',uiaalloc2,'\'$strlen\'',
+    xpge(uias,'$uia_alloc/2',uiaalloc2,'\'$strlen\'',
         [p('\'$uia_alloc\'/2','allocates a UIA of specified length'),
             p('\'$uia_size\'/2','obtains the actual size of a UIA'),
             p('\'$uia_clip\'/2','clip the given UIA'),
