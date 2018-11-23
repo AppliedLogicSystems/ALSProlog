@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl2.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Various positional list predicates
+ |		Group: Lists
+ |		DocTitle: nth_tail/4
+ |		-- Various positional list predicates
  *=====================================================================*/
 module builtins.
 

@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl3.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Miscellaneous list predicates
+ |		Group: Lists
+ |		DocTitle: number_list/4
+ |		-- Miscellaneous list predicates
  *=====================================================================*/
 module builtins.
 

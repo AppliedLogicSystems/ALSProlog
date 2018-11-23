@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl4.pro
  |	Copyright (c) 1996 Applied Logic Systems, Inc.
- |
- |		Miscellaneous list predicates
+ |		Group: Lists
+ |		DocTitle: split_ll_by_blank/3
+ |		-- Miscellaneous list predicates
  *=====================================================================*/
 module builtins.
 

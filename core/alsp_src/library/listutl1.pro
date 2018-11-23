@@ -1,12 +1,13 @@
 /*======================================================================
  |			listutl1.pro
- |		Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Various algebraic list predicates
+ |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |		Group: Lists
+ |		DocTitle: list_diff/3
+ |		-- Various algebraic list predicates
  *=====================================================================*/
 module builtins.
 
-export lappend/2.
+export append/2.
 export list_diff/3.
 export list_diffs/4.
 export symmetric_diff/3.
