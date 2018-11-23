@@ -1,4 +1,4 @@
-/* =================================================================== *
+/* ==================================================================== *
  |				doctools.pro
  |
  |	Primary predicates:
@@ -6,7 +6,7 @@
  |	    new_page(Path)  - creates skeletal new *.md page
  |	    idx_page(Path)  - indexes (toc) a new *.md page
  |
- * =================================================================== */
+ * ==================================================================== */
 
 src_folder_md_files('./md_help').
 
@@ -14,7 +14,7 @@ packages([core_prolog, alsdev, library, c_intf]).
 
 pack_readable(core_prolog, 'Core Prolog').
 pack_readable(alsdev, 'ALSDev').
-pack_readable(library, 'ALS Library').
+pack_readable(alslib, 'ALS Library').
 pack_readable(c_intf, 'C Interface').
 
 pack_kid(control, core_prolog).
@@ -30,21 +30,24 @@ pack_kid(tcltk_interface, alsdev).
 pack_kid(c_intf, c_intf).
 
 %future:
-%pack_kid(..., library).
+%pack_kid(..., alslib).
 
 	% Core Prolog
-group_display(control, 'Control').
-group_display(input_output, 'Input Output').
-group_display(prolog_database, 'Prolog Database').
-group_display(terms, 'Terms').
+group_display(control, 'Control') :-!.
+group_display(input_output, 'Input Output') :-!.
+group_display(prolog_database, 'Prolog Database') :-!.
+group_display(terms, 'Terms') :-!.
+group_display(uias, 'UIAs') :-!.
 	% ALSDev
-group_display(development_environment, 'Development Env.').
-group_display(gui_library, 'Gui Library').
-group_display(prolog_objects, 'Prolog Objects').
-group_display(tcltk_interface, 'TclTk Interface').
-
+group_display(development_environment, 'Development Env.') :-!.
+group_display(gui_library, 'Gui Library') :-!.
+group_display(prolog_objects, 'Prolog Objects') :-!.
+group_display(tcltk_interface, 'TclTk Interface') :-!.
 	% ALS C-Interf
-group_display(c_data, 'C Data').
+group_display(c_data, 'C Data') :-!.
+
+	% ALS Library
+group_display(G, G).
 
 	/* ------------------------------------------------------ *
 	 |	    toc_from_docsdb
@@ -52,18 +55,18 @@ group_display(c_data, 'C Data').
 	 |	Writes the tables of contents in alshelp/:
 	 |	    toc_core_prolog.html
 	 |	    toc_alsdev.html
+	 |	    toc_alslib
+	 |	    toc_c_intf
 	 |		[Future: for library and foreign interface]
 	 |	These are driven by prolog "databases":
 	 |	    docsdb_core_prolog.pro
 	 |	    docsdb_alsdev.pro
 	 * ------------------------------------------------------ */
 
-toc_locn('./alshelp').
-
 td:- toc_from_docsdb.
 tdcore :- tocs_from_docsdbs([core_prolog]).
 tdalsdev :- tocs_from_docsdbs([alsdev]).
-tdcint :- tocs_from_docsdbs([c_intf]).
+tdc_int :- tocs_from_docsdbs([c_intf]).
 
 toc_from_docsdb
         :-
@@ -88,23 +91,67 @@ tocs_from_docsdbs([Package | Packages])
 
         Write out the table of contents (toc) for PackageName.
  * --------------------------------------------------------------- */
+	% Paths to locations of alshelp/ when running in src_help_md:
+toc_locn('./alshelp'). 		% running in src_help_md
+md_toc_locn('../ref-manual').	% running in src_help_md
+
+	%% depending on the location of toc_<Pack>.pro:
+toc2mdSrcDir('').    		%% for src_help_md/alshelp
+md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
+
+		%% packages([core_prolog, alsdev, library, c_intf]).
 write_toc(PackageName, []) :-!.
 
 write_toc(PackageName, PackageData)
         :-
+	PackageName == core_prolog,
+	!,
+	write_toc_core_prolog(PackageData).
+
+write_toc(PackageName, PackageData)
+        :-
+		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:
+        catenate(['toc_', PackageName, '.html'], TocFile),
         toc_locn(TocFolder),
+        join_path([TocFolder, TocFile], TgtTocFile),
+	toc2mdSrcDir(Toc2SrcMdDir),		 %% for src_help_md/alshelp
+	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir),
+
+		%% write the toc file as file ~docs/ref-manual/md_toc_<PackAbbrev>.html:
+        catenate(['md_toc_', PackageName, '.html'], MDTocFile),
+        md_toc_locn(MDTocFolder),
+        join_path([MDTocFolder, MDTocFile], TgtMDTocFile),
+	md_toc2mdSrcDir(MDToc2SrcDir), 
+	write_out_toc(PackageData, TgtMDTocFile, MDToc2SrcDir).
+
+write_toc_core_prolog(PackageData)
+	:-
+	PackageName = core_prolog,
+
+        toc_locn(TocFolder),
+	toc2mdSrcDir(Toc2SrcMdDir),		 %% for src_help_md/alshelp
         catenate(['toc_', PackageName, '.html'], TocFile),
         join_path([TocFolder, TocFile], TgtTocFile),
-        open(TgtTocFile, write, OS),
+	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir).
+
+write_out_toc(PackageData, TgtTocFile, ToSrcDir)
+	:-
 %OS = user_output,
+        open(TgtTocFile, write, OS),
         write_toc_header(OS),
         sort(PackageData, SortedPackageData),
-	last_toc_phase( SortedPackageData, OS).
+	last_toc_phase( SortedPackageData, ToSrcDir, OS),
+	close(OS).
 
-last_toc_phase( SortedPackageData, OS)
+
+
+
+
+
+last_toc_phase( SortedPackageData, ToSrcDir, OS)
 	:-
         breakout_groups(SortedPackageData, BrokenOutGroups, FinalBrokenOutGroups),
-        write_pdata(BrokenOutGroups, OS),
+        write_pdata(BrokenOutGroups, ToSrcDir, OS),
         printf(OS, '</BODY>\n</HTML>\n', []).
         close(OS).
 
@@ -176,23 +223,24 @@ make_pa_descs([p(PA, DescList) | PredsWithDescs], FName, [PA-DescAtom-FName | PA
         ),
         make_pa_descs(PredsWithDescs, FName, PADescs).
 
-write_pdata([], OS).
+write_pdata([], _, OS).
 
-write_pdata([Group-GData | BrokenOutGroups], OS)
+write_pdata([Group-GData | BrokenOutGroups], Toc2SrcMdDir, OS)
         :-
         group_display(Group, GroupDisp),
         printf(OS, '<div class="hentry">%t</div><br>\n', [GroupDisp]),
 	collapse_PAs(GData, CollapseGData),
-        write_group(CollapseGData, OS),
-        write_pdata(BrokenOutGroups, OS).
+        write_group(CollapseGData, Toc2SrcMdDir, OS),
+        write_pdata(BrokenOutGroups, Toc2SrcMdDir, OS).
 
-write_group([], OS).
-write_group([PA-IX-FName| GData], OS)
+	%% in ref-manual/md_toc____: '../src_help_md/md_help/'
+write_group([], _, OS).
+write_group([PA-IX-FName| GData], Toc2SrcMdDir, OS)
         :-
         printf(OS,
-            '<div class="eentry"><a class="astyl" target="content" href="%t.html" ix="%t -- %t">%t</a></div><br>\n',
-            [FName,PA,IX,PA]),
-        write_group(GData, OS).
+            '<div class="eentry"><a class="astyl" target="content" href="%t%t.html" ix="%t -- %t">%t</a></div><br>\n',
+            [Toc2SrcMdDir,FName,PA,IX,PA]),
+        write_group(GData, Toc2SrcMdDir, OS).
 
 collapse_PAs([], []).
 			%% PA-DescAtom-FName
@@ -210,7 +258,7 @@ getPandA(PA, P, A)
 	:-
 	atomread(PA, PPAA, [syntax_errors(quiet)]),
 	!,
-	PPAA = P/A.
+	(PPAA = P/A ; P = PPAA, A=0).
 
 getPandA(PA, P, A)
 	:-
@@ -219,7 +267,12 @@ getPandA(PA, P, A)
 	sub_atom(PA, 0, Bef, AA, P), 
 	C is Bef + 1, 
 	sub_atom(PA, C, _, 0, Natom),
-	atomread(Natom, A).
+	atomread(Natom, A),
+	!.
+getPandA(P, P, 0)
+        :-
+        atom(P),
+	!.
 
 getPandA(P/A, P, A) :-!.
 
@@ -451,6 +504,37 @@ finish_skeleton(OS)
 blnk(OS) :- printf(OS, '\n',[]).
 
 	/* -------------------------------------------------------------------- *
+	 * -------------------------------------------------------------------- */
+
+do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList)
+	:-	
+        open(PkgFile, read, IS),
+	read_term(IS, XPGEList, [attach_fullstop(true)]),
+	close(IS),
+
+    	XPGETerm = xpge(Group,Title,FileName,PlainPred,PAsWithDescs),
+	xtr_plain_title(Title, PlainPred),
+	NewList = [XPGETerm | XPGEList],
+	sort(NewList, SortedNewList),
+
+        open(PkgFile, write, OS2),
+        write_term(OS2, SortedNewList, [ quoted(true) ]),
+        write(OS2, '.'),nl(OS2),
+        flush_output(OS2),
+        close(OS2).
+
+xtr_plain_title(PlainPred/_, PlainPred)
+	:-!.
+
+xtr_plain_title(Title, PlainPred)
+	:-
+	atom(Title),
+	open(atom(Title), read, IS),
+	read_term(IS, PA, [attach_fullstop(true)]),
+	close(IS),
+	PA = PlainPred/_.
+
+	/* -------------------------------------------------------------------- *
 	 |		idx_page(Path)
 	 |
 	 |	Path is as described above for new_page(Path).
@@ -465,12 +549,10 @@ blnk(OS) :- printf(OS, '\n',[]).
 	 |	A.  It reads the list from docsdb_<Package>.pro, adds
 	 |	    an appropriate entry for the np term at the beginning of the
          |          list, and sorts the list;
-	 |		docsdb_<Package>.pro
-	 |	B.  Uses the sorted list to rewrite a new file 
+	 |	B.  Rewrites docsdb_<Package>.pro using the sorted list from step A.
+	 |	C.  Uses the sorted list to rewrite a new file 
 	 |		toc_<Package>.html 
 	 |	    in folder alshelp/.
-	 |	C.  Rewrites docsdb_<Package>.pro using the sorted list
-	 |	    produced in step A.
 	 * -------------------------------------------------------------------- */
 ii :- 
 	Path = 'np_for_curl.np',
@@ -507,39 +589,42 @@ rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
 	(exists_file(PkgFile) -> true ; 
 		open(PkgFile, write, OOS), printf(OOS, '[].\n', []), close(OOS)
 	),
-        open(PkgFile, read, IS),
-	read_term(IS, XPGEList, [attach_fullstop(true)]),
-	close(IS),
+	do_rew_idx(Pkgfile, PackAbbrev, Group, Title, FileName, PAsWithDescs, TocFolder).
+	
+	/* -------------------------------------------------------------------- *
+	 * -------------------------------------------------------------------- */
+/* Moved above
+	% Paths to locations of alshelp/ when running in src_help_md:
+toc_locn('./alshelp'). 		% running in src_help_md
+md_toc_locn('../ref-manual').	% running in src_help_md
 
-    	XPGETerm = xpge(Group,Title,FileName,PlainPred,PAsWithDescs),
-	xtr_plain_title(Title, PlainPred),
-	NewList = [XPGETerm | XPGEList],
-	sort(NewList, SortedNewList),
+	%% depending on the location of toc_<Pack>.pro:
+toc2mdSrcDir('').    		%% for src_help_md/alshelp
+md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
+*/
 
+do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, PAsWithDescs)
+	:-
+	do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList),
+
+		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:
         toc_locn(TocFolder),
-        catenate(['toc_', PackAbbrev, '.html'], TocFile),
+	toc2mdSrcDir(Toc2SrcMdDir),
+	write_toc_file(TocFolder, PackAbbrev, '', SortedNewList, Toc2SrcMdDir),
+
+		%% write the toc file as file ~docs/ref-manual/md_toc_<PackAbbrev>.html:
+        md_toc_locn(MDTocFolder),
+	md_toc2mdSrcDir(MDToc2SrcDir), 
+	write_toc_file(MDTocFolder, PackAbbrev, 'md_', SortedNewList, MDToc2SrcDir).
+	
+write_toc_file(TocFolder, PackAbbrev, TocFilePrefix, SortedNewList, Toc2SrcMdDir)
+	:-
+        catenate([TocFilePrefix, 'toc_', PackAbbrev, '.html'], TocFile),
         join_path([TocFolder, TocFile], TgtTocFile),
         open(TgtTocFile, write, OS),
         write_toc_header(OS),
-	last_toc_phase( SortedNewList, OS),
-	close(OS),
-
-        open(PkgFile, write, OS2),
-        write_term(OS2, SortedNewList, [ quoted(true) ]),
-        write(OS2, '.'),nl(OS2),
-        flush_output(OS2),
-        close(OS2).
-
-xtr_plain_title(PlainPred/_, PlainPred)
-	:-!.
-
-xtr_plain_title(Title, PlainPred)
-	:-
-	atom(Title),
-	open(atom(Title), read, IS),
-	read_term(IS, PA, [attach_fullstop(true)]),
-	close(IS),
-	PA = PlainPred/_.
+	last_toc_phase( SortedNewList, Toc2SrcMdDir, OS),
+	close(OS).
 
 	/* -------------------------------------------------------------------- *
 	 * -------------------------------------------------------------------- */
