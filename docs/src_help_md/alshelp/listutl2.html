@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>nth_tail/4</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">nth_tail/4</h1>
+</header>
+<h2 id="forms">FORMS</h2>
+<p><code>deleteNth(N, List, Remainder)</code></p>
+<p><code>change_nth(N, List, NewItem)</code></p>
+<p><code>subst_nth(N, List, NewItem, NewList)</code></p>
+<p><code>nth_tail(N, List, Head, Tail)</code></p>
+<p><code>at_most_n(List, N, Head)</code></p>
+<p><code>get_list_tail(List, Item, Tail)</code></p>
+<p><code>sublist(List,Start,Length,Result)</code></p>
+<p><code>last(List, Item)</code></p>
+<p><code>delete_1st(List, Item, Result)</code></p>
+<p><code>nonmember(List, Item)</code></p>
+<h2 id="description">DESCRIPTION</h2>
+<p><strong><code>deleteNth/3</code></strong> If N is a non-negative integer and List is a list, then Remainder is the result of deleting the Nth element of List; this predicate numbers the list beginning with 1.</p>
+<p><strong><code>change_nth/3</code></strong> If N is a non-negative integer, List is list, and NewItem is any non-var object, destructively changes the Nth element of List to become NewItem; this predicate numbers the list beginning with 0.</p>
+<p><strong><code>subst_nth/4</code></strong> If N is a non-negative integer, List is list, and NewItem is any non-var object, NewList is the result of non-destrctively changing the Nth element of List to become | NewItem; this predicate numbers the list beginning with 0.</p>
+<p><strong><code>nth_tail/4</code></strong> If List is a list and N is a non-negative integer, then Head is the portion of List up to and including the Nth element, and tail is the portion of List from the Nth element to the end.</p>
+<p><strong><code>at_most_n/3</code></strong> If List is a list and N is a non-negative integer, Head is the longest initial segment of List with length =&lt; N.</p>
+<p><strong><code>get_list_tail/3</code></strong> If List is a list and Item is any object, Tail is the portion of List extending from the leftmost occurrence of Item in List to the end of List; fails if Item does not belong to List.</p>
+<p><strong><code>sublist/4</code></strong> If List is an arbitrary list, Result is the sublist of length Length beginning at position Start in List.</p>
+<p><strong><code>last/2</code></strong> If List is a non-empty list, Item is the last (right-most) element of List.</p>
+<p><strong><code>delete_1st/3.</code></strong> If Item occurs on List, deletes the left-most entry of Item on List, returning in Result; fails if Item is not on List.</p>
+<p><strong><code>nonmember/2</code></strong> Succeeds iff member(List, Item) fails</p>
+<h2 id="examples">EXAMPLES</h2>
+</body>
+</html>
