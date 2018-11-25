@@ -171,7 +171,7 @@ last([_|Tail],Item)
 	last(Tail, Item).
 
 /*!---------------------------------------------------------------------
- |	delete_1st/3.
+ |	delete_1st/3
  |	delete_1st(List, Item, Result)
  |	delete_1st(+, +, -)
  |

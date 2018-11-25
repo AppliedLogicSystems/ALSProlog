@@ -11,7 +11,7 @@ predicates:
 - {sig: 'get_list_tail/3', desc: '- returns the tail of a list determined by an element'}
 - {sig: 'sublist/4', desc: '- extracts a sublist from a list'}
 - {sig: 'last/2', desc: '- returns last element of a list'}
-- {sig: 'delete_1st/3.', desc: '- deletes the left-most entry of Item in List'}
+- {sig: 'delete_1st/3', desc: '- deletes the left-most entry of Item in List'}
 - {sig: 'nonmember/2', desc: '-	tests for the failure of membership'}
 ---
 ## FORMS
@@ -68,7 +68,7 @@ predicates:
 **`last/2`** If List is a non-empty list, Item is the last (right-most) element
     of List.
 
-**`delete_1st/3.`** If Item occurs on List, deletes the left-most entry of Item on
+**`delete_1st/3`** If Item occurs on List, deletes the left-most entry of Item on
     List, returning in Result; fails if Item is not on List.
 
 **`nonmember/2`** Succeeds iff member(List, Item) fails
