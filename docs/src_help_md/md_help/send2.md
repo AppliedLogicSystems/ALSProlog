@@ -1,6 +1,7 @@
 ---
 title: 'send/2'
 package: ALSDev
+group: Prolog Objects
 predicates:
 - {sig: 'send/2', desc: 'send a message to an object'}
 ---

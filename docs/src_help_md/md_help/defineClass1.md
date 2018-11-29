@@ -1,6 +1,7 @@
 ---
 title: 'defineClass/1'
 package: ALSDev
+group: Prolog Objects
 predicates:
 - {sig: 'defineClass/1', desc: 'specify an ObjectPro class'}
 ---

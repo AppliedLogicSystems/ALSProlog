@@ -1,6 +1,7 @@
 ---
 title: 'ALSDev File Menu'
 package: ALSDev
+group: Development Env.
 predicates:
 - {sig: 'File Menu', desc: 'Select a file for editing'}
 ---

@@ -1,6 +1,7 @@
 ---
 title: 'Preferences Dialog'
 package: ALSDev
+group: Development Env.
 predicates:
 - {sig: 'Preferences Dialog', desc: 'Set various IDE preferences'}
 ---

@@ -1,6 +1,7 @@
 ---
 title: 'extend_main_menubar/2'
 package: ALSDev
+group: Gui Library
 predicates:
 - {sig: 'extend_main_menubar/2', desc: 'add entries to the main menubar'}
 - {sig: 'menu_entries_list/[2,3]', desc: 'obtain menu entries'}

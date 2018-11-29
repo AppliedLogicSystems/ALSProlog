@@ -1,6 +1,7 @@
 ---
 title: 'file_select_dialog/[1,2,3]'
 package: ALSDev
+group: Gui Library
 predicates:
 - {sig: 'file_select_dialog/ [1,2,3]', desc: 'select a file'}
 ---

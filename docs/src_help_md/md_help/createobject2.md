@@ -1,6 +1,7 @@
 ---
 title: 'create_object/2'
 package: ALSDev
+group: Prolog Objects
 predicates:
 - {sig: 'create_object/2', desc: 'create an object'}
 ---
