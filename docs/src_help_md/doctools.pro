@@ -513,6 +513,31 @@ do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList)
 	close(IS),
 
     	XPGETerm = xpge(Group,Title,FileName,PlainPred,PAsWithDescs),
+	check_for_xpge_dup( XPGETerm, PAsWithDescs, XPGEList, PkgFile, Title, SortedNewList).
+
+check_for_xpge_dup( XPGETerm, PAsWithDescs, XPGEList, PkgFile, Title, SortedNewList)
+	:-
+	XPGETerm = xpge(Group, Title, FileName, PlainPred, NewPAsWithDescs),
+		%% Already have an entry in PkgFile for this xpge:
+	member(xpge(Group, Title, FileName, PlainPred, PrevEntryPADs), XPGEList),
+	!,
+		%% Check if there's a change in the PAs with Descs:
+	check_merge_PAs_Ds(NewPAsWithDescs, PrevEntryPADs, InitMergedPAsDs),
+	sort(InitMergedPAsDs, SortedMergedPAsDs),
+	replace_xpge( XPGEList, 
+			xpge(Group, Title, FileName, PlainPred, SortedMergedPAsDs), 
+			SortedNewList),
+
+        open(PkgFile, write, OS2),
+        write_term(OS2, SortedNewList, [ quoted(true) ]),
+        write(OS2, '.'),nl(OS2),
+        flush_output(OS2),
+	close(OS2).
+
+		%% No previous entry in PkgFile for this xpge:
+check_for_xpge_dup( XPGETerm, _, XPGEList, PkgFile, Title, SortedNewList)
+	:-
+    	XPGETerm = xpge(Group,Title,FileName,PlainPred,PAsWithDescs),
 	xtr_plain_title(Title, PlainPred),
 	NewList = [XPGETerm | XPGEList],
 	sort(NewList, SortedNewList),
@@ -522,6 +547,64 @@ do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList)
         write(OS2, '.'),nl(OS2),
         flush_output(OS2),
         close(OS2).
+
+	% Run thru the new PA/Descs checking each; 
+	%   if ThisPA is not present, add it;
+	%   if ThisPA is present, update OldDesc by NewDesc
+
+	% Every new PAD has been dealt with:
+check_merge_PAs_Ds([], _, []). 
+
+check_merge_PAs_Ds([p(ThisPA,NewDesc) | RestNewPAsWithDescs], PrevEntryPADs, 
+			[p(ThisPA, NewDesc) | RestMergedPAsDs])
+	:-
+		% Is there a p(ThisPA, __) old entry?:
+	check_PA_status(PrevEntryPADs, p(ThisPA,NewDesc), UpdatedEntryPADs),
+	!,
+	check_merge_PAs_Ds(RestNewPAsWithDescs, UpdatedEntryPADs, RestMergedPAsDs).
+
+	% p(ThisPA,_) is not present in PrevEntryPADs
+check_merge_PAs_Ds([p(ThisPA,NewDesc) | RestNewPAsWithDescs], PrevEntryPADs, 
+			[p(ThisPA,NewDesc) | RestMergedPAsDs])
+	:-
+	check_merge_PAs_Ds(RestNewPAsWithDescs, PrevEntryPADs, RestMergedPAsDs).
+
+	
+	% Is there a p(ThisPA, __) old entry? -- No, if PrevEntryPADs = [];
+	% So no clause for PrevEntryPADs = []
+	% (Want to fail into the 2nd clause for check_for_xpge_dup)
+
+	% Is there a p(ThisPA, __) old entry?:
+	% Yes, this is it.  Note that either NewDesc\=OldDesc, so we want to
+	% replace OldDesc by NewDesc, or NewDesc==OldDes, and it doesn't matter
+	% if we replace OldDesc by NewDesc, the result will stay the same.
+check_PA_status([p(ThisPA, OldDesc) | RestPrevEntryPADs], 
+			p(ThisPA,NewDesc), [p(ThisPA,NewDesc) | RestPrevEntryPADs])
+	:-!.
+	
+	% Is there a p(ThisPA, __) old entry?:
+	% Don't know, but this isn't it; skip over:
+check_PA_status([p(ThisPA, OldDesc) | RestPrevEntryPADs], 
+			p(ThisPA,NewDesc), [p(ThisPA, OldDesc) | RestPrevEntryPADs])
+	:-!.
+	check_PA_status(RestPrevEntryPADs, p(ThisPA,NewDesc), RestPrevEntryPADs).
+
+	% XPGEList is sorted going in; this doesn't change that:
+replace_xpge([], _, []).
+replace_xpge([xpge(Group, Title, FileName, PlainPred, _) | TailXPGEList], 
+		xpge(Group, Title, FileName, PlainPred, SortedMergedPAsDs), 
+	     [xpge(Group, Title, FileName, PlainPred, SortedMergedPAsDs) | 
+		TailXPGEList])
+	:-!.
+
+replace_xpge([XPGETerm | TailXPGEList], 
+		xpge(Group, Title, FileName, PlainPred, SortedMergedPAsDs), 
+	     [XPGETerm | TailSortedNewList])
+	:-
+	replace_xpge(TailXPGEList, 
+		xpge(Group, Title, FileName, PlainPred, SortedMergedPAsDs), 
+	     	TailSortedNewList).
+
 
 xtr_plain_title(PlainPred/_, PlainPred)
 	:-!.
