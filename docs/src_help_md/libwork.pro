@@ -35,6 +35,7 @@ src_helpPath('./').
 lib_dev_path('../../core/alsp_src/library').
 
 tlu1 :- doc_lib_file(listutl1).
+tlu4 :- doc_lib_file(listutl4).
 
 libsetup :-
 	command_line(LibFilesList),
@@ -208,10 +209,8 @@ findPredComments(Lines, [lcmt(Comment) | CommentsList], [b(BeforeTopLines) | RBT
 	:-
 	findNextComment(Lines, Comment, BeforeTopLines, InterLinesTail),
 	!,
-%nl,write_lines(Comment),nl,
 	findPredComments(InterLinesTail, CommentsList, RBTL, FinalTail).
 
-%findPredComments(Lines, [], [], Lines).
 findPredComments(Lines, [], [b(PLines)], Lines)
 	:-
 	peel_endmod(Lines, PLines).
@@ -310,26 +309,67 @@ xtr_doc([L1, L2 | Ls], d(PA, Form, Summary, Desc))
 	
 getSummary([SL | RestLs], Summary, RestLs)
 	:-
+		% Does SL start with ' |' ?
 	sub_atom(SL, 0, 2, _, ' |'),
+		% Yes, get the full tail of SL following the initial ' |':
 	sub_atom(SL, 2, _, 0, SLX),
+		% convert to codes & strip off initial blanks, tabs, and '|'s:
 	strip_front(SLX, CodesSLX),
-	CodesSLX = [0'- | _],
-	!,
-	atom_codes(Summary, CodesSLX).
+		% Extract the summary from the trailing codes, if it exists:
+		% Note that the summary line must have a dash:
+	xtr_summary(CodesSLX, Summary),
+	!.
 
 getSummary([L | Ls], Summary, RestLs)
 	:-
 	getSummary(Ls, Summary, RestLs).
 
-getDesc([L | _], [])
+getDesc(Ls, Desc)
+	:-
+	getDesc0(Ls, InitDesc),
+	adj_desc_lines(InitDesc, Desc).
+
+adj_desc_lines([], []).
+adj_desc_lines([Line | Desc], [AdjLine | AdjDesc])
+	:-
+	strip_front(Line, CodesF),
+	reverse(CodesF, RCodesF),
+	two_blank_end(RCodesF, 0, B2EndRCodesF),
+	reverse(B2EndRCodesF, B2ECodesF),
+	atom_codes(AdjLine, B2ECodesF),
+	adj_desc_lines(Desc, AdjDesc).
+	
+two_blank_end(RCodes, 2, RCodes)
+	:-!.
+
+	% blank space:
+two_blank_end([0'  | RCodesIn], N, [0' | RCodesOut])
+	:-!,
+	M is N+1,
+	two_blank_end(RCodesIn, M, RCodesOut).
+
+	% non-blank space; because of clause 1, N<2.
+two_blank_end([Cd | RCodesIn], N, [0' | RCodesOut])
+	:-!,
+	M is N+1,
+	two_blank_end([Cd | RCodesIn], M, RCodesOut).
+
+getDesc0([L | _], [])
 	:-
 	sub_atom(L, 0, 4, _, ' *!-'),
 	!.
-getDesc([L | Ls], RR)
+getDesc0([L | Ls], RR)
 	:-
 	clean_white(L, R),
 	(R == '' -> RR = Desc ; RR = [R | Desc]),
-	getDesc(Ls, Desc).
+	getDesc0(Ls, Desc).
+
+	% Trailing codes CodesSLX start with a dash ('-'):
+xtr_summary([0'- | TailCodesSLX], Summary)
+	:-!,
+		% Strip any more leading whitespace following the '-':
+	s_f(TailCodesSLX, FinalCodesSLX),
+	atom_codes(Summary, FinalCodesSLX).
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
