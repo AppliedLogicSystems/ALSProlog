@@ -35,6 +35,7 @@ src_helpPath('./').
 lib_dev_path('../../core/alsp_src/library').
 
 tlu1 :- doc_lib_file(listutl1).
+tlu3 :- doc_lib_file(listutl3).
 tlu4 :- doc_lib_file(listutl4).
 
 libsetup :-
@@ -298,11 +299,26 @@ extr_doc([lcmt(C) | CommentsList], [D | DocList])
 
 xtr_doc([L1, L2 | Ls], d(PA, Form, Summary, Desc))
 	:-
-	clean_white(L1, PA),
+	clean_PA_entry(L1, PA),
+%	clean_white(L1, PA),
 	clean_white(L2, Form),
 	getSummary(Ls, Summary, RestLs),
 	crossWhiteLines(RestLs, StartDescLines),
 	getDesc(StartDescLines, Desc).
+
+clean_PA_entry(L1, PA)
+	:-
+	clean_white(L1, CL1),
+		% Now check that there is no trailing period:
+	atom_codes(CL1, Codes),
+	reverse(Codes, RCodes),
+		% clean white space off the end:
+	s_f(RCodes,  QCodes),
+	(QCodes = [0'. | UCodes] ->
+		ZCodes = UCodes ; ZCodes = QCodes),
+	reverse(ZCodes, PACodes),
+	atom_codes(PA, PACodes).
+	
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
@@ -417,16 +433,21 @@ write_alb(LibFile, Module, alslib, DocList, FolderPath)
 		%% *.alb has no hand-entered info that is different
 		%% from what is generated here, so it is ok
 		%% to overwrite it:
-	open(Alb_path, write, OS),
-%	OS = user_output,
-
+	pullPAs(DocList, PAsList),
 	AlbTerm = 
 	    libactivate(Module, [alslib, LibFile], PAsList, []),
-	pullPAs(DocList, PAsList),
-    % display on the console:
+% display on the console:
 printf(user_output, '%t:\n', [AlbFullName]),
 printf(user_output, '%t.\n', [AlbTerm]),
-	printf(OS, '%t.\n', [AlbTerm]).
+
+	open(Alb_path, write, OS),
+%	OS = user_output,
+	printf(OS, '%t.\n', [AlbTerm]),
+	close(OS),
+	open(Alb_path, read, IS),
+		%% we're looking to see if there are syntax errors:
+	read_term(IS, ABT, []),
+	close(IS).
 
 pullPAs([], []).
 pullPAs([d(PA, Form, Summary, Desc) | DocList], [PA | PAsList])
