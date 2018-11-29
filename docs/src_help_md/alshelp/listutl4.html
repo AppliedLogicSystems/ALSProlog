@@ -23,8 +23,23 @@
 <p><code>split_ll_at_start(Lines, SplitInitSeg, Head, Tail, SplitterLine)</code></p>
 <p><code>split_ll_by_blank(Lines, Head, Tail)</code></p>
 <h2 id="description">DESCRIPTION</h2>
-<p><strong><code>split_ll_at_start/5</code></strong> If Lines is a list of atoms (or UIAs), and if SplitInitSeg is an atom, then, if there is any element of Lines with SplitInitSeg at its initial segment, then: - SplitterLine is the first such line; - Head is the initial sublist of Lines up to but not including SplitterLine; - Tail is the sublist of Lines following SplitterLine If there is no such line, then: - SplitterLine = ’’ - Head = Lines - Tail = []</p>
-<p><strong><code>split_ll_by_blank/3</code></strong> If Lines is a list of atoms (or UIAs), then, if ’’ belongs to Lines, then: - Head is the initial sublist of Lines up to the first occurrence of ’’; - Tail is the sublist of Lines following Head If there is no such line, then: - Head = Lines - Tail = []</p>
+<p><strong><code>split_ll_at_start/5</code></strong> If Lines is a list of atoms (or UIAs), and if SplitInitSeg is an atom,<br />
+then, if there is any element of Lines with SplitInitSeg at its initial segment,<br />
+then:<br />
+- SplitterLine is the first such line;<br />
+- Head is the initial sublist of Lines up to but not including SplitterLine;<br />
+- Tail is the sublist of Lines following SplitterLine<br />
+If there is no such line, then:<br />
+- SplitterLine = ’’<br />
+- Head = Lines<br />
+- Tail = []</p>
+<p><strong><code>split_ll_by_blank/3</code></strong> If Lines is a list of atoms (or UIAs), then, if ’’ belongs to Lines,<br />
+then:<br />
+- Head is the initial sublist of Lines up to the first occurrence of ’’;<br />
+- Tail is the sublist of Lines following Head<br />
+If there is no such line, then:<br />
+- Head = Lines<br />
+- Tail = []</p>
 <h2 id="examples">EXAMPLES</h2>
 </body>
 </html>
