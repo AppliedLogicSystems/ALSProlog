@@ -28,8 +28,8 @@ export subst_tagged/4.
  |
  |	- tests list membership without binding any variables
  |
- |	nobind_member(X, List) holds and only if X is a member of List;
- |	if the test is successful, no variables in either input are bound.
+ |	Logically, nobind_member(X, List) holds and only if X is a member 
+ |	of List; if the test is successful, no variables in either input are bound.
  *!--------------------------------------------------------------------*/
 nobind_member(X, [Y | _])
 	:-
@@ -65,8 +65,7 @@ flatten(Item, [Item]).
  |	
  |	- creates a list of N copies of an item	
  |	
- |	Result is a list of length N all of whose elements are the entity
- |	Item.
+ |	Result is a list of length N all of whose elements are the entity Item.
  *!--------------------------------------------------------------------*/
 n_of(0, _, []) :-!.
 n_of(N, Item, [Item | RestItems])
@@ -81,7 +80,9 @@ n_of(N, Item, [Item | RestItems])
  |	
  |	- invertible length predicate
  |	
- |	List is of length N - works in both directions.
+ |	List is of length N - works in both directions in the sense
+ |	that either List or N can be uninstantiated with the other
+ |	variable of correct type, and is_length(List, N) will succeed.
  *!--------------------------------------------------------------------*/
 is_length([], 0) :-!.
 is_length([_ | Tail], N)
@@ -107,8 +108,8 @@ is_length([_ | Tail], N)
  |	
  |	If List is a list, NumberedList is a list of terms of the form
  |	N-Item, where the Item components are simply the elements of List
- |	in order, and N is a integer, sequentially numbered the elements
- |	of List.
+ |	in order, and N is a integer, sequentially numbering the elements
+ |	of List, beginning with 1.
  *!--------------------------------------------------------------------*/
 number_list(List, NumberedList)
 	:-
@@ -123,7 +124,8 @@ number_list(List, NumberedList)
  |
  |	If Items is a list, and StartNum is an integer, NumberedItems is
  |	the list obtained by replacing each element X in Items by N-X,
- |	where N is the number of the position of X in Items.
+ |	where N is the number of the position of X in Items; i.e., the
+ |	list is numbered beginning with StartNum.
  *!--------------------------------------------------------------------*/
 number_list([], _, []).
 number_list([Item | Items], CurNum, [CurNum-Item | NumberedItems])
@@ -155,15 +157,16 @@ encode_list([Item | Items], [CurCode | RestCodes], [CurCode-Item | CodedItems])
  |
  |	 - performs substs for structs package constructors
  |
- |	OrderedTags and DefArgs are lists of the same length; so will be ArgsList.
+ |	OrderedTags and DefArgs are lists of the same length.
+ |	The output ArgsList will be the same length as OrderedTags.
  |	ArgSpecs is a list of equations of the form
  |		Tag = Value
  |	where each of the Tags in such an equation must be on the list
  |	OrderedTags (but not all OrderedTags elements must occur on ArgSpecs);
  |	in fact, ArgSpecs can be empty.  The elements X of ArgsList are defined
- |	as follows:  if X corresponds to Tag on OrderedTags, then: if Tag=Val
- |	occurs on ArgSpecs, X is Val; otherwise, X is the element of DefArgs
- |	corresponding to Tag.
+ |	as follows:  if X corresponds to Tag on OrderedTags, then: 
+ |	if Tag=Val occurs on ArgSpecs, X is Val; 
+ |	otherwise, X is the element of DefArgs corresponding to Tag.
  *!--------------------------------------------------------------------*/
 
 struct_lookup_subst([], [], _, []).
@@ -183,7 +186,7 @@ struct_lookup_subst([Tag | OrderedTags], [DefVal | DefArgs],
  |  check_default(PList, Tag, Default, Value)
  |  check_default(+, +, +, -)
  |
- |  - looks up an equation on a list, with default
+ |  - looks up an equation on a list, with a default
  |
  |  PList is a list of equations of the form
  |
@@ -215,7 +218,7 @@ check_default_del([OTag=OVal | RestPList],Tag,Default,Value,
  |	remove_tagged(EqnList, TagsToRemove, ReducedEqnList)
  |	remove_tagged(+, +, -).
  |
- |	-	removes tagged equations from a list
+ |	- removes tagged equations from a list
  |
  |	EqnList is a list of equations of the form
  |
@@ -241,7 +244,7 @@ remove_tagged([Tag=Value | PList], TagsToRemove, [Tag = Value | RedPList])
  |	merge_plists(LeftEqnList, RightEqnList, MergedLists)
  |	merge_plists(+, +, -).
  |
- |	-	(recursively) merges two tagged equation lists
+ |	- recursively merges two tagged equation lists
  |
  |	LeftEqnList and RightEqnList are lists of equations of the form
  |
@@ -285,7 +288,7 @@ merge_plists([Tag=LVal | RestLeft], Right, [Tag=MergeVal | RestResult])
  |	merge_tagged_lists(LeftEqnList, RightEqnList, MergedLists)
  |	merge_tagged_lists(+, +, -).
  |
- |	-	(recursively) merges two tagged equation lists
+ |	- recursively merges two tagged equation lists
  |
  |	LeftEqnList and RightEqnList are lists of equations of the form
  |
@@ -314,7 +317,7 @@ merge_tagged_lists([Tag=LVal | RestLeft], Right, [Tag=LVal | RestResult])
  |	mangle_change_tagged(PList,Tag,NewValue)
  |	mangle_change_tagged(+,+,+)
  |
- |	-- destructively changes the value of a tagged eqn
+ |	- destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
  |	and NewValue is an arbitrary prolog term, then:
@@ -337,7 +340,7 @@ mangle_change_tagged([_ | WkngPList],Tag,NewValue)
  |	subst_tagged(PList,Tag,NewValue,NewPList)
  |	subst_tagged(+,+,+,-)
  |
- |	-- NON-destructively changes the value of a tagged eqn
+ |	- NON-destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
  |	and NewValue is an arbitrary prolog term, then:

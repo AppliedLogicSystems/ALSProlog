@@ -27,8 +27,7 @@ export subset/2.
  |	- appends a list of lists together
  |
  |	If ListOfLists if a list, each of whose elements is a list, Result
- |	is obtained by appending the members of ListOfLists together in
- |	order.
+ |	is obtained by appending the members of ListOfLists together in order.
  *!--------------------------------------------------------------------*/
 append([], []).
 append([List | ListOfLists], Result)
@@ -92,8 +91,8 @@ symmetric_diff(A,B,A_symd_B)
  |
  |	- returns the intersection of two lists
  |
- |	If A and B are lists, returns the intersection AintB of A and B, which
- |	is the collection of all items common to both lists.
+ |	If A and B are lists, returns the intersection AintB of A and B, 
+ |	which is the list of all items common to both lists, in order.
  *!--------------------------------------------------------------------*/
 intersect([],_,[]) :-!.
 intersect(_,[],[]) :-!.
@@ -134,8 +133,8 @@ int_diff([X | RestA], B, RestAintB, [X | RestAnotB])
  |
  |	- returns the intersection of a list of lists
  |
- |	If L is a list of lists, returns the intersection IntsectL of all the
- |	list appearing on L.
+ |	If L is a list of lists, returns the intersection IntsectL of all 
+ |	of the lists appearing on L.
  *!--------------------------------------------------------------------*/
 intersect([], []) :-!.
 
