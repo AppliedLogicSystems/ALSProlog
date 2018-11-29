@@ -1,6 +1,7 @@
 ---
 title: 'c_create/3'
 package: C Interface
+group: C Data
 predicates:
 - {sig: 'c_create/3', desc: 'equivalent to c_alloc/2 plus c_set/3'}
 - {sig: 'c_create_abs/3', desc: 'equivalent to c_alloc_abs/2 plus c_set/3'}

@@ -1,6 +1,7 @@
 ---
 title: 'c_alloc/[2,3]'
 package: C Interface
+group: C Data
 predicates:
 - {sig: 'c_const/2', desc: 'get the value of a C defined constant'}
 - {sig: 'c_rconst/2', desc: 'get the value of a C defined runtime constant'}
