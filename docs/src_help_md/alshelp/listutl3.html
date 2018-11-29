@@ -68,7 +68,7 @@ in fact, ArgSpecs can be empty. The elements X of ArgsList are defined<br />
 as follows: if X corresponds to Tag on OrderedTags, then:<br />
 if Tag=Val occurs on ArgSpecs, X is Val;<br />
 otherwise, X is the element of DefArgs corresponding to Tag.</p>
-<p><strong><code>check_default/4.</code></strong> PList is a list of equations of the form<br />
+<p><strong><code>check_default/4</code></strong> PList is a list of equations of the form<br />
 tag = value<br />
 check_default(PList, Tag, Default, Value) succeeds if:<br />
 i) Tag=Value belongs to PList; or,<br />
@@ -101,12 +101,12 @@ Tag=LVal and Tag = RVal<br />
 occur in LeftEqnList and RightEqnList, respectively,<br />
 MergedLists will contain the equation<br />
 Tag = LVal</p>
-<p><strong><code>mangle_change_tagged/3.</code></strong> If Plist is a list of tagged equations, Tag is a tag,<br />
+<p><strong><code>mangle_change_tagged/3</code></strong> If Plist is a list of tagged equations, Tag is a tag,<br />
 and NewValue is an arbitrary prolog term, then:<br />
 i) If an equation Tag=OldVal occurs on PList,<br />
 destructively alters that eqn to become Tag=NewValue;<br />
 ii) Has no effect otherwise.</p>
-<p><strong><code>subst_tagged/4.</code></strong> If Plist is a list of tagged equations, Tag is a tag,<br />
+<p><strong><code>subst_tagged/4</code></strong> If Plist is a list of tagged equations, Tag is a tag,<br />
 and NewValue is an arbitrary prolog term, then:<br />
 i) If an equation Tag=OldVal occurs on PList,<br />
 then NewPList is the result of altering that eqn<br />

@@ -11,12 +11,12 @@ predicates:
 - {sig: 'number_list/3', desc: 'numbers the elements of a list'}
 - {sig: 'encode_list/3', desc: 'encodes the elements of a list with provided codes'}
 - {sig: 'struct_lookup_subst/4', desc: 'performs substs for structs package constructors'}
-- {sig: 'check_default/4.', desc: 'looks up an equation on a list, with a default'}
+- {sig: 'check_default/4', desc: 'looks up an equation on a list, with a default'}
 - {sig: 'remove_tagged/3', desc: 'removes tagged equations from a list'}
 - {sig: 'merge_plists/3', desc: 'recursively merges two tagged equation lists'}
 - {sig: 'merge_tagged_lists/3', desc: 'recursively merges two tagged equation lists'}
-- {sig: 'mangle_change_tagged/3.', desc: 'destructively changes the value of a tagged eqn'}
-- {sig: 'subst_tagged/4.', desc: 'NON-destructively changes the value of a tagged eqn'}
+- {sig: 'mangle_change_tagged/3', desc: 'destructively changes the value of a tagged eqn'}
+- {sig: 'subst_tagged/4', desc: 'NON-destructively changes the value of a tagged eqn'}
 - {sig: 'merge_in_list/3', desc: 'merges two list together'}
 ---
 ## FORMS
@@ -93,7 +93,7 @@ predicates:
     if Tag=Val occurs on ArgSpecs, X is Val;  
     otherwise, X is the element of DefArgs corresponding to Tag.  
 
-**`check_default/4.`** PList is a list of equations of the form  
+**`check_default/4`** PList is a list of equations of the form  
     tag = value  
     check_default(PList, Tag, Default, Value) succeeds if:  
     i)	 Tag=Value belongs to PList; or,  
@@ -130,13 +130,13 @@ predicates:
     MergedLists will contain the equation  
     Tag = LVal  
 
-**`mangle_change_tagged/3.`** If Plist is a list of tagged equations, Tag is a tag,  
+**`mangle_change_tagged/3`** If Plist is a list of tagged equations, Tag is a tag,  
     and NewValue is an arbitrary prolog term, then:  
     i)	If an equation Tag=OldVal occurs on PList,  
     destructively alters that eqn to become Tag=NewValue;  
     ii)	Has no effect otherwise.  
 
-**`subst_tagged/4.`** If Plist is a list of tagged equations, Tag is a tag,  
+**`subst_tagged/4`** If Plist is a list of tagged equations, Tag is a tag,  
     and NewValue is an arbitrary prolog term, then:  
     i)	If an equation Tag=OldVal occurs on PList,  
     then NewPList is the result of altering that eqn  
