@@ -1,6 +1,7 @@
 ---
 title: 'curl/[1,2,3]'
 group: Input Output
+module: curl
 predicates:
 - {sig: 'curl/1', desc:  'Access to the internet via the curl package with URL, Options, Target in one list'}
 - {sig: 'curl/2', desc:  'Access to the internet via the curl package with separate URL arg, combined Options, Target in one list'}

@@ -23,4 +23,5 @@ defaults:
       reference: true
       package: Core Prolog
       group: Control
+      module: builtins
       layout: "reference-page"
