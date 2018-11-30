@@ -1,6 +1,7 @@
 ---
 title: 'tcl_call/3'
 package: ALSDev
+group: TclTk Interface
 predicates:
 - {sig: 'tcl_call/3', desc: 'execute Tcl script'}
 - {sig: 'tcl_eval/3', desc: 'evaluate Tcl script'}

@@ -1,6 +1,7 @@
 ---
 title: 'init_tk_alslib/[0,1,2]'
 package: ALSDev
+group: Gui Library
 predicates:
 - {sig: 'init_tk_alslib/[0,1,2]', desc: 'initialize GUI library, creating Tcl interpreter'}
 ---

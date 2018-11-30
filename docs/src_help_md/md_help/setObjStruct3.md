@@ -1,6 +1,7 @@
 ---
 title: 'setObjStruct/3'
 package: ALSDev
+group: Prolog Objects
 predicates:
 - {sig: 'setObjStruct/3', desc: 'set the value of a slot in an object'}
 - {sig: 'accessObjStruct/3', desc: 'access the value of a slot in an object'}

@@ -1,6 +1,7 @@
 ---
 title: 'info_dialog/[1,2,3]'
 package: ALSDev
+group: Gui Library
 predicates:
 - {sig: 'info_dialog/ [1,2,3]', desc: 'present an information dialog'}
 ---

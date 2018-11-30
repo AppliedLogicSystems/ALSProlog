@@ -1,6 +1,7 @@
 ---
 title: 'ALSDev Listener Window'
 package: ALSDev
+group: Development Env.
 predicates:
 - {sig: 'Listener Window', desc: 'Primary interaction window'}
 ---

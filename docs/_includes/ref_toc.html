@@ -1,0 +1,21 @@
+{%- assign groups = site.pages | where: "reference", true | where: "package", include.package | group_by: "group" %}
+
+{%- for g in groups %}
+
+<div class="hentry">{{g.name}}</div><br>
+
+	{%- assign predicates = "" | split: "" %}
+	{%- for r in g.items %}
+		{% for p in r.predicates %}
+			{% assign predicates = predicates | push: p %}
+		{% endfor %}
+	{%- endfor %}
+
+	{%- assign sorted_preds = predicates | sort: "sig" %}
+
+	{%- for p in sorted_preds %}
+		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+		<div class="eentry"><a class="astyl" target="content" href="{{ppage.url}}" title="{{p.sig}} -- {{p.desc}}">{{ p.sig }}</a></div><br>
+	{%- endfor %}
+
+{%- endfor %}

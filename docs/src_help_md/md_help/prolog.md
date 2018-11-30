@@ -1,6 +1,7 @@
 ---
 title: 'prolog'
 package: ALSDev
+group: TclTk Interface
 predicates:
 - {sig: 'prolog', desc: 'call a prolog term from Tcl'}
 ---

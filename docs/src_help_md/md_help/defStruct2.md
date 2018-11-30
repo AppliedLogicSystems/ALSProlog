@@ -1,6 +1,7 @@
 ---
 title: 'defStruct/2'
 package: ALSDev
+group: Prolog Objects
 predicates:
 - {sig: 'defStruct/2', desc: 'specify an abstract data type'}
 ---

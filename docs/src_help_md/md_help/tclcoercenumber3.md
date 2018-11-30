@@ -1,6 +1,7 @@
 ---
 title: 'tcl_coerce_number/3'
 package: ALSDev
+group: TclTk Interface
 predicates:
 - {sig: 'tcl_coerce_number/3', desc: 'convert Tcl entity to Prolog number'}
 - {sig: 'tcl_coerce_atom/3', desc: 'convert Tcl entity to Prolog atom'}

@@ -1,6 +1,7 @@
 ---
 title: 'popup_select_items/[2,3,4]'
 package: ALSDev
+group: Gui Library
 predicates:
 - {sig: 'popup_select_items/ [2,3,4]', desc: 'present popup selection list'}
 ---
