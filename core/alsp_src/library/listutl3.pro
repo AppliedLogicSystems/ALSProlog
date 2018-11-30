@@ -182,7 +182,7 @@ struct_lookup_subst([Tag | OrderedTags], [DefVal | DefArgs],
 	struct_lookup_subst(OrderedTags, DefArgs, ArgSpecs, ArgsList).
 
 /*!------------------------------------------------------
- |  check_default/4.
+ |  check_default/4
  |  check_default(PList, Tag, Default, Value)
  |  check_default(+, +, +, -)
  |
