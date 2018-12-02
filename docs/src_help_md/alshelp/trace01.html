@@ -1,3 +1,13 @@
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trace Goal -- trace the execution of a goal
+
+trace(Goal) -- trace the execution of a goal
+
+trace -- turn on tracing
+
+notrace -- turn off tracing
+
+</code></pre></div></div>
+
 <h2 id="forms">FORMS</h2>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trace Goal
@@ -8,7 +18,6 @@ trace
 
 notrace
 </code></pre></div></div>
-
 <h2 id="description">DESCRIPTION</h2>
 
 <p>In the <code class="highlighter-rouge">trace/1</code> case, the <code class="highlighter-rouge">Goal</code> will be single stepped according to the debugger’s leash mode. In the <code class="highlighter-rouge">trace/0</code> case, tracing will be turned on for all items until a call to <code class="highlighter-rouge">notrace/0</code> is encountered.</p>
