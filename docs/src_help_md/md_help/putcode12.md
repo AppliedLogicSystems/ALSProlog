@@ -2,8 +2,10 @@
 title: 'put_code/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'put_code/1', desc: 'output a character code to the current output stream'}
-- {sig: 'put_code/2', desc: 'output a character code to a specific output stream'}
+- {sig: 'put_code', args: {
+    1: 'output a character code to the current output stream',
+    2: 'output a character code to a specific output stream'
+  }}
 ---
 
 ## FORMS

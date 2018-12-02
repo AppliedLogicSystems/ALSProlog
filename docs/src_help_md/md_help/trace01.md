@@ -1,8 +1,7 @@
 ---
 title: 'trace/[0,1]'
 predicates:
-- {sig: 'trace/0', desc: 'turn on tracing'}
-- {sig: 'trace/1', desc: 'trace the execution of a goal'}
+- {sig: 'trace', args: {0: 'turn on tracing', 1: 'trace the execution of a goal'}}
 - {sig: 'notrace/0', desc: 'turn off tracing'}
 ---
 

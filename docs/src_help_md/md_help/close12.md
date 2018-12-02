@@ -2,8 +2,7 @@
 title: 'close/1'
 group: Input Output
 predicates:
-- {sig: 'close/1', desc: 'close an open stream'}
-- {sig: 'close/2', desc: 'close an open stream with options'}
+- {sig: 'close', args: { 1: 'close an open stream', 2: 'close an open stream with options'}}
 ---
 
 ## FORMS

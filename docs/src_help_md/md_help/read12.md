@@ -2,10 +2,14 @@
 title: 'read/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'read/1', desc: 'read a term from the current input stream'}
-- {sig: 'read/2', desc: 'read a term from specified stream'}
-- {sig: 'read_term/2', desc: 'read term from current input with options'}
-- {sig: 'read_term/3', desc: 'read term from specified stream with options'}
+- {sig: 'read', args: {
+    1: 'read a term from the current input stream',
+    2: 'read a term from specified stream'
+  }}
+- {sig: 'read_term', args: {
+    2: 'read term from current input with options',
+    3: 'read term from specified stream with options'
+  }}
 ---
 
 ## FORMS

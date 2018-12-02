@@ -2,8 +2,10 @@
 title: 'retract/[1,2]'
 group: Prolog Database
 predicates:
-- {sig: 'retract/1', desc: 'removes a clause from the database'}
-- {sig: 'retract/2', desc: 'removes a clause specified by a database reference'}
+- {sig: 'retract', args: {
+    1: 'removes a clause from the database',
+    2: 'removes a clause specified by a database reference'
+  }}
 - {sig: 'erase/1', desc: 'removes a clause from the database'}
 ---
 

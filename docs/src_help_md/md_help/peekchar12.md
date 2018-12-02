@@ -2,8 +2,7 @@
 title: 'peek_char/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'peek_char/1', desc: 'obtain char from stream'}
-- {sig: 'peek_char/2', desc: 'obtain char from stream'}
+- {sig: 'peek_char/[1,2]', desc: 'obtain char from stream'}
 ---
 
 ## FORMS

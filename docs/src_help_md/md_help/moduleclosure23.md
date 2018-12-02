@@ -2,8 +2,10 @@
 title: 'module_closure/[2,3]'
 group: Prolog Database
 predicates:
-- {sig: 'module_closure/2', desc: 'creates a module closure'}
-- {sig: 'module_closure/3', desc: 'creates a module closure for the specified procedure'}
+- {sig: 'module_closure', args: {
+    2: 'creates a module closure',
+    3: 'creates a module closure for the specified procedure'
+  }}
 ---
 
 ## FORMS

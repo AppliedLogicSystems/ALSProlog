@@ -11,8 +11,7 @@ predicates:
 - {sig: 'int_diff/4', desc: 'returns the intersection and one difference of two lists'}
 - {sig: 'intersect/2', desc: 'returns the intersection of a list of lists'}
 - {sig: 'union/3', desc: 'returns the ordered union of two lists'}
-- {sig: 'sorted_merge/3', desc: 'returns the sorted union of two lists'}
-- {sig: 'sorted_merge/2', desc: 'returns the sorted union of a list of lists'}
+- {sig: 'sorted_merge', args: {3: 'returns the sorted union of two lists', 2: 'returns the sorted union of a list of lists'}}
 - {sig: 'subset/2', desc: 'determines if one list is a subset of another'}
 ---
 ## FORMS

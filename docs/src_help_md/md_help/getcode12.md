@@ -2,8 +2,10 @@
 title: 'get_code/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'get_code/1', desc: 'read a character code from current input stream'}
-- {sig: 'get_code/2', desc: 'read character code from a specific stream'}
+- {sig: 'get_code', args: {
+    1: 'read a character code from current input stream',
+    2: 'read character code from a specific stream'
+  }}
 ---
 
 ## FORMS

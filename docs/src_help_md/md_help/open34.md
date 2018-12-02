@@ -2,8 +2,7 @@
 title: 'open/[3,4]'
 group: Input Output
 predicates:
-- {sig: 'open/3', desc: 'open a stream'}
-- {sig: 'open/4', desc: 'open a stream with options'}
+- {sig: 'open', args: { 3: 'open a stream', 4: 'open a stream with options'}}
 ---
 
 ## FORMS
