@@ -2,8 +2,7 @@
 title: 'peek_code/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'peek_code/1', desc: 'obtain char code from stream'}
-- {sig: 'peek_code/2', desc: 'obtain char from stream'}
+- {sig: 'peek_code', args: { 1: 'obtain char code from stream', 2: 'obtain char from stream'}}
 ---
 
 ## FORMS

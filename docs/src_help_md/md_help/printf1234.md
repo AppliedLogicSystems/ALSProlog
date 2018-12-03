@@ -2,11 +2,13 @@
 title: 'printf/[1,2,3,4]'
 group: Input Output
 predicates:
-- {sig: 'printf/1', desc: 'print out a string to the current output'}
-- {sig: 'printf/2', desc: 'print out a string with arguments'}
-- {sig: 'printf/3', desc: 'print out a string with a format and arguments'}
+- {sig: 'printf', args: {
+    1: 'print out a string to the current output',
+    2: 'print out a string with arguments',
+    3: 'print out a string with a format and arguments',
+    4: 'print out string with format, arguments, options'
+  }}
 - {sig: 'printf_opt/3', desc: 'print out string with format, arguments, options'}
-- {sig: 'printf/4', desc: 'print out string with format, arguments, options'}
 ---
 
 ## FORMS

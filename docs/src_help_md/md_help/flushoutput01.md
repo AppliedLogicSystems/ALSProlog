@@ -2,8 +2,7 @@
 title: 'flush_output/[0,1]'
 group: Input Output
 predicates:
-- {sig: 'flush_output/0', desc: 'flush current output stream'}
-- {sig: 'flush_output/1', desc: 'flush specific output stream'}
+- {sig: 'flush_output', args: {0: 'flush current output stream', 1: 'flush specific output stream'}}
 ---
 
 ## FORMS

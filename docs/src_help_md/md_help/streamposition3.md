@@ -2,8 +2,7 @@
 title: 'stream_position/[2,3]'
 group: Input Output
 predicates:
-- {sig: 'stream_position/2', desc: 'reposition a stream'}
-- {sig: 'stream_position/3', desc: 'reposition a stream'}
+- {sig: 'stream_position/[2,3]', desc: 'reposition a stream'}
 ---
 
 ## FORMS

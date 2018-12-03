@@ -2,8 +2,10 @@
 title: 'clause/[2,3]'
 group: Prolog Database
 predicates:
-- {sig: 'clause/2', desc: 'retrieve a clause'}
-- {sig: 'clause/3', desc: 'retrieve a clause with a database reference'}
+- {sig: 'clause', args: {
+    2: 'retrieve a clause',
+    3: 'retrieve a clause with a database reference'
+  }}
 - {sig: 'instance/2', desc: 'retrieve a clause from the database reference'}
 ---
 

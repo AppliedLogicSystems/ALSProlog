@@ -1,10 +1,8 @@
 ---
 title: 'spy/[0,1]'
 predicates:
-- {sig: 'spy/0', desc: 'enable spy points'}
-- {sig: 'spy/1', desc: 'sets a spy point'}
-- {sig: 'nospy/0', desc: 'removes all spy points'}
-- {sig: 'nospy/1', desc: 'removes a spy point'}
+- {sig: 'spy', args: {0: 'enable spy points', 1: 'sets a spy point'}}
+- {sig: 'nospy', args: {0: 'removes all spy points', 1: 'removes a spy point'}}
 ---
 
 ## FORMS

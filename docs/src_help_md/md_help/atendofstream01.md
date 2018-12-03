@@ -2,8 +2,10 @@
 title: 'at_end_of_stream/[0,1]'
 group: Input Output
 predicates:
- - {sig: 'at_end_of_stream/0', desc: 'test for end of the curent input stream'}
- - {sig: 'at_end_of_stream/1', desc: 'test for end of a specific input stream'}
+ - {sig: 'at_end_of_stream', args: {
+     0: 'test for end of the curent input stream',
+     1: 'test for end of a specific input stream'
+   }}
 ---
 
 ## FORMS

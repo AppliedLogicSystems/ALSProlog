@@ -7,8 +7,7 @@ predicates:
 - {sig: 'flatten/2', desc: 'flattens a nested list'}
 - {sig: 'n_of/3', desc: 'creates a list of N copies of an item	'}
 - {sig: 'is_length/2', desc: 'invertible length predicate'}
-- {sig: 'number_list/2', desc: 'creates a numbered list from a source list'}
-- {sig: 'number_list/3', desc: 'numbers the elements of a list'}
+- {sig: 'number_list', args: {2: 'creates a numbered list from a source list', 3: 'numbers the elements of a list'}}
 - {sig: 'encode_list/3', desc: 'encodes the elements of a list with provided codes'}
 - {sig: 'struct_lookup_subst/4', desc: 'performs substs for structs package constructors'}
 - {sig: 'check_default/4', desc: 'looks up an equation on a list, with a default'}

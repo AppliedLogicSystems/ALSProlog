@@ -7,7 +7,13 @@ layout: default
 
 <p>
 {%- for p in page.predicates %}
+	{%- if p.args %}
+		{%- for a in p.args %}
+<code>{{ p.sig | escape}}/{{ a[0] }}</code> — {{ a[1] | escape }}<br>
+		{%- endfor %}
+	{%- else %}
 <code>{{ p.sig | escape}}</code> — {{ p.desc | escape }}<br>
+	{%- endif %}
 {%- endfor %}
 </p>
 

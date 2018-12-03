@@ -2,14 +2,20 @@
 title: 'write/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'write/1', desc: 'write term to current output stream'}
-- {sig: 'write/2', desc: 'write term to specified stream'}
-- {sig: 'writeq/1', desc: 'write term to current output stream so that it may be read back in'}
-- {sig: 'writeq/2', desc: 'write term to specified stream so that it may be read back in'}
-- {sig: 'write_canonical/1', desc: 'write term to current output stream in canonical form(no operators)'}
-- {sig: 'write_canonical/2', desc: 'write term to specified stream in canonical form'}
-- {sig: 'write_term/2', desc: 'write term to current output stream with options'}
-- {sig: 'write_term/3', desc: 'write term to specified output stream with options'}
+- {sig: 'write', args:
+    {1: 'write term to current output stream', 2: 'write term to specified stream'}}
+- {sig: 'writeq',args: {
+    1: 'write term to current output stream so that it may be read back in',
+    2: 'write term to specified stream so that it may be read back in'
+  }}
+- {sig: 'write_canonical', args: {
+    1: 'write term to current output stream in canonical form(no operators)',
+    2: 'write term to specified stream in canonical form'
+  }}
+- {sig: 'write_term', args: {
+    2: 'write term to current output stream with options',
+    3: 'write term to specified output stream with options'
+  }}
 - {sig: 'display/1', desc: 'write term to current output stream in canonical form'}
 ---
 

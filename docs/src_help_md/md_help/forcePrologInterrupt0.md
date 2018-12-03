@@ -2,8 +2,7 @@
 title: 'forcePrologInterrupt/0'
 predicates:
 - {sig: 'forcePrologInterrupt/0', desc: 'force interrupt on next call'}
-- {sig: 'callWithDelayedInterrupt/1', desc: 'call goal, setting delayed interrupt'}
-- {sig: 'callWithDelayedInterrupt/2', desc: 'call goal, setting delayed interrupt'}
+- {sig: 'callWithDelayedInterrupt/[1,2]', desc: 'call goal, setting delayed interrupt'}
 ---
 
 ## FORMS

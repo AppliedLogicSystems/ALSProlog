@@ -2,8 +2,10 @@
 title: 'get_char/[1,2]'
 group: Input Output
 predicates:
-- {sig: 'get_char/1', desc: 'read a character from current input stream'}
-- {sig: 'get_char/2', desc: 'read character from a specific stream'}
+- {sig: 'get_char', args: {
+    1: 'read a character from current input stream',
+    2: 'read character from a specific stream'
+  }}
 ---
 
 ## FORMS
