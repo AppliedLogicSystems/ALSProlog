@@ -47,22 +47,6 @@ export halt/0.
 halt :-
 	pbi_halt.
 
-/*-------------------------------------------------------------------*
- | 	curmod/1          (returns the name of the current module)
- |	curmod(Mod)
- |	curmod(?)
- |
- |	- Mod is the current module context
- |
- |	The following icode command creates a module closure, which 
- |	unifies the module obtained from the module closure with the argument.
- *-------------------------------------------------------------------*/
-
-:-	compiletime,
-	module_closure(curmod,1,curmod).
-
-curmod(M,M).
-
 /*------------------------------------------------------------------*
  |	corrected_sys_searchdir/1
  |	corrected_sys_searchdir(Dir)
@@ -89,6 +73,21 @@ fin_corrected_sys_searchdir(_, SSDIRList, SSDIR)
 	:-
 	path_elements(SSDIR, SSDIRList).
 
+/*-------------------------------------------------------------------*
+ | 	curmod/1          (returns the name of the current module)
+ |	curmod(Mod)
+ |	curmod(?)
+ |
+ |	- Mod is the current module context
+ |
+ |	The following icode command creates a module closure, which 
+ |	unifies the module obtained from the module closure with the argument.
+ *-------------------------------------------------------------------*/
+
+:-	compiletime,
+	module_closure(curmod,1,curmod).
+
+curmod(M,M).
 
 /*------------------------------------------------------------------*
  |	modules/2
@@ -109,6 +108,97 @@ next_modules(N,_,_,Module,UseList)
 	:-
 	'$next_module'(N,NN,NextModule,NextUseList),
 	next_modules(NN,NextModule,NextUseList,Module,UseList).
+
+export sys_modules/1.
+sys_modules([
+	builtins,syscfg,rel_arith,xconsult,sio,
+	pgm_info,debugger,tcltk,windows,tk_alslib,alsdev,utilities,
+	alsshell,avl,cref,macroxp,shellmak,ttyshlmk
+	]).
+
+export non_sys_modules/1.
+non_sys_modules(Mods)
+	:-
+	findall(M, (modules(M,_), (debugger:not(noshow_module(M)))), Mods).
+
+export module_preds/2.
+export module_preds/3.
+
+module_preds(M,L)
+	:-
+	findall(PA, 
+		(all_procedures(M,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
+	(L0 = [] ->
+		catenate('No predicates defined in ',M,Msg),
+		L = [Msg] 
+		; 
+		sort(L0, L1),
+		L = L1
+	).
+
+module_preds(Mod,S,L)
+	:-
+	findall(PA, (debugger:spying_on(CallForm,Mod),
+					functor(CallForm,P,A),
+					catenate([P,'/',A],PA)  ),
+					S0),
+	sort(S0, S),
+
+	findall(PA, 
+		(all_procedures(Mod,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
+	(L0 = [] ->
+		catenate('No predicates defined in ',Mod,Msg),
+		L = [Msg] 
+		; 
+		sort(L0, L1),
+		remove(S, L1, L)
+	).
+
+remove([], L, L).
+remove([Item | S], L1, L)
+	:-
+	delete_sorted(L1, Item, L2),
+	remove(S, L2, L).
+
+delete_sorted([], Item, []).
+delete_sorted([Item | L], Item, L)
+	:-!.
+delete_sorted([H | L], Item, L)
+	:-
+	H @> Item,
+	!.
+
+delete_sorted([H | L1], Item, [H | L2])
+	:-
+	delete_sorted(L1, Item, L2).
+
+
+sys_mods_status(SMs)
+        :-
+        sys_modules(InitSysMs),
+        sort(InitSysMs, SysMs),
+        annotate_showing(SysMs, SMs).
+
+annotate_showing([], []).
+annotate_showing([M | SysMs], [[M, S] | SMs])
+        :-
+        ((debugger:noshow_module(M)) ->
+                S = 0
+                ;
+                S = 1
+        ),
+        annotate_showing(SysMs, SMs).
+
+
+
+
+
 
 /*------------------------------------------------------------------*
  | procedures/4
@@ -595,7 +685,6 @@ force_libload_file(File,DirDC)
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
-%curmod(MMM),
 	libhide(M,[LH|LT],PredList),
 	mc_all(ModClosures, M, [LH | LT]),
 	!.
