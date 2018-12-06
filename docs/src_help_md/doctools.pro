@@ -1,5 +1,8 @@
 /* ==================================================================== *
  |				doctools.pro
+ |              Copyright (c) 2018 Applied Logic Systems, Inc.
+ |
+ |		-- 
  |
  |	Primary predicates:
  |	    toc_from_docsdb - write out tables of contents
@@ -12,11 +15,13 @@ src_folder_md_files('./md_help').
 
 packages([core_prolog, alsdev, library, c_intf]).
 
+	% Readable texts for the packages:
 pack_readable(core_prolog, 'Core Prolog').
 pack_readable(alsdev, 'ALSDev').
 pack_readable(alslib, 'ALS Library').
 pack_readable(c_intf, 'C Interface').
 
+	% Sub-Groups of the packages:
 pack_kid(control, core_prolog).
 pack_kid(prolog_database, core_prolog).
 pack_kid(terms, core_prolog).
@@ -26,23 +31,27 @@ pack_kid(development_environment, alsdev).
 pack_kid(gui_library, alsdev).
 pack_kid(prolog_objects, alsdev).
 pack_kid(tcltk_interface, alsdev).
+
 	%% will probably grow:
 pack_kid(c_intf, c_intf).
 
 %future:
 %pack_kid(..., alslib).
 
+	% Readable texts for the package subgroups:
 	% Core Prolog
 group_display(control, 'Control') :-!.
 group_display(input_output, 'Input Output') :-!.
 group_display(prolog_database, 'Prolog Database') :-!.
 group_display(terms, 'Terms') :-!.
 group_display(uias, 'UIAs') :-!.
+
 	% ALSDev
 group_display(development_environment, 'Development Env.') :-!.
 group_display(gui_library, 'Gui Library') :-!.
 group_display(prolog_objects, 'Prolog Objects') :-!.
 group_display(tcltk_interface, 'TclTk Interface') :-!.
+
 	% ALS C-Interf
 group_display(c_data, 'C Data') :-!.
 
@@ -57,17 +66,22 @@ group_display(G, G).
 	 |	    toc_alsdev.html
 	 |	    toc_alslib
 	 |	    toc_c_intf
-	 |		[Future: for library and foreign interface]
 	 |	These are driven by prolog "databases":
 	 |	    docsdb_core_prolog.pro
 	 |	    docsdb_alsdev.pro
+	 |	    docsdb_alslib.pro
+	 |	    docsdb_c_intf.pro
+	 |	These live in ~ALSProlog/docs/src_help_md, which
+	 |	is the same folder containing doctools.pro.
 	 * ------------------------------------------------------ */
 
+	% Process a single package (convenience):
 td:- toc_from_docsdb.
 tdcore :- tocs_from_docsdbs([core_prolog]).
 tdalsdev :- tocs_from_docsdbs([alsdev]).
 tdc_int :- tocs_from_docsdbs([c_intf]).
 
+	% Process all the packages:
 toc_from_docsdb
         :-
         packages(Packages),
@@ -89,24 +103,28 @@ tocs_from_docsdbs([Package | Packages])
 /* --------------------------------------------------------------- *
         write_toc(PackageName, PackageData)
 
-        Write out the table of contents (toc) for PackageName.
+        Write out the table of contents (toc) for PackageName,
+	using PackageData obtained from docsdb_<package>.pro
  * --------------------------------------------------------------- */
+
 	% Paths to locations of alshelp/ when running in src_help_md:
 toc_locn('./alshelp'). 		% running in src_help_md
-md_toc_locn('../ref-manual').	% running in src_help_md
+%md_toc_locn('../ref-manual').	% running in src_help_md
 
 	%% depending on the location of toc_<Pack>.pro:
 toc2mdSrcDir('').    		%% for src_help_md/alshelp
-md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
+%md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
 
 		%% packages([core_prolog, alsdev, library, c_intf]).
 write_toc(PackageName, []) :-!.
 
+/*
 write_toc(PackageName, PackageData)
         :-
 	PackageName == core_prolog,
 	!,
 	write_toc_core_prolog(PackageData).
+*/
 
 write_toc(PackageName, PackageData)
         :-
@@ -115,15 +133,18 @@ write_toc(PackageName, PackageData)
         toc_locn(TocFolder),
         join_path([TocFolder, TocFile], TgtTocFile),
 	toc2mdSrcDir(Toc2SrcMdDir),		 %% for src_help_md/alshelp
-	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir),
+	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir).
 
+/*
 		%% write the toc file as file ~docs/ref-manual/md_toc_<PackAbbrev>.html:
         catenate(['md_toc_', PackageName, '.html'], MDTocFile),
         md_toc_locn(MDTocFolder),
         join_path([MDTocFolder, MDTocFile], TgtMDTocFile),
 	md_toc2mdSrcDir(MDToc2SrcDir), 
 	write_out_toc(PackageData, TgtMDTocFile, MDToc2SrcDir).
+*/
 
+/*
 write_toc_core_prolog(PackageData)
 	:-
 	PackageName = core_prolog,
@@ -133,6 +154,7 @@ write_toc_core_prolog(PackageData)
         catenate(['toc_', PackageName, '.html'], TocFile),
         join_path([TocFolder, TocFile], TgtTocFile),
 	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir).
+*/
 
 write_out_toc(PackageData, TgtTocFile, ToSrcDir)
 	:-
@@ -142,11 +164,6 @@ write_out_toc(PackageData, TgtTocFile, ToSrcDir)
         sort(PackageData, SortedPackageData),
 	last_toc_phase( SortedPackageData, ToSrcDir, OS),
 	close(OS).
-
-
-
-
-
 
 last_toc_phase( SortedPackageData, ToSrcDir, OS)
 	:-
@@ -676,15 +693,6 @@ rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
 	
 	/* -------------------------------------------------------------------- *
 	 * -------------------------------------------------------------------- */
-/* Moved above
-	% Paths to locations of alshelp/ when running in src_help_md:
-toc_locn('./alshelp'). 		% running in src_help_md
-md_toc_locn('../ref-manual').	% running in src_help_md
-
-	%% depending on the location of toc_<Pack>.pro:
-toc2mdSrcDir('').    		%% for src_help_md/alshelp
-md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
-*/
 
 do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, PAsWithDescs)
 	:-
@@ -693,13 +701,8 @@ do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, PAsWithDescs)
 		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:
         toc_locn(TocFolder),
 	toc2mdSrcDir(Toc2SrcMdDir),
-	write_toc_file(TocFolder, PackAbbrev, '', SortedNewList, Toc2SrcMdDir),
+	write_toc_file(TocFolder, PackAbbrev, '', SortedNewList, Toc2SrcMdDir).
 
-		%% write the toc file as file ~docs/ref-manual/md_toc_<PackAbbrev>.html:
-        md_toc_locn(MDTocFolder),
-	md_toc2mdSrcDir(MDToc2SrcDir), 
-	write_toc_file(MDTocFolder, PackAbbrev, 'md_', SortedNewList, MDToc2SrcDir).
-	
 write_toc_file(TocFolder, PackAbbrev, TocFilePrefix, SortedNewList, Toc2SrcMdDir)
 	:-
         catenate([TocFilePrefix, 'toc_', PackAbbrev, '.html'], TocFile),

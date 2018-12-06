@@ -2,7 +2,7 @@
  |			listutl3.pro
  |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
  |		Group: Lists
- |		DocTitle: number_list/4
+ |		DocTitle: number_list/3
  |		-- Miscellaneous list predicates
  *=====================================================================*/
 module builtins.
@@ -20,6 +20,9 @@ export remove_tagged/3.
 export merge_plists/3.
 export mangle_change_tagged/3.
 export subst_tagged/4.
+export struct_lookup_subst/4.
+export merge_tagged_lists/3.
+export merge_in_list/3.
 
 /*!---------------------------------------------------------------------
  |	nobind_member/2
@@ -196,6 +199,8 @@ struct_lookup_subst([Tag | OrderedTags], [DefVal | DefArgs],
  |  i)	 Tag=Value belongs to PList; or,
  |  ii)	 if Default is of the form Value^DC and call(DC) succeeds, or
  |  iii) if Default=Value
+ |  iv)  in cases ii,iii) it is assumed that there is at
+ |       most one equation on PList with left side Tag
  *!-----------------------------------------------------*/
 check_default(PList, Tag, Default, Value)
     :-
@@ -205,6 +210,26 @@ check_default(PList, Tag, Value^DefaultCall, Value)
 	call(DefaultCall).
 check_default(PList, Tag, Default, Default).
 
+/*!------------------------------------------------------
+ |  check_default_del/5
+ |  check_default_del(PList,Tag,Default,Value,ReducedPList)
+ |  check_default_del(+,+,+,+,-)
+ |
+ |  - looks up a tagged equation on a List, and deletes it
+ |
+ |  PList is a list of equations of the form
+ |
+ |      tag = value
+ |
+ |  check_default_del(PList, Tag, Default, Value,ReducedPList) 
+ |  succeeds if:
+ |  i)	 Tag=Value does not belong to PList; or,
+ |  ii)	 Tag=Value belongs to PList, and the difference
+ |	 between PList and ReducedPList is the removal
+ |	 of the Tag=Value equation.
+ |  iii) it is assumed that there is at most one equation on 
+ |       PList with left side Tag
+ *!-----------------------------------------------------*/
 check_default_del([],Tag,Default,Default,[]).
 check_default_del([Tag=Value | Tail],Tag,Default,Value,Tail)
     :-!.

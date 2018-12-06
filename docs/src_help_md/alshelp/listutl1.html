@@ -21,44 +21,44 @@
 </header>
 <h2 id="forms">FORMS</h2>
 <p><code>append(ListOfLists, Result)</code></p>
-<p><code>list_diff(A, B, A_NotB)</code></p>
-<p><code>list_diffs(A,B,A_NotB,B_NotA)</code></p>
-<p><code>symmetric_diff(A,B,A_symd_B)</code></p>
-<p><code>intersect(A,B,AintB)</code></p>
 <p><code>int_diff(A,B,AintB,AnotB)</code></p>
 <p><code>intersect(L,IntsectL)</code></p>
-<p><code>union(A,B, AuB)</code></p>
-<p><code>sorted_merge(List1, List2, Union)</code></p>
+<p><code>intersect(A,B,AintB)</code></p>
+<p><code>list_diff(A, B, A_NotB)</code></p>
+<p><code>list_diffs(A,B,A_NotB,B_NotA)</code></p>
 <p><code>sorted_merge(ListOfLists, Union)</code></p>
+<p><code>sorted_merge(List1, List2, Union)</code></p>
 <p><code>subset(LeftList, RightList)</code></p>
+<p><code>symmetric_diff(A,B,A_symd_B)</code></p>
+<p><code>union(A,B, AuB)</code></p>
 <h2 id="description">DESCRIPTION</h2>
 <p><strong><code>append/2</code></strong> If ListOfLists if a list, each of whose elements is a list, Result<br />
 is obtained by appending the members of ListOfLists together in order.</p>
-<p><strong><code>list_diff/3</code></strong> If A and B are lists, returns the difference A-B consisting of<br />
-all items on A, but not on B.</p>
-<p><strong><code>list_diffs/4</code></strong> If A and B are lists, returns both the difference A-B together<br />
-with the difference B-A.</p>
-<p><strong><code>symmetric_diff/3</code></strong> If A and B are lists, returns the symmetric difference of A and B,<br />
-which is the union of A-B and B-A.</p>
-<p><strong><code>intersect/3</code></strong> If A and B are lists, returns the intersection AintB of A and B,<br />
-which is the list of all items common to both lists, in order.</p>
 <p><strong><code>int_diff/4</code></strong> If A and B are lists, returns the intersection AintB of A and B,<br />
 together with the difference A - B.</p>
 <p><strong><code>intersect/2</code></strong> If L is a list of lists, returns the intersection IntsectL of all<br />
 of the lists appearing on L.</p>
+<p><strong><code>intersect/3</code></strong> If A and B are lists, returns the intersection AintB of A and B,<br />
+which is the list of all items common to both lists, in order.</p>
+<p><strong><code>list_diff/3</code></strong> If A and B are lists, returns the difference A-B consisting of<br />
+all items on A, but not on B.</p>
+<p><strong><code>list_diffs/4</code></strong> If A and B are lists, returns both the difference A-B together<br />
+with the difference B-A.</p>
+<p><strong><code>sorted_merge/2</code></strong> If ListOfLists is a list of lists, Union is the sorted merge<br />
+(non-repetitive union) of the members of ListsOfLists.</p>
+<p><strong><code>sorted_merge/3</code></strong> If List1 and List2 are lists of items, Union is<br />
+the sorted merge (non-repetitive union) of List1 and List2.</p>
+<p><strong><code>subset/2</code></strong> If LeftList and RightList are both lists, this predicate is<br />
+true if and only if every element of LeftList is also an<br />
+element of RightList</p>
+<p><strong><code>symmetric_diff/3</code></strong> If A and B are lists, returns the symmetric difference of A and B,<br />
+which is the union of A-B and B-A.</p>
 <p><strong><code>union/3</code></strong> If A and B are lists, returns the ordered union of A and B, consisting<br />
 of all items occurring on either A or B, with all occurrences of items<br />
 from A occurring before any items from B-A; equivalent to:<br />
 append(A,B-A,AuB);<br />
 If both lists have the property that each element occurs no more<br />
 than once, then the union also has this property.</p>
-<p><strong><code>sorted_merge/3</code></strong> If List1 and List2 are lists of items, Union is<br />
-the sorted merge (non-repetitive union) of List1 and List2.</p>
-<p><strong><code>sorted_merge/2</code></strong> If ListOfLists is a list of lists, Union is the sorted merge<br />
-(non-repetitive union) of the members of ListsOfLists.</p>
-<p><strong><code>subset/2</code></strong> If LeftList and RightList are both lists, this predicate is<br />
-true if and only if every element of LeftList is also an<br />
-element of RightList</p>
 <h2 id="examples">EXAMPLES</h2>
 </body>
 </html>
