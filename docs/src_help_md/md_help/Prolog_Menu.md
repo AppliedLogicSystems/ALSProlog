@@ -2,6 +2,7 @@
 title: 'Prolog Menu'
 package: ALSDev
 group: Development Env.
+module: alsdev
 predicates:
 - {sig: 'Prolog Menu', desc: 'Manage prolog projects and settings'}
 ---

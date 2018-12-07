@@ -2,6 +2,7 @@
 title: 'Tools Menu'
 package: ALSDev
 group: Development Env.
+module: alsdev
 predicates:
 - {sig: 'Tools Menu', desc: 'Invoke various useful tools'}
 ---

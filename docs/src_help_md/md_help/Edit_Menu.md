@@ -2,6 +2,7 @@
 title: 'ALSDev Edit Menu'
 package: ALSDev
 group: Development Env.
+module: alsdev
 predicates:
 - {sig: 'Edit Menu', desc: 'Select actions while editing a file'}
 ---
