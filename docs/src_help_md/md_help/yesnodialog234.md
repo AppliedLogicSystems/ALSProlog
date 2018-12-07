@@ -2,6 +2,7 @@
 title: 'yes_no_dialog/[2,3,4,6]'
 package: ALSDev
 group: Gui Library
+module: alsdev
 predicates:
 - {sig: 'yes_no_dialog/[2,3,4,6]', desc: 'present a yes/no dialog'}
 ---

@@ -2,6 +2,7 @@
 title: 'tcl_delete/1'
 package: ALSDev
 group: TclTk Interface
+module: alsdev
 predicates:
 - {sig: 'tcl_delete/1', desc: 'delete a Tcl interpreter'}
 - {sig: 'tcl_delete_all/0', desc: 'delete all Tcl interpreters'}

@@ -2,6 +2,7 @@
 title: 'tcl_new/1'
 package: ALSDev
 group: TclTk Interface
+module: alsdev
 predicates:
 - {sig: 'tcl_new/1', desc: 'create a Tcl interpreter'}
 - {sig: 'tk_new/1', desc: 'create a Tcl interpreter initialized for Tk'}

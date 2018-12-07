@@ -2,6 +2,7 @@
 title: 'atomic_input_dialog/[2,3,4]'
 package: ALSDev
 group: Gui Library
+module: alsdev
 predicates:
 - {sig: 'atomic_input_dialog/[2,3,4]', desc: 'input atoms and numbers'}
 ---

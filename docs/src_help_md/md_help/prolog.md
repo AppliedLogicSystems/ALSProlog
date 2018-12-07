@@ -2,6 +2,7 @@
 title: 'prolog'
 package: ALSDev
 group: TclTk Interface
+module: alsdev
 predicates:
 - {sig: 'prolog', desc: 'call a prolog term from Tcl'}
 ---
