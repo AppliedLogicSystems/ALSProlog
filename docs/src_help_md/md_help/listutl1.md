@@ -2,6 +2,7 @@
 title: 'list_diff/3'
 package: alslib
 group: Lists
+module: builtins
 predicates:
 - {sig: 'append/2', desc: 'appends a list of lists together'}
 - {sig: 'int_diff/4', desc: 'returns the intersection and one difference of two lists'}

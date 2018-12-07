@@ -26,6 +26,7 @@ pack_kid(control, core_prolog).
 pack_kid(prolog_database, core_prolog).
 pack_kid(terms, core_prolog).
 pack_kid(input_output, core_prolog).
+pack_kid(file_system, core_prolog).
 
 pack_kid(development_environment, alsdev).
 pack_kid(gui_library, alsdev).
@@ -44,6 +45,7 @@ group_display(control, 'Control') :-!.
 group_display(input_output, 'Input Output') :-!.
 group_display(prolog_database, 'Prolog Database') :-!.
 group_display(terms, 'Terms') :-!.
+group_display(file_system, 'File System') :-!.
 group_display(uias, 'UIAs') :-!.
 
 	% ALSDev
@@ -323,7 +325,7 @@ collapse_from(GData, P, DA_List, TailCPA, IX, TailGData)
 	 |
 	 |	Path is a path to a file containing the following term:
 	 |
-	 |	np(Package, Group, Title, FileName,
+	 |	np(Package, Group, Title, FileName, Module,
 	 |	    [<List of <PAs with Descrips>>] ).
 	 |
 	 |	where:
@@ -331,15 +333,20 @@ collapse_from(GData, P, DA_List, TailCPA, IX, TailGData)
 	 |	-  pack_kid(Group, Package)
 	 |	-  Title is of the form: P/A
 	 |	-  md_help/<FileName>.md is the intended skeletal target
+	 |	-  Module is where the predicats have been declared
 	 |	-  Each <PAs with Descrips> is of the form
 	 |		p(<quoted atom Q/R>, <atom which is a short description of Q/R>)
+	 |
+	 |	new_page/1 can be invoked from the command line using:
+	 |
+	 |		alspro doctools.pro -g do_np -p <path to xx.np>
 	 |
 	 |	The convenience predicate mknnp/0 will create the outline of
 	 |	such an np(...) in the file ./nnp.np.
 	 * -------------------------------------------------------------------- */
 
 mknnp :- open('./nnp.np', write, OS),
-	printf(OS, 'np(\n   ,  %Package\n   ,  %Group\n   ,  %Title\n   ,  %FileName\n', []),
+	printf(OS, 'np(\n   ,  %Package\n   ,  %Group\n   ,  %Title\n   ,  %FileName\n   ,  %Module\n  ',[]),
 	printf(OS, '   % Preds With Descriptions:\n',[]),
 	printf(OS, '   [p(   , \'  \'),\n',[]),
 	printf(OS, '    p(   , \'  \'),\n',[]),
@@ -352,6 +359,32 @@ mknnp :- open('./nnp.np', write, OS),
 tt :- 
 	Path = 'np_for_curl.np',
 	new_page(Path).
+
+	%% alspro doctools.pro -g do_np -p <path to xx.np>
+do_np :-
+	command_line(CommandLine),
+	catch(
+		np_list(CommandLine),
+		npissue(IssueInfo, NPPath),
+		exit_np(NPPath, IssueInfo)
+	).
+
+exit_np(NPPath, IssueInfo)
+	:-
+	printf(user_output, '=======================\n',[]),
+%	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n\t%t\n', [NPPath, IssueInfo]),
+	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n\n', [NPPath]),
+
+	printf(user_output, '+++++++++++++++++++++++\n',[]),
+	printf(user_output, 'Exiting from doctools.pro/newpage due to problems with file %t\n',[NPPath]),
+	halt.
+	
+np_list([])
+	:- halt.
+np_list([NPPath | NPFiles])
+	:-
+	new_page(NPPath),
+	np_list(NPFiles).
 
 new_page(Path)
 	:-
@@ -369,13 +402,13 @@ do_new_page(Path)
 	close(IS),
 	check_and_go(NewPageTerm).
 
-check_and_go(np(Package, Group, Title, FileName, PAsWithDescs))
+check_and_go(np(Package, Group, Title, FileName, Module, PAsWithDescs))
 	:-
 	check_package(Package),
 	check_group(Group, Package),
 	check_file(FileName),
 	check_PAsWithDs(PAsWithDescs),
-	make_new_page(Package, Group, Title, FileName, PAsWithDescs).
+	make_new_page(Package, Group, Title, FileName, Module, PAsWithDescs).
 
 check_package(Package)
 	:-
@@ -433,24 +466,25 @@ integer_list([N | Tail])
 	integer(N),
 	integer_list(Tail).
 
-make_new_page(Package, Group, Title, FileName, PAsWithDescs)
+make_new_page(Package, Group, Title, FileName, Module, PAsWithDescs)
 	:-
 	file_extension(MDFile, FileName, md),
 	src_folder_md_files(MD_Src_Folder),
         join_path([MD_Src_Folder, MDFile], TgtMDFile),
 	open(TgtMDFile, write, OS),
-	(write_out_new_page(Package, Group, Title, PAsWithDescs, OS) ->
+	sort(PAsWithDescs, SortedPAsWithDescs),
+	(write_out_new_page(Package, Group, Title, Module, SortedPAsWithDescs, OS) ->
 		close(OS) ; close(OS) ).
 
-write_out_new_page(Package, Group, Title, PAsWithDescs, OS)
+write_out_new_page(Package, Group, Title, Module, PAsWithDescs, OS)
 	:-
-	yaml(Title, Package, Group, PAsWithDescs, OS),
+	yaml(Title, Package, Group, Module, PAsWithDescs, OS),
 	length(PAsWithDescs, MinNumForms),
         printf(OS, '\n## FORMS\n\n', []),
-	do_forms_skels(MinNumForms, OS),
+	do_forms_skels(PAsWithDescs, OS),
 	finish_skeleton(OS).
 
-yaml(Title, Package, Group, Preds, OS)
+yaml(Title, Package, Group, Module, Preds, OS)
         :-
         printf(OS, '---\n', []),
         printf(OS, 'title: \'%t\'\n', [Title]),
@@ -460,6 +494,7 @@ yaml(Title, Package, Group, Preds, OS)
 	(Group == '' -> true;
 		printf(OS, 'group: %t\n', [Group])
 	),
+        printf(OS, 'module: %t\n', [Module]),
         printf(OS, 'predicates:\n', []),
         yaml_preds(Preds, OS),
         printf(OS, '---\n', []).
@@ -475,14 +510,21 @@ short_descs([p(PA, DescAtom) | StrippedPreds], OS)
         :-
         printf(OS, '`%t` `--` %t\n\n', [PA,DescAtom]),
         short_descs(StrippedPreds, OS).
-do_forms_skels(0, OS).
-do_forms_skels(N, OS)
+
+do_forms_skels([], OS).
+do_forms_skels( [p(PA,DescAtom) | Preds], OS)
 	:-
-	N>0,
-	printf(OS, '`P(B1,B2,...)`\n',[]),
+	getPandA(PA, P, A),
+	B is A-1,
+	n_of(B, ' %t', Fmt0),
+	append(Fmt0, [' )`'], Fmt1),
+	Fmt2 = [`, P, '(' | Fmt1],
+	catenate(Fmt2, Fmt),
+	n_of(B, ',', V0),
+	printf(OS, Fmt,V0),
+	nl(OS),
 	blnk(OS),
-	M is N-1,
-	do_forms_skels(M, OS).
+	do_forms_skels(Preds, OS).
 
 finish_skeleton(OS)
 	:-

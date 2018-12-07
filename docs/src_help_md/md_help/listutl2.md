@@ -2,6 +2,7 @@
 title: 'nth_tail/4'
 package: alslib
 group: Lists
+module: builtins
 predicates:
 - {sig: 'at_most_n/3', desc: 'returns initial segment of list of length =< N'}
 - {sig: 'change_nth/3', desc: 'destructively changes the Nth element of a list'}

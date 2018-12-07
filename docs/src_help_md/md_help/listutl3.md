@@ -2,6 +2,7 @@
 title: 'number_list/3'
 package: alslib
 group: Lists
+module: builtins
 predicates:
 - {sig: 'check_default/4', desc: 'looks up an equation on a list, with a default'}
 - {sig: 'check_default_del/5', desc: 'looks up a tagged equation on a List, and deletes it'}

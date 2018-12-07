@@ -604,7 +604,7 @@ write_md(LibFile, Module, DocList, DocTitle, Group, Md_path, Overwrite)
 	sort(DocList, SortedDocList),
 	assemblePreds(SortedDocList, Preds, Forms, Descs),
 		%%%%---- From doctools.pro:
-	yaml(DocTitle, alslib, Group, Preds, OS),
+	yaml(DocTitle, alslib, Group, Module, Preds, OS),
 	printf(OS, '## FORMS\n\n', []),
 	writeFoms(Forms, OS),
 	printf(OS, '## DESCRIPTION\n', []),
