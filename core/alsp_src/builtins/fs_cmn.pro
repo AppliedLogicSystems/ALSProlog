@@ -41,7 +41,7 @@ export must_exist_file/1.
  |	date(Date)
  |	date(-)
  |
- |	 -	gets the current local date
+ |	 - gets the current local date
  |
  |	Unifies the input with the current date which is represented
  |	by a term of the form ??/??/??.  The exact pattern (e.g.,
@@ -72,8 +72,8 @@ time(HH:MM:SS)
  |	datetime(Date, Time)
  |	datetime(-, -)
  |
- |	 -	gets the current local date and time from the same 
- |		call to the OS clock
+ |	 - gets the current local date and time from the same 
+ |	   call to the OS clock
  |
  |	Unifies the input with the current date which is represented
  |	by a term of the form ??/??/??.  The exact pattern (e.g.,
@@ -90,8 +90,8 @@ datetime(Date, HH:MM:SS)
  |	gm_datetime(Date, Time)
  |	gm_datetime(-, -)
  |
- |	 -	gets the current Greenwich UTC date and time from the same 
- |		call to the OS clock
+ |	 - gets the current Greenwich UTC date and time from the same 
+ |	   call to the OS clock
  |
  |	Formats as for datetime/2
  *!--------------------------------------------------------------*/
@@ -118,6 +118,12 @@ date_less(YY0/MM0/DD0, YY1/MM1/DD1)
 			(MM0 < MM1,!; (MM0 = MM1, DD0 < DD1)))).
 
 /*!--------------------------------------------------------------
+ |	set_date_pattern/1
+ |	set_date_pattern(Pattern)
+ |	set_date_pattern(+)
+ |
+ |	- sets the date pattern (= AA/BB/CC)
+ |
  *!--------------------------------------------------------------*/
 set_date_pattern(AA/BB/CC)
 	:-
@@ -148,6 +154,11 @@ insert_comma_chars([C | RestCs], [C, 0', | RestICs])
 date_pattern(YY,MM,DD,YY/MM/DD).
 
 /*!--------------------------------------------------------------
+ |	valid_date/1
+ |	valid_date(Date)
+ |	valid_date(+)
+ |
+ |	- determines whether a date (pattern) is a valid date
  *!--------------------------------------------------------------*/
 valid_date(YY-MM-DD)
 	:-
@@ -301,9 +312,11 @@ remove_file(FileName)
 	system_error([unlink(FileName)]).
 
 /*!--------------------------------------------------------------
-  |	filename_equal/2
-  |	filename_equal(Name1, Name2)
-  |	filename_equal(+, +)
+ |	filename_equal/2
+ |	filename_equal(Name1, Name2)
+ |	filename_equal(+, +)
+ | 
+ |	- OS portable check for equality of file names 
  *!--------------------------------------------------------------*/
 filename_equal(Name1, Name2)
 	:-
@@ -334,6 +347,13 @@ mod_lc_eq_chrs(C1, C2)
 	C2 is C1 - 32, 
 	!.
 
+/*!--------------------------------------------------------------
+ | 	getDirEntries/3
+ | 	getDirEntries(Path, FilePattern, FirstResult)
+ | 	getDirEntries(+, +, -)
+ |
+ |	- returns the file in a directory which matches a pattern
+ *!--------------------------------------------------------------*/
 getDirEntries(Path, FilePattern, FirstResult)
 	:-
 	'$getDirEntries'(Path, FilePattern, FirstResult), !.
@@ -341,6 +361,13 @@ getDirEntries(Path, FilePattern, FirstResult)
 	:-
 	system_error([getDirEntries(Path, FilePattern, FirstResult)]).
 
+/*!--------------------------------------------------------------
+ |	must_exist_file/1
+ |	must_exist_file(File)
+ |	must_exist_file(+)
+ |
+ |	- raises a system_error if exists_file fails
+ *!--------------------------------------------------------------*/
 must_exists_file(File)
 	:- exists_file(File), !.
 must_exists_file(File)
