@@ -368,9 +368,9 @@ getDirEntries(Path, FilePattern, FirstResult)
  |
  |	- raises a system_error if exists_file fails
  *!--------------------------------------------------------------*/
-must_exists_file(File)
+must_exist_file(File)
 	:- exists_file(File), !.
-must_exists_file(File)
+must_exist_file(File)
 	:-
 	system_error([must_exist_file(File)]).
 
