@@ -1,4 +1,4 @@
-libactivate(builtins,[alslib,listutl3],
+libactivate(builtins,[library,listutl3],
     [check_default/4,check_default_del/5,encode_list/3,flatten/2,is_length/2,
         mangle_change_tagged/3,merge_in_list/3,merge_plists/3,
         merge_tagged_lists/3,n_of/3,nobind_member/2,number_list/2,

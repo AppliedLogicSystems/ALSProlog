@@ -558,7 +558,7 @@ write_alb(LibFile, Module, alslib, PAsList, FolderPath)
 		%% *.alb has no hand-entered info that is different
 		%% from what is generated here, so it is ok
 		%% to overwrite it:
-	AlbTerm = libactivate(Module, [alslib, LibFile], PAsList, []),
+	AlbTerm = libactivate(Module, [library, LibFile], PAsList, []),
 
 	open(Alb_path, write, OS),
 	printf(OS, '%t.\n', [AlbTerm]),

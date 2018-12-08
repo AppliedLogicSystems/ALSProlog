@@ -1,2 +1,2 @@
-libactivate(builtins,[alslib,listutl4],
+libactivate(builtins,[library,listutl4],
     [split_ll_at_start/5,split_ll_by_blank/3],[]).
