@@ -1,6 +1,7 @@
 ---
 title: 'see/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'see/1', desc: 'sets the current input stream'}
 - {sig: 'seeing/1', desc: 'returns the name of the current input stream'}

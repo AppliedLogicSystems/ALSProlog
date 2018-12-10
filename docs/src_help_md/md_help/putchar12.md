@@ -1,6 +1,7 @@
 ---
 title: 'put_char/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'put_char', args: {
     1: 'output a character to the current output stream',

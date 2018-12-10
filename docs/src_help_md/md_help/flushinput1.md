@@ -1,6 +1,7 @@
 ---
 title: 'flush_input/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'flush_input/1', desc: 'discard buffer contents of stream'}
 ---

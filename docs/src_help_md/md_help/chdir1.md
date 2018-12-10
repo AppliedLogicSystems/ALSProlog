@@ -1,6 +1,7 @@
 ---
 title: 'chdir/1'
 group: Input Output
+module: user
 predicates:
 - {sig: 'chdir/1', desc: 'changes the current directory to the specified directory'}
 ---

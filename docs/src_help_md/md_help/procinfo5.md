@@ -1,5 +1,6 @@
 ---
 title: '$procinfo/5'
+module: builtins
 predicates:
 - {sig: '$procinfo/5', desc: 'retrieves information about the given procedure'}
 - {sig: '$nextproc/3', desc: 'retrieves the next procedure in the name table'}

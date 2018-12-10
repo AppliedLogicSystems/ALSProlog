@@ -1,6 +1,7 @@
 ---
 title: 'put_string/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'put_string', args: {
     1: 'output a string to the current output stream',

@@ -1,6 +1,7 @@
 ---
 title: 'get_code/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'get_code', args: {
     1: 'read a character code from current input stream',

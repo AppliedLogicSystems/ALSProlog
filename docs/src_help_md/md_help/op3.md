@@ -1,5 +1,6 @@
 ---
 title: 'op/3'
+module: sio
 predicates:
 - {sig: 'op/3', desc: 'define operator associativity and precedence'}
 ---

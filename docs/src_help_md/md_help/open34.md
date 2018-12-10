@@ -1,6 +1,7 @@
 ---
 title: 'open/[3,4]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'open', args: { 3: 'open a stream', 4: 'open a stream with options'}}
 ---

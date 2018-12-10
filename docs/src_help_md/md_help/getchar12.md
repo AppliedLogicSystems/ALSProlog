@@ -1,6 +1,7 @@
 ---
 title: 'get_char/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'get_char', args: {
     1: 'read a character from current input stream',

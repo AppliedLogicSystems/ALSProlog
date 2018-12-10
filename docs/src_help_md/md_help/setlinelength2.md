@@ -1,6 +1,7 @@
 ---
 title: 'set_line_length/2'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'set_line_length/2', desc: 'set length of line for output stream'}
 - {sig: 'set_max_depth/2', desc: 'set maximum depth that terms will be written to'}

@@ -1,6 +1,7 @@
 ---
 title: 'read/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'read', args: {
     1: 'read a term from the current input stream',

@@ -1,6 +1,7 @@
 ---
 title: 'at_end_of_stream/[0,1]'
 group: Input Output
+module: sio
 predicates:
  - {sig: 'at_end_of_stream', args: {
      0: 'test for end of the curent input stream',

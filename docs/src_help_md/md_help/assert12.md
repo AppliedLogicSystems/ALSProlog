@@ -2,9 +2,18 @@
 title: 'assert/[1,2]'
 group: Prolog Database
 predicates:
-- {sig: 'assert/[1,2]', desc: 'adds a clause to a procedure'}
-- {sig: 'asserta/[1,2]', desc: 'adds a clause at the beginning of a procedure'}
-- {sig: 'assertz/[1,2]', desc: 'adds a clause at the end of a procedure'}
+- {sig: 'assert', args: { 
+    1: 'adds a clause to a procedure',
+    2: 'adds a clause to a procedure, returning a DB Ref'
+  }}
+- {sig: 'asserta', args: { 
+    1: 'adds a clause to the beginning of a procedure',
+    2: 'adds a clause to the beginning of a procedure, returning a DB Ref'
+  }}
+- {sig: 'assertz', args: { 
+    1: 'adds a clause to the end of a procedure',
+    2: 'adds a clause to the end of a procedure, returning a DB Ref'
+  }}
 ---
 
 ## FORMS

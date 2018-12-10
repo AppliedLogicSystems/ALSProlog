@@ -1,6 +1,7 @@
 ---
 title: 'write/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'write', args:
     {1: 'write term to current output stream', 2: 'write term to specified stream'}}

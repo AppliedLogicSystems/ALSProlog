@@ -1,6 +1,7 @@
 ---
 title: 'peek_char/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'peek_char/[1,2]', desc: 'obtain char from stream'}
 ---

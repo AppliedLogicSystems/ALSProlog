@@ -1,6 +1,7 @@
 ---
 title: 'close/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'close', args: { 1: 'close an open stream', 2: 'close an open stream with options'}}
 ---

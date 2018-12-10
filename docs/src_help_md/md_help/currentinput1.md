@@ -1,6 +1,7 @@
 ---
 title: 'current_input/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'current_input/1', desc: 'retrieve current input stream'}
 - {sig: 'current_output/1', desc: 'retrieve current output stream'}

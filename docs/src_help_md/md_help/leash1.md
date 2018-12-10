@@ -1,5 +1,6 @@
 ---
 title: 'leash/1'
+module: debugger
 predicates:
 - {sig: 'leash/1', desc: 'set which ports are leashed for the debugger'}
 ---

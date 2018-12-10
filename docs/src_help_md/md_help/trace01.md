@@ -1,5 +1,6 @@
 ---
 title: 'trace/[0,1]'
+module: debugger
 predicates:
 - {sig: 'trace', args: {0: 'turn on tracing', 1: 'trace the execution of a goal'}}
 - {sig: 'notrace/0', desc: 'turn off tracing'}

@@ -1,5 +1,6 @@
 ---
 title: 'current_op/3'
+module: sio
 predicates:
 - {sig: 'current_op/3', desc: 'retrieve current operator definitions'}
 ---

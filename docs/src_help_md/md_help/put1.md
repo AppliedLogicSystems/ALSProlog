@@ -1,6 +1,7 @@
 ---
 title: 'put/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'put/1', desc: 'write out a character'}
 - {sig: 'tab/1', desc: 'prints out a specified number of spaces'}

@@ -1,6 +1,7 @@
 ---
 title: 'skip/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'skip/1', desc: 'discard all input characters until specified character'}
 ---

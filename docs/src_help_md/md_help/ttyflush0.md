@@ -1,6 +1,7 @@
 ---
 title: 'ttyflush/0'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'ttyflush/0', desc: 'forces all buffered output to the screen'}
 ---

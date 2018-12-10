@@ -1,6 +1,7 @@
 ---
 title: 'set_input/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'set_input/1', desc: 'set current input stream'}
 - {sig: 'set_output/1', desc: 'set current output stream'}

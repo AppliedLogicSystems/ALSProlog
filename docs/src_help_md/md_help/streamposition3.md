@@ -1,6 +1,7 @@
 ---
 title: 'stream_position/[2,3]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'stream_position/[2,3]', desc: 'reposition a stream'}
 ---

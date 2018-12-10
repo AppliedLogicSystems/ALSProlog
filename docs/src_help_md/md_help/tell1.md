@@ -1,6 +1,7 @@
 ---
 title: 'tell/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'tell/1', desc: 'sets the standard output stream'}
 - {sig: 'telling/1', desc: 'returns the name of the standard output stream'}

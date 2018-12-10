@@ -1,6 +1,7 @@
 ---
 title: 'poll/2'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'poll/2', desc: 'Determine whether I/O is possible'}
 ---

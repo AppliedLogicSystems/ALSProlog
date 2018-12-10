@@ -1,6 +1,7 @@
 ---
 title: 'flush_output/[0,1]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'flush_output', args: {0: 'flush current output stream', 1: 'flush specific output stream'}}
 ---

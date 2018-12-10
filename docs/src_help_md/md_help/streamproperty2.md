@@ -1,6 +1,7 @@
 ---
 title: 'stream_property/2'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'stream_property/2', desc: 'retrieve streams and their properties'}
 ---

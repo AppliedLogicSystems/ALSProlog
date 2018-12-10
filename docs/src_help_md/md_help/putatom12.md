@@ -1,6 +1,7 @@
 ---
 title: 'put_atom/[1,2]'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'put_atom', args: {
     1: 'output an atom to the current output stream',

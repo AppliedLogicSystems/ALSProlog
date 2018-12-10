@@ -1,6 +1,7 @@
 ---
 title: 'get0/1'
 group: Input Output
+module: sio
 predicates:
 - {sig: 'get0/1', desc: 'read the next character'}
 - {sig: 'get/1', desc: 'read the next printable character'}
