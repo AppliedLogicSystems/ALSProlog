@@ -200,7 +200,7 @@ breakout_groups([], FinalBrokenOutGroups, FinalBrokenOutGroups)
         FinalBrokenOutGroups = [].
 breakout_groups(SortedPackageData, [GX | BrokenOutGroups], FinalBrokenOutGroups)
         :-
-        SortedPackageData = [xpge(G, PA, FName, First, Preds) | _],
+        SortedPackageData = [xpge(G, PA, FName, PlainPred, Preds) | _],
         brkout_grp(SortedPackageData, G, GX, TailSortedPackageData),
         breakout_groups(TailSortedPackageData, BrokenOutGroups, FinalBrokenOutGroups).
 
@@ -213,19 +213,19 @@ brkout_grp(SortedPackageData, G, G-XGrp, TailSortedPackageData)
 
 accum_grp([], Group, [], []).
 
-accum_grp([xpge(Group, PA, FName, First, Preds) | InterSortedPackageData],
+accum_grp([xpge(Group, PA, FName, PlainPred, Preds) | InterSortedPackageData],
           Group,
-          [xpge(Group, PA, FName, First, Preds) | TailGroupEntries],  TailSortedPackageData)
+          [xpge(Group, PA, FName, PlainPred, Preds) | TailGroupEntries],  TailSortedPackageData)
         :-!,
         accum_grp(InterSortedPackageData, Group, TailGroupEntries, TailSortedPackageData).
 
-accum_grp([xpge(NextGroup, PA, FName, First, Preds) | InterSortedPackageData],
+accum_grp([xpge(NextGroup, PA, FName, PlainPred, Preds) | InterSortedPackageData],
            Group, [],
-           [xpge(NextGroup, PA, FName, First, Preds) | InterSortedPackageData]).
+           [xpge(NextGroup, PA, FName, PlainPred, Preds) | InterSortedPackageData]).
 
 expand_grp([], []).
 
-expand_grp([xpge(Group, PA, FName, First, PredsWithDescs) | GroupEntries], Expanded)
+expand_grp([xpge(Group, PA, FName, PlainPred, PredsWithDescs) | GroupEntries], Expanded)
         :-
         make_pa_descs(PredsWithDescs, FName, PADescs),
         append(PADescs, NextExpanded, Expanded),
@@ -400,7 +400,8 @@ do_new_page(Path)
 	open(Path, read, IS),
 	read(IS, NewPageTerm),
 	close(IS),
-	check_and_go(NewPageTerm).
+	check_and_go(NewPageTerm),
+	do_new_idx_tm(NewPageTerm).
 
 check_and_go(np(Package, Group, Title, FileName, Module, PAsWithDescs))
 	:-
@@ -482,6 +483,8 @@ write_out_new_page(Package, Group, Title, Module, PAsWithDescs, OS)
 	length(PAsWithDescs, MinNumForms),
         printf(OS, '\n## FORMS\n\n', []),
 	do_forms_skels(PAsWithDescs, OS),
+        printf(OS, '\n## DESCRIPTION\n\n', []),
+	do_descs_skels(PAsWithDescs, OS),
 	finish_skeleton(OS).
 
 yaml(Title, Package, Group, Module, Preds, OS)
@@ -526,12 +529,14 @@ do_forms_skels( [p(PA,DescAtom) | Preds], OS)
 	blnk(OS),
 	do_forms_skels(Preds, OS).
 
+do_descs_skels([], OS).
+do_descs_skels( [p(PA,DescAtom) | Preds], OS)
+	:-
+	printf(OS, '\n**`%t`**  \n\n', [PA]),
+	do_descs_skels(Preds, OS).
+
 finish_skeleton(OS)
 	:-
-        blnk(OS),
-        printf(OS, '## DESCRIPTION\n',[]),
-        blnk(OS),
-        printf(OS, 'Description text...\n',[]),
         blnk(OS),
         printf(OS, '## EXAMPLES\n',[]), 
         blnk(OS),
@@ -718,11 +723,16 @@ do_new_idx(Path)
 	open(Path, read, IS),
 	read(IS, NewPageTerm),
 	close(IS),
-	NewPageTerm = np(Package, Group, Title, FileName, PAsWithDescs),
-	    % All necessary checks made when new_page(Path) ran:
-	rewrite_idx(Package, Group, Title, FileName, PAsWithDescs).
+	do_new_idx_tm(NewPageTerm).
 
-rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
+do_new_idx_tm(NewPageTerm)
+	:-
+trace,
+	NewPageTerm = np(Package, Group, Title, FileName, Module, PAsWithDescs),
+	    % All necessary checks made when new_page(Path) ran:
+	rewrite_idx(Package, Group, Title, FileName, Module, PAsWithDescs).
+
+rewrite_idx(Package, Group, Title, FileName, Module, PAsWithDescs)
 	:-
 		%% pack_readable(c_intf, 'C Interface').
 	(pack_readable(PackAbbrev, Package) -> true;
@@ -731,13 +741,16 @@ rewrite_idx(Package, Group, Title, FileName, PAsWithDescs)
 	(exists_file(PkgFile) -> true ; 
 		open(PkgFile, write, OOS), printf(OOS, '[].\n', []), close(OOS)
 	),
-	do_rew_idx(Pkgfile, PackAbbrev, Group, Title, FileName, PAsWithDescs, TocFolder).
+%	do_rew_idx(Pkgfile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs, TocFolder).
+	do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs).
 	
 	/* -------------------------------------------------------------------- *
 	 * -------------------------------------------------------------------- */
 
-do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, PAsWithDescs)
+do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs)
 	:-
+		%% Need to include Module in the docsdb; but all entries need to be converted:
+%	do_docsdb(PkgFile, Group, Title, FileName, Module, PAsWithDescs, SortedNewList),
 	do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList),
 
 		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:

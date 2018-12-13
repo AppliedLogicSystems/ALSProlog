@@ -1,0 +1,16 @@
+np(
+core_prolog, %Package
+file_system, %Group
+'get_cwd/1',   %Title
+'getcwd1',     %FileName
+builtins,      %Module
+     % Preds With Descriptions:
+   [p('get_cwd/1', 'returns the current working directory'),
+    p('change_cwd/1', 'change the current working directory'),
+    p('canon_path/2', 'canonicalizes a path name'),
+    p('remove_file/1', 'removes a file from the current working directory'),
+    p('filename_equal/2', 'OS portable check for equality of file names'),
+    p('getDirEntries/3', 'defined using \'$getDirEntries\''),
+    p('must_exist_file/1', 'raises system_error if exists_file fails')
+   ]
+  ).
