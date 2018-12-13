@@ -1,6 +1,8 @@
 /*========================================================================*
  |			miscatom.pro
  |	Copyright (c) 1995-96 Applied Logic Systems, Inc.
+ |		Group: Terms
+ |		DocTitle: list_diff/3
  |
  |		Prolog Atom utilities
  |
