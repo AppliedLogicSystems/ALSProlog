@@ -2,7 +2,7 @@
  |			html_tokens.pro
  |		Copyright (c) 1999-2004 Applied Logic Systems, Inc.
  |	
- |		Tokenize html source files suitably for parsing into pml.
+ |		Tokenize html source files suitably for parsing into pxml.
  |
  |	Authors: Ken Bowen & Chuck Houpt
  |
@@ -35,7 +35,7 @@
  |	MODIFICATIONS.
  *=================================================================*/
 
-module pml.
+module pxml.
 
 export tokenize_file/2.
 export read_tokens/2.
@@ -85,7 +85,7 @@ read_tokens(S, Tokens)
  |   S       = input stream
  | Output:
  |   Tokens  = [<list of tokens read from S> | Tail]
- |   Tail    = tail of Result Tokens
+ |   Tail    = tail of Input Tokens
  |   FlagOut = one of: normal, n1, comment
  |
  | Reads as many tokens as it can from S, returning them in Tokens,
@@ -257,7 +257,6 @@ dispatch_cross_white(C, S, C).
 
 /*---------------------------------------------------------------------
  |	
- |	next_token(NextNonblankChar, FlagIn, S, T, NxtC, FlagInter),
  |
  | 
  *--------------------------------------------------------------------*/
@@ -275,11 +274,12 @@ next_token(0'}, _, S, '}',NxtC, n1)
 	:-!,
 	get_code(S,NxtC).
 
-next_token(0'(, _, S, '(',NxtC, n1) 
+
+next_token(0'(, _, S, '{',NxtC, n1) 
 	:-!,
 	get_code(S,NxtC).
 
-next_token(0'), _, S, ')',NxtC, n1) 
+next_token(0'), _, S, '}',NxtC, n1) 
 	:-!,
 	get_code(S,NxtC).
 
@@ -402,13 +402,13 @@ next_token(0'", S, '"',NxtC)
 	:-!,
 	get_code(S,NxtC).
 */
-	%%% ?? MUST GET STRING AS TOKEN:  ??
-next_token(0'", S, StringToken, NxtC) 
+%%% ?? MUST GET STRING AS TOKEN:  ??
+next_token(0'", S, StringToken ,NxtC) 
 	:-!,
 	read_string_char_list(S, StringChars, NxtC),
 	atom_codes(StringToken, StringChars).
 
-next_token(0'', S, '\'', NxtC) 
+next_token(0'', S, '\'',NxtC) 
 	:-!,
 	get_code(S,NxtC).
 
@@ -423,7 +423,7 @@ next_token(0'&, S, T, NxtC)
 	),
 	atom_codes(T, [0'& | Cs]).
 
-next_token(C1, S, T, NxtC)
+next_token(C1, S, T,NxtC)
 	:-
 	read_to_terminator(S, Cs, NxtC),
 	name(T, [C1 | Cs]).
@@ -454,32 +454,6 @@ dispatch_read_to_terminator(C, S, [], C)
         :-
         C = 0'&, !.
 	
-dispatch_read_to_terminator(C, S, [], C)
-        :-
-        C = 0'}, !.
-	
-		/*  ADDITION FOR DTDs */
-dispatch_read_to_terminator(C, S, [], C)
-	:-
-	single_char_dtd(C),!.
-
-
-dispatch_read_to_terminator(C, S, [], C)
-	:-
-	C = 0'', !.
-
-dispatch_read_to_terminator(C, S, [], C)
-	:-
-	C = 0'[, !.
-dispatch_read_to_terminator(C, S, [], C)
-	:-
-	C = 0'], !.
-
-
-dispatch_read_to_terminator(C, S, [C | Cs], NxtC)
-	:-
-	read_to_terminator(S, Cs, NxtC).
-
 /*---------------------------------------------------------------------
  |	
  |
@@ -496,6 +470,21 @@ dispatch_read_to_semi(0';, S, [0';], NxtC)
 dispatch_read_to_semi(C, S, [C | Cs], NxtC)
 	:-
 	read_to_semi(S, Cs, NxtC).
+
+/*---------------------------------------------------------------------
+ |	
+ |
+ | 
+ *--------------------------------------------------------------------*/
+
+/*  ADDITION FOR DTDs */
+dispatch_read_to_terminator(C, S, [], C)
+	:-
+	single_char_dtd(C),!.
+
+dispatch_read_to_terminator(C, S, [C | Cs], NxtC)
+	:-
+	read_to_terminator(S, Cs, NxtC).
 
 /*---------------------------------------------------------------------
  |	
@@ -586,6 +575,16 @@ get_cmt_inter('--',  Cs, S, Tokens, Tail, FlagOut)
 
 		%% if C \= 0'>, raise error...
 
+/*
+	%% raise eof error:
+get_cmt_inter(end_of_file,  Cs, Tokens, Tail)
+	:-
+
+	%% anything else is a big-time error:
+get_cmt_inter(,  Cs, Tokens, Tail)
+	:-
+*/
+
 /*---------------------------------------------------------------------
  |	
  |
@@ -637,4 +636,3 @@ disp_end_cmt_try(C, [0'-], S, [C, 0'- | RCs], Terminal, Flag)
 	get_cmt(S, RCs, Terminal, Flag).
 
 endmod.
-
