@@ -1,24 +1,27 @@
-:-['./html_tokens.pro'].
-
-read_226_toks
+read_toks
 	:-
-	check_tokenize_file,
-	check_read_tokens,
-	check_grab_html_tokens.
+	sys_env(OS,_,_),
+        (OS = mswin32 ->
+		Path = '../alsp_src/tests/libtests/example.com'
+		;
+		Path = '../../alsp_src/tests/libtests/example.com'
+	),
+	printf('In %t reading path: %t\n', [OS, Path]),
+	check_tokenize_file(Path),
+	check_read_tokens(Path),
+	check_grab_html_tokens(Path).
 
 
-check_tokenize_file
+check_tokenize_file(Path)
 	:-
-	Path = '../../alsp_src/tests/libtests/example.com',
 	tokenize_file(Path, Tokens1),
 	length(Tokens1, NumTokens1),
 	printf('tokenize_file read %t tokens\n', [NumTokens1]),
 	NumTokens1 == 226.
 
 
-check_read_tokens
+check_read_tokens(Path)
 	:-
-	Path = '../../alsp_src/tests/libtests/example.com',
 	open(Path, read, IS),
 	read_tokens(IS, Tokens2),
 	close(IS),
@@ -27,9 +30,8 @@ check_read_tokens
 	printf('read_tokens got %t tokens\n', [NumTokens2]),
 	NumTokens2 == 226.
 	
-check_grab_html_tokens
+check_grab_html_tokens(Path)
 	:-
-	Path = '../../alsp_src/tests/libtests/example.com',
 	grab_html_tokens(Path, Tokens3),
 	length(Tokens3, NumTokens3),
 	printf('tokenize_file read %t tokens\n', [NumTokens3]),

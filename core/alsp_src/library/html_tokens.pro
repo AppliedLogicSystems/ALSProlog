@@ -1,60 +1,76 @@
 /*=================================================================*
  |			html_tokens.pro
- |	Copyright (c) 1999-2019 Applied Logic Systems, Inc.
- |		Group: Web
- |		DocTitle: read_tokens/2
- |		-- Tokenize html source files suitably for parsing into pxml.
+ |		Copyright (c) 1999-2004 Applied Logic Systems, Inc.
+ |	
+ |		Tokenize html source files suitably for parsing into pxml.
  |
  |	Authors: Ken Bowen & Chuck Houpt
+ |
+ |	This software is copyrighted by Applied Logic Systems, Inc.,
+ |	and other parties.  The following terms apply to all files 
+ |	associated with the software unless explicitly disclaimed in 
+ |	individual files.
+ |
+ |	The authors hereby grant permission to use, copy, modify, distribute,
+ |	and license this software and its documentation for any purpose, provided
+ |	that existing copyright notices are retained in all copies and that this
+ |	notice is included verbatim in any distributions. No written agreement,
+ |	license, or royalty fee is required for any of the authorized uses.
+ |	Modifications to this software may be copyrighted by their authors
+ |	and need not follow the licensing terms described here, provided that
+ |	the new terms are clearly indicated on the first page of each file where
+ |	they apply.
+ |	
+ |	IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY
+ |	FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ |	ARISING OUT OF THE USE OF THIS SOFTWARE, ITS DOCUMENTATION, OR ANY
+ |	DERIVATIVES THEREOF, EVEN IF THE AUTHORS HAVE BEEN ADVISED OF THE
+ |	POSSIBILITY OF SUCH DAMAGE.
+ |	
+ |	THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ |	INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+ |	FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  THIS SOFTWARE
+ |	IS PROVIDED ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE
+ |	NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR
+ |	MODIFICATIONS.
  *=================================================================*/
 
 module pxml.
 
-export grab_html_tokens/2.
-export read_tokens/2.
 export tokenize_file/2.
+export read_tokens/2.
+export grab_html_tokens/2.
 
-/*!---------------------------------------------------------------------
- |	tokenize_file/2
+	%%------------------------------------------
+	%% Tokenize the input
+	%%------------------------------------------
+
+/*---------------------------------------------------------------------
  |	tokenize_file(File, Tokens)
- |	tokenize_file(+, -)
  |
- | 	- extracts all Tokens from the File
- |
- |	Opens a stream to File, and uses read_tokens/2 to read all
- |	tokens found in File into the list Tokens.
- *!--------------------------------------------------------------------*/
+ | Opens a stream to the File, and extracts tokens from the stream.
+ *--------------------------------------------------------------------*/
 tokenize_file(File, Tokens)
 	:-
 	open(File, read, S),
 	read_tokens(S, Tokens),
 	close(S).
 
-/*!---------------------------------------------------------------------
- |	grab_html_tokens/2
- |	grab_html_tokens(Path, Tokens)
- |	grab_html_tokens(+, -)
+/*---------------------------------------------------------------------
+ |	grab_html_tokens(Path, HTMLPageTokens)
  |
- | 	- extracts all Tokens from the File
- |
- | 	Just like tokenize_file/2, but wraps read_tokens in unwind_protect
- *!--------------------------------------------------------------------*/
+ | Just like tokenize_file/2, but wraps read_tokens in unwind_protect
+ *--------------------------------------------------------------------*/
 grab_html_tokens(Path, HTMLPageTokens)
     :-
     open(Path, read, S),
     unwind_protect( read_tokens(S, HTMLPageTokens), close(S) ).
 
-/*!---------------------------------------------------------------------
- |	read_tokens/2
+/*---------------------------------------------------------------------
  |	read_tokens(S, Tokens)
- |	read_tokens(+, -)
  |
- | 	- extracts all Tokens from a stream
- |
- | 	S is a read-stream to a potential source of tokens;
- |	Reads all tokens out of stream S into list Tokens by invoking 
- |	the workhorse read_tokens/5.
- *!--------------------------------------------------------------------*/
+ | Read html Tokens out of stream S; invokes the workhorse.
+ *--------------------------------------------------------------------*/
 read_tokens(S, Tokens)
 	:-
 	read_tokens(normal, S,  Tokens, [], _).
@@ -118,6 +134,7 @@ read_tokens(Flag, S, Tail, Tail, Flag).
  |
  | 
  *--------------------------------------------------------------------*/
+
 scoop_href_and_go(T, NxtC, S, Tokens, FlagInter, Tail, FlagOut)
 	:-
 	peek_code(S, C),
@@ -164,6 +181,7 @@ scoop_0(S, Tokens, InterTokens, NxtC0, FlagInter, FlagInter0)
  |
  | 
  *--------------------------------------------------------------------*/
+
 read_string_char_list_xtnd(S, StringChars, NxtC0)
 	:-
 	get_code(S, C),
@@ -242,6 +260,7 @@ dispatch_cross_white(C, S, C).
  |
  | 
  *--------------------------------------------------------------------*/
+
 next_token(0'<, _, S, '<',NxtC, n1) 
 	:-!,
 	get_code(S,NxtC).
@@ -457,6 +476,7 @@ dispatch_read_to_semi(C, S, [C | Cs], NxtC)
  |
  | 
  *--------------------------------------------------------------------*/
+
 /*  ADDITION FOR DTDs */
 dispatch_read_to_terminator(C, S, [], C)
 	:-
