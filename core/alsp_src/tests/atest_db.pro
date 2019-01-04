@@ -8,6 +8,11 @@
 
 module als_testing.
 
+% test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
+
+test_info(read_html_tokens_test, read_examp_toks, user, read_226_toks, 
+	'read html tokens from file version of example.com').
+
 	%% Standard ALS examples:
 
 test_info(stack_overflow_test, stack_overflow_test, user, test,

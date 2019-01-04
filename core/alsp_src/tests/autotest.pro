@@ -60,7 +60,8 @@ configure_testing(TDs, CmdLineVs)
 	dmember(['-srcdir',SrcDir], CmdLineVs),
 	join_path([SrcDir,'../../',examples,als], EXAMP_ALS_Path),
 	join_path([SrcDir,tests,tsuite], TSUITE_Path),
-	add_search_dirs([EXAMP_ALS_Path,TSUITE_Path]).
+	join_path([SrcDir,tests,libtests], LIBTESTS_Path),
+	add_search_dirs([EXAMP_ALS_Path,TSUITE_Path, LIBTESTS_Path]).
 
 configure_testing(_, _)
 	:-
