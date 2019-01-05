@@ -79,4 +79,12 @@ test_info(testeoln, testeoln, user, test,
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').
 
+% Format:
+% test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
+
+% Library tests:
+
+test_info(read_html_tokens_test, read_examp_toks, user, read_toks, 
+	'read html tokens from file version of example.com').
+
 endmod.
