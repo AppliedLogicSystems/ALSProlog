@@ -1,6 +1,6 @@
 /* ====================================================================== *
  |			libwork.pro
- |		Copyright (c) 2018 Applied Logic Systems, Inc.
+ |		Copyright (c) 2018-2019 Applied Logic Systems, Inc.
  |		Group: Library Maintenance
  |		DocTitle: libsetup/0
  |      

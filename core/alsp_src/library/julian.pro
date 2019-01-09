@@ -1,6 +1,6 @@
 /*============================================================*
  |		julian.pro
- |	Copyright (c) 1999-2000 Applied Logic Systems, Inc.
+ |	Copyright (c) 1999-2019 Applied Logic Systems, Inc.
  |		
  |	Author: Ken Bowen
  |
