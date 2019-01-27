@@ -1,3 +1,5 @@
-libactivate(pml,[library,parse_html],
-    [ parse_html_toks_to_pml/6, grab_pml/2, read_pml_term/3, read_pml_comment/3 ],
+libactivate(pxml,[library,parse_html],
+    [grab_pxml/2,grab_pxml_with_paths/5,grab_pxml_with_tagged/3,
+        parse_html_toks_to_pxml/5,parse_html_toks_to_pxml_vals/3,
+        read_pxml_comment/3,read_pxml_term/7,unary_tag/1],
     []).

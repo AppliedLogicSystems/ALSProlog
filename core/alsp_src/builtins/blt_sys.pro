@@ -714,7 +714,6 @@ do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
 :-dynamic(lib_mod_list/1).
 libhide(M,List,PredList) 
 	:-
-%	subPath(List, LibFileName),
 	join_path(List, LibFileName),
 	libhide0(PredList,M,LibFileName).
 

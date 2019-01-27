@@ -7,7 +7,6 @@
  |
  |	Authors: Ken Bowen & Chuck Houpt
  *=================================================================*/
-
 module pxml.
 
 export grab_html_tokens/2.
