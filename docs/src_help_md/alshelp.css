@@ -4,21 +4,25 @@
         left: -0.5em;
         height: 1.4em;
         right: 0;
+	background-color:AliceBlue;
 }
 #package-view {
         position: fixed;
         top: 1.4em;
         left: 0;
-        height: 8em;
-        width: 13em;
+        height: 8.6em;
+        width: 14em;
+	background-color:Khaki;
 }
 
 #toc-view {
         position: fixed;
-        top: 10em;
+        top: 12em;
         left: 0;
         bottom: 0;
-        width: 14em;
+        width: 13em;
+	height: 70%;
+	background-color:Lavender;
 }
 
 #content-view {
@@ -27,6 +31,7 @@
         left: 14em;
         bottom: 0;
         right: 0;
+	background-color:AliceBlue;
 }
 
 iframe {
