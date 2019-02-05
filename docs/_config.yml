@@ -14,10 +14,13 @@ liquid:
   strict_filters    : true
   strict_variables  : false
 
+exclude:
+  - src_help_md
+
 defaults:
   -
     scope:
-      path: "src_help_md/md_help"
+      path: "ref-manual/alshelp"
       type: "pages"
     values:
       reference: true
