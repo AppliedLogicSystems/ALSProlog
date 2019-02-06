@@ -11,7 +11,7 @@ Please be patient.
 ### [Prolog Builtins and Library](10-Prolog-I-O)
 ### [TTY Development Environment](13-Using-the-Prolog-Shell)
 ### [ALS Prolog IDE](16-ALS-IDE)
-### [ALS Prolog Foreign Interface](19-Using-the-ALS-Foreign-Interface)
+### [ALS Prolog Foreign Interface](21-Using-the-ALS-Foreign-Interface)
 
 ## Sidebar
 
