@@ -311,6 +311,7 @@ arity of Clause is P/N, then:
 * asserta/1 adds Clause before all previous clauses for P/N;
 * assertz/1 adds Clause after all previous clauses for P/N;
 * assert/1 adds Clause in some implementation-dependent position relative to all previous clauses for P/N.
+
 ````
 clause/2
 clause(Head, Body)
@@ -514,7 +515,7 @@ consult/2 allows one to load files (either singly or a list) under various optio
 where Options is a list of consult options.  The most useful is to add a folder to override the system search path for the duration of this consult.  For example:
 ````
 	consult(['id.pro', 'hickory.pro'], [search_path('examples/als’)]).
-
+````
 ````
 consultmessage/1
 consultmessage(OnOff)
