@@ -34,8 +34,8 @@ title: Documentation
 
 ## [Reference Manual](ref-manual)
 
-- [Syntax of Prolog](#)
+- [Syntax of Prolog](.)
 - [Builtins](ref-manual)
-- [ALSDev](#)
-- [ALS Library](#)
-- [ALS C-Inter](#)
+- [ALSDev](.)
+- [ALS Library](.)
+- [ALS C-Inter](.)
