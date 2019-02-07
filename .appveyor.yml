@@ -11,7 +11,4 @@ install:
 git,make,gcc-core,mingw64-i686-gcc-core,libcrypt-devel,mingw64-i686-libgcrypt,mingw64-i686-curl,tcl-tk-devel,mingw64-i686-tcl,mingw64-i686-tk,zip,php,procps"
 
 build_script:
-  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make"
-
-test_script:
-  - C:\Cygwin\bin\bash -lc "cd $APPVEYOR_BUILD_FOLDER/%OS% && make test"
+  - C:\Cygwin\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -eux -o pipefail
+
+cd "$(dirname "$0")"
+
+case "$(uname)" in
+    "CYGWIN"*)  OS=win32 ;;
+    *)          OS=unix ;;
+esac
+
+pushd $OS
+make
+if [[ $OS == 'unix' ]]
+then
+	make testdocs
+fi
+make test
+popd

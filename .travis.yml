@@ -34,4 +34,4 @@ before_install: |
   fi
 
 script:
-  - cd unix && make && make test
+  - ./cibuild

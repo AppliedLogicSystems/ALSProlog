@@ -19,6 +19,9 @@ standard: core
 test: core
 	$(MAKE) -C ../core/unix test
 
+testdocs:
+	$(MAKE) -C ../core/unix testdocs
+
 distclean:
 	$(MAKE) -C ../core/unix distclean
 	sh superclean.sh
