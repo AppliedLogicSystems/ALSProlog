@@ -6,10 +6,10 @@
  |      
  |              -- Install and document alslib library files
  |      
- |	Works from from <PathToLib>/<libfile>.pro, and generates
+ |	Works from <PathToLib>/<libfile>.pro, and generates
  |		<PathToLib>/<libfile>.alb
- |	together with 
- |	    ~docs/src_help_md/md_help/<libfile>.md
+ |	    together with 
+ |		~docs/src_help_md/md_help/<libfile>.md
  |
  |	If pandoc is available, translates <libfile>.md to
  |	    ~docs/src_help_md/alshelp/<libfile>.html
@@ -22,6 +22,7 @@
  |	    ~docs/ref-manual/md_toc_alslib.html
  |
  |	Assumes one is running in ~docs/src_help_md	
+ |
  |	Issue: Work out paths and code extension so that a regular
  |	installation can add a library file.
  |
@@ -32,26 +33,38 @@
  |                  or
  |		alspro libwork.pro -g libsetup -p listutl1 listutl2 listutl3
  |
- |	By default, libsetup will NOT overwrite the target *.md file.
+ |	By default, libsetup/0 will NOT overwrite the target *.md file.
  |	If the command line switch -ow is present, then it WILL overwrite
  |	the target *.md file.
  |
  |	Note: Depends on doctools.pro
  * ====================================================================== */
-:-['doctools.pro'].
+%:-['doctools.pro'].
+:-['/Users/ken/ALS/GitHub/ALSProlog/docs/src_help_md/doctools.pro'].
 
 export libsetup/0.
 
 	%% Assumes this is being run in ~docs/src_help_md:
 mdFolderPath('./md_help').
 src_helpPath('./').
+check_get_lib_path(LibPath)
+	:-
+	lib_dev_path(LibPath),
+	path_elements(ListUtl1Path, [LibPath, 'listutl1.pro']), 
+	exists_file(ListUtl1Path),
+	!.
+    % Path from ~/ALSProlog/docs/src_help_md to library
+    % in ALSProlog built tree:
 lib_dev_path('../../core/alsp_src/library').
+lib_dev_path(LibPath)
+	:-
+	builtins:sys_searchdir(ALSDIR),
+	path_elements(LibPath, [ALSDIR, library]).
 
 	%% Convenience during development:
 tlu1 :- doc_lib_file(listutl1).
 tlu3 :- doc_lib_file(listutl3).
 tlu4 :- doc_lib_file(listutl4).
-
 /*!---------------------------------------------------------------------
  |	libsetup/0
  |	libsetup
@@ -131,7 +144,7 @@ do_libsetup([LibFile | LibFilesList], Overwrite)
  |	   ii) Checks that DocTitle is in both EX and LPA
  |	   If there is a mismatch, or ii) fails, throws a message and halts;
  |	G) Writes <LibFile>.alb in the library area (next to <LibFile.pro>)
- |	H) i) If src_help_md/md_help/<LibFile>.md exists, then:
+ |	H) If src_help_md/md_help/<LibFile>.md exists, then:
  |		1) If Overwrite==true, writes a new version of src_help_md/md_help/<LibFile>.md;
  |		2) If Overwrite\=true, skips this step
  |	I) If src_help_md/md_help/<LibFile>.md does not exist, then
@@ -152,7 +165,8 @@ do_libsetup([LibFile | LibFilesList], Overwrite)
  *!--------------------------------------------------------------------*/
 doc_lib_file(LibFile, Overwrite)
 	:-
-	lib_dev_path(LibraryFolderPath),
+	check_get_lib_path(LibraryFolderPath),
+%	lib_dev_path(LibraryFolderPath),
 	file_extension(FullName, LibFile, pro),
 	join_path([LibraryFolderPath, FullName], L_path),
 
@@ -182,7 +196,7 @@ doc_lib_file(LibFile, Overwrite)
 	write(PandocCmd),nl,
 
 	makePAsDs(DocList, PAsWithDescs),
-	idx_lib_page(Group, DocTitle, LibFile, PAsWithDescs).
+	idx_lib_page(Group, DocTitle, LibFile, Module, PAsWithDescs).
 	
 
 	%Move to library
@@ -304,8 +318,9 @@ all_white([0'	 | LCodes])
 
 head_comment_top([0'/, 0'* | L])
 	:-
-	all_equals(L).
-
+	cross_equals(L, End),
+	(End ==[] -> true ; End == [0'*]).
+	
 all_equals([]).
 all_equals([0'= | L])
 	:-
@@ -598,7 +613,7 @@ write_md(LibFile, Module, DocList, DocTitle, Group, Md_path, Overwrite)
 			printf(OS, 'File: %t already exists;\nRefusing to overwrite.\n',[Md_path]),
 			printf(OS, 'Displaying generated MD file on console:\n\n', [])
 			;
-			true
+			open(Md_path, write, OS)
 		)
 	),
 	sort(DocList, SortedDocList),
@@ -620,7 +635,13 @@ assemblePreds([d(PA, Form, Summary, Desc) | DocList], [p(PA,DescAtom) | Preds],
 		insert_spaces(Summary, SpacedSummary),
 		catenate(SpacedSummary, DescAtom)
 	),
-	mdDesc(PA, Desc, FullDesc),
+	(Desc == [] ->
+		SD = Summary,
+		Desc0 = [SD]
+		;
+		Desc0 = Desc
+	),
+	mdDesc(PA, Desc0, FullDesc),
 	assemblePreds(DocList, Preds, Forms, Descs).
 
 mdDesc(PA, [Desc1 | RestDesc], [DL1 | RestFullDesc])
@@ -654,11 +675,13 @@ outDesc([DL | Desc], OS)
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
 
-idx_lib_page(Group, Title, FileName, PAsWithDescs)
+idx_lib_page(Group, Title, FileName, Module, PAsWithDescs)
 	:-
 	src_helpPath(SrcHelpPath),
 		%% PkgFile is Full path to docsdb_alslib.pro
 	join_path([SrcHelpPath, 'docsdb_alslib.pro'], PkgFile),
 		%%%%---- From doctools.pro:
-	do_rew_idx(PkgFile, alslib, Group, Title, FileName, PAsWithDescs).
+
+%	do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs).
+	do_rew_idx(PkgFile, alslib, Group, Title, FileName, Module, PAsWithDescs).
 
