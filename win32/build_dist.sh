@@ -100,7 +100,7 @@ cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
 mkdir "$DISTDIR/alshelp"
 cp -pr $REFS/$HELP/* "$DISTDIR/alshelp"
-cp -p $REFS/als_help.html "$DISTDIR/als_help.html"
+cp -p $REFS/index.html "$DISTDIR/als_help.html"
 cp -p $REFS/alshelp.css "$DISTDIR/alshelp.css"
 cp -p $REFS/package_nav.html "$DISTDIR/package_nav.html"
 

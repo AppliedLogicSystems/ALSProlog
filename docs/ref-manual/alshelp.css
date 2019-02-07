@@ -1,22 +1,30 @@
+#mbar {
+        position: fixed;
+        top: 0em;
+        left: -0.5em;
+        height: 1.4em;
+        right: 0;
+}
 #package-view {
         position: fixed;
-        top: 0;
+        top: 1.4em;
         left: 0;
-        height: 8em;
-        width: 13em;
+        height: 8.6em;
+        width: 14em;
 }
 
 #toc-view {
         position: fixed;
-        top: 8em;
+        top: 12em;
         left: 0;
         bottom: 0;
-        width: 14em;
+        width: 13em;
+	height: 70%;
 }
 
 #content-view {
         position: fixed;
-        top: 0;
+        top: 1.4em;
         left: 14em;
         bottom: 0;
         right: 0;
