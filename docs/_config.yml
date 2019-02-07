@@ -31,11 +31,6 @@ header_pages:
 defaults:
   -
     scope:
-      path: ""
-    values:
-      layout: "default"
-  -
-    scope:
       path: "ref-manual/alshelp"
       type: "pages"
     values:
