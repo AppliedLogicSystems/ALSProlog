@@ -1,8 +1,5 @@
 ---
 title: 'get_cwd/1'
-package: core_prolog
-group: file_system
-module: builtins
 predicates:
 - {sig: 'canon_path/2', desc: 'canonicalizes a path name'}
 - {sig: 'change_cwd/1', desc: 'change the current working directory'}
@@ -14,69 +11,85 @@ predicates:
 ---
 
 ## FORMS
+```
+canon_path(SrcPath,CanonPath)
 
-`canon_path( , )`
+change_cwd(NewDir)
 
-`change_cwd( )`
+filename_equal(Name1, Name2)
 
-`filename_equal( , )`
+getDirEntries(Path, FilePattern, FilesList)
 
-`getDirEntries( , , )`
+get_cwd(Path)
 
-`get_cwd( )`
+must_exist_file(FileName)
 
-`must_exist_file( )`
-
-`remove_file( )`
-
-
+remove_file(FileName)
+```
 ## DESCRIPTION
 
+**`canon_path/2`** If `SrcPath` is a path name, either to a file or to a directory,
+    `CanonPath` is a canonicalized version of that path name, in the
+    sense that all symbolic links  in the path (to either subdirs
+    or the file at the end) are dereferenced out.
 
-**`canon_path/2`**  
-
-
-**`change_cwd/1`**  
-
-
-**`filename_equal/2`**  
-
-
-**`getDirEntries/3`**  
+**`change_cwd/1`** If `NewDir` is a (quoted) atom representing an existing
+    path in the filesystem, this predicates changes the 
+    current working directory being used by the program
+    to become `NewDir`.  Under DOS or Windows, this won't change the drive. 
 
 
-**`get_cwd/1`**  
+**`filename_equal/2`** Checks, in an OS portable way, whether or not `Name1` and `Name2`
+    specify the same file.
 
 
-**`must_exist_file/1`**  
+**`getDirEntries/3`** If Path is a (quoted) atom representing a path to a
+    folder (directory) in the file system, and if FilePattern
+    is a pattern (possibly using *), then FilesList is the
+    list of all files in folder Path (possibly including subfolders)
+    which match FilePattern. 
 
 
-**`remove_file/1`**  
+**`get_cwd/1`** Obtains the current working directory being used by the program
+    as a quoted atom, and unifies it with `Path`. Under DOS or Windows, the drive is included.
+
+
+**`must_exist_file/1`** If FileName is a (quoted) atom representing a possible entry
+    in the file system, calls exists_file/1 to determine if FileName exists.  If FileName
+    does not exist, raises a system error (while exists_file/1 simply fails). 
+
+
+**`remove_file/1`** If FileName is a (quoted) atom naming a file in the
+    current working directory, removes that file. 
 
 
 ## EXAMPLES
 
 ```
-1st example
-```
+?- get_cwd(Path).
 
-```
-2nd example
+Path='/Users/ken' 
+
+yes.
+?- change_cwd('./Documents').
+
+yes.
+?- get_cwd(Path).
+
+Path='/Users/ken/Documents' 
+
+yes.
+?- getDirEntries('./', 'b*', FilesList).
+
+FilesList=[bibliographies,'bird-of-prey.jpg','bp-sageMath.pdf'] 
+
+yes.
+
+?-  must_exist_file('./zpper.foo').
+Error: System error: must_exist_file('./zpper.foo')
+- must_exist_file: './zpper.foo'
+- Throw pattern: error(system_error,[must_exist_file('./zpper.foo')])
 ```
 
 ## ERRORS
 
-Errors text...
-
-## NOTES
-
-Notes text...
-
-## SEE ALSO
-
-- `F/N1`
-- `G/N2`
-- [Bowen 91, 7.6 ]
-- [Sterling 86, 9.2 ]
-- [Bratko 86, 7.2 ]
-- [Clocksin 81, 6.5 ]

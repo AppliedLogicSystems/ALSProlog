@@ -265,7 +265,9 @@ strip_last([H | PathList], [H | ParPathList])
  |
  |	- change the current working directory
  |
- |	Changes the current working directory being used by the program
+ |	If NewDir is a (quoted) atom representing an existing
+ |	path in the filesystem, this predicates changes the 
+ |	current working directory being used by the program
  |	to become NewDir (which must be an atom). Under DOS, this won't 
  |	change the drive.
  *!--------------------------------------------------------------*/
@@ -283,8 +285,9 @@ change_cwd(Path)
  |
  |	- returns the current working directory
  |
- |	Returns the current working directory being used by the program
- |	as a quoted atom.  Under DOS, the drive is included.
+ |	Obtains the current working directory being used by the program
+ |	as a quoted atom, and unifies it with Path. 
+ | 	Under DOS or Windows, the drive is included.
  *!--------------------------------------------------------------*/
 get_cwd(Path)
 	:-
@@ -300,8 +303,8 @@ get_cwd(Path)
  |
  |	- removes a file from the current working directory
  |
- |	If FileName is an atom (possibly quoted) naming a file in
- |	the current working directory, removes that file.
+ |	If FileName is a (quoted) atom naming a file in the 
+ |	current working directory, removes that file.
  *!--------------------------------------------------------------*/
 
 remove_file(FileName)
@@ -349,10 +352,16 @@ mod_lc_eq_chrs(C1, C2)
 
 /*!--------------------------------------------------------------
  | 	getDirEntries/3
- | 	getDirEntries(Path, FilePattern, FirstResult)
+ | 	getDirEntries(Path, FilePattern, FilesList)
  | 	getDirEntries(+, +, -)
  |
- |	- returns the file in a directory which matches a pattern
+ |	- returns a list of files in a directory matching a pattern
+ |
+ |	If Path is a (quoted) atom representing a path to a
+ |	folder (directory) in the file system, and if FilePattern
+ |	is a pattern (possibly using *), then FilesList is the
+ |	list of all files in folder Path (possibly including subfolders)
+ |	which match FilePattern.
  *!--------------------------------------------------------------*/
 getDirEntries(Path, FilePattern, FirstResult)
 	:-
@@ -363,10 +372,15 @@ getDirEntries(Path, FilePattern, FirstResult)
 
 /*!--------------------------------------------------------------
  |	must_exist_file/1
- |	must_exist_file(File)
+ |	must_exist_file(FileName)
  |	must_exist_file(+)
  |
  |	- raises a system_error if exists_file fails
+ |
+ |	If FileName is a (quoted) atom representing a possible entry
+ |	in the file system, calls exists_file/1 to determine if 
+ |	FileName exists.  If File does not exist, raises a system 
+ |	error (while exists_file/1 simply fails).
  *!--------------------------------------------------------------*/
 must_exist_file(File)
 	:- exists_file(File), !.
