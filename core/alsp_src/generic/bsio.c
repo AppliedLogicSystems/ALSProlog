@@ -1248,9 +1248,9 @@ sio_file_open()
 #elif   defined(MSWin32)
     if ((SIO_FD(buf) = MSL_open_patch((char *)filename, flags | O_BINARY)) == -1)
 #elif defined(__GO32__) || defined(OS2)
-    if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0777)) == -1)
+    if ((SIO_FD(buf) = open(filename, flags|O_BINARY, 0666)) == -1)
 #elif defined(UNIX)
-    if ((SIO_FD(buf) = open((char *)filename, flags|O_BINARY, 0777)) == -1)
+    if ((SIO_FD(buf) = open((char *)filename, flags|O_BINARY, 0666)) == -1)
 #else
 #error
 #endif
