@@ -25,13 +25,19 @@ exclude:
   - src_help_md
 
 header_pages:
- - about.md
- - docs.md
+  - docs/index.md
+  - about.md
+
+ref_packages:
+  - Core Prolog
+  - alslib
+  - C Interface
+  - ALSDev
 
 defaults:
   -
     scope:
-      path: "ref-manual/alshelp"
+      path: "docs/ref"
       type: "pages"
     values:
       reference: true
