@@ -85,6 +85,12 @@ test_info(read_html_tokens_test, read_examp_toks, user, read_toks,
 test_info(parse_examples_html_test, parse_examples_html, user, parse_html, 
 	'parse pxml terms from file versions of example.com and sample_awstats.html').
 
+test_info(library_strings_test, strings_test, user, test_strings_lib,
+	'tests of string utility functions.').
+
+test_info(library_miscatom_test, miscatom_test, user, test_miscatom_lib,
+	'test of miscellaneous atom-related predicates').
+
 test_info(testeoln, testeoln, user, test,
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').

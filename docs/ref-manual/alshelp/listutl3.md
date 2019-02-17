@@ -8,6 +8,8 @@ predicates:
 - {sig: 'check_default_del/5', desc: 'looks up a tagged equation on a List, and deletes it'}
 - {sig: 'encode_list/3', desc: 'encodes the elements of a list with provided codes'}
 - {sig: 'flatten/2', desc: 'flattens a nested list'}
+- {sig: 'insert_item_in_list/3', desc: 'interleaves arbitrary term  between elements of a list'}
+- {sig: 'insert_spaces/2', desc: 'interleaves quoted blank between elements of a list'}
 - {sig: 'is_length/2', desc: 'invertible length predicate'}
 - {sig: 'mangle_change_tagged/3', desc: 'destructively changes the value of a tagged eqn'}
 - {sig: 'merge_in_list/3', desc: 'merges two list together'}
@@ -30,6 +32,10 @@ predicates:
 `encode_list(Items, Codes, CodedItems)`
 
 `flatten(List, FlatList)`
+
+`insert_item_in_list(In_List, Item, Out_List)`
+
+`insert_spaces(In_List, Out_List)`
 
 `is_length(List, N)`
 
@@ -90,6 +96,14 @@ predicates:
 **`is_length/2`** List is of length N - works in both directions in the sense  
     that either List or N can be uninstantiated with the other  
     variable of correct type, and is_length(List, N) will succeed.  
+
+**`insert_item_in_list/3`** If In_List is a list of arbitrary terms, and Item is a term,
+    then Out_List is that list obtained from In_List by interleaving
+    Item between each pair of items of In_List.
+
+i**`insert_spaces/2`** If In_List is a list of arbitrary terms, then Out_List is that
+    list obtained from In_List by interleaving ' '  between each
+    pair of items of In_List.
 
 **`mangle_change_tagged/3`** If Plist is a list of tagged equations, Tag is a tag,  
     and NewValue is an arbitrary prolog term, then:  

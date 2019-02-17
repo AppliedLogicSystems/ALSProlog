@@ -29,10 +29,6 @@ export characteristic_files/3.
 export possible_dir_for/4.
 export flatten_ws_lists/2.
 export flatten_to_atom/2.
-export cat_together_seplines/2.
-export cat_together_spaced/2.
-export prefix_dir/3.
-export prefix_to/3.
 
 /*!-----------------------------------------------------------------------
  |	general_os/3
