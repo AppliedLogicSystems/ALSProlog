@@ -1,6 +1,6 @@
 /*======================================================================
  |			listutl1.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
  |		Group: Lists
  |		DocTitle: list_diff/3
  |		-- Various algebraic list predicates
@@ -166,7 +166,7 @@ union([],B, B) :-!.
 union(A,[], A) :-!.
 union(A,B, AuB)
    :-
-   union0(B,A,AuB).
+   union0(A,B,AuB).
 
 union0([],A,A).
 union0([X | RestB],A,[X | RestAuB])

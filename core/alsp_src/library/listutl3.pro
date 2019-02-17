@@ -1,6 +1,6 @@
 /*======================================================================
  |			listutl3.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
  |		Group: Lists
  |		DocTitle: number_list/3
  |		-- Miscellaneous list predicates
@@ -23,6 +23,8 @@ export subst_tagged/4.
 export struct_lookup_subst/4.
 export merge_tagged_lists/3.
 export merge_in_list/3.
+export insert_item_in_list/3.
+export insert_spaces/2.
 
 /*!---------------------------------------------------------------------
  |	nobind_member/2
@@ -401,5 +403,38 @@ merge_in_list([Item | Left], Right, Result)
 merge_in_list([Item | Left], Right, [Item | Result])
 	:-
 	merge_in_list(Left, Right, Result).
+
+/*!---------------------------------------------------------------------
+ |	insert_item_in_list/3
+ |	insert_item_in_list(In_List, Item, Out_List)
+ |	insert_item_in_list(+, +, -).
+ |
+ | 	- interleaves an arbitrary term  between elements of a list
+ |
+ |	If In_List is a list of arbitrary terms, and Item is a term,
+ |	then Out_List is that list obtained from In_List by interleaving
+ |	Item between each pair of items of In_List.
+ *!--------------------------------------------------------------------*/
+insert_item_in_list([], _, []).
+insert_item_in_list([Element], Item, [Element])
+	:-!.
+insert_item_in_list([Element | RestIn_List], Item, [Element, Item | RestOut_List])
+	:-
+	insert_item_in_list(RestIn_List, Item, RestOut_List).
+
+/*!---------------------------------------------------------------------
+ |	insert_spaces/2
+ |	insert_spaces(In_List, Out_List)
+ |	insert_spaces(+, -).
+ |
+ | 	- interleaves a quoted blank between elements of a list
+ |
+ |	If In_List is a list of arbitrary terms, then Out_List is that 
+ |	list obtained from In_List by interleaving ' '  between each 
+ |	pair of items of In_List.
+ *!--------------------------------------------------------------------*/
+insert_spaces(In_List, Out_List)
+	:-
+	insert_item_in_list(In_List, ' ', Out_List).
 
 endmod.

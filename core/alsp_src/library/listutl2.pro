@@ -1,6 +1,6 @@
 /*======================================================================
  |			listutl2.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
  |		Group: Lists
  |		DocTitle: nth_tail/4
  |		-- Various positional list predicates

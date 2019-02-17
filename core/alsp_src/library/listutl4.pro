@@ -1,6 +1,6 @@
 /*======================================================================
  |			listutl4.pro
- |	Copyright (c) 1996 Applied Logic Systems, Inc.
+ |	Copyright (c) 1996-2019 Applied Logic Systems, Inc.
  |		Group: Lists
  |		DocTitle: split_ll_by_blank/3
  |		-- Miscellaneous list predicates
