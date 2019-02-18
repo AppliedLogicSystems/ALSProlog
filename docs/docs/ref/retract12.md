@@ -101,8 +101,8 @@ As the last call to `listing/1` shows, there are no more heroes left in the data
 - `abolish/1`  
 `clause/1`
 
-- [Bowen 91, 7.3]
-- [Clocksin 81, 6.4]
-- [Bratko 86, 7.4]  
-- [Sterling 86, 12.2]
+- {% include book.md id="bowen91"    sec="7.3" %}
+- {% include book.md id="clocksin81" sec="6.4" %}
+- {% include book.md id="bratko86"   sec="7.4" %}
+- {% include book.md id="sterling86" sec="12.2" %}
   

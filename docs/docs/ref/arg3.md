@@ -36,7 +36,7 @@ If `Nth` is not an integer greater than `0` and less than or equal to the arity 
 - `functor/3`  
 `=../2`
 
-- [Bowen 91, 7.6]
-- [Sterling 86, 9.2]
-- [Bratko 86, 7.2]
-- [Clocksin 81, 6.5]
+- {% include book.md id="bowen91"    sec='9.1' %}
+- {% include book.md id="sterling86" sec='9.2' %}
+- {% include book.md id="bratko86"   sec='7.2' %}
+- {% include book.md id="clocksin81" sec='6.5' %}

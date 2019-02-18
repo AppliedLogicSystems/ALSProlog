@@ -184,5 +184,5 @@ The file `user` is special. When `user` is consulted or reconsulted, the input c
 
 ## SEE ALSO
 
-- [Bratko 86, 6.5]
-- [Clocksin 81, 6.1]
+- {% include book.md id="bratko86"   sec="6.5" %}
+- {% include book.md id="clocksin81" sec="6.1" %}

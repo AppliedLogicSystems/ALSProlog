@@ -23,4 +23,4 @@ yes.
 ## SEE ALSO
 
 - `fail/0`
-- [Clocksin 81, 6.2]
+- {% include book.md id="clocksin81" sec="6.2" %}

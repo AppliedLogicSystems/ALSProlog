@@ -32,6 +32,6 @@ loop
 
 - `fail/0`
 
-- [Sterling 86, 12.5]
-- [Bratko 86, 7.5]
-- [Clocksin 81, 6.6]
+- {% include book.md id="sterling86" sec="12.5" %}
+- {% include book.md id="bratko86"   sec="7.5" %}
+- {% include book.md id="clocksin81" sec="6.6" %}

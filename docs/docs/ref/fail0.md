@@ -22,5 +22,5 @@ no.
 
 - `true/0`
 
-- [Bowen 91, 7.1]
-- [Clocksin 81, 6.2]
+- {% include book.md id="bowen91"    sec="7.1" %}
+- {% include book.md id="clocksin81" sec="6.2" %}

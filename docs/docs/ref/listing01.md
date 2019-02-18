@@ -33,4 +33,4 @@ To list all of the clauses in the `module dairy`, you could submit the goal :
 ```
 ## SEE ALSO
 
-- [Clocksin 81, 6.4]
+- {% include book.md id="clocksin81" sec="6.4" %}

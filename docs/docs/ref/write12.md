@@ -199,7 +199,7 @@ T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
 - `op/3`
 - `tell/1`
 - User Guide (Prolog I/O)
-- [Bowen 91, 7.8]
-- [Clocksin 81, 6.9]
-- [Sterling 86, 12.1]
-- [Bratko 86, 6.2.1]
+- {% include book.md id="bowen91"    sec="7.8" %}
+- {% include book.md id="clocksin81" sec="6.9" %}
+- {% include book.md id="sterling86" sec="12.1" %}
+- {% include book.md id="bratko86"   sec="6.2.1" %}

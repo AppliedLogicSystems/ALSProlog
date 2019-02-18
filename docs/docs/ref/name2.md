@@ -56,8 +56,8 @@ We recommend the use of `atom_chars/2` and `number_chars/2` instead of `name/2`.
 `term_codes/2`
 
 - `User Guide (Syntax of ALS Prolog)`  
-- [Bowen 91, 7.8]  
-- [Clocksin 81, 6.5]  
-- [Bratko 86, 6.4]  
-- [Sterling 86, 12.1]
+- {% include book.md id="bowen91"    sec="7.8" %}
+- {% include book.md id="clocksin81" sec="6.5" %}
+- {% include book.md id="bratko86"   sec="6.4" %}
+- {% include book.md id="sterling86" sec="12.1" %}
 

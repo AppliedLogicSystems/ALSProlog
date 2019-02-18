@@ -73,7 +73,7 @@ no.
 
 - `!/0`
 - `->/2`
-- [Bowen 91, 7.1]
-- [Sterling 86, 10.4]
-- [Bratko 86, 2.3]
-- [Clocksin 81, 6.7]
+- {% include book.md id="bowen91"    sec="7.1" %}
+- {% include book.md id="sterling86" sec="10.4" %}
+- {% include book.md id="bratko86"   sec="2.3" %}
+- {% include book.md id="clocksin81" sec="6.7" %}

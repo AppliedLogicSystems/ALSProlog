@@ -42,6 +42,6 @@ In the `trace/1` case, the `Goal` will be single stepped according to the debugg
 - `spy/1`
 - `nospy/0`
 - `leash/0`
-- [Bowen 91, 4.5]
-- [Bratko 86, 8.4]
-- [Clocksin 81, 8.3]
+- {% include book.md id="bowen91"    sec="4.5" %}
+- {% include book.md id="bratko86"   sec="8.4" %}
+- {% include book.md id="clocksin81" sec="8.3" %}

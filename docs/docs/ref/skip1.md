@@ -27,4 +27,4 @@ yes.
 
 ## SEE ALSO
 
-- [Clocksin 81, 6.9]
+- {% include book.md id="clocksin81" sec="6.9" %}

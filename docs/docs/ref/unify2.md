@@ -61,7 +61,7 @@ Note that in the next to last example, the depth of the printing is much deeper 
 - `\==/2`
 - `eq`
 - `noneq`
-- [Bowen 91, 4.6]
-- [Bratko 86, 2.7]
-- [Clocksin 81, 6.8]
-- [Sterling 86, 4.1]
+- {% include book.md id="bowen91"    sec="4.6" %}
+- {% include book.md id="bratko86"   sec="2.7" %}
+- {% include book.md id="clocksin81" sec="6.8" %}
+- {% include book.md id="sterling86" sec="4.1" %}

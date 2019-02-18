@@ -39,7 +39,7 @@ yes.
 - `arg/3`  
 `mangle/3`
 
-- [Bowen 91, 7.6]
-- [Clocksin 81, 6.5]
-- [Bratko 86, 7.2]
-- [Sterling 86, 9.2]
+- {% include book.md id="bowen91"    sec="7.6" %}
+- {% include book.md id="clocksin81" sec="6.5" %}
+- {% include book.md id="bratko86"   sec="7.2" %}
+- {% include book.md id="sterling86" sec="9.2" %}

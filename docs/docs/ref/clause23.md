@@ -80,6 +80,6 @@ If `Ref` is not instantiated to a database reference and Head is uninstantiated,
 
 ## SEE ALSO
 
-- [Bowen 91, 7.3]
-- [Sterling 86, 12.2]
-- [Clocksin 81, 6.4]
+- {% include book.md id="bowen91"    sec="7.3" %}
+- {% include book.md id="sterling86" sec="12.2" %}
+- {% include book.md id="clocksin81" sec="6.4" %}

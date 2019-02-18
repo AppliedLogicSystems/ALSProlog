@@ -91,7 +91,7 @@ yes.
 ```
 ## SEE ALSO
 
-- [Bowen 91, 7.9]
-- [Sterling 86, 8.1]
-- [Bratko 86, 3.3]
-- [Clocksin 81, 5.5]
+- {% include book.md id="bowen91"    sec="7.9" %}
+- {% include book.md id="sterling86" sec="8.1" %}
+- {% include book.md id="bratko86"   sec="3.3" %}
+- {% include book.md id="clocksin81" sec="5.5" %}

@@ -39,7 +39,7 @@ no.
 
 ## SEE ALSO
 
-- [Bowen 91, 7.6]
-- [Bratko 86, 7.1.1]
-- [Sterling 86, 10.1]
+- {% include book.md id="bowen91"    sec="7.6" %}
+- {% include book.md id="bratko86"   sec="7.1.1" %}
+- {% include book.md id="sterling86" sec="10.1" %}
 

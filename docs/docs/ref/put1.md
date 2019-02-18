@@ -32,6 +32,6 @@ If `Char` is bound to an integer within the range 0 -- 255, `put/1` will write o
 - `nl/0`  
 
 `User Guide (Prolog I/O)`  
-- [Bowen 91, 7.8]  
-- [Clocksin 81, 5.2]  
-- [Bratko 86, 6.3]
+- {% include book.md id="bowen91"    sec="7.8" %}
+- {% include book.md id="clocksin81" sec="5.2" %}
+- {% include book.md id="bratko86"   sec="6.3" %}

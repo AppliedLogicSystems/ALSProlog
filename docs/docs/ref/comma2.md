@@ -59,5 +59,5 @@ Note that the parentheses around the argument to call/1 are to keep the parser f
 `:/2`  
 `;/2`
 
-- [Bratko 86, 2.3]
-- [Clocksin 81, 6.7]`
+- {% include book.md id="bratko86"   sec="2.3" %}
+- {% include book.md id="clocksin81" sec="6.7" %}`

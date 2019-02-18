@@ -28,6 +28,6 @@ nospy(Module : Name/Arity)
 ## SEE ALSO
 
 - Tools (Using the Debugger)
-- [Bowen 91, 6.5]
-- [Clocksin 81, 6.13]
-- [Bratko 86, 8.4]
+- {% include book.md id="bowen91"    sec="6.5" %}
+- {% include book.md id="clocksin81" sec="6.13" %}
+- {% include book.md id="bratko86"   sec="8.4" %}

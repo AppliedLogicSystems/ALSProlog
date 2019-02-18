@@ -51,4 +51,4 @@ yes.
 ## SEE ALSO
 
 - `compare/3`
-- [Bowen 91, 7.4]
+- {% include book.md id="bowen91"    sec="7.4" %}

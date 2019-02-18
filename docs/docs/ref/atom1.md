@@ -51,7 +51,7 @@ no.
 
 - `ar/1`  
 `nonvar/1`
-- [Bowen 91, 7.6]
-- [Sterling 86, 9.1]
-- [Bratko 86, 7.1]
-- [Clocksin 81, 6.3]
+- {% include book.md id="bowen91"    sec="7.6" %}
+- {% include book.md id="sterling86" sec="9.1" %}
+- {% include book.md id="bratko86"   sec="7.1" %}
+- {% include book.md id="clocksin81" sec="6.3" %}

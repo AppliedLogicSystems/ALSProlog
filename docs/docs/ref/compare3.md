@@ -99,4 +99,4 @@ in the standard order, because the second structure has a greater arity than the
 `@</2`  
 `sort/2`
 
-- [Bowen 91, 7.4]
+- {% include book.md id="bowen91"    sec="7.4" %}

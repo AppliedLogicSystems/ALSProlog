@@ -109,6 +109,6 @@ ALS Prolog complies to the ISO Prolog Standard regarding errors. A calculation e
 
 ## SEE ALSO
 
-- [Bowen 91, 7.7]
-- [Clocksin 81, 6.11]
-- [Bratko 86, 3.4]
+- {% include book.md id="bowen91"    sec="7.7" %}
+- {% include book.md id="clocksin81" sec="6.11" %}
+- {% include book.md id="bratko86"   sec="3.4" %}

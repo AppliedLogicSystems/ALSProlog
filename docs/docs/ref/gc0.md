@@ -21,4 +21,4 @@ yes.
 ```
 ## SEE ALSO
 
-- [Sterling 86, 13]
+- {% include book.md id="sterling86" sec="13" %}

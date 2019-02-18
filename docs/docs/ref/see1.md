@@ -59,6 +59,6 @@ firstTerm(File, Term) :-
 - `close/1`
 - `close/2`
 - User Guide (Prolog I/O)  
-- [Bowen 91, 7.8]  
-- [Clocksin 81, 5.4]  
-- [Bratko 86, 6.1]
+- {% include book.md id="bowen91"    sec="7.8" %}
+- {% include book.md id="clocksin81" sec="5.4" %}
+- {% include book.md id="bratko86"   sec="6.1" %}

@@ -65,7 +65,7 @@ yes.
 - `!/0`  
 `not/1`
 
-- [Bowen 91, 7.1]
-- [Sterling 86, 11]
-- [Bratko 86, 5.1]
-- [Clocksin 81, 4.2]
+- {% include book.md id="bowen91"    sec="7.1" %}
+- {% include book.md id="sterling86" sec="11" %}
+- {% include book.md id="bratko86"   sec="5.1" %}
+- {% include book.md id="clocksin81" sec="4.2" %}
