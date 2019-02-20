@@ -29,8 +29,7 @@ INSTALLATION DIRECTORY
 	README.md 		-- this file  
 	LICENSE.txt		-- Open Source Licence for ALS Prolog  
 	als-prolog-manual.pdf   -- Primary manual  
-	als_help.htm		-- Reference Help System entry (*)  
-	help/             	-- Reference Help System files  
+	docs/index.html		-- Documentation Help System entry (*)  
 	examples/		-- Sample Prolog programs  
 	alspro                 	-- ALS Prolog executable  
 	alsdir/           	-- Directory containing components used by the executables  
@@ -67,18 +66,11 @@ HELP SYSTEM
 ===========
 
 The current Reference Manual for ALS Prolog is implemented as an HTML-based HELP system.
-You will need a fairly recent version of a standard browser to read the help files.
-
-After installation is complete, the ALS Prolog HELP system consists of the files
-
-	als_help.html,  alshelp.css,  package_nav.html, 
-
-together with all files in the subfolder alshelp.
-	
+You will need a fairly recent version of a standard browser to read the help files.	
 
 To view the ALS Prolog Help system, simply open the file
 
-	als_help.html
+	docs/index.html
 
 in your browser.  
 

@@ -2,7 +2,7 @@
 title: Documentation
 ---
 
-## [User's Guide](guide)
+## [User's Guide](guide/)
 
 - **Language: Standard Part**
   - [1 The Syntax of ALS Prolog](guide/1-The-Syntax-of-ALS-Prolog)
@@ -32,6 +32,6 @@ title: Documentation
 - **ALS/Foreign Language Interface**
   - [21 Using the ALS Foreign Interface](guide/21-Using-the-ALS-Foreign-Interface)
 
-## [Reference Manual](ref)
+## [Reference Manual](ref/)
 
 {% include ref-packtoc.html %}

@@ -1,0 +1,10 @@
+# Override base configurations for docs-only local site
+
+title: "ALS Prolog Documentation"
+
+destination: ./_local_site
+
+safe: false
+
+header_pages:
+  - dummy.md
