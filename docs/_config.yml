@@ -2,9 +2,16 @@
 title: "ALS Prolog"
 url: "https://alsprolog.com"
 
+repository: "AppliedLogicSystems/ALSProlog"
+
 # Build settings
 markdown: kramdown
+theme: minima
 #permalink: pretty
+
+kramdown:
+  syntax_highlighter_opts:
+    default_lang: prolog
 
 # Enable as many error-checks as possible
 safe                : true
@@ -17,15 +24,20 @@ liquid:
 exclude:
   - src_help_md
 
+header_pages:
+  - docs/index.md
+  - about.md
+
+ref_packages:
+  - Core Prolog
+  - alslib
+  - C Interface
+  - ALSDev
+
 defaults:
   -
     scope:
-      path: ""
-    values:
-      layout: "default"
-  -
-    scope:
-      path: "ref-manual/alshelp"
+      path: "docs/ref"
       type: "pages"
     values:
       reference: true
