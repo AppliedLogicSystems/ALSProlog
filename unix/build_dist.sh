@@ -18,7 +18,7 @@ BIN=$ALS_PROLOG/core/unix/$ARCH
 LIB=$ALS_PROLOG/core/alsp_src/library
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
-REFS=$ALS_PROLOG/docs/_site/ref-manual
+DOCS=$ALS_PROLOG/docs/_local_site
 
 if test $# -ne 1
 then
@@ -39,7 +39,6 @@ MANUAL=als_man.pdf ; # standard manual is missing.
 REFMANUAL=ref_man.pdf ; 
 MANUALNAME=als-prolog-manual.pdf ;
 REFMANUALNAME=als-ref-manual.pdf ;
-HELP="alshelp" ;
 ;;
 esac
 
@@ -67,11 +66,7 @@ cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
-mkdir "$DISTDIR/alshelp"
-cp -pr $REFS/$HELP/* "$DISTDIR/alshelp"
-cp -p $REFS/index.html "$DISTDIR/als_help.html"
-cp -p $REFS/alshelp.css "$DISTDIR/alshelp.css"
-cp -p $REFS/package_nav.html "$DISTDIR/package_nav.html"
+cp -pr $DOCS "$DISTDIR/docs"
 cp -p "$ALS_PROLOG/core/alsp_src/doc/alspro.1" "$DISTDIR/alspro.1"
 
 

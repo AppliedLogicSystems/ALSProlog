@@ -188,12 +188,15 @@ BUNDLE ?= bundle
 
 docs :
 	cd $(CORE)/../docs && $(BUNDLE) install && $(BUNDLE) exec jekyll build
+	env BUNDLE=$(BUNDLE) $(CORE)/../docs/_build_local_docs.sh
 
 testdocs : docs
 	cd $(CORE)/../docs && $(BUNDLE) exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
 	--assume-extension --empty-alt-ignore _site
+	cd $(CORE)/../docs/_local_site && $(BUNDLE) exec htmlproofer \
+	--check-html --disable-external --empty-alt-ignore
 
 clean :
 	rm -f *.o rm *.d
