@@ -1,20 +1,24 @@
 {% comment %}
 
-Book Citations
+# Book Citations
 
 This include produces rich links to books based on book citation data files
 with optional search or page numbers.
 
 Required Arguments:
-  ID  - name of book's data (i.e. base name of data file)
-  SEC - section of book being references
+
+- `id`  - name of book's data (i.e. base name of data file)
+- `sec` - section of book being references
 
 Example Usage:
 
-{% include book.md id="bowen91" sec=9.1 %}
+```
+{% include book.md id="bowen91" sec="9.1" %}
+```
 
-Book data files (in _data dir) have the following structure:
+Book data files (in `_data` dir) have the following structure:
 
+```
 cite:
   short: <brief citation string like "Bowen 91">
   long: <one-line citation, suitable for link title attribute, etc>
@@ -25,6 +29,7 @@ url: <URL to book with query string suitable for search or page-link>
 sec2page:
   <section>: <page number>
   ...
+```
 
 {% endcomment -%}
 
