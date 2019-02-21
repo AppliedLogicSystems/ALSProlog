@@ -20,7 +20,8 @@ get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,Mod,CLInf
 	pbi_get_command_line(RawCommandLine),
 
 	%% get the command line, but ignore the image name
-	(RawCommandLine = [Image | CommandLine] ; CommandLine = []),
+	(RawCommandLine = [ImageName | CommandLine] ; CommandLine = []),
+ 	arg(4,CLInfo,ImageName),
 	!,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, Mod, CLInfo).
 

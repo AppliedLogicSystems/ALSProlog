@@ -126,7 +126,7 @@ kill_off([(P,A) | PL],Mod)
 
 final_message([], OutStream, true)
 	:-!,
-	printf(OutStream,'All Tests Were Successful !!\n',[]).
+	printf(OutStream,'All autotest Tests (Standard ALS examples & tsuite tests) Were Successful !!\n',[]).
 final_message(FailedTests, OutStream, fail)
 	:-
 	printf(OutStream, 'The following tests failed:\n\t%t\n', FailedTests).

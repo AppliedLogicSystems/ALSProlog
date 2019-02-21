@@ -115,7 +115,7 @@ TEST_DIR = $(SOURCE_DIR)/tests
 
 test: testrun
 
-testrun : curl_test command_line_test iso_test_suite test_suite
+testrun : curl_test test_app_image command_line_test iso_test_suite test_suite 
 
 curl_test: alspro
 	$(TEST_DIR)/tsuite/curl_test.sh ./alspro
@@ -125,6 +125,9 @@ command_line_test: alspro
 
 test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
+
+test_app_image: alspro
+	sh $(TEST_DIR)/tsuite/test_app_image.sh
 
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
