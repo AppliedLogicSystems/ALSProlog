@@ -21,12 +21,7 @@
 		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
 		<tr>
 		<td>
-			<a href="{{ppage.url}}"
-			title="{% if p.args -%}
-				{%- for a in p.args %}{{ a[1] }}{% unless forloop.last %}; {% endunless %}{% endfor %}
-			{%- else -%}
-				{{ p.desc }}
-			{%- endif -%}">
+			<a href="{{ppage.url}}">
 			{{ p.sig }}
 			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
 		</a>
