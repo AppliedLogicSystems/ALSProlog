@@ -45,3 +45,9 @@ defaults:
       group: Control
       module: builtins
       layout: "reference-page"
+  -
+    scope:
+      path: "docs/guide"
+      type: "pages"
+    values:
+      layout: "guide-page"

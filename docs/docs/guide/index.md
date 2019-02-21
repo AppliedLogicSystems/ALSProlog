@@ -1,6 +1,6 @@
 ---
 title: User's Guide
-layout: page
+layout: toc-page
 ---
 
 {% include_relative _Sidebar.md %}

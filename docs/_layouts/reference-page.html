@@ -2,6 +2,13 @@
 layout: default
 ---
 
+<nav>
+<a href="../">Docs</a>
+&gt; <a href="./">Reference</a>
+&gt; <a href="./#{{ page.package | slugify }}">{{ page.package | escape }}</a>
+&gt; <a href="./#{{ page.group | slugify }}">{{ page.group | escape }}</a>
+</nav>
+
 <h1>{{ page.title | escape }}</h1>
 <h3>Module: {{ page.module | escape }}</h3>
 
