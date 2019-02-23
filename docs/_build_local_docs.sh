@@ -47,6 +47,11 @@ fi
 # Fix Ref-Guide cross-links
 "${SED[@]}" 's/href="\.\.\/guide\/\([^#\/]*\)"/href="..\/guide\/\1.html"/' ref/*.html
 
+# Fix relative index links
+"${SED[@]}" 's/href="\(..*\)\/"/href="\1\/index.html"/' *.html */*.html
+"${SED[@]}" 's/href="\(..*\)\/#\(..*\)"/href="\1\/index.html#\2"/' *.html */*.html
+
+
 # Fix images links
 "${SED[@]}" 's/src="\/docs\/[^\/]*\//src="/' */*.html
 
