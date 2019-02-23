@@ -63,7 +63,7 @@ test-local : local
 
 ## Clean all generated files
 clean:
-	rm -rf Gemfile.lock _site _local_site
+	rm -rf Gemfile.lock _site _local_site .jekyll-metadata
 
 ## Display this help
 help:
