@@ -191,7 +191,7 @@ testdocs : docs
 	cd $(CORE)/../docs && $(BUNDLE) exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
-	--assume-extension --empty-alt-ignore _site
+	--empty-alt-ignore _site
 	cd $(CORE)/../docs/_local_site && $(BUNDLE) exec htmlproofer \
 	--directory-index-file noindex.html \
 	--check-html --disable-external --empty-alt-ignore
