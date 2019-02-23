@@ -4,11 +4,7 @@
 
 set -eux
 
-cd "$(dirname "$0")"
-
-${BUNDLE:-bundle} exec jekyll build --config _config.yml,_local_config.yml
-
-pushd _local_site
+cd "$(dirname "$0")/_local_site"
 
 # Replace top level with docs
 shopt -s extglob
@@ -35,5 +31,3 @@ fi
 # Fix relative index links
 "${SED[@]}" 's/href="\(..*\)\/"/href="\1\/index.html"/' *.html */*.html
 "${SED[@]}" 's/href="\(..*\)\/#\(..*\)"/href="\1\/index.html#\2"/' *.html */*.html
-
-popd

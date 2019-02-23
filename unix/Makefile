@@ -1,7 +1,8 @@
 all: standard
 
 core:
-	$(MAKE) -C ../core/unix all docs
+	$(MAKE) -C ../core/unix all
+	$(MAKE) -C ../docs all
 	cd ../foreign_sdk/unix ; ./build.sh
 
 odbc:
@@ -20,8 +21,9 @@ test: core
 	$(MAKE) -C ../core/unix test
 
 testdocs:
-	$(MAKE) -C ../core/unix testdocs
+	$(MAKE) -C ../docs test
 
 distclean:
 	$(MAKE) -C ../core/unix distclean
+	$(MAKE) -C ../docs clean
 	sh superclean.sh
