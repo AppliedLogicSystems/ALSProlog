@@ -187,7 +187,7 @@ clean :
 distclean: superclean
 
 superclean : clean
-	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS)
+	rm -fr alsdir examples alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS)
 	rm -rf $(SOURCE_DIR)/tests/iso_test_suite/*.tmp $(SOURCE_DIR)/tests/iso_test_suite/*.out *.log *.out foo* *.tmp
 
 -include *.d

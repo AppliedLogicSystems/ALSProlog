@@ -23,4 +23,4 @@ test: core
 distclean:
 	$(MAKE) -C ../core/win32 distclean
 	$(MAKE) -C ../docs clean
-	sh superclean.sh
+	sh ../unix/superclean.sh
