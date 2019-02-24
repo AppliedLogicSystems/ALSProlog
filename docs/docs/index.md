@@ -1,5 +1,6 @@
 ---
 title: Documentation
+regenerate: true
 ---
 
 ## [User's Guide](guide/)
