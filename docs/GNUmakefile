@@ -39,7 +39,7 @@ _local_site/index.html : Gemfile.lock $(source)
 	./_build_local_docs.sh
 
 ###########################################
-.PHONY : test test-site test-local
+.PHONY : test test-site test-local test-unused
 
 ## Test all markup and links
 test : test-site test-local
@@ -57,6 +57,12 @@ test-local : local
 	--directory-index-file noindex.html \
 	--check-html --disable-external --empty-alt-ignore \
 	_local_site
+
+## Test for un-reachable site files (needs `bundle exec jekyll serve`)
+test-unused :
+	TEMPDIR=$$(mktemp -d) ; \
+	wget --no-verbose --recursive --directory-prefix=$$TEMPDIR --no-host-directories http://127.0.0.1:4000 \
+	&& diff -ru _site $$TEMPDIR
 
 ###########################################
 .PHONY : clean help
