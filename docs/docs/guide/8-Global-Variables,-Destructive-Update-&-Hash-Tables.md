@@ -2,6 +2,10 @@
 ---
 
 # 8 Global Variables, Destructive Update & Hash Tables
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ALS Prolog provides a method of globally associating values with arbitrary terms
 (which occur on the heap).  The associations are immune to backtracking. That is,

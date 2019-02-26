@@ -2,6 +2,10 @@
 ---
 
 # 16 ALS IDE
+{:.no_toc}
+
+* TOC
+{:toc}
 
 The ALS Integrated Development Environment (IDE) provides a GUI-based developer-friendly setting for developing ALS Prolog programs. Start the ALS IDE by issuing alsdev
 in an appropriate command window. The IDE displays an initial spash screen

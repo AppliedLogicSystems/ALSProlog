@@ -2,6 +2,10 @@
 ---
 
 # 20 ALS Prolog - TclTk Interface
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ## 20.1 Introduction and Overview
 The interface between ALS Prolog and Tcl/Tk allows prolog programs to create,

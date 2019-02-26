@@ -2,6 +2,10 @@
 ---
 
 # 15 Packaging for Delivery
+{:.no_toc}
+
+* TOC
+{:toc}
 
 A typical complex ALS Prolog application involves the following elements:
 * the ALS Prolog system

@@ -2,6 +2,10 @@
 ---
 
 # 6 ObjectPro: Object Oriented Programming
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ALS ObjectPro is an object-oriented programming toolkit fully integrated with
 ALS Prolog. Unlike some other approaches to object-oriented programming in

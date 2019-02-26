@@ -2,6 +2,10 @@
 ---
 
 # 13 Using the Prolog Shell
+{:.no_toc}
+
+* TOC
+{:toc}
 
 13 TTY Development Environment
 The TTY Development interface for ALS Prolog is similar to the original DEC-10

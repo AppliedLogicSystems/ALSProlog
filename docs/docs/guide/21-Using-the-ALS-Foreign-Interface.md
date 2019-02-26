@@ -2,15 +2,11 @@
 ---
 
 # 21 Using the ALS Foreign Interface
+{:.no_toc}
 
-#### Contents:
-````
-Section 21.1 (A Simple Prolog Predicate in C)
-Section 21.2 (Writing Prolog Predicates in C)
-Section 21.3 (Further Considerations on Interfacing Foreign Predicates)
-Section 21.4 (Embedding ALS Prolog Programs in C)
-Section 21.5 (Manipulating C Data Structures from Prolog)
-````
+* TOC
+{:toc}
+
 The ALS Foreign Interface provides programmers with the ability to interface Prolog programs with programs written in other languages such as C. The immediate
 aspects of the interface are provided by a collection of C functions and constants
 which provide the basis for communication between Prolog programs and C programs. The communication method allows several styles of organization, ranging

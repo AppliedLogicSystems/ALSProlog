@@ -2,6 +2,10 @@
 ---
 
 # 10 Prolog I/O
+{:.no_toc}
+
+* TOC
+{:toc}
 
 Most programs need to communicate with the outside world. There are a wide variety of outside entities with which a program can communicate, ranging from the
 screen, keyboard, and files to other programs over networks. This section describes

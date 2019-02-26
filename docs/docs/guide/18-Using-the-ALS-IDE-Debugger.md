@@ -2,6 +2,10 @@
 ---
 
 # 18 Using the ALS IDE Debugger
+{:.no_toc}
+
+* TOC
+{:toc}
 
 Selecting the Debugger entry from the Tools menu causes the primary debugger
 window to appear::

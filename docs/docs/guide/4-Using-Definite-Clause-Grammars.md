@@ -2,6 +2,10 @@
 ---
 
 # 4 UsingDefinite Clause Grammars
+{:.no_toc}
+
+* TOC
+{:toc}
 
 Prolog is a very powerful tool for implementing parsers and compilers. The Definite Clause Grammar (DCG) notation provides a convenient means of exploiting
 this power by automatically translating grammar rules into Prolog clauses. ALS

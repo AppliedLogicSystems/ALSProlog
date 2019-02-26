@@ -2,6 +2,10 @@
 ---
 
 # 9 Freeze, Exceptions, Events, Interrupts, Signals
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ## 9.1 Freeze
 

@@ -2,6 +2,10 @@
 ---
 
 # 2 Prolog Source Code
+{:.no_toc}
+
+* TOC
+{:toc}
 
 Just like most other computer languages, Prolog allows you to store programs and
 data in text files. The builtin predicates consult/1, reconsult/1, read/1,

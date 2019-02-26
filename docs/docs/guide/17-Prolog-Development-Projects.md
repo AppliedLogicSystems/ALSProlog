@@ -2,6 +2,10 @@
 ---
 
 # 17 Prolog Development Projects
+{:.no_toc}
+
+* TOC
+{:toc}
 
 The ALS Prolog Development Environment (alsdev) supports a simple concept of
 development project which nonetheless, is quite useful. At it’s most elementary, a

@@ -2,6 +2,10 @@
 ---
 
 # 7 Working with Uninterned Atoms
+{:.no_toc}
+
+* TOC
+{:toc}
 
 Like most symbolic programming langauges, ALS Prolog implements atoms in
 two different ways:

@@ -2,6 +2,10 @@
 ---
 
 # 3 Modules
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ALS Prolog provides a module system to facilitate the creation and maintenance of
 large programs. The main purpose of the module system is to partition procedures

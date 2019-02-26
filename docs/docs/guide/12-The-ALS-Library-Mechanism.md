@@ -2,23 +2,13 @@
 ---
 
 # 12 The ALS Library Mechanism
+{:.no_toc}
+
+* TOC
+{:toc}
 
 The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called ’builtin’ and those which are called ’library’ is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
-### [Overview](#121-overview-of-the-als-library-mechanism-and-tools)
-### [Algebraic List Predicates](#122-lists-algebraic-list-predicates-listutl1pro)
-### [Positional List Predicates](#positional-list-predicates)
-### [Miscelaneous List Predicates](#124-lists-miscellaneous-list-predicates-listutl3pro)
-### [Tree Predicates (avl.pro)](#125-tree-predicates-avlpro)
-### [Miscellaneous Predicates](#126-miscellaneous-predicates-commalpro)
-### [I/O Predicates](#127-io-predicates-iolayerpro)
-### [Control Predicates](#128-control-predicates-lib_ctlpro)
-### [Prolog Database Predicates](#129-prolog-database-predicates-misc_dbpro)
-### [Miscellaneous I/O Predicates](#1210-miscellaneous-io-predicates-misc_iopro)
-### [Simple I/O Predicates](#1211-simple-io-predicates-simpliopro)
-### [String Manipulation Predicates](#1212-string-manipulation-predicates-stringspro)
-### [Extensible List Utilities](#1213-extensible-list-utilities-xlistspro)
-### [CREF: Cross-Referencer](#1214-cref-cross-referencer-crefpro)
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools.
 

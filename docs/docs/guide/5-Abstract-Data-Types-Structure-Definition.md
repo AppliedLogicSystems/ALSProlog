@@ -2,6 +2,10 @@
 ---
 
 # 5 Abstract Data Types: Structure Definition
+{:.no_toc}
+
+* TOC
+{:toc}
 
 One powerful modern programming idea is the use of abstract data types to hide the
 inner details of the implementation of data types. The arguments in favor of this
