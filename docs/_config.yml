@@ -22,6 +22,10 @@ liquid:
   strict_variables  : false
 
 exclude:
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - GNUmakefile
   - src_help_md
 
 header_pages:
