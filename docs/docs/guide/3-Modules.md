@@ -26,13 +26,13 @@ module parser.
 module compiler.
 ```
 Following a module declaration, all clauses will be asserted into that module using
-assertz until the end of the module or until another module declaration is encountered. In addition, any commands that appear within the scope of the module will be executed from inside that module. The end of a module is signified by an endmod. The following example defines the predicate test/0 in two different modules. The definitions don’t conflict with each other because they appear in different modules.
+assertz until the end of the module or until another module declaration is encountered. In addition, any commands that appear within the scope of the module will be executed from inside that module. The end of a module is signified by an endmod. The following example defines the predicate test/0 in two different modules. The definitions don't conflict with each other because they appear in different modules.
 ```
 module mod1.
-test :- write(’Module #1’), nl.
+test :- write('Module #1'), nl.
 endmod.
 module mod2.
-test :- write(’Module #2’), nl.
+test :- write('Module #2'), nl.
 endmod.
 ```
 Clauses which are not contained inside an explicit module declaration are added to
@@ -85,7 +85,7 @@ Whenever the Prolog system tries to call a procedure, it first looks for that pr
 
 If the called procedure p/n is not defined in a module, M, from which it is called, then the system will search the use list of M (see 3.3.2 below) for a module M1 that exports
 the procedure (p/n) in question. If such a module M1 is found, then all occurrences
-of the procedure p/n in the calling module M will be ‘forwarded’ to the procedure
+of the procedure p/n in the calling module M will be 'forwarded' to the procedure
 p/n defined in the module M1. After the procedure p/n has been forwarded from
 module M to another module M1, all future calls to procedure p/n from within M
 will be automatically routed to the proper place in M1 without further intervention
@@ -108,7 +108,7 @@ export translate/3.
 export reduce/2, compose/3.
 export a/0, b/0, c/0.
 ```
-Export declarations can occur anywhere within a module. However, one good programming style dictates that procedures are exported just before they’re defined.
+Export declarations can occur anywhere within a module. However, one good programming style dictates that procedures are exported just before they're defined.
 Another stylistic alternative is to group all the export declarations for a module together in the beginning of the module. The only restriction is that visible procedures must be exported before they can be called from another module. This can happen during the execution of a command or query inside a consult.
 
 ### 3.3.2 Use Lists
@@ -129,7 +129,7 @@ for the module M in which the use declaration occurs. If there is more than one
 module in a given use declaration (as in the first example above), then the listed
 modules are added to the front of the existing use list in reverse order from their
 original order in the use declaration. During the forwarding process, use lists are
-always searched from left to right. This means that the most recently ‘used’ modules (i.e., those whose use declaration was made most recently) will be searched first. Here’s an example of a module with use declarations building a use list:
+always searched from left to right. This means that the most recently 'used' modules (i.e., those whose use declaration was made most recently) will be searched first. Here's an example of a module with use declarations building a use list:
 ```
 module graphics.
 use bitOps, splineOps.
@@ -160,7 +160,7 @@ module automatically uses every other module (in the order the modules are actua
 
 ## 3.5 References to Specific Modules
 
-In addition to the export and use list conventions, the module system allows access to specific modules via the operator :/2, whose left hand argument is interpreted as the name of a module, and whose right hand argument is the goal to be called. The access is independent of export declarations. In the following example, the procedure zip in module1 specifically references the procedure bar in module2, even though bar isn’t exported from module2:
+In addition to the export and use list conventions, the module system allows access to specific modules via the operator :/2, whose left hand argument is interpreted as the name of a module, and whose right hand argument is the goal to be called. The access is independent of export declarations. In the following example, the procedure zip in module1 specifically references the procedure bar in module2, even though bar isn't exported from module2:
 ```
 module module1.
 zip :- module2:bar.
@@ -170,7 +170,7 @@ module module2.
 bar :- true.
 endmod.
 ```
-As this example demonstrates, the export declarations of a module aren’t sacred
+As this example demonstrates, the export declarations of a module aren't sacred
 and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explict references be used only when there are compelling reasons for
 avoiding the use list and export declaration mechanism.
 
@@ -218,7 +218,7 @@ the two modules are processed independently.
 
 ## 3.7 Facilities for Manipulating Modules
 
-When Prolog starts up, the current module is user. This means that any queries you submit will make use of the procedures defined within user and the modules which are accessible from user’s use list. The current module can always be determined using curmod/1.   It is called with an uninstantiated variable which is then bound to the current module. The predicate modules/2 can be used to determine all of the modules currently in the system, together with their use lists. Assume that the following code has been consulted:
+When Prolog starts up, the current module is user. This means that any queries you submit will make use of the procedures defined within user and the modules which are accessible from user's use list. The current module can always be determined using curmod/1.   It is called with an uninstantiated variable which is then bound to the current module. The predicate modules/2 can be used to determine all of the modules currently in the system, together with their use lists. Assume that the following code has been consulted:
 ```
 module m1.
 use m2.

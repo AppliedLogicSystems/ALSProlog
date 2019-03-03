@@ -75,7 +75,7 @@ The call likes(mary,wine) succeeds, so the original goal succeeds:
 ?- likes(john,Who).
 Who = mary
 ```
-If you want Prolog to look for another answer, press ‘;’ (semi-colon) followed by
+If you want Prolog to look for another answer, press ';' (semi-colon) followed by
 Return. This will cause failure to occur, forcing the search for another solution.
 In this example, execution re-enters the procedure box for female/1 through the
 redo port (See Figure (e) below). However, there are no more solutions for female/1, so the procedure must fail. Execution then leaves the female/1 box
@@ -109,8 +109,8 @@ would take place at level 3.
 
 You have a choice of how the debugger is going to continue examining the program. When you want to move slowly through the program, looking at everything
 there is to see, you use the creep command. To creep, you should respond with
-‘c’ followed by return at the ? prompt of the debugger. Return alone will also
-make the debugger creep. However, for the sake of readability, the ‘c’ will appear
+'c' followed by return at the ? prompt of the debugger. Return alone will also
+make the debugger creep. However, for the sake of readability, the 'c' will appear
 explicitly in all the examples.
 ```
 (1) 1 call: likes(john,_93) ? c
@@ -183,7 +183,7 @@ no.
 
 ## 14.3 Additional Debugger Commands
 
-If your program is large and/or complicated, looking at every port call in the program’s execution is often tiresome and unnecessary. Once a procedure is debugged, it is no longer necessary to trace its execution in detail.
+If your program is large and/or complicated, looking at every port call in the program's execution is often tiresome and unnecessary. Once a procedure is debugged, it is no longer necessary to trace its execution in detail.
 
 However, other procedures may still contain errors. In this case, you want to examine the execution of the questionable procedures without looking at the execution
 of the correct portions of the program. This can be done by limiting the amount of
@@ -202,15 +202,15 @@ Who = mary;
 (2) 2 fail: female(_93) ?
 (1) 1 redo: likes(john,_93) ?
 ```
-In this trace, the debugger skips the execution likes(john,Who), and doesn’t
+In this trace, the debugger skips the execution likes(john,Who), and doesn't
 stop at any of the ports inside the call to likes/2. However, when the call fails
-because of the ;\hveleven return command in the Prolog shell’s answer showing
+because of the ;\hveleven return command in the Prolog shell's answer showing
 mode, the fail ports from the interior of that call are printed.
 
 ### 14.3.2 Ignoring Even More Execution
 
 The big skip command is similar to the skip command above, except that the internal failure ports are not printed when a call fails. You tell the debugger to do a
-big skip by typing S (uppercase ‘S’) followed by \ReturnKey . A big skip is also
+big skip by typing S (uppercase 'S') followed by \ReturnKey . A big skip is also
 much more efficient that a normal skip.
 ```
 ?- trace likes(john,Who).
@@ -240,7 +240,7 @@ the retried goal ran, except for side effects. Side effects not undone by a retr
 
 ## 14.4 Changing the Leashing
 
-After watching all of the ports during a trace, you might find that you want don’t
+After watching all of the ports during a trace, you might find that you want don't
 want to stop at every port that passes by. For example, it might not be useful to see
 the fail and exit ports in the execution of your program. By changing the leashing
 of the debugger via leash/1, you can control which ports are actually printed. The
@@ -258,7 +258,7 @@ particular procedure. This is useful when most of your program is working correc
 a program that takes derivatives of a function and simplifies the result:
 ```
 diff :-
-    write(’type in: Var,Fn’), nl,
+    write('type in: Var,Fn'), nl,
     read((X,F)),
     diff(X,F,Answer),
     write(Answer), nl,
@@ -330,7 +330,7 @@ yes.
 
 ## 14.8 Getting Help
 
-Typing ‘h’ at the ? prompt of the debugger gives a summary of the debugger commands.
+Typing 'h' at the ? prompt of the debugger gives a summary of the debugger commands.
 
 ## 14.9 Exiting the Debugger
 

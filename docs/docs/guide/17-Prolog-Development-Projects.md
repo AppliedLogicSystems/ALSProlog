@@ -8,7 +8,7 @@
 {:toc}
 
 The ALS Prolog Development Environment (alsdev) supports a simple concept of
-development project which nonetheless, is quite useful. At it’s most elementary, a
+development project which nonetheless, is quite useful. At it's most elementary, a
 project is just a named collection of files. Projects are accessed through the Prolog
 menu introduced in the preceeding section: 
 
@@ -20,7 +20,7 @@ Here is a sample project window:
 ![](images/PrologProjectWindowSample.png)
 Figure. Sample Prolog Project Window
 
-Clicking on the triangular arrow button to the left of ‘Files:’ causes the list of files
+Clicking on the triangular arrow button to the left of 'Files:' causes the list of files
 incorporated in the project to open, as shown below:
 
 ![](images/projects-2.gif)
@@ -45,6 +45,6 @@ other arrow button on the left:
 
 As with files, one can single-click an entry in this list to select it, and remove it with
 the Delete button, or change its position using the blue up/down arrows. New directories are added by clicking Add, which raises a directory selection dialog. If
-the ‘relative’ radio button is checked, the new added path will be represented relative to the current working directory if this is possible. Otherwise, the path is represented in absolute form.
+the 'relative' radio button is checked, the new added path will be represented relative to the current working directory if this is possible. Otherwise, the path is represented in absolute form.
 
 

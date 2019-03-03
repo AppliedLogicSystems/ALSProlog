@@ -27,21 +27,21 @@ bufwriteq(String, Term)
 ## EXAMPLES
 
 ```
-?- sprintf(X, ’Contents: %t, Amount: %t’, [pocket(keys),1]).
+?- sprintf(X, 'Contents: %t, Amount: %t', [pocket(keys),1]).
 X = "Contents: pocket(keys), Amount: 1"
 
-?- sprintf(string(X), ’Contents: %t, Amount: %t’, [pocket(keys),1]).
+?- sprintf(string(X), 'Contents: %t, Amount: %t', [pocket(keys),1]).
 X = "Contents: pocket(keys), Amount: 1"
 
-?- sprintf(atom(X), ’Contents: %t, Amount: %t’,[pocket(keys),1]).
-X = ’Contents: pocket(keys), Amount: 1’
+?- sprintf(atom(X), 'Contents: %t, Amount: %t',[pocket(keys),1]).
+X = 'Contents: pocket(keys), Amount: 1'
 ```
 ```
 ?- bufwrite("jack+f(tom)", +(jack, f(tom))).
 yes.
 ```
 ```
-?- bufwrite(S, ’Enterprise’).
+?- bufwrite(S, 'Enterprise').
 S = [69,110,116,101,114,112,114,105,115,101]
 yes.
 ```

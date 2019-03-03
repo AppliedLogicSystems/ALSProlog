@@ -47,7 +47,7 @@ The following options supported by ALS Prolog are options specified by the March
 
 The following additional options are supported by ALS Prolog:
 
-- `vars_and_names(Vars,Names)` -- After reading a term, `Vars` shall be a list of the variables in the term read in left-to-right traversal order, `Names` is a list of the associated names of the variables. `’_’` is the only variable name which may occur more than once on the list `Names`.
+- `vars_and_names(Vars,Names)` -- After reading a term, `Vars` shall be a list of the variables in the term read in left-to-right traversal order, `Names` is a list of the associated names of the variables. `'_'` is the only variable name which may occur more than once on the list `Names`.
 
 - `attach_fullstop(Bool)` -- `Bool` is either `true` or `false`. The default is `false`. When `Bool` is `true`, a fullstop is inserted before the end of the stream. This option is most useful for reading single terms from atom, character, and character code streams.
 
@@ -55,7 +55,7 @@ The following additional options are supported by ALS Prolog:
 
     **`true`** In this type of read, the read susends or waits until enough characters are available to parse as a valid Prolog term.
 
-    **`false`** In this type of read, if no characters are available, the read will immediately return with success, unifying the ’read term argument’ (which is argument 1 for `read_term/2` and is argument 2 for `read_term/3`) with the term `unfinished_read`; any tokens consumed in the read attempt are saved in the stream data structure, and subsequent attempts to read from this stream begin with these tokens, followed by tokens created from further characters which arrive at later times.
+    **`false`** In this type of read, if no characters are available, the read will immediately return with success, unifying the 'read term argument' (which is argument 1 for `read_term/2` and is argument 2 for `read_term/3`) with the term `unfinished_read`; any tokens consumed in the read attempt are saved in the stream data structure, and subsequent attempts to read from this stream begin with these tokens, followed by tokens created from further characters which arrive at later times.
 
 - `syntax_errors(Val)` -- Val indicates how the system is to handle any syntax errors which occur during the reading of `Term`.  The possible values of `Val` and their interpretations are:
 

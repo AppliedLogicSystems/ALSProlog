@@ -19,8 +19,8 @@ Every Prolog source file must be a sequence of zero or more Prolog terms, each
 term followed by a period (.) and a white space character. A period followed by a
 white space character is called a full stop. Full stops are needed in source files to
 show where one term ends and another begins. Each term in a file is treated as a
-closed logical formula. This means that even though two seperate terms have variable names in common, each term’s variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written ‘_ ’), which is quantified for each occurrance. This means that within a single term, every occurrance
-of ‘_’ is a different variable.
+closed logical formula. This means that even though two seperate terms have variable names in common, each term's variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written '_ '), which is quantified for each occurrance. This means that within a single term, every occurrance
+of '_' is a different variable.
 
 ### 2.1.1 Rules
 
@@ -69,7 +69,7 @@ Commands are often used in prolog source files to require the consult or reconsu
 Here are some examples of commands:
 
     :- op(300, xfx, #).
-    :- [file1], [file2], write(’Files 1&2 have been loaded’).
+    :- [file1], [file2], write('Files 1&2 have been loaded').
     :- initializeProgram, topLevelGoal.
 
 The prolog shell accepts queries from a terminal or window, and prints the results.  Because the shell assumes that each input is a query, it uses the query symbol ?- as a prompt.
@@ -120,7 +120,7 @@ Program files are sequences of source terms that are meant to be read in by cons
 
 ### 2.2.1 Consulting Program Files
 
-To consult a file means to read the file, load the file’s clauses into the internal Prolog database, and execute any commands or directives occurring in the file. Reconsulting a file causes part or all of the current definitions in the internal prolog database for
+To consult a file means to read the file, load the file's clauses into the internal Prolog database, and execute any commands or directives occurring in the file. Reconsulting a file causes part or all of the current definitions in the internal prolog database for
 procedures which occur in the file to be discarded and the new ones (from the file) to be loaded, as well as executing any commands or directives in the file (again). See Chapter 11 (Prolog Builtins: Non-I/O) consult/1.  {ADD LINK}
 
 A file is consulted by the query or goal
@@ -139,12 +139,12 @@ list brackets, as in
 By default, files listed this way (inside list brackets) are _reconsulted_.
 
 To insist that one or more files in such a list be consulted (which might cause some of the clauses
-from the files to be doubled in memory), prefix a ‘+’ to the filename, as in:
+from the files to be doubled in memory), prefix a '+' to the filename, as in:
 
     ?- [file1,+file2,file3].
 
 In this case, file2 will be consulted instead of reconsulted. For consistency and
-backwards compatibility, one can also prefix a ‘-’ to indicate that the file should be
+backwards compatibility, one can also prefix a '-' to indicate that the file should be
 reconsulted, even though this is redundant:
 
     ?- [file1,+file2,-file3].
@@ -153,7 +153,7 @@ When any of these consult goals are presented, first the terms from file1 are pr
 for procedure p, those from file1 will be listed in the internal database before
 those from file2. 
 
-Clauses in the internal database are ‘tagged’ with the file from which they originated. When a file is reconsulted, only those clauses in memory which are tagged as originating from that file will be discarded at the start of the reconsult operation. Thus, suppose that both file1 and file3 contain clauses for the procedure p, and that we initially perform
+Clauses in the internal database are 'tagged' with the file from which they originated. When a file is reconsulted, only those clauses in memory which are tagged as originating from that file will be discarded at the start of the reconsult operation. Thus, suppose that both file1 and file3 contain clauses for the procedure p, and that we initially perform
 
     ?- [file1,file2,file3].
 
@@ -184,7 +184,7 @@ Win32:
 
 In general, file names should be enclosed in single quotes (making them quoted atoms). The exception is any file name which is acceptable as an atom by itself.
 
-Simple file names consist of only the file name, or a file name together with an extension. All others are complex file names. Absolute path names provide a complete description of the location of a file in the file system, while relative path names provide a description of a file’s location relative to the current directory. Simple file names are interpreted as relative path names.
+Simple file names consist of only the file name, or a file name together with an extension. All others are complex file names. Absolute path names provide a complete description of the location of a file in the file system, while relative path names provide a description of a file's location relative to the current directory. Simple file names are interpreted as relative path names.
 
 The way that the program-loading predicates react to the different kinds of path names is described below. In general, the loading predicates attempt to determine whether a file exists, and if so, they load the clauses from the file. If the file does not exist, the loading predicates raise an error exception.
 
@@ -218,12 +218,12 @@ The facts searchdir/1 in module builtins can be manipulated by a user program or
 
 * On Linux (including Mac OS X) and Windows, if the ALSPATH environment variable is set , the
 entries from this are used to create searchdir/1 assertions.
-* If ALS Prolog was started from the command line, any ‘-s’ switches on the command line will cause searchdir/1assertions to be added.
+* If ALS Prolog was started from the command line, any '-s' switches on the command line will cause searchdir/1assertions to be added.
 
 Thus, the directories which will be searched appear as follows:
 
 1. First, the current directory is searched.
-2. Next, any directories appearing as ‘-s’ command line switches are searched, in the order they appear from left to right on the command line.
+2. Next, any directories appearing as '-s' command line switches are searched, in the order they appear from left to right on the command line.
 3. Next, any directories appearing in an ALSPATH environment variable are
 searched, in the order they appear in the variable statement.
 4. The subdirectory builtins of alsdir is searched.
@@ -236,7 +236,7 @@ builtins can be included in an ALS Prolog autoload file.
 ### 2.2.3 How are Filename Extensions treated?
 
 For your convenience, if you have a file ending with a .pro or a .pl extension, you
-don’t have to type the extension in calls to the program loading predicates. The
+don't have to type the extension in calls to the program loading predicates. The
 following goal loads the Prolog file wands.pro:
 
     ?- consult(wands).
@@ -256,7 +256,7 @@ loaded instead, provided that the original source file has not been modified sin
 files.) The advantage of this lies in the fact that object files load much more quickly
 than source files. Note that on all systems, the following call will _not_ create an object file for wands:
 
-    ?- consult(’wands.pro’).
+    ?- consult('wands.pro').
 
 Thus, when consulting or reconsulting a file with no extension, ALS Prolog proceeds as follows:
 

@@ -10,7 +10,7 @@
 One powerful modern programming idea is the use of abstract data types to hide the
 inner details of the implementation of data types. The arguments in favor of this
 technique are well-known (cf. [Ref: Liskov] ). Of course, it is possible to use the
-abstract data type idea ’by hand’ as a matter of discipline when developing programs. However, like many other things, programming life becomes easier if useful tools supporting the practice are available. In particular, good tools make it easy to modify abstract data type definitions while still maintaining efficient code.
+abstract data type idea 'by hand' as a matter of discipline when developing programs. However, like many other things, programming life becomes easier if useful tools supporting the practice are available. In particular, good tools make it easy to modify abstract data type definitions while still maintaining efficient code.
 
 The defStruct tool provides such support for a common construct: the use of Prolog
 structures (i.e., compound terms) which must be accessed for values and may be
@@ -98,7 +98,7 @@ For defStructs, the left component of the equality statements must be one of the
 * setPred
 * makePred
 * structLabel
-The right sides of the defStruct equality statements are Prolog terms whose structure depends on the left side entry. The right side corresponding to ’propertiesList’
+The right sides of the defStruct equality statements are Prolog terms whose structure depends on the left side entry. The right side corresponding to 'propertiesList'
 is a list of atoms which are the symbolic names of the properties or slots of the structure being defined. For all of the rest of the equality statements, the right side is
 a single atom. The roles of these right side atoms are described below:
 
@@ -172,7 +172,7 @@ Thus, the goal
     makeWindowStruct(ThisWinStruct)
 
 will create a wi(...) structure with default values and bind it to ThisWinStruct.
-Besides the generated unary ‘make’ predicates, two other construction predicates
+Besides the generated unary 'make' predicates, two other construction predicates
 are created:
 ```
 makePred=mkpr 

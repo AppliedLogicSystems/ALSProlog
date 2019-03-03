@@ -33,7 +33,7 @@ tk_new/1 functions in the same manner as tcl_new/1, except that the newlycreated
 Examples
 ```
 tcl_new(i). Succeeds, creating a Tcl interpreter named i.
-tcl_new(X). Succeeds, unifying X with the atom ‘interp1’.
+tcl_new(X). Succeeds, unifying X with the atom 'interp1'.
 ```
 Errors
 * Interpreter is not an atom or variable.
@@ -48,21 +48,21 @@ Errors
 
 tcl_call and tcl_eval both execute a script using the Tcl interpreter and returns the
 Tcl result in Result. tcl_call passes the Script argument as a single argument
-toTcl’s eval command. tcl_eval passes the elements of ArgList as arguments to the
-Tcl’s eval command, which concatenates the arguments before evalating them.
+toTcl's eval command. tcl_eval passes the elements of ArgList as arguments to the
+Tcl's eval command, which concatenates the arguments before evalating them.
 
-tcl_call’s Script can take the following form:
+tcl_call's Script can take the following form:
 * List - The list is converted to a Tcl list and evaluated by the Tcl interpreter. The
 list may contain, atoms, numbers and lists.
 * Atom - The atom is converted to a string and evaluated by the Tcl interpreter.
-tcl_eval’s ArgList may contain atoms, numbers or lists.
+tcl_eval's ArgList may contain atoms, numbers or lists.
 
 Examples
 ```
-tcl_call(i, [puts, abc], R). Prints ‘abc’ to standard output, and bind R to ‘’.
+tcl_call(i, [puts, abc], R). Prints 'abc' to standard output, and bind R to ''.
 tcl_call(i, [set, x, 3.4], R). Sets the Tcl variable x to 3.4 and binds R to 3.4.
-tcl_call(i, ‘set x’, R). Binds R to 3.4.
-tcl_eval(i, [‘if [file exists ‘, Name, ‘] puts file-found’], R).
+tcl_call(i, 'set x', R). Binds R to 3.4.
+tcl_eval(i, ['if [file exists ', Name, '] puts file-found'], R).
 ```
 Errors
 * Interpreter is not an atom.
@@ -80,14 +80,14 @@ already the correct type, then it is simple bound to the output argument. If the
 cannot be converted, an error is generated.  
 Examples
 ```
-tcl_coerce_number(i, ‘ 1.3’, N) Succeeds, binding N to the float 1.3
+tcl_coerce_number(i, ' 1.3', N) Succeeds, binding N to the float 1.3
 tcl_coerce_number(i, 1.3, N) Succeeds, binding N to the float 1.3
-tcl_coerce_number(i, ‘abc’, N) Generates an error.
-tcl_coerce_atom(i, [a, b, c], A) Succeeds, binding A to ‘a b c’
-tcl_coerce_atom(i, 1.4, A) Succeeds, binding A to ‘1.4’
-tcl_coerce_list(i, ‘a b c’, L) Succeeds, binding L to [a, b, c]
+tcl_coerce_number(i, 'abc', N) Generates an error.
+tcl_coerce_atom(i, [a, b, c], A) Succeeds, binding A to 'a b c'
+tcl_coerce_atom(i, 1.4, A) Succeeds, binding A to '1.4'
+tcl_coerce_list(i, 'a b c', L) Succeeds, binding L to [a, b, c]
 tcl_coerce_list(i, 1.4, L) Succeeds, binding L to [1.4]
-tcl_coerce_list(i, ‘’, L) Succeeds, binding L to []
+tcl_coerce_list(i, '', L) Succeeds, binding L to []
 ```
 Errors
 * Interpreter is not an atom.
@@ -167,5 +167,5 @@ tcl8.0 (support library directory)
 tk8.0 (support library directory)
 
 On Solaris, unlike other Unix systems, the search path list for shared objects does
-not include the executable’s directory. To ensure that the Tcl/Tk shared objects are
-found, the current directory ‘.’ must be added to the LD_LIBRARY_PATH environment variable.
+not include the executable's directory. To ensure that the Tcl/Tk shared objects are
+found, the current directory '.' must be added to the LD_LIBRARY_PATH environment variable.

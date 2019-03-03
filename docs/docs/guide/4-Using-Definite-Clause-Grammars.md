@@ -40,7 +40,7 @@ This rule means that if S is a list of tokens, and if some initial sequence of S
 parsed as a sentence, then E is the list of tokens which remain after one sentence
 has been parsed. The first part of the sentence, the noun, is constructed from the
 tokens beginning with S up to I0. The verb phrase picks up where the noun left
-off, and consumes tokens up to E. For example, if ‘cat’ is a noun, and ‘ran’ is a
+off, and consumes tokens up to E. For example, if 'cat' is a noun, and 'ran' is a
 verb phrase, then the following queries will succeed:
 ```
 ?- sentence([cat,ran],[]).
@@ -53,7 +53,7 @@ back the rest of the input token list.
 ## 4.2 Writing a Grammar
 
 Because DCG rules are translated into Prolog clauses, it is possible to have many
-rules that define what it means to be a sentence or a noun or a verb. If one rule can’t
+rules that define what it means to be a sentence or a noun or a verb. If one rule can't
 parse the list of tokens, Prolog will fail that rule and try the next rule. The following set of
 rules says that cat, dog, and pig are all nouns. In addition, two compound verb
 phrases are defined.

@@ -13,12 +13,12 @@ once an association is installed, backtracking to a point prior to creation of t
 points concerning this.) Because both the associated term and value may occur on
 the heap, both a term and its associated value can contain uninstatiated variables.
 
-## 8.1 ‘Named’ Global Variables
+## 8.1 'Named' Global Variables
 
 The underlying primitive predicates set_global/2 and get_global/2 defined in the
 next section maintain a uniform global association list. This has the disadvantage
 that as the number of distint associations to be mainted grows, the performance of
-both set_global/2 and get_global/2 will degrade. The facility described in this section avoids this problem by providing individual global variables which are accessed by programmer-specified unary predicates; hence this mechanism is said to provide ‘named global variables.’
+both set_global/2 and get_global/2 will degrade. The facility described in this section avoids this problem by providing individual global variables which are accessed by programmer-specified unary predicates; hence this mechanism is said to provide 'named global variables.'
 ```
 make_gv/1
 make_gv(Name)
@@ -35,13 +35,13 @@ atom corresponding to the string Name. The definitions are installed in the modu
 in which make_gv/1 is called. These two predicates are used, respectively, to set
 or get the values of the global variable which was allocated. Here are some examples:
 ```
-?-make_gv(‘_flag’).
+?-make_gv('_flag').
 yes.
 ?-set_flag(hithere).
 yes.
 ?-get_flag(X).
 X = hithere.
-?-make_gv(‘CommonCenter’).
+?-make_gv('CommonCenter').
 yes.
 ?-setCommonCenter(travel_now).
 yes.
@@ -134,7 +134,7 @@ calling pattern for this predicate is similar to arg/3:
     mangle(Nth, Structure, NewArg)
 
 This call destructively modifies an argument of the compound term Structure
-in a spirit similar to Lisp’s rplaca and rplacd. Structure must be instantiated to a compound term with at least N arguments. The Nth argument of Structure will become NewArg. Lists are considered to be structures of arity two.
+in a spirit similar to Lisp's rplaca and rplacd. Structure must be instantiated to a compound term with at least N arguments. The Nth argument of Structure will become NewArg. Lists are considered to be structures of arity two.
 NewArg must satisfy the restriction that NewArg is not itself an uninstatiated variable
 (though it can be a compound term containing uninstatiated variables). Modifications made to a structure by mangle/3 will survive failure and backtracking.
 
@@ -149,11 +149,11 @@ Victim = doNot(fold,spindle,mutilate)
 yes.
 ```
 
-## 8.4 ‘Named’ Hash Tables
+## 8.4 'Named' Hash Tables
 
 The allocation and use of hash tables is supported by exploiting the fact that the
 implementation of terms is such that a term is an array of (pointers to) its arguments. So hash tables are created by combining a term (created on the heap) together with access routines implemented using basic hashing techniques. The destructive update feature mangle/3 is used in an essential manner. As was the case with global variables, at bottom lies a primitive collection of mechanisms, over
-which is a more easily usable layer providing ‘named’ hash tables.
+which is a more easily usable layer providing 'named' hash tables.
 
 The predicate for creating named hash tables is
 ```
@@ -165,13 +165,13 @@ If Name is any atom, including a quoted atom, the goal make_hash_table(Name)
 will create a hash table together a set of access methods for that table. The atom
 Name will be used as the suffix to the names of all the hash table access methods.
 Suppose for the sake of the following discussion that Name is bound to the atom
-’_xamp_tbl’. Then the goal
+'_xamp_tbl'. Then the goal
 
-    make_hash_table(‘_xamp_tbl’)
+    make_hash_table('_xamp_tbl')
 
 will create the following access predicates:
 ```
-reset_xamp_tbl  - throw away old hash table associated with the ’_xamp_tbl’
+reset_xamp_tbl  - throw away old hash table associated with the '_xamp_tbl'
 hash table and create a brand new one.
 
 set_xamp_tbl(Key,Value – associate Key with Value in the hash table; Key should
@@ -189,10 +189,10 @@ through the table and locate associations matching the "pattern" as specified by
 pdel_xamp_tbl(KeyPattern,ValPattern) – This functions the same as pget_xamp_tbl except that
 the association is deleted from the table once it is retrieved.
 ```
-Consider the following example (where we have omitted all of the ‘yes’ replies, but
-retained the ‘no’ replies):
+Consider the following example (where we have omitted all of the 'yes' replies, but
+retained the 'no' replies):
 ```
-?- make_hash_table(‘_assoc’).
+?- make_hash_table('_assoc').
 ?- set_assoc(a, f(1)).
 ?- set_assoc(b, f(2)).
 ?- set_assoc(c, f(3)).

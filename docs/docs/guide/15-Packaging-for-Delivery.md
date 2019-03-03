@@ -55,7 +55,7 @@ have to be loaded: they are all pre-packaged into the my_app image. This image
 is suitable for distribution (assuming your program my_app is ready for its debut
 to the outside world).  
 
-To explain how this works, let’s assume that you are using a statically linked extended image my_ex_alspro as your starting point. Then, from start to finish,
+To explain how this works, let's assume that you are using a statically linked extended image my_ex_alspro as your starting point. Then, from start to finish,
 here is what happens.  
 
 1.  You issue the command to run my_ex_alspro , and it is loaded and running.  
@@ -70,22 +70,22 @@ here is what happens.
 4.  ALS Prolog loads the library files  
     [cmdline, listutl1, listutl2, misc_db, misc_io, objs_run, strings]
 5.  ALS Prolog changes the usual Prolog shell startup to run your goal
-start_my_app instead. For the curious, the definition of the 0-ary predicate ‘$start’/0 at the end of the builtins file builtins.pro is retracted, and
+start_my_app instead. For the curious, the definition of the 0-ary predicate '$start'/0 at the end of the builtins file builtins.pro is retracted, and
 the following clause is asserted in module builtins:  
-    ‘$start’ :- start_my_app.
+    '$start' :- start_my_app.
 6.  The entire (Prolog) code space is copied out in appropriate format to a temporary file, call it TF.  
 7.  The file my_app is opened, and the original image my_ex_alspro is copied into the file my_app, which is left open.  
 8.  The entire temporary file TF is copied onto the end of the file my_app.  
 9.  A fixup to a certain global variable (call it G) is made and my_app is closed.
 
-The ‘copying’ which is carried out is really writing the various code and data elements in the executable object file format appropriate to the given machine and operating system (e.g., a.out, coff, elf, etc.) So the final file my_app is really an executable file whose initial segment is the original image my_ex_alspro, followed by some ‘extra stuff’. Moreover, the entry point for my_app is the original
+The 'copying' which is carried out is really writing the various code and data elements in the executable object file format appropriate to the given machine and operating system (e.g., a.out, coff, elf, etc.) So the final file my_app is really an executable file whose initial segment is the original image my_ex_alspro, followed by some 'extra stuff'. Moreover, the entry point for my_app is the original
 entry point for my_ex_alspro, which is just a version of the ALS Prolog image.
 
 When any such image (be it plain ALS Prolog or an extended image) starts up, at a
 point very early in its initialization, it looks at the global variable G. In the plain
-ALS Prolog image, or one which has simply been statically linked with some additional C code, G = 0. But in a ‘packaged application’ such as my_app, G contains
+ALS Prolog image, or one which has simply been statically linked with some additional C code, G = 0. But in a 'packaged application' such as my_app, G contains
 a number effectively telling the system where the end of the image
-my_ex_alspro lies, and where the ‘extra stuff’, the packaged Prolog code, starts.
+my_ex_alspro lies, and where the 'extra stuff', the packaged Prolog code, starts.
 The system uses this to appropriately allocate memory, and then to load the packaged ALS Prolog code from the application, from the builtins, and from the loaded
 library files, into the approprate code area. (This is a block move, so it happens very
 quickly. The difference in the startup times for alspro_b and alspro reflects the difference between loading the builtins *.obp files from disk, and this simple block
@@ -100,7 +100,7 @@ my_ex_alspro <my_app component files> \
     misc_db, misc_io, objs_run, strings] ) ] ).
 ```
 Such approaches are especially suitable for use in makefiles. (Note the continuation
-characters ‘\’ at the end of each line except the final one.)
+characters '\' at the end of each line except the final one.)
 
 Like the ALS Prolog environments themselves, some packaged applications will
 want to accept command line arguments. Two predicates can be used in this regard.
@@ -110,7 +110,7 @@ being run, use pbi__get_command_line/1. For example, if the packaged application
 would cause any call
     pbi__get_command_line(X)
 to yield the value
-    X = [foo,zipper, ‘-f’, zap].
+    X = [foo,zipper, '-f', zap].
 If you want the packaged version (“foo”) of the application to co-ordinate with the
 “unpackaged version” developed under the ALS environment, you can use
 setup_cmd_line/0. If the packaged application “foo” starts with

@@ -45,7 +45,7 @@ followed by a return on DOS. or # at the beginning of a line on the Mac) which s
 
 ## 13.1 Asking Prolog to Do Something
 The most common way of telling Prolog what you want it to do is to submit a goal.
-If you are in the Prolog shell, and ?- is the prompt, then anything you type is considered to be a goal. A goal must end with a period, ‘ . ’, followed by a white space
+If you are in the Prolog shell, and ?- is the prompt, then anything you type is considered to be a goal. A goal must end with a period, ' . ', followed by a white space
 character (carriage return, blank, etc.). This is called a full stop. Goals must be correct Prolog terms. See Chapter 1 of the User Guide for a discussion concerning the
 construction of correct Prolog terms. The following is an example of a goal submitted from the ALS Prolog shell:
 ```
@@ -66,7 +66,7 @@ no.
 ```
 This goal fails because the list [a,b,c] is not four elements long.
 After submitting a goal in the Prolog shell, if any variables have become instantiated, their values will be displayed to you as in the first example above with
-length/2. When this occurs, the shell waits for you to type either a ‘;’ followed
+length/2. When this occurs, the shell waits for you to type either a ';' followed
 by a return, or just a return. The two choices have the following effect:
 * ; — Forces the goal to fail, thus causing backtracking and retrying of
 the goal.
@@ -89,7 +89,7 @@ goals from files:
 * Commands
 * Queries
 Commands are specified by the :- prefix, while queries are specified by the ?-prefix. The only difference between the two is that queries write the message
-‘yes.’ to the screen if the goal succeeds, and ‘no.’ if the goal fails, while commands do not write any result on the screen.
+'yes.' to the screen if the goal succeeds, and 'no.' if the goal fails, while commands do not write any result on the screen.
 
 ## 13.1.2 Command Line Editing and History
 The ALS Prolog TTY shell supports command line editing and history similar to that for the Linux Bash shell.  One can move left or right on the line using the left or right arrow keys, can delete characters using the delete key, can insert characters by typing or by selecting some text and using the ^V (control-v) key.  If the command history is turned on, the up arrow key allows you to walk backward through previously submitted commands.
@@ -119,7 +119,7 @@ files for the Prolog system to load as programs.
 2.  If you want to load Prolog predicates from inside a program, or from the
 Prolog shell, you can use the consult/1 builtin in the following manner:
     ?- consult(File).
-where File is instantiated to a Prolog program’s file name. Alternatively, one
+where File is instantiated to a Prolog program's file name. Alternatively, one
 can use
     ?- reconsult(File).
 Finally, one can use the top-level list-as-reconsult construct:
@@ -136,11 +136,11 @@ key for your system (e.g., the Control-C key on Linux, including Mac OS X, or th
 ## 13.4 How ALS Prolog Finds Prolog Files
 When a request that a file be loaded is made (such as reconsult(myfile) ), ALS Prolog looks for the file in the following manner:  
 ### 13.4.1 Complex Pathnames
-If the file is not a simple pathname, that is, any file with a ‘file-slash’ character (‘/
-’) in it (on Unix or DOS), or the ’file-color’ character (":") (on the Mac), the file
+If the file is not a simple pathname, that is, any file with a 'file-slash' character ('/
+') in it (on Unix or DOS), or the 'file-color' character (":") (on the Mac), the file
 will be loaded as specified. Some examples are:
 ```
-?- consult(’/usr/gorilla/banana.pro’).
+?- consult('/usr/gorilla/banana.pro').
 Consulting /usr/gorilla/banana.pro...
 .../usr/gorilla/banana.pro consulted.
 yes.
@@ -176,7 +176,7 @@ greater flexibility than the foregoing discussion indicates. When ALS Prolog is 
 with the ALSDIR environment variable, and uses them to create a set of facts in the
 builtins module. These facts all have the following form:  
     searchdir(".../.../").
-The expression within the quotes can be any meaningful Unix path describing a directory (hence the terminal (‘/’). At startup time, the assertions correspond to the
+The expression within the quotes can be any meaningful Unix path describing a directory (hence the terminal ('/'). At startup time, the assertions correspond to the
 expressions found on the ALSPATH pathlist. Thus, the facts corresponding to the
 example above would be:
 ```
@@ -185,7 +185,7 @@ searchdir("/usr/gorilla/").
 searchdir("/usr/prolog/alsdir/").
 searchdir("/usr/prolog/").
 ```
-Note that the current directory (or ‘.’ to represent it) does not appear among these
+Note that the current directory (or '.' to represent it) does not appear among these
 facts; however, it is always automatically searched first. Additional entries can be
 made to this collection of facts by using assert/1 (or asserta/1 or assertz/1). For example, the goal
     :-builtins:asserta(searchdir("chimpanze/")).
@@ -197,7 +197,7 @@ immediately after the current directory and before any other directories. Assert
 such as these can be placed in the ALS Prolog startup file (described below) to customize search paths for particular directries. See the User Guide for more information concerning loading files.
 
 ## 13.5 Controlling the Search Path
-If you want to be able to consult some of your files that are not in your current directory, and you don’t want to use absolute pathnames, you can put the directories
+If you want to be able to consult some of your files that are not in your current directory, and you don't want to use absolute pathnames, you can put the directories
 where those files reside on a path searchlist called ALSPATH. In additon, you can
 add directories using the comannd-line switch -S at start-up time ({ADD LINK}see Section 13.7
 (ALS Prolog Command Line Options) ). The following is an example use of the ALSPATH variable on Linux or DOS:
@@ -224,7 +224,7 @@ uses the value of the ALSPATH variable to create and assert facts for the predic
 builtins:searchdir/1. The predicate which processes this is called builtins:ss_init_searchdir/1. In fact, the reading and processing of ALSPATH, when it exists, is done as follows (in blt_shl.pro):
 ```
 ss_init_searchdir
-    :-getenv(’ALSPATH’,ALSPATH),
+    :-getenv('ALSPATH',ALSPATH),
     ss_init_searchdir(ALSPATH).
 ```
 What really happens in the code is that ss_init_searchdir/1 takes apart the
@@ -237,7 +237,7 @@ one hand, one can directly make assertions on builtins:searchdir/1 as above to s
 up the search path. Or, one can directly call ss_init_searchdir0/1 with an
 appropriate argument. So one of the animals examples from the last section would
 work like this:
-    :-builtins:ss_init_searchdir0([’usr:prolog:alsdir:examples’, ‘usr:gorilla’]).
+    :-builtins:ss_init_searchdir0(['usr:prolog:alsdir:examples', 'usr:gorilla']).
 Such a call can be placed in the Prolog startup file or in one of your source files to
 occur automatically, as descirbed in the next section.
 
@@ -268,7 +268,7 @@ from the ALSPATH environment variable.
 to run the goal when it starts up as if it was the first goal typed to the 
 Prolog shell after the system is started. The goal might have to be quoted 
 depending on the rules of the operating system shell you are running in, and 
-if the goal contains any of your shell’s special characters. You do not have 
+if the goal contains any of your shell's special characters. You do not have 
 to put a full stop after a goal, and you can submit multiple goals, provided 
 there is no white space anywhere in the given goals. When the submitted goal 
 finishes running (with success or failure), control is passed to the normal 
@@ -297,12 +297,12 @@ single quotes if necessary to defeat the OS shell) and is used to force one or
 more assertions, as follows:  
 If Goal is of the form M:(H1, ...Hk), then each of H1, ..., Hk is asserted in 
 module M. Thus,
-    alspro -A ‘ice_cream:(jerry, ben)’
+    alspro -A 'ice_cream:(jerry, ben)'
 would cause the two facts facts jerry and ben to be asserted in module 
 ice_cream.   If Goal is of the form M:H, then H is asserted in module M.  
 If Goal is of the form (H1, ...Hk), then each of H1, ..., Hk is
 asserted in module user. Thus,  
-    alspro -A ‘(jerry, ben)’
+    alspro -A '(jerry, ben)'
 would cause the two facts facts jerry and ben to be asserted in module user.  
 Otherwise, Goal is asserted in module user.  
 
@@ -409,12 +409,12 @@ line
 
 would result in the following fact being asserted in module builtins:
 
-    command_line([’-k’,fast,’-s’,initstate,foofile]).
+    command_line(['-k',fast,'-s',initstate,foofile]).
 
 This assertion is always made, even when -p is not used, in which case
 the argument of command_line/1 is the empty list. It is important to
 note that command_line/1 is not exported from module builtins, so that
-accesses to it from other modules must be prefixed with ‘builtins:’ as in
+accesses to it from other modules must be prefixed with 'builtins:' as in
 
     ...,builtins:command_line(Cmds),...
 

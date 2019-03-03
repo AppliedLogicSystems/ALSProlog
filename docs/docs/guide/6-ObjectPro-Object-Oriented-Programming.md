@@ -19,10 +19,10 @@ The objects of ObjectPro are frame-like entities possessing state which survives
 backtracking. Each object belongs to a class from which it obtains its methods.
 Classes are arranged in a hierarchy, with lower classes inheriting methods from parent classes. The behavior of an object is determined by two aspects:
 
-* The object’s state, and
-* The object’s methods.
+* The object's state, and
+* The object's methods.
 
-An object’s state is a frame-like entity consisting of named slots which can hold
+An object's state is a frame-like entity consisting of named slots which can hold
 values. The table below illustrates the state of a simple object:
 
 | slot name      | slot value |
@@ -35,7 +35,7 @@ values. The table below illustrates the state of a simple object:
 | autoClass      |            |
 | manufacturer   |            |
 
-Changes to the object’s state amount to changes in the values of one or more slots.
+Changes to the object's state amount to changes in the values of one or more slots.
 Such changes are permanent and survive backtracking. The values which appear in
 slots can be any Prolog entity, including (the state of) other objects. Messages are
 sent to objects by calls of the form
@@ -43,7 +43,7 @@ send(Object, Message).
 In general, objects are created, held in variables, passed around among routines, and
 sent messages in the style above. When necessary, an object can be assigned a global name when it is created which can be used for sending messages to the object.
 
-An object’s methods are determined by the class to which it belongs.
+An object's methods are determined by the class to which it belongs.
 A class is determined by three things:
 * A local state-schema which describes the structure of part of the state of any
 object belonging to the class;
@@ -60,11 +60,11 @@ The methods associated with a class are defined by Prolog clauses which can util
 primitive predicates for manipulating objects, as well as any ordinary Prolog predicates.
 
 Objects are activated by sending them message . The methods of the class to which
-the object belongs (or from which its class inherits) determine the object’s reaction
+the object belongs (or from which its class inherits) determine the object's reaction
 to the message. A message can be an arbitrary Prolog term which may include uninstantiated variables, thus implementing the partially-instatiated message paradigm of Concurrent Prolog [Ref]
 The ALS ObjectPro system is integrated with the module system of ALS Prolog, in
 that class definitions in ALS ObjectPro may be exported from their defining modules so as to be visible in other modules, or may be left unexported, rendering them
-local to the defining module. However, each object ‘knows’ the module of its defining class, so that if one has hold of the object in a variable Object, then the call
+local to the defining module. However, each object 'knows' the module of its defining class, so that if one has hold of the object in a variable Object, then the call
 
     send(Object, Message)
 
@@ -102,10 +102,10 @@ equation are expressions of the form
 
     SlotName = SlotValue
 
-where SlotName is one of the named slots in the structure defining the object’s
+where SlotName is one of the named slots in the structure defining the object's
 state. These slots are determined by the class to which the object belongs, and may
 be slots from the state-schema of the immediate class parent, or may also be slots
-from any of the state-schemata of ancestor classes. The intent of the values equation is to enable the programmer to specify local slots, as well as to prescribe initial values for some of the object’s
+from any of the state-schemata of ancestor classes. The intent of the values equation is to enable the programmer to specify local slots, as well as to prescribe initial values for some of the object's
 slots (both local and/or inherited) when it is created.
 
 When a global atomic name for the object is needed, one includes an equation of
@@ -119,7 +119,7 @@ A message is sent to an object with a call of the form
 
 where Object is the target object (or an atom naming the object), and Message
 is an arbitrary Prolog term. The Message may include uninstantiated variables
-which might be instantiated by the object’s method for dealing with Message.
+which might be instantiated by the object's method for dealing with Message.
 Such calls to send/2 can occur both in ordinary Prolog code, and in the code defining methods of classes (and hence objects). For convenience, or conceptual emphasis, a call
 
     send_self(Object, Message)
@@ -155,7 +155,7 @@ The name equation and the subClassOf equation are both required.
 
 The ObjectPro system pre-defines one top-level class named genericObjects;
 all classes are ultimately subclasses of the genericObjects class. genericObjects provides one visible slot, myName, which is always instantiated to the
-object’s name. Several other slots, normally non-visible, are also provided.
+object's name. Several other slots, normally non-visible, are also provided.
 
 A class is said to be an immediate subclass of the (parent) class named in the subClassOf equation. The relation subclass is the transitive closure of the immediate subclass relation.
 
@@ -219,7 +219,7 @@ If an export = yes equation appears on the Eqns list of a class definition, the
 class methods and other information concerning the class are exported from the
 module in which the definition takes place.
 
-Of course, a call send(Object, Message), where Obj is in class C, could fail if C’s method code for Message fails. The action=Name equation in an Object definition is used to override the default name for the methods predicate of the class C. If such an equation is present in Object's definition, the methods predicate for Object will be Name/2 instead of the default method of C indicated above.
+Of course, a call send(Object, Message), where Obj is in class C, could fail if C's method code for Message fails. The action=Name equation in an Object definition is used to override the default name for the methods predicate of the class C. If such an equation is present in Object's definition, the methods predicate for Object will be Name/2 instead of the default method of C indicated above.
 
 The constraints equation allows the programmer to impose constraints on the
 values of particular slots in the states of objects which are instances of the class. The
@@ -244,7 +244,7 @@ value. The generated code ensures that when instances of the class are initializ
 to value. 
 
 The constraint expression slotName < valueList requires that
-the values of slotName be among the Prolog terms appearing on the list valueList. Here ’<’ is a short hand for ’is an element of’. The generated code for the class methods applies a test to any attempted update of the value of slotName to ensure that the new value is on the list valueList.
+the values of slotName be among the Prolog terms appearing on the list valueList. Here '<' is a short hand for 'is an element of'. The generated code for the class methods applies a test to any attempted update of the value of slotName to ensure that the new value is on the list valueList.
 
 As indicated, the third constraint expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs.
 Conditon expresses a condition which any potential value for slotName in an
@@ -400,14 +400,14 @@ run_stack :-
     rs(Obj).
 
 rs(Obj)
-    :- write(’4stack:>’),flush_output,read(Msg),
+    :- write('4stack:>'),flush_output,read(Msg),
        rs(Msg, Obj).
 
 rs(quit, _).
 
 rs(M, Obj)
     :- send(Obj, M),
-       printf(’Msg=%t\n’, [M]),
+       printf('Msg=%t\n', [M]),
        flush_output,
        rs(Obj).
 ```
@@ -489,7 +489,7 @@ run_vehicles
        run_vehicles(a(Auto1, Auto2)).
 
 run_vehicles(Autos)
-    :- printf(’::>’, []), flush_output,
+    :- printf('::>', []), flush_output,
        read(Cmd),
        disp_run_vehicles(Cmd, Autos).
 
@@ -503,10 +503,10 @@ exec_vehicles_cmd(Msg > N, Autos)
     :- arg(N, Autos, AN),
        send(AN, Msg),
        !,
-       printf(’%t-|| %t\n’, [N,Msg]).
+       printf('%t-|| %t\n', [N,Msg]).
 
 exec_vehicles_cmd(Cmd, Autos)
-    :- printf(’Can\’t understand: %t\n’, [Cmd]).
+    :- printf('Can\'t understand: %t\n', [Cmd]).
 ```
 And here is a trace of an execution of this code:
 ```

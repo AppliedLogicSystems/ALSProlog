@@ -26,13 +26,13 @@ allowing one to use the same functionality with any other interpreter.
 ## 19.2 Dialogs.
 ### 19.2.1 Information dialogs.
 ```
-info_dialog(Msg) :info_dialog(Msg, ‘Info’).
+info_dialog(Msg) :info_dialog(Msg, 'Info').
 info_dialog(Msg, Title) :info_dialog(tcli, Msg, Title).
 
 ```
 #### info_dialog(Interp, Msg, Title)
 The call
-    ?-info_dialog(‘Message for the User’, ‘Dialog Box Title’).
+    ?-info_dialog('Message for the User', 'Dialog Box Title').
 produces the following information dialog:
 
 ![](images/info_dialog_box.gif)
@@ -41,14 +41,14 @@ produces the following information dialog:
 #### yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
 ```
 yes_no_dialog(Msg, Answer)
-:yes_no_dialog(Msg, ‘Info’, Answer).
+:yes_no_dialog(Msg, 'Info', Answer).
 yes_no_dialog(Msg, Title, Answer)
 :yes_no_dialog(tcli, Msg, Title, Answer).
 yes_no_dialog(Interp, Msg, Title, Answer)
-:yes_no_dialog(Interp, Msg, Title, ‘Yes’, ‘No’, Answer).
+:yes_no_dialog(Interp, Msg, Title, 'Yes', 'No', Answer).
 ```
 The call
-    ?- yes_no_dialog(‘Sample yes-no query for user?’, Answer).
+    ?- yes_no_dialog('Sample yes-no query for user?', Answer).
 produces the following popup dialog:
 
 ![](images/yes_no-1.gif)
@@ -58,8 +58,8 @@ If the user clicks “Yes”, the result is
 while clicking “No” yields
     Answer = No.
 The call
-    yes_no_dialog(tcli, ‘Sample yes-no query for user?’,
-            ‘Dialog Box Title’, ‘OK’, ‘Cancel’, Answer).
+    yes_no_dialog(tcli, 'Sample yes-no query for user?',
+            'Dialog Box Title', 'OK', 'Cancel', Answer).
 produces the popup dialog
 
 ![](images/yes_no-2.gif)
@@ -77,8 +77,8 @@ popup_select_items(Interp, SourceList, Options, ChoiceList)
 ```
 The call
 ```
-?- popup_select_items([‘The first item’,’Item #2’,
-            ‘Item three’, the_final_item], Selection).
+?- popup_select_items(['The first item','Item #2',
+            'Item three', the_final_item], Selection).
 ```
 produces the popup shown below:
 
@@ -92,8 +92,8 @@ popup_select_items/_ predicate returns a list of the selected items.
 
 The Options argument for popup_select_items/[3,4] allows the programmer to place the popup list box in any of the other standard Tk listbox selection modes. For example, the call
 ```
-?- popup_select_items([‘The first item’, ’Item #2’, ‘Item three’,
-        the_final_item], [mode=extended, title= ’Extended Mode Selection’ ], 
+?- popup_select_items(['The first item', 'Item #2', 'Item three',
+        the_final_item], [mode=extended, title= 'Extended Mode Selection' ], 
         Selection).
 ```
 will popup a list box whose appearance is identical (apart from the different title requested) to the previous listbox. However, it will permit selection of ranges of elements, as seen below:
@@ -132,12 +132,12 @@ element under the mouse, inclusive.
 #### atomic_input_dialog(Interp, Msg, Title, Atom)
 ```
 atomic_input_dialog(Msg, Atom)
-    :- atomic_input_dialog(Msg, ‘Input’, Atom).
+    :- atomic_input_dialog(Msg, 'Input', Atom).
 atomic_input_dialog(Msg, Title, Atom)
     :- atomic_input_dialog(tcli, Msg, Title, Atom).
 ```
 This is a useful method of obtaining input from users. For example, the call
-    ?- atomic_input_dialog(‘Please input something:’, Atom).
+    ?- atomic_input_dialog('Please input something:', Atom).
 will popup the following window:
 
 ![](images/atom_input-1.gif)
@@ -153,7 +153,7 @@ then the output result would be
 #### file_select_dialog(Interp, Options, FileName)
 ```
 file_select_dialog(FileName)
-    :- file_select_dialog(tcli, [title=’Select File’], FileName).
+    :- file_select_dialog(tcli, [title='Select File'], FileName).
 file_select_dialog(Options, FileName)
     :- file_select_dialog(tcli, Options, FileName).
 ```
@@ -165,10 +165,10 @@ would produce this popup:
 
 The call
 ```
-?- file_select_dialog([title=’Testing File Selection for Open’,
+?- file_select_dialog([title='Testing File Selection for Open',
                        filetypes= [[zip,[zip]],
-                                   [‘Prolog’,[‘pro’]],
-                                   [‘All Files’,[‘*’]] ] ],
+                                   ['Prolog',['pro']],
+                                   ['All Files',['*']] ] ],
                       File).
 ```
 would produce
@@ -191,7 +191,7 @@ create_image(ImagePath, ImageName)
     create_image(tcli, ImagePath, ImageName).
 ```
 Assume that pow_wow_dance.gif is a file in the current directory. Then the call
-    ?- create_image(‘pow_wow_dance.gif’, pow_wow).
+    ?- create_image('pow_wow_dance.gif', pow_wow).
 will create the internal form of this image and associate the name pow_wow with
 it.  Display of images which have been created is accomplished with:
 ```
@@ -212,13 +212,13 @@ Simple additions to the main menubar are often useful. The general call to accom
 Label should be the label which will appear on the menu bar, and MenuEntriesList is a Prolog list describing the menu entries. The simplest list consists
 only of labels which will occur on the pull-down menu. Thus, after executing the
 call
-    ?- extend_main_menubar(‘Test Extend’, [‘Test Entry #1’, ‘Test Entry #2’]).
+    ?- extend_main_menubar('Test Extend', ['Test Entry #1', 'Test Entry #2']).
 the main listener window would look like this when clicking on the newly added
 menubar entry:
 
 ![](images/x_menu-1.gif)
 
-This is somewhat uninteresting, however, since these menu items won’t do anything. To add simple behaviors to the menu entry, one uses expressions of the form
+This is somewhat uninteresting, however, since these menu items won't do anything. To add simple behaviors to the menu entry, one uses expressions of the form
 Label + Behnavior,
 where Label is the menu label which will appear, and Behavior is either a ground
 Prolog term, or is a prolog term of the form
@@ -226,15 +226,15 @@ Prolog term, or is a prolog term of the form
 where Expr is a quoted atom describing a Tcl/Tk function call. Thus, if we replace
 the call considered above by the following,
 ```
-?- extend_main_menubar(‘Test Extend’,
-            [‘Test Entry #1’ + tcl(‘bell’), 
-             ‘Test Entry #2’ + test_write ]),
+?- extend_main_menubar('Test Extend',
+            ['Test Entry #1' + tcl('bell'), 
+             'Test Entry #2' + test_write ]),
             ]).
 ```
 where
 ```
 test_write
-    :-  printf(user_output, ‘This is a test ...\n’, []),
+    :-  printf(user_output, 'This is a test ...\n', []),
         flush_input(user_input).
 ```
 then the appearance of the main menu and the new pulldown will be the same, but
@@ -260,7 +260,7 @@ a _menu entry action expression_, which can be one of the following:
 Here, TclExpr can be any Tcl/Tk expression for evaulation, and PrologCall
 is any ground Prolog goal. The new entry
     cascade(SubLabel, SubList)
-allows one to create menu entries which are themselves cascades. In this case, SubLabel must be an atom which will serve as the entry’s label, and SubList is
+allows one to create menu entries which are themselves cascades. In this case, SubLabel must be an atom which will serve as the entry's label, and SubList is
 (recursively) a list of menu entry descriptors.
 
 Here are several useful predicates for working with menus and menu entries:
@@ -273,7 +273,7 @@ If MenuPath is a Tk path to a menu (top level or subsidiary), then EntriesList
 will be the list of labels for the entries on that menu, in order. For example,
 ```
 ?- menu_entries_list(shl_tcli,
-        ‘.topals.mmenb’, EntriesList).
+        '.topals.mmenb', EntriesList).
 EntriesList = [File, Edit, Prolog, Tools, Help].
 ```
 
@@ -282,14 +282,14 @@ When one indexes menu entries, the indicies are integers beginning at 0.
 ```
 path_to_main_menu_entry(Index, SubMenuPath)
     :- 
-    path_to_menu_entry(shl_tcli, ‘.topals.mmenb’, Index, SubMenuPath).
+    path_to_menu_entry(shl_tcli, '.topals.mmenb', Index, SubMenuPath).
 
 path_to_menu_entry(MenuPath, Index, SubMenuPath)
     :-
     path_to_menu_entry(tcli, MenuPath, Index, SubMenuPath).
 ```
 If MenuPath is a Tk path to a menu (top level or subsidiary), and if Index is an
-integer >= 0, and if the Index’th entry of MenuPath is a cascade, so that it has
+integer >= 0, and if the Index'th entry of MenuPath is a cascade, so that it has
 an associated menu, then SubMenuPath is a path to that associated menu. Thus,
 ```
 ?- path_to_main_menu_entry(4, SubMenuPath).
@@ -307,7 +307,7 @@ add_to_main_menu_entry(Index, Entry)
 
 For example,
 
-    ?- add_to_main_menu_entry(3,, ‘My Entry’ + test_write).
+    ?- add_to_main_menu_entry(3,, 'My Entry' + test_write).
 
 will add an entry at the end of the Tools cascade. The predicate
 

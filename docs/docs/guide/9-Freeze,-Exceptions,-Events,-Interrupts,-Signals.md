@@ -9,8 +9,8 @@
 
 ## 9.1 Freeze
 
-ALS Prolog supports a ‘freeze’ control construct similar to those that appear in
-some other prolog systems (See [carlsson] for general information on delay terms and implementation strategies). Using ‘freeze’, one can implement a variety of approaches to co-routining and delayed evaluation.
+ALS Prolog supports a 'freeze' control construct similar to those that appear in
+some other prolog systems (See [carlsson] for general information on delay terms and implementation strategies). Using 'freeze', one can implement a variety of approaches to co-routining and delayed evaluation.
 ```
 freeze/2
 freeze(Var, Goal)
@@ -23,7 +23,7 @@ In normal usage, Var is an uninstantiated variable which occurs in Goal. When in
 behaves as follows:
 1.  If Var is instantiated, then M:Goal is executed;
 
-2.  If Var is not instantiated, then the goal freeze(Var, Goal) immediately succeeds, but creates a ‘delay term’ (on the heap) which encodes information
+2.  If Var is not instantiated, then the goal freeze(Var, Goal) immediately succeeds, but creates a 'delay term' (on the heap) which encodes information
 about this goal. If Var becomes instantiated at some point in the future, at
 that time, the goal M:Goal is run (with, of course, Var as instantiated).
 
@@ -32,7 +32,7 @@ For example, here is an example of an extremely simple producer-consumer corouti
 pc2 :- freeze(S, produce2(0,S)), consume2(S).
 produce2(N, [N | T])
     :- M is N+1,
-       write(‘-p-’),
+       write('-p-'),
        freeze(T, produce2(M,T)).
 
 consume2([N | T])
@@ -40,9 +40,9 @@ consume2([N | T])
        ((N > 3, 0 is N mod 3) -> gc; true),
        (N < 300 -> consume2(T) ; true).
 ```
-Without the presence of the ‘freeze’ constructs, this program will simply loop in
-produce2/2, doing nothing but incrementing the counter and printing ‘-p-’ on the
-terminal. However, using the freeze construct, the program ‘alternates’ between
+Without the presence of the 'freeze' constructs, this program will simply loop in
+produce2/2, doing nothing but incrementing the counter and printing '-p-' on the
+terminal. However, using the freeze construct, the program 'alternates' between
 produce2/2 and consume2/1, producing the following behavior on the terminal:
 ```
 ?- pc2.
@@ -218,7 +218,7 @@ Consider the sample code:
 ct :- catch(c1, p1(X), e(c1,X)).
 c1 :- write(c1),nl, catch(c2, p2(X), e(c2,X)).
 c2 :- write(c2),nl, catch(c3, p1(X), e(c3,X)).
-c3 :- write(’c3-->’), read(Item),
+c3 :- write('c3-->'), read(Item),
       write(throwing(Item)),nl, 
       throw(Item).
 e(H,I) :- printf("Handler %t caught item %t\n",[H,I]).
@@ -269,24 +269,24 @@ goal(Person)
     :- printf("%t: Chris, take out that garbage!\n",[Person]),
        responseTo(Person), 
        okay(Person).
-responseTo(’Mom’) :- throw.
-responseTo(’Dad’).
+responseTo('Mom') :- throw.
+responseTo('Dad').
 okay(Person) 
-    :- printf("Chris: Okay %t, I’ll do it.\n",[Person]).
+    :- printf("Chris: Okay %t, I'll do it.\n",[Person]).
 interrupt :- printf("Chris: I want to go hiking with Kev.\n").
 ```
 Then:
 ```
-?- catch(goal(’Mom’),interrupt).
+?- catch(goal('Mom'),interrupt).
 Mom: Chris, take out that garbage!
 Chris: I want to go hiking with Kev.
 yes.
-?- catch(goal(’Dad’),interrupt).
+?- catch(goal('Dad'),interrupt).
 Dad: Chris, take out that garbage!
-Chris: Okay Dad, I’ll do it.
+Chris: Okay Dad, I'll do it.
 yes.
 ```
-Notice that with Mom, it’s okay to interrupt, but you don’t try it with Dad. In the
+Notice that with Mom, it's okay to interrupt, but you don't try it with Dad. In the
 above example, Chris responds to Dad with the okay/1 predicate, but Chris did
 not respond to Mom because the okay/1 predicate was never reached. After a
 throw/0 predicate is executed, control is given to the ExceptionGoal. After
@@ -309,7 +309,7 @@ is useful as a general interrupt mechanism in Prolog. Since it is always carried
 upon procedure entry, and since all calls must go through the procedure table, any
 call can be interrupted. If the overflow check believes that the heap safety value is
 larger than the current distance between the heap and backtrack stack, the next call
-will be stopped. The key word is ‘ believes’: the heap safety value could have been
+will be stopped. The key word is ' believes': the heap safety value could have been
 set to an absurdly large value leading to the interruption.
 
 The key to using this as the basis for a general Prolog interrupt mechanism is to provide a method of specifying the reason for the interrupt, together with an interrupt
@@ -329,7 +329,7 @@ Something happens to trigger an interrupt (i.e., to set the heap safety value to
 large value) and f/2 is called. The heap overflow check code will run and the goal
 will now operationally look as though it were
 
-    :- b, c, ‘$int’(f(s,d)), d, f.
+    :- b, c, '$int'(f(s,d)), d, f.
 
 Rather than f/2 running, $int/1 will run. When $int/1 returns, d/0 will run,
 which is what would have happened if f/2 had run and returned. If $int/1
@@ -343,9 +343,9 @@ apparent that it can be used for a variety of purposes, as sketched below.
 
 _A clause decompiler in Prolog itself_: The $int/1 code might be of the form
 ```
-‘$int’(Goal) 
+'$int'(Goal) 
     :- save Goal somewhere,
-       set a ’decompiler’ interrupt.
+       set a 'decompiler' interrupt.
 ```
 The goal would be saved somewhere, and the interrupt code would merely return
 after making sure that the next call would be interrupted. It is not necessary to call
@@ -353,9 +353,9 @@ Goal, because nothing below the clause being decompiled is of interest.
 
 _A debugging trace mechanism_: The $int/1 code would be of the form
 ```
-‘$int’(Goal) 
+'$int'(Goal) 
     :- show user Goal,
-       set a ’trace’ interrupt and call Goal.
+       set a 'trace' interrupt and call Goal.
 ```
 Here, the code will show the user the goal and then call it, after making sure that all
 subgoals in Goal will be interrupted.
@@ -369,7 +369,7 @@ In order for the above operations to take place, the interrupt handler needs to 
 which interrupt has been issued. This is done through the _magic value_. Magic is
 a global variable, which is provided as the first argument to the $int/2 call
 
-    ‘$int’(Magic,Goal)
+    '$int'(Magic,Goal)
 
 Calling $int/2 with the value of Magic passed (as first argument) means that
 the proper interrupt handler will be called. If the value of Magic is allowed to be
@@ -393,7 +393,7 @@ For example, the goal
 
 will call
 
-    ‘$int’(Magic,a)
+    '$int'(Magic,a)
 
 If the clause
 
@@ -405,7 +405,7 @@ is called by the goal
 
 then
 
-    ‘$int’(Magic,a)
+    '$int'(Magic,a)
 
 will be called once again, since after b returns, a/0 is the next goal called. Finally,
 there must be a way of calling a goal, a, without interrupting it, but setting the interrupt
@@ -423,11 +423,11 @@ then
 
 will call
 
-    :- ‘$int’(Magic,b).
+    :- '$int'(Magic,b).
 
 not
 
-    :- ‘$int’(Magic,a).
+    :- '$int'(Magic,a).
 
 However, if a/0 is merely the fact
 
@@ -439,19 +439,19 @@ then the call
 
 will end up calling
 
-    :- ‘$int(Magic,b).
+    :- '$int(Magic,b).
 
 As an extended example of the use of these routines, we will construct a simple
 clause decompiler. The code sketched earlier outlines the general idea:
 ```
-‘$int’(Goal) :- 
+'$int'(Goal) :- 
     save Goal somewhere,
-    set a ’decompiler’ interrupt.
+    set a 'decompiler' interrupt.
 ```
 The goal can be saved for the next call inside a term in the variable Magic. The
 clause so far would be
 ```
-‘$int’(s(Goals,Final),NewGoal) 
+'$int'(s(Goals,Final),NewGoal) 
     :- 
     setPrologInterrupt(s([Goal|Goals],Final)),
     forcePrologInterrupt.
@@ -478,28 +478,28 @@ running, each subgoal will pick up its variables from the clause environment. If
 decompiler should ever backtrack, the procedure for Head will backtrack, going on
 to the next clause, which will be treated in the same way. The only tricky thing is
 the stopping of the decompiler. The two clauses given above will decompile the entire computation, including the code which called the decompiler. The best method
-is to have a goal which the decompiler recognizes as being an ‘end of clause flag’.
+is to have a goal which the decompiler recognizes as being an 'end of clause flag'.
 However, having a special goal which would always stop the decompiler would
 mean that the decompiler would not be able to decompile itself. So some way must
-be found to make only the particular call to this ‘distinguished’ goal be the one at
+be found to make only the particular call to this 'distinguished' goal be the one at
 which the decompiler will stop. The clauses above can be changed to the following
 to achieve this goal:
 ```
-‘$int’(s(ForReal,Goals,Final),$endSource(Variable)
+'$int'(s(ForReal,Goals,Final),$endSource(Variable)
     :- ForReal == Variable,!.
 
-‘$int’(s(ForReal,Goals,Final),Goal) 
+'$int'(s(ForReal,Goals,Final),Goal) 
     :- setPrologInterrupt(s(ForReal, [Goal|Goals],Final)),
        forcePrologInterrupt.
 
-‘$source’(Head,Body) 
+'$source'(Head,Body) 
     :- setPrologInterrupt(s(ForReal,[],Body)),
        callWithDelayedInterrupt(Head),
-       ‘$endSource’(ForReal).
+       '$endSource'(ForReal).
 ```
 Here, $source/2 has a variable ForReal in its environment. This is carried
 through the interrupts inside the term in Magic. If the interrupted goal is ever
-$endSource(ForReal), the decompiler stops. Note that $endSource(ForReal) will be caught when $source/2 is called, since all subgoals are then being caught, and it’s argument will come from the environment of
+$endSource(ForReal), the decompiler stops. Note that $endSource(ForReal) will be caught when $source/2 is called, since all subgoals are then being caught, and it's argument will come from the environment of
 $source/2. Otherwise, the interrupted goal is added to the growing list of subgoals, and the computation continues. If $source/2 is called by $source/2,
 there will be a new environment and the first $endSource/1 encountered will be
 caught and stored, but not the second one. The complete code for the decompiler
@@ -584,7 +584,7 @@ alarm_handler(EventId, Goal, Context)
        propagate_event(EventId,Goal,Context).
 
 alarm_handler(_,Goal,_)
-    :- write(‘a_h_Goal’=Goal), nl,
+    :- write('a_h_Goal'=Goal), nl,
        setSavedGoal(Goal),
        remQueue(NewGoal),
        NewGoal.
@@ -663,7 +663,7 @@ alarm_handler(EventId, Goal, Context)
        !,
        propagate_event(EventId,Goal,Context).
 alarm_handler(_,Goal,_) 
-    :- write(‘a_h_Goal’=Goal), nl,
+    :- write('a_h_Goal'=Goal), nl,
        setSavedGoal(Goal),
        remQueue(NewGoal),
        NewGoal.

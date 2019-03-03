@@ -19,9 +19,9 @@ except for possible differences in efficiency. However, programs which must inte
 
 Symbols are entered in the symbol table only once, so comparison between atoms
 which are symbols is very fast. This is because only the symbol table indices need
-to be compared. In contrast, UIAs are stored on the heap as the sequence of characters in the atom’s print name (together with header/footer information). Comparison of a symbol with a UIA, or a UIA with a UIA, is somewhat slower because
+to be compared. In contrast, UIAs are stored on the heap as the sequence of characters in the atom's print name (together with header/footer information). Comparison of a symbol with a UIA, or a UIA with a UIA, is somewhat slower because
 the two atoms must be compared by comparing the characters in their print names.
-Thus, it is desirable to store atoms as symbols if they are likely to often be compared with other atoms. This includes the functors of structures and the distinguished program constants such as ’:-’ or ’+’, etc. On the other hand, many programs contain atoms which are seldom or never compared with other atoms. Prompt messages and other output strings are good examples, as are atoms read when
+Thus, it is desirable to store atoms as symbols if they are likely to often be compared with other atoms. This includes the functors of structures and the distinguished program constants such as ':-' or '+', etc. On the other hand, many programs contain atoms which are seldom or never compared with other atoms. Prompt messages and other output strings are good examples, as are atoms read when
 searching a file. These objects should usually be stored as UIAs to avoid clogging
 up the symbol table.
 
@@ -40,9 +40,9 @@ already in the symbol table.
 
 Consider the following clauses:
 ```
-p(’x’,y) :- q(’f’,’x’).
-p(f(y),’wombat’).
-p(x,’wombat’).
+p('x',y) :- q('f','x').
+p(f(y),'wombat').
+p(x,'wombat').
 ```
 Let us assume that none of p, q, x, y, f, or wombat are initially in the symbol table
 when these clauses are first read. Both p and q will be put into the symbol table
@@ -62,10 +62,10 @@ As such, they are rarely compared with other atoms.
 It is sometimes desirable, under direct program control, to intern an atom which
 was originally stored as a UIA. This will cause all future occurrences of the atom,
 whether read by the parser or processed by name/2, to be turned into symbols.
-This is accomplished by using functor/3. Suppose that the constant ’ProgramConstant’ should be interned. This atom cannot be written in a program text without enclosing it in single quotes, because otherwise it would be read as a
+This is accomplished by using functor/3. Suppose that the constant 'ProgramConstant' should be interned. This atom cannot be written in a program text without enclosing it in single quotes, because otherwise it would be read as a
 variable. The way to turn this into a constant is to issue the goal:
 
-    functor(_,’ProgramConstant’,0).
+    functor(_,'ProgramConstant',0).
 
 If a large number of constants need to be interned, it may be desirable to write an
 intern predicate which might take the following form.
@@ -75,7 +75,7 @@ intern([H|T]) :- intern(H), intern(T).
 ```
 This could then be called in the following manner:
 
-    intern([ ’ProgramConstant’, ’AnotherConstant’, ’YetAnotherConstant’ ]).
+    intern([ 'ProgramConstant', 'AnotherConstant', 'YetAnotherConstant' ]).
 
 All three quoted strings will be interned so that later occurrences will be stored as
 symbols. The PI_forceuia() function can also be used to intern UIAs. See
@@ -89,12 +89,12 @@ There are several additional predicates which can be used to manipulate UIAs. A
 UIA of specific length can be created with a call to $uia_alloc/2 with the following
 arguments:
 
-    ‘$uia_alloc’(BufLen,UIABuf)
+    '$uia_alloc'(BufLen,UIABuf)
 
 BufLen should be instantiated to a positive integer which represents the size (in
 bytes) of the UIA to allocate. The actual size of the buffer allocated will be a multiple of four greater than or equal to BufLen. UIABuf should be a variable. UIAs
 created with $uia_alloc are initially filled with zeros, and will unify with the null
-atom (’’).
+atom ('').
 
 ### 7.3.2 Modifying UIAs
 
@@ -102,7 +102,7 @@ Values can be inserted into a UIA buffer using a number of different routines. W
 will discuss two of them here: $uia_pokeb/3 and $uia_pokes/3. The modifications
 are destructive, and persist across backtracking.  (Note that these procedures can be used to modify system atoms (file names and strings that are represented as UIAs). However, this use is strongly discouraged.)  $uia_pokeb/3 is called as follows:
 
-    ‘$uia_pokeb’(UIABuf,Offset,Value)
+    '$uia_pokeb'(UIABuf,Offset,Value)
 
 UIABuf should be a buffer obtained from $uia_alloc/2. The buffer is viewed
 as a vector of bytes with the first byte having offset zero. Offset is the offset
@@ -115,7 +115,7 @@ Figure. Action of $uia_pokeb/2.
 
 $uia_pokes/3 is called in the following form:
 
-‘$uia_pokes’(UIABuf,Offset,Insert)
+'$uia_pokes'(UIABuf,Offset,Insert)
 
 UIA Buf and Offset are as above. Insert is an atom or another UIA. Like
 $uia_pokeb/3, $uia_pokes/3 views the buffer as a vector of bytes with offset zero specifying the first byte. But instead of replacing just a single byte,
@@ -131,9 +131,9 @@ Figure. Action of $uia_pokes/3.
 $uia_peekb/3, $uia_peeks/3, and $uia_peeks/4 are used to obtain specific
 bytes and symbols (UIAs) from a buffer created by $uia_alloc/2. The parameters for these procedures are specified as follows:
 ```
-‘$uia_peekb’(UIABuf,Offset,Value)
-‘$uia_peeks’(UIABuf,Offset,Extract)
-‘$uia_peeks’(UIABuf,Offset,Size,Extract)
+'$uia_peekb'(UIABuf,Offset,Value)
+'$uia_peeks'(UIABuf,Offset,Extract)
+'$uia_peeks'(UIABuf,Offset,Size,Extract)
 ```
 These parameters are interpreted in the same manner as the parameters for
 $uia_pokeb/3 and $uia_pokes/3, where Size must also be an integer.
@@ -152,12 +152,12 @@ copy_atom_to_uia(Atom, UIABuf)
 
 copy_list_to_uia(Ints,UIABuf) 
     :- length([_|Ints], BufLen),
-       ‘$uia_alloc’(BufLen, UIABuf),
+       '$uia_alloc'(BufLen, UIABuf),
        copy_list_to_uia(Ints, 0, UIABuf).
 
 copy_list_to_uia([],_,_) :- !.
 copy_list_to_uia([H | T], N, Buf) 
-    :- ‘$uia_pokeb’(Buf,N,H),
+    :- '$uia_pokeb'(Buf,N,H),
        NN is N+1,
        copy_list_to_uia(T, NN, Buf).
 ```
@@ -182,20 +182,20 @@ $uia_poke/4  - modifies the specified region of a UIA
 ```
 In addition, there are three useful routines for dealing with the sizes of UIAs. The call
 
-    ‘$uia_size’(UIABuf, Size)
+    '$uia_size'(UIABuf, Size)
 
 returns the actual size (in bytes) of the given UIA. 
 
 If Size is less than or equal to the actual size of the given UIABuf, the call
 
-    ‘$uia_clip’(UIABuf,Size)
+    '$uia_clip'(UIABuf,Size)
 
 reduces the size of UIABuf by removing all but one of the trailing zeros (null
 bytes). 
 
 When Atom is a Prolog atom (symbol or UIA),
 
-    ‘$strlen(Atom,Size)’
+    '$strlen(Atom,Size)'
 
 returns the length of the print name of that atom (thus not counting the terminating
 null byte).
@@ -217,12 +217,12 @@ usually stay there, and pointers to them be passed to the Prolog side.
 * Strings and structs which are created on the Prolog side and which are
 ephemeral in the sense that the C side will consume them when they are initially passed, and no further reference will be made to them from the C side,
 can be created as UIAs. Note that if after control returns to Prolog, a garbage collection will sooner or later take place. In all likelihood, the UIA object will either pass out of existence, or at least move its location on the
-heap, so that if C ’holds on’ to the pointer it was passed, this pointer will no
+heap, so that if C 'holds on' to the pointer it was passed, this pointer will no
 longer be valid. Thus, one only wants to pass UIAs to C when they are
 ephemeral in the sense above: C will not hold on to a pointer to the UIA
 after control returns to Prolog.
 * When non-ephemeral objects are to be created under Prolog control, it is
-best to create these in ’C space’ by calling malloc. This can be done either
+best to create these in 'C space' by calling malloc. This can be done either
 by creating a specific C-defined Prolog predicate which carries out the
 work, or by using the C interface utilities which allow Prolog to call malloc
 and manipulate the allocated C memory.

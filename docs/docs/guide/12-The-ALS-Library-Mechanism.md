@@ -7,7 +7,7 @@
 * TOC
 {:toc}
 
-The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called ’builtin’ and those which are called ’library’ is quite gray.
+The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools.
@@ -20,7 +20,7 @@ them which must cause the library file to be loaded.
 
 Like most symbolic languages, ALS Prolog utilizes a name table which is a hash
 table recording the association between names of predicates and the internal addresses at which their executable code is stored. Quite simply, the ALS library
-mechanism replaces the normal name table entry for the library predicates by a special ’stub’ name table entry which accomplishes three things:
+mechanism replaces the normal name table entry for the library predicates by a special 'stub' name table entry which accomplishes three things:
 * it indicates that the predicate in question is a library predicate;
 * it indicates the file in which the library predicate resides;
 * it issues an internal ALS Prolog interrupt which is regarded as a library interrupt.
@@ -388,7 +388,7 @@ flatten_comma_list/2
 flatten_comma_list(SourceList, ResultList)
 flatten_comma_list(+, -)
 ```
--- flattens nested comma lists and removes extraneous trues’
+-- flattens nested comma lists and removes extraneous trues'
 
 If SourceList is a comma list (i.e., (a,b,c,...) ), then ResultList is also a comma list
 which is the result of removing all extraneous nesting and all extraneous occurrences of the atom true.
@@ -514,7 +514,7 @@ and TargetFile = fooout, gen_file_header/3 outputs a header of the following for
 In gen_file_header/4, the argument ExtraCall is called just before the printing of the
 lower comment line. Thus, if ExtraCall were
 
-    printf(OutStream,’         -- by zipper_foo\n’,[]),
+    printf(OutStream,'         -- by zipper_foo\n',[]),
 
 the output would look like:
 ```

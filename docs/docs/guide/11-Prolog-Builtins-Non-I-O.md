@@ -58,7 +58,7 @@ then Term is unified with the nth argument of Structure.
 Term =.. List
 ? =.. ?
 ```
-Term =.. List (pronouced ‘univ’) translates between terms and lists of their
+Term =.. List (pronouced 'univ') translates between terms and lists of their
 components. If Term is instantiated, List will be unified with a list of the form [F,
 A1,...,An], where F is the functor of Term and A1,...,An are the arguments
 of Term. Conversely, if List is of the form [F, A1,...,An] where F is an atom,
@@ -423,8 +423,8 @@ repeat
 repeat/0 always succeeds, even during backtracking.
 ```
 $findterm/5
-’$findterm’(Functor,Arity,HeapPos,Term,NewHeapPos)
-’$findterm’(+, +, +, ?, -)
+'$findterm'(Functor,Arity,HeapPos,Term,NewHeapPos)
+'$findterm'(+, +, +, ?, -)
 ```
 A low-level predicate for searching the heap.
 ```
@@ -499,7 +499,7 @@ consult/2 allows one to load files (either singly or a list) under various optio
 ```
 where Options is a list of consult options.  The most useful is to add a folder to override the system search path for the duration of this consult.  For example:
 ```
-	consult(['id.pro', 'hickory.pro'], [search_path('examples/als’)]).
+	consult(['id.pro', 'hickory.pro'], [search_path('examples/als')]).
 ```
 ```
 consultmessage/1
@@ -563,10 +563,10 @@ all_ntbl_entries/4
 ```
 Retrieve information concerning all Prolog- or C-defined procedures.
 ```
-’$procinfo’/5
-’$nextproc’/3
-’$exported_proc’/3
-’$resolve_module’/4
+'$procinfo'/5
+'$nextproc'/3
+'$exported_proc'/3
+'$resolve_module'/4
 ```
 Retrieve detailed information about a given procedure.
 
@@ -602,7 +602,7 @@ set_date_pattern(Pattern).
 set_date_pattern(+).
 ```
 The acceptable arguments to set_date_pattern/1 are ground terms built up out
-of the atoms yy, mm, and dd, separated by the slash ’/’, such as
+of the atoms yy, mm, and dd, separated by the slash '/', such as
 
     mm/dd/yy or dd/mm/yy.
 
@@ -654,13 +654,13 @@ degree of portability across operating systems. They do not claim to handle or s
 But they do deal with most normal file and path names encountered in practice.
 Consequently they make it possible to write fairly machine-independent code. The
 approach is to simply parse incoming path expressions into elementary lists, and to
-’pretty-print’ outgoing lists into the appropriate path expressions. The internal representations are simply lists consisting of the significant elements of the path and
+'pretty-print' outgoing lists into the appropriate path expressions. The internal representations are simply lists consisting of the significant elements of the path and
 file name. These predicates are defined in the builtins file filepath.pro. When running on a particular operating system (Unix, Windows, Macintosh), the top-level
 predicates determine the running OS, and call the parameterized lower-level predicates. Thus, some calls involving OS-specific path names will succeed under one
 OS and fail under another. For Windows path names, it is important to remember
-that ‘\’ is the ISO Prolog standard escape character in (quoted) atoms, and hence occurrences of ‘\’ as a directory separator must generally be doubled, as in:
+that '\' is the ISO Prolog standard escape character in (quoted) atoms, and hence occurrences of '\' as a directory separator must generally be doubled, as in:
 
-    ‘C:\\star\\flow\\foo.pro’
+    'C:\\star\\flow\\foo.pro'
 
 The primary predicates described in this Section are the following:
 ```
@@ -686,10 +686,10 @@ file_extension(?, ?, ?)
 This predicate is used for splitting or composing file (and path) names around the
 dot which separates the extension. Examples:
 ```
-file_extension(‘foo.bar’, F, X) => F = foo, X = bar.
-file_extension(‘/star/flow/foo.bar, F, X) => F = ‘/star/flow/foo’, X = bar.
-file_extension(silly, F, X) => F = silly, X = ‘’.
-file_extension(N, foo, bar) => N = ‘foo.bar’.
+file_extension('foo.bar', F, X) => F = foo, X = bar.
+file_extension('/star/flow/foo.bar, F, X) => F = '/star/flow/foo', X = bar.
+file_extension(silly, F, X) => F = silly, X = ''.
+file_extension(N, foo, bar) => N = 'foo.bar'.
 ```
 ```
 path_directory_tail/3.
@@ -717,9 +717,9 @@ path_directory_tail(Path, Directory, Tail)
 ```
 **Examples:**
 ```
-path_directory_tail(‘foo.bar’, F, T) => F = ‘.’, X = ‘foo.bar.’
-path_directory_tail(‘/star/flow/foo.bar, F, T) => F = ‘/star/flow’, X = ‘foo.bar’.
-path_directory_tail(‘/star/flow/sirius, F, T) => F = ‘/star/flow’, X = sirius.
+path_directory_tail('foo.bar', F, T) => F = '.', X = 'foo.bar.'
+path_directory_tail('/star/flow/foo.bar, F, T) => F = '/star/flow', X = 'foo.bar'.
+path_directory_tail('/star/flow/sirius, F, T) => F = '/star/flow', X = sirius.
 ```
 ```
 is_absolute_path/1.
@@ -735,16 +735,16 @@ is_absolute_path(Path)
 ```
 Examples which succeed when running on the appropriate OS:
 ```
-is_absolute_path(‘/star/flow/foo.pro’).
-is_absolute_path(‘C:\\star\\flow\\foo.pro’).
-is_absolute_path(‘mozart:star:flow:foo.pro’).
+is_absolute_path('/star/flow/foo.pro').
+is_absolute_path('C:\\star\\flow\\foo.pro').
+is_absolute_path('mozart:star:flow:foo.pro').
 ```
 Examples which fail:
 ```
-is_absolute_path(‘foo.pro’).
-is_absolute_path(‘../foo.pro’).
-is_absolute_path(‘..\\foo.pro’).
-is_absolute_path(‘:foo.pro’).
+is_absolute_path('foo.pro').
+is_absolute_path('../foo.pro').
+is_absolute_path('..\\foo.pro').
+is_absolute_path(':foo.pro').
 ```
 ```
 path_type/2.
@@ -766,7 +766,7 @@ path_type(+, +, -)
 This predicate determines the OS-specific type of a file system path. All paths are
 relative unless determined to be absolute. A path is absolute if:
 ```
-Unix:    It begins with the character ‘/’;
+Unix:    It begins with the character '/';
 
 MacOS:   Same as unix.
 
@@ -828,18 +828,18 @@ These two predicates implement the OS-specific mappings between file system
 paths and lists of their components. They function as inverses of each other.
 **Examples:**
 ```
-Unix: ‘/star/flow/foo.pro’
-              <=> [‘/’,star,flow,’foo.pro’]
+Unix: '/star/flow/foo.pro'
+              <=> ['/',star,flow,'foo.pro']
 
-Windows: ‘C:\\star\\flow\\foo.pro’
+Windows: 'C:\\star\\flow\\foo.pro'
               <=> ['C:\\',star,flow,'foo.pro']
 
 MacOS:  Like Unix
 
 Also:
 
-      join_path([‘/star/flow’,sirius],X)
-           =>   X= ‘/star/flow/sirius’,
+      join_path(['/star/flow',sirius],X)
+           =>   X= '/star/flow/sirius',
 etc.
 ```
 ```
@@ -847,10 +847,10 @@ tilda_expand/2.
 tilda_expand(TildaPath, Path)
 tilda_expand(+, -)
 ```
-This predicate expands occurrences of ‘~’ in settings where this is meaninful, that
+This predicate expands occurrences of '~' in settings where this is meaninful, that
 is, when one of the two follow goals succeeds:
 
-    getenv(’HOME’, Home) ; get_user_home(Name, Home)
+    getenv('HOME', Home) ; get_user_home(Name, Home)
 
 ```
 directory_self/1.
@@ -868,9 +868,9 @@ directory_self(Self)
     :- sys_env(OS, _, _),
        !,
        directory_self(OS, Self).
-directory_self(unix, ’.’).
-directory_self(macos, ’:’).
-directory_self(mswin32, ’.’).
+directory_self(unix, '.').
+directory_self(macos, ':').
+directory_self(mswin32, '.').
 ```
 ```
 same_path/2
@@ -911,7 +911,7 @@ file_status/2   - returns status information concerning a file
 files/2       - returns a list of files, matching a pattern, in the current directory
 files/3       - returns a list of files, matching a pattern, residing in a directory
 subdirs/1     - returns the list of subdirectories of the current directory
-subdirs_red/1 - returns the list of subdirectories of the current directory, sans ’.’ and ’..’
+subdirs_red/1 - returns the list of subdirectories of the current directory, sans '.' and '..'
 directory/3   - returns a list of files of a given type and matching a pattern
 ```
 #### Manipulating Drives:
@@ -959,14 +959,14 @@ files(Pattern,FileList)
 files(+,-)
 ```
 Returns the list (FileList) of all ordinary files in the current directory which
-match Pattern, which can include the usual ’*’ and ’?’ wildcard characters.
+match Pattern, which can include the usual '*' and '?' wildcard characters.
 ```
 files/3
 files(Directory, Pattern,FileList)
 files(+,+,-)
 ```
 Returns the list (FileList) of all ordinary files in the directory Directory which
-match Pattern, which can include the usual ’*’ and ’?’ wildcard characters.
+match Pattern, which can include the usual '*' and '?' wildcard characters.
 ```
 subdirs/1
 subdirs(SubdirList)
@@ -978,8 +978,8 @@ subdirs_red/1
 subdirs_red(SubdirList)
 subdirs_red(-)
 ```
-Returns the list of all subdirectories of the current working directory, omitting ’.’
-and ’..’
+Returns the list of all subdirectories of the current working directory, omitting '.'
+and '..'
 ```
 exists_file/1.
 exists_file(File)
@@ -1012,7 +1012,7 @@ system              |           | 2        | 99        |
 TEXT                |           |          | 99        |
 
 
-Where applicable, permissions for files can be queried and manipulated. Permissions are lists of atoms representing the permission details. The listing below presents the possible permission combinations (order is unimportant). On some systems, some subattributes such as ’execute’ are meaningless.
+Where applicable, permissions for files can be queried and manipulated. Permissions are lists of atoms representing the permission details. The listing below presents the possible permission combinations (order is unimportant). On some systems, some subattributes such as 'execute' are meaningless.
 ```
 []
 [execute]
@@ -1049,7 +1049,7 @@ directory/3
 directory(Pattern,FileType,List)
 directory(+,+,-)
 ```
-If Pattern is a file name pattern, including possibly the ’*’ and '?' wildcard characters, and if FileType is a numeric (internal) file type or a symbolic (abstract) file
+If Pattern is a file name pattern, including possibly the '*' and '?' wildcard characters, and if FileType is a numeric (internal) file type or a symbolic (abstract) file
 type, directory/3 unifies List with a sorted list of atoms of names of files of type
 FileType, matching Pattern, and found in the current directory.
 ```
@@ -1057,7 +1057,7 @@ get_current_drive/1
 get_current_drive(Drive)
 get_current_drive(-)
 ```
-Returns the current logical drive. On Unix, returns the erzataz drive ’’.
+Returns the current logical drive. On Unix, returns the erzataz drive ''.
 ```
 change_current_drive/1
 change_current_drive(Drive)
@@ -1107,8 +1107,8 @@ math_end (-5)
 math_reset (-6)
     Causes the internal buffer pointer to be reset to the point at which 
     math_start was called. This is used internally to throw away some inline 
-    math code after the compiler has decided that it can’t compile it 
-    (as in ‘X is 2.3’ for example).
+    math code after the compiler has decided that it can't compile it 
+    (as in 'X is 2.3' for example).
 
 math_endbranch (-7) 
     Fills in the relative branch associated with an rbranch instruction which 
@@ -1189,7 +1189,7 @@ addto_autouse (-21)
 addto_autoname (-22)
     Causes a procedure name/arity to be added to the autoname list. This is a 
     list of procedures for which “stubs” are created when a module is 
-    initialized.  By default, call/1, ’,’/2, ’;’/2, are on this list. These 
+    initialized.  By default, call/1, ','/2, ';'/2, are on this list. These 
     stubs must exist for context-dependent procedures such as call or setof 
     to work properly.  Arg1 should be set to the procedure name and Arity should 
     be set to the arity.
@@ -1276,7 +1276,7 @@ assert_succ :-
    $icode(-5,0,0,0),         % fill in relative address for math_begin
    $icode(32,1,0,3),         % put_valueA1,A3
    $icode(32,2,0,1),         % put_valueA2,A1
-   $icode(37,’+’,2,2),       % put_structure’+’/2,A2
+   $icode(37,'+',2,2),       % put_structure'+'/2,A2
    $icode(47,3,0,0),         % unify_local_value A3
    $icode(45,1,0,0),         % unify_integer1
    $icode(3,is,2,0),         % execute is/2
