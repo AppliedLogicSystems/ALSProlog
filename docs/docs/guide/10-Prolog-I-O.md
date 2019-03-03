@@ -52,10 +52,10 @@ bank, thereby either viewing an earlier portion of the stream (the water) or adv
 
 A fundamental principle underlying the notion of stream is this:
 
-````
+```
     A program manipulating a stream need have no knowledge 
     of what lies at the other end of the stream.
-````
+```
 
 Thus, a program which is the source of a stream (is producing a stream) need have
 no knowledge of what is consuming the stream, and a program which is the sink for
@@ -128,7 +128,7 @@ of opening or creating the stream should provide the program with some descripto
 or handle with which to refer to the created stream for future manipulation.
 ### 10.2.1 Stream opening predicates.
 There are two predicates used for opening streams:
-````
+```
 open/3
 open(SourceSink, Mode, Descriptor)
 open(+, +, -)
@@ -136,13 +136,13 @@ open(+, +, -)
 open/4
 open(SourceSink,Mode,Descriptor,Options)
 open(+, +, -, +)
-````
+```
 The three-argument version is simply definable in terms the four-argument version
 by:
-````
+```
 open(SourceSink, Mode, Descriptor)
     :- open(SourceSink, Mode, Descriptor, []).
-````
+```
 The arguments for open/4 are described below.
 
 ### 10.2.2 SourceSink Terms.
@@ -199,14 +199,14 @@ In the second case, which is the general case, DescriptionList is a list of equa
     Tag = Value.
 
 The possible values Tag may take on are:
-````
+```
 domain type protocol port target.
-````
+```
 
 The expressions which Value may take on are determined by the value of Tag. The
 only required tag which must appear is the target tag. Default values are supplied
 for all other tags if no equation is present. The socket tags, the range of corresponding values, and their defaults, are described below.
-````
+```
 domain: values = [af_unix, af_inet]; default = af_unix
 
 type: values = [sock_stream, sock_dgram]; default = sock_stream
@@ -219,16 +219,16 @@ port:
 
 target:
     values = an atom which is an acceptable machine name;
-````
+```
 
 When the socket is a read (incoming) socket, the null atom ’’ can be used.
 Here are several simple examples:
-````
+```
 socket(jarrett)
 socket(’’)
 socket([target=’’, domain=af_inet, type=sock_stream])
 socket([target=jarrett, domain=af_inet, type=sock_dgram])
-````
+```
 
 #### Windows.
 
@@ -278,7 +278,7 @@ will capture all characters written to S (write,nl,printf, etc.), and when S is 
 For both read and write url streams, the Curl options available are exactly the same as for http/3 or curl/1-3 in Section 10.11.
 
 Examples:
-````
+```
 ?- open(url('http://example.com/',[response_code(RC),total_time(TTT),result=_]), read, _,[alias(myStream)]), get_line(myStream,L),close(myStream).
 
 RC=200
@@ -294,7 +294,7 @@ S=stream_descriptor('',closed,string,string("abcdef"),[noinput|output],false,
     true,0)
 
 yes.
-````
+```
 
 ### 10.2.3 Immediate versu Delayed Streams.
 
@@ -352,12 +352,12 @@ since the last unfinished read.
 ### 10.2.4 Modes.
 
 There are four possible modes for a stream:
-````
+```
 read
 write
 read_write
 append
-````
+```
 However, only file streams support the read_write and append modes at the present
 time; all other streams only support the read or write modes.
 The mode names rather clearly indicate the manner in which the streams to which
@@ -409,10 +409,10 @@ stream creation; these will be discussed later.)
 Some streams can be repositioned during program execution. These options indicate the type of repositionion which is requested for the stream. Not all streams support such repositioning. It the stream to be opened does not support the requested
 repositioning, the repositioning request generates an exception from open/4..
 There are two types of repositioning requests:
-````
+```
 reposition(true)
 reposition(false)
-````
+```
 The first indicates that the stream should support repositioning to any meaningful
 position (The ISO standard only requires that the stream should support repositioning to any previously occupied position). The second indicates simply that repositioning is not requested.
 
@@ -426,11 +426,11 @@ some other kinds of streams. A buffering option is indicated by a term of the fo
     buffering(BOption)
 
 where BOption is one of the following three atoms:
-````
+```
 byte
 line
 block
-````
+```
 These options determine how often data is moved between the stream buffer and the
 source or destination. The first, byte, indicates that data should be moved on every
 character or byte (according as the stream is text or binary) handled by the program; in essence, this specifies no buffering should be used. The second, line, indicates that data should be moved on a line-by-line basis. The third option, block,
@@ -461,27 +461,27 @@ is empty, before attempting to refill the stream’s buffer from the external so
 the system will first execute the goal Goal. Here is how this option is normally
 used. Suppose we wish to use a read mode and write mode stream to window myWin, and that whenever the read stream buffer is empty, we want a prompt to be
 printed on the window. Consider the following code fragment:
-````
+```
 open(window(myWin),write, [buffering(line),text], OutStream),
 open(window(myWin), read, [prompt_goal(user_prompt_goal(OutStream))], InStream),
-````
+```
 Both streams are opened with line buffering; the write stream is explicitly indicated to be a text stream, while the read stream is a text stream by default (this is just by way of example). 
 In addition, the read stream has a prompt_goal option
 applied. Whenever the buffer of the read stream is empty, the system will first run
 the generic goal
-````
+```
 get_user_prompt(Prompt), put_atom(Stream,Prompt), flush_output(Stream).
-````
+```
 In this case,
-````
+```
     user_prompt_goal(OutStream).
-````
+```
 The code defining this goal could be:
-````
+```
 user_prompt_goal(Stream)
     :- put_atom(Stream, ’>>’),
        flush_output(Stream).
-````
+```
 Here the desired prompt is ’>>’ . The I/O routines put_atom/2 and
 flush_output/1 will be described in later sections.
 
@@ -494,11 +494,11 @@ the form
     eof_action(Action)
 
 where Action is one of the following atoms:
-````
+```
 error
 eof_code
 reset
-````
+```
 The interpretations of these action options are as follows:
 
 * error:An I/O end-of-file error exception is raised, signifying that no more input
@@ -515,11 +515,11 @@ output by nl/1. A write end-of-line option is indicated by a term of the form
     write_eoln_type(Type)
 
 where Type is one of the following three atoms:
-````
+```
 cr
 lf
 crlf
-````
+```
 These options determine what characters are output by nl/1. The first, cr, indicates that a carriage return (“\r”) should be output. The second, lf, indicates
 that a line feed (“\n”) should be output. The third, crlf, indicates that a carriage
 return followed by a line feed (“\r\n”) should be output.
@@ -558,11 +558,11 @@ is what the Prolog standard describes as implementation dependent. As such, impl
 stream descriptor is used simply as a means of referring to the stream in the predicates described in the following sections.
 
 ### 10.2.7 Closing Streams.
-````
+```
 close/1.
 close(Stream_or_Alias).
 close(+).
-````
+```
 Streams are very easily closed. One simply uses the unary predicate close/1 applied
 either to the stream descriptor or to an alias for the stream:
 
@@ -603,11 +603,11 @@ When ALS Prolog starts up, the current input and output streams are automaticall
 set to the standard input and output streams. However, the program can change the
 settings of the current input and output streams. The following predicates are used
 for manipulating the current streams.
-````
+```
 current_input/1
 current_input(Stream)
 current_input(?)
-````
+```
 The goal
 
     current_input(Stream)
@@ -617,11 +617,11 @@ means that current_input unifies Stream with the stream descriptor of the
 current input stream. Note that this means that current_input applies to
 stream descriptors. In particular, even if Alias is an alias for the current input
 stream, calling current_input(Alias) will fail.
-````
+```
 current_output/1
 current_output(Stream)
 current_output(?)
-````
+```
 The goal
 
     current_output(Stream)
@@ -631,11 +631,11 @@ means that current_output unifies Stream with the stream descriptor of the
 current output stream. Note that this means that current_output applies to
 stream descriptors. In particular, even if Alias is an alias for the current output
 stream, calling current_output(Alias) will fail.
-````
+```
 set_input/1
 set_input(Stream_or_alias)
 set_input(+)
-````
+```
 set_input/1 is used to set the current input stream. If Stream_or_alias
 is instantiated to either a stream descriptor of a stream in either read or read_write
 mode, or is instantiated to an alias for such a stream,
@@ -645,11 +645,11 @@ stream associated with Stream_or_alias. If Stream_or_alias is inappropriate for 
 Thus
 set_input(S_or_a) cannot fail. Either it succeeds or it raises an exception, in
 which case the current input stream remains unchanged.
-````
+```
 set_output/1
 set_output(Stream_or_alias)
 set_output(+)
-````
+```
 set_output/1 is used to set the current output stream.  If Stream_or_alias is instantiated to either a stream descriptor of a stream in either write, read_write, or append mode, or is instantiated to an alias for such a
 stream, then a call to
 
@@ -663,11 +663,11 @@ stream remains unchanged. .
 
 ### 10.3.3 Stream Charcteristics
 
-````
+```
 stream_property/2
 stream_property(Stream, Property)
 stream_property(?, ?)
-````
+```
 stream_property/2 is used to determine whether or not a given property applies to a given stream; It can also be used to enumerate or generate the (open)
 streams possessing a certain property. Declaratively,
 
@@ -723,49 +723,49 @@ This goal will enumerate all the properties for all streams which were open befo
 this goal was run. Note that this example may call close(S) several times for
 each stream S, but this does not cause any problem since close simply succeeds
 if called on a stream which is already closed.
-````
+```
 is_stream/2
 is_stream(Stream_or_alias, Stream)
 is_stream(+, ?)
-````
+```
 Succeeds when Stream_or_alias is a stream or alias and will bind Stream to the
 corresponding stream.
-````
+```
 assign_alias/2.
 assign_alias(Alias, Stream_or_alias)
 assign_alias(+, +)
-````
+```
 If Stream_or_alias is associated with the stream S, and if Alias is a term, associates Alias to S as an alias. Note that a given stream can carry more than one alias,
 and that Alias can be a compound term.
-````
+```
 cancel_alias/1.
 cancel_alias(Alias)
 cancel_alias(+)
-````
+```
 If Alias is currently associated with stream S as an alias, removes the alias association between Alias and S.
-````
+```
 reset_alias/2.
 reset_alias(Alias, Stream_or_alias)
 reset_alias(+, +)
-````
+```
 If Alias is currently associated with stream S as an alias, and if Stream_or_alias
 is associated with stream S’, first removes the association between Alias and
 stream S, and then associates Alias to stream S’ as an alias.
-````
+```
 current_alias/2.
 current_alias(Alias,Stream)
 current_alias(?,?)
-````
+```
 Succeeds iff Alias is an alias which is associated with the stream Stream.
 
 ### 10.3.4 Stream Positions
 
-````
+```
 at_end_of_stream/0
 at_end_of_stream/1
 at_end_of_stream(Stream_or_alias)
 at_end_of_stream(+)
-````
+```
 Consider a stream S which has been opened for input. If the stream S is of finite
 length, it is possible to reach a state in which all the characters or bytes in the stream
 S have been read by input routines
@@ -792,61 +792,61 @@ succeeds when called in the past end of stream state. A stream need not have an
 end, in which case this predicate would never succeed for that stream. If the source
 for S_or_a is a device such as a terminal, and if there is no input currently available on that device, then at_end_of_stream will wait for input just as get_code
 would do.
-````
+```
 at_end_of_line/0.
 at_end_of_line/1.
 at_end_of_line(Alias_or_stream)
 at_end_of_line(+)
-````
+```
 These predicates determine whether a stream is at positioned at the end of a line, in
 an elementary way. They simply attempt to perform a peek_char on the stream,
 and determine if the character returned is identical with newline (i.e., the character
 with code 0’\n). The are defined by:
-````
+```
 at_end_of_line
     :- get_current_input_stream(Stream),
        at_end_of_line(Stream).
 
 at_end_of_line(Alias_or_stream)
     :- peek_char(Alias_or_stream,0’\n).
-````
-````
+```
+```
 flush_output/0
 flush_output/1
 flush_output(Stream_or_alias)
 flush_output(+)
-````
+```
 If the stream associated with Stream_or_alias is a currently open output
 stream, then any output which is currently buffered by the system for that stream
 is (physically) sent to that stream, and flush_output(Stream_or_alias)
 succeeds.
 
 flush_output/0 flushes the current output stream; it is defined by
-````
+```
 flush_output
     :- current_output(Stream),
        flush_output(Stream.
-````
-````
+```
+```
 flush_input/0
 flush_input/1
 flush_input(Stream_or_alias)
 flush_input(+)
-````
+```
 If the stream associated with Stream_or_alias is a currently open input
 stream, then any input which is currently buffered by the system for this stream is
 discarded, and flush_input(Stream_or_alias) succeeds.
 flush_input/0 flushes the current input stream; it is defined by
-````
+```
 flush_input
     :- current_input(Stream),
        flush_input(Stream).
-````
-````
+```
+```
 stream_position/3
 stream_position(Stream_or_alias, Current_position, New_position)
 stream_position(+, ?, ?)
-````
+```
 If the stream associated with Stream_or_alias supports repositioning, then
 the call to stream_position/3 causes Current_position to be unified
 with the current stream position of the stream, and, as a side effect, the stream
@@ -866,46 +866,46 @@ relative to the end of the stream. The position represented by this term is
 the end-of-stream position plus N bytes.
 * The atom current_position.
 * The term current_position(N) where N is an integer. This allows positions to be specified relative to the current position in the file.
-````
+```
 set_stream_position/2
 set_stream_position(Stream_or_alias, Position)
 set_stream_position(+, +)
-````
+```
 set_stream_position(Stream_or_alias, Position) changes the position of
 the stream associated with Stream_or_alias to Position. This predicate is
 effectively defined by:
-````
+```
 set_stream_position(Stream_or_alias, Position)
     :- stream_position(Stream_or_alias, _, Position).
-````
+```
 The possible error exceptions are the same as those for stream_position/3.
 
 ## 10.4 Byte Input/Output.
 
-````
+```
 get_byte/1
 get_byte(Byte)
 get_byte(?)
-````
+```
 Unifies Byte with the next byte obtained from the current input stream.
-````
+```
 get_byte/2
 get_byte(Alias_or_stream, Byte)
 get_byte(+, ?)
-````
+```
 Unifies Byte with the next byte obtained from the stream associated with
 Alias_or_stream.
-````
+```
 put_byte/1
 put_byte(Byte)
 put_byte(Byte)
-````
+```
 Outputs the byte Byte to the current output stream.
-````
+```
 put_byte/2
 put_byte(Alias_or_stream,Byte)
 put_byte(Alias_or_stream,Byte)
-````
+```
 Outputs the byte Byte to the stream associated with Alias_or_stream.
 
 ## 10.5 Character Input/Output.
@@ -915,7 +915,7 @@ While these predicates are primarily inteded for use on streams opened in text
 mode, they have meaning for streams opened in binary mode, unless otherwise indicated. There are related byte-oriented predicates for streams opened in binary
 mode. (Note that ALS Prolog is more relaxed than the ISO standard; the latter states
 that character operations cannot be performed on binary streams, and that byte operations cannot be performed on character streams)
-````
+```
 get_char/1
 get_char(Char)
 get_char(?)
@@ -923,13 +923,13 @@ get_char(?)
 get_char/2
 get_char(S_or_a, Char)
 get_char(+, ?)
-````
+```
 get_char(Char) is equivalent to get_char(S, Char) where S is the current input stream; that is, get_char/1 is effectively defined by:
-````
+```
 get_char(Char)
     :- current_input(Stream),
        get_char(Stream, Char).
-````
+```
 Let Stream_or_alias be properly instantiated, and let S be the stream associated with Stream_or_alias. Then if S is a text stream,
 
     get_char(Stream_or_alias, Char)
@@ -943,7 +943,7 @@ a delayed stream, and is in the delayed state when the goal is issued, Char is b
 
 ![](images/GetCharExamples.png)
 
-````
+```
 get_nonblank_char/1
 get_nonblank_char(Char)
 get_nonblank_char(-)
@@ -951,18 +951,18 @@ get_nonblank_char(-)
 get_nonblank_char/2
 get_nonblank_char(Stream, Char)
 get_nonblank_char(+, -)
-````
+```
 get_nonblank_char/1 is defined by
 
-````
+```
 get_nonblank_char(Char)
     :- get_current_input_stream(Stream),
        get_nonblank_char(Stream,Char).
-````
+```
 get_nonblank_char(Stream, Char) unifies Char with the next nonwhitespace character obtained from the input stream associated with
 Alias_or_stream, if such a character occurs before the next end of line, and
 unifies Char with the atom end_of_line otherwise.
-````
+```
 get_atomic_nonblank_char/1
 get_atomic_nonblank_char(Char)
 get_atomic_nonblank_char(-)
@@ -970,13 +970,13 @@ get_atomic_nonblank_char(-)
 get_atomic_nonblank_char/2
 get_atomic_nonblank_char(Stream, Char)
 get_atomic_nonblank_char(+, -)
-````
+```
 get_atomic_nonblank_char/1 is defined by
-````
+```
 get_atomic_nonblank_char(Char)
     :- get_current_input_stream(Stream),
        get_atomic_nonblank_char(Stream,Char).
-````
+```
 get_atomic_nonblank_char(Stream, Char) unifies Char with the
 atomic form of the next non-whitespace character obtained from the input stream
 associated with Alias_or_stream, if such a character occurs before the next
@@ -985,7 +985,7 @@ end of line, and unifies Char with the atom
     end_of_line
 
 otherwise. It is defined by
-````
+```
 get_atomic_nonblank_char(Stream,Char)
     :- get_nonblank_char(Stream,Char0),
        (Char0 = end_of_line ->
@@ -993,8 +993,8 @@ get_atomic_nonblank_char(Stream,Char)
             ;
             name(Char, [Char0])
        ).
-````
-````
+```
+```
 peek_char/1.
 peek_char(Char)
 peek_char(-)
@@ -1002,11 +1002,11 @@ peek_char(-)
 peek_char/2
 peek_char(Alias_or_Stream, Char)
 peek_char(+, -)
-````
+```
 peek_char(Char) unifies Char with the next character obtained from the default input stream. However, the character is not consumed.
 peek_char(Alias_or_Stream, Char) unifies Char with the next character obtained from the stream associated with Alias_or_Stream. However,
 the character is not consumed.
-````
+```
 put_char/1
 put_char(Char)
 put_char(+)
@@ -1014,13 +1014,13 @@ put_char(+)
 put_char/2
 put_char(Stream_or_alias, Char)
 put_char(+,+)
-````
+```
 put_char(Char) is equivalent to put_char(S, Char) where S is the current output stream; that is, put_char/1 is effectively defined by
-````
+```
 put_char(Char)
     :- current_output(Stream),
        put_char(Stream, Char).
-````
+```
 If Stream_or_alias is properly instantiated, S is the stream associated with
 Stream_or_alias, and Char is a character, then
 
@@ -1032,7 +1032,7 @@ outputs the character Char to S, and changes the stream position on S to take ac
 
 ![](images/PutCharExamples.png)
 
-````
+```
 put_string/1
 put_string(String)
 put_string(+)
@@ -1040,31 +1040,31 @@ put_string(+)
 put_string/2
 put_string(Alias_or_stream, String)
 put_string(+, +)
-````
+```
 put_string(String) is defined by
-````
+```
 put_string(String)
     :- get_current_output_stream(Stream),
        put_string(Stream, String).
-````
+```
 If String is a Prolog string (i.e., a list of character codes),
 put_string(Alias_or_stream, String) recursively applies put_char
 to String to output the characters associated with String to Alias_or_stream.
-````
+```
 put_atom/2
 put_atom(Alias_or_stream,Atom)
 put_atom(+,+)
-````
+```
 Outputs the atom Atom to the stream associated with Alias_or_stream. Very
 efficient.
-````
+```
 get_number/3
 get_number(Alias_or_stream,InputType,Number)
 get_number(+,+,?)
-````
+```
 Attempts to read a number of the given type InputType from the stream associated with Alias_or_stream, and if successful, unifies the result with Number.
 The possible values for InputType are:
-````
+```
 InputType       Type of Number
 =========       ==============
 byte            signed byte (8 bit)
@@ -1079,39 +1079,39 @@ long            signed integer (32 bit)
 ulong           unsignged integer (32 bit)
 float           floating point (32 bit)
 double          floating point (64 bit)
-````
-````
+```
+```
 put_number/3
 put_number(Stream_or_alias,OutputType,Number)
 put_number(+,+,+)
-````
+```
 put_number(Alias_or_stream,OutputType,Number) outputs the
 number Number as OutputType to the stream associated with
 Stream_or_alias. OutputType may take on the following values:
-````
+```
 byte   short   long   float   double.
-````
-````
+```
+```
 get_line/1
 get_line(Line)
 get_line(?)
-````
+```
 get_line(Line) is defined by
-````
+```
 get_line(Line)
     :- get_current_input_stream(Stream),
        get_line(Stream,Line).
-````
-````
+```
+```
 get_line/2
 get_line(Stream_or_Alias, Line)
 get_line(+, ?)
-````
+```
 Reads the current line or remaining portion thereof from the stream associated with
 Stream_or_Alias into a UIA, and unifies this UIA with Line. If end-of-file
 is encountered before any characters, this predicate will fail. If end-of-file is encountered before the newline, then this predicate will unify Line with the UIA
 containing the characters encountered up until the end-of-file.
-````
+```
 put_line/1
 put_line(Line)
 put_line(+)
@@ -1119,53 +1119,53 @@ put_line(+)
 put_line/2
 put_line(Stream,Line)
 put_line(+,+)
-````
+```
 put_line(Line) is defined by
-````
+```
 put_line(Line)
     :- get_current_output_stream(Stream),
        put_line(Stream,Line).
-````
+```
 put_line(Stream, Line) is defined by
-````
+```
 put_line(Stream,Line)
     :- put_atom(Stream,Line),
        nl(Stream).
-````
-````
+```
+```
 skip_line/0
 skip_line/1
 skip_line(Alias_or_stream)
 skip_line(+)
-````
+```
 skip_line/0 is defined by
-````
+```
 skip_line
     :- get_current_input_stream(Stream),
        skip_line(Stream).
-````
+```
 If Alias_or_stream is open for (text) input,
 skip_line(Alias_or_stream) skips to the next line of input for the stream
 associated with Alias_or_stream.
-````
+```
 nl/0
 nl/1
 nl(Stream_or_alias)
 nl(+)
-````
+```
 nl is equivalent to nl(S) where S is the current output stream; that is,
-````
+```
 nl : -
     current_output(Stream),
     nl(Stream).
-````
+```
 nl(Stream_or_alias) causes the current line or record on the stream associated with Stream_or_alias to be terminated.
 
 ## 10.6 Character Code Input/Output
 
 These predicates provide a means of directly manipulating streams at the character
 code level.
-````
+```
 get_code/1
 get_code(Code)
 get_code(?)
@@ -1173,13 +1173,13 @@ get_code(?)
 get_code/2
 get_code(Stream_or_alias, Int)
 get_code(+,?)
-````
+```
 get_code(Code) is equivalent to get_code(S, Code) where S is the current input stream; i.e., get_code/1 is defined by:
-````
+```
 get_code(Code)
     :- current_input(Stream),
        get_code(Stream,Code).
-````
+```
 Assume that Stream_or_alias is instantiated to a stream descriptor or to the
 alias of a stream descriptor, and let S be the stream associated with
 Stream_or_alias. If S is a text stream then
@@ -1189,22 +1189,22 @@ Stream_or_alias. If S is a text stream then
 is true iff Code unifies with the character code corresponding to the next character
 to be read from Stream, else if S is a binary stream it is true iff Code unifies with
 the next byte to be read from S.
-````
+```
 put_code/1
 put_code(Code)
 put_code(+)
-````
+```
 put_code(Code) is equivalent to put_code(S, Code) where S is the current output stream; i.e., put_code/1 is defined by:
-````
+```
 put_code(Code)
     :- current_output(Stream),
        put_code(Stream, Code).
-````
-````
+```
+```
 put_code/2
 put_code(Stream_or_alias, Code)
 put_code(+,+)
-````
+```
 put_code(Stream_or_alias, Code) outputs the character with code
 Code to the stream associated with Stream_or_alias, and changes the stream
 position on the stream associated with Stream_or_alias to take account of the
@@ -1220,7 +1220,7 @@ terms, there are a variety of options which can be requested. These options are 
 
 A read options list is a list of read options, where the possible read options are defined as follows. Let T be the term which is (to be) read from the input stream.
 
-````
+```
 variables(Vars) 
     Vars is unified with a list of the variables encountered 
     in a left to right traversal of the term T.
@@ -1299,24 +1299,24 @@ attach_fullstop(Bool)
     This option determines if a fullstop is added to the tokens comprising a 
     the term to be read. It is most | useful when used in conjunction with atom
     or list streams.
-````
+```
 
-````
+```
 read_term/2
 read_term(Term, Options)
 read_term(?, +)
-````
+```
 read_term(Term, Options) is equivalent to read_term(S, Term, Options) where S is the current input stream; i.e., read_term/2 is defined by:
-````
+```
 read_term(Term, Options)
     :- current_input(Stream),
        read_term(Stream, Term, Options).
-````
-````
+```
+```
 read_term/3
 read_term(Stream_or_alias, Term, Options)
 read_term(+, ?,+)
-````
+```
 read_term(Stream_or_alias, Term, Options) inputs a sequence TT
 of tokens from the stream associated with Stream_or_alias until an end token
 has been read. It is a syntax error if end of stream is reached before an end token
@@ -1326,7 +1326,7 @@ A ’sequence of tokens’ implies that single quotes and double quotes (if incl
 the standard) are balanced. That is, an apparent end token appearing inside any
 kind of quotes is not an end token. However, parentheses and square brackets need
 not be balanced. The effect of this predicate may be modified by clauses of the special user-defined procedure char_conversion/2.
-````
+```
 read/1
 read(Term)
 read(?)
@@ -1334,24 +1334,24 @@ read(?)
 read/2
 read(Stream_or_alias, Term)
 read(+,?)
-````
+```
 read(Term) is equivalent to read_term(S, Term, []) where S is the current input stream; that is, read/1 is defined by:
-````
+```
 read(Term)
     :- current_input(Stream),
        read_term(Stream, Term, []).
-````
+```
 read(Stream_or_alias, Term) is equivalent to
 
     read_term(Stream_or_alias, Term, []),
 
 so that read/2 is defined by:
-````
+```
 read(Stream_or_alias, Term)
     :- read_term(Stream_or_alias, Term, []).
-````
+```
 The following convenience predicates are quite useful:
-````
+```
 atomread/2
 atomread(Atom,Term)
 atomread(+,-)
@@ -1367,9 +1367,9 @@ bufread(+,-)
 bufread/3
 bufread(String,Term,Options)
 bufread(+,-,+)
-````
+```
 These are defined as follows:
-````
+```
 atomread(Atom,Term)
     :- atomread(Atom,Term,[]).
 
@@ -1385,7 +1385,7 @@ bufread(String,Term,Options)
     :- open(string(String),read,Stream),
        read_term(Stream,Term, [attach_fullstop(true)|Options]),
        close(Stream).
-````
+```
 
 ### 10.7.2 Write options.
 
@@ -1397,7 +1397,7 @@ are represented using identifiers of the forms A, ...., Z, A1,....,A2,....... A 
 default setting for each of these options is indicated in square brackets following
 each write option term. Let T be the term being written out, and let the expression
 Bool take on one of the values true or false.
-````
+```
 quoted(Bool) [default: Bool = false]
     If Bool = true, forces all symbols in T to be written out in such a manner that 
     read_term/[2,3] may be used to read them back in. Bool = false indicates that 
@@ -1451,9 +1451,9 @@ depth_computation(Val) [default: Val = nonflat]
 
 line_end(Bool) [default: Bool = true]
     When Bool = true, nl(_) is normal; when Bool = false, line-breaks (new lines) are preceeded by a \ .
-````
+```
 
-````
+```
 write_term/2
 write_term(Term, Options)
 write_term(+, +)
@@ -1461,19 +1461,19 @@ write_term(+, +)
 write_term/3
 write_term(Stream_or_alias, Term, Options)
 write_term(+,+,+)
-````
+```
 write_term(Term, Options) is equivalent to write_term(Out, Term, Options) where Out is the current output stream; that is, write_term/2 is defined by:
-````
+```
 write_term(Term, Options)
     :- current_output(Stream),
        write_term(Stream, Term, Options).
-````
+```
 write_term(Stream_or_alias, Term, Options) outputs Term to
 the stream associated with Stream_or_alias in a form which is defined by the
 write-options list Options.
 
 #### Examples
-````
+```
 write_term(S, [1,2,3]) ==> [1,2,3]
 write_term(S, [1,2,3], [ignoreops(true)]) ==> .(1, .(2, .(3, [])))
 write_term(S, ’1 < 2’ ) ==> 1<2
@@ -1481,8 +1481,8 @@ write_term(S, ’1 < 2’, [quoted(true)] ) ==> ’1 < 2’
 write_term(S, ’VAR’(0),[numbervars(true)]) ==> A
 write_term(S, ’VAR’(1),[numbervars(true)]) ==> B
 write_term(S, ’VAR’(28),[numbervars(true)]) ==> C1
-````
-````
+```
+```
 write/1
 write(Term)
 write(+)
@@ -1490,31 +1490,31 @@ write(+)
 write/2
 write(Stream_or_alias, Term)
 write(+,+)
-````
+```
 write(Term) is equivalent to write(Out, Term) where Out is the current
 output stream; that is, write/1 can be defined by:
-````
+```
 write(Term)
     :- current_output(Stream),
        write(Stream, Term).
-````
+```
 write(Stream_or_alias, Term) is equivalent to
 
     write_term(Stream_or_alias, Term, [numbervars(true)]);
 
 Thus, write/2 can be defined by:
-````
+```
 write(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [numbervars(true)]).
-````
+```
 #### Examples
-````
+```
 write(S, [1,2,3]) ==> [1,2,3]
 write(S, 1 < 2 )  ==> 1<2
 write(S, ’VAR’(0) < ’VAR(1) ) ==> A<B
-````
+```
 
-````
+```
 writeq/1
 writeq(Term)
 writeq(+)
@@ -1522,29 +1522,29 @@ writeq(+)
 writeq/2
 writeq(Stream_or_alias, Term)
 writeq(+,+)
-````
+```
 writeq(Term) is equivalent to writeq(Out, Term) where Out is the current output stream; i.e, writeq/1 can be defined by:
-````
+```
 writeq(Term)
     :- current_output(Stream),
        writeq(Stream, Term).
-````
+```
 writeq(Stream_or_alias, Term) is equivalent to
 
     write_term(Stream_or_alias, Term, [quoted(true), numbervars(true)]);
 
 that is, writeq/2 can be defined by:
-````
+```
 writeq(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [quoted(true), numbervars(true)]).
-````
+```
 #### Examples
-````
+```
 writeq(S, [1, 2, ’A’ ]) ==> [1, 2, ’A’ ]
 writeq(S, ’1 < 2’ ) ==> ’1 < 2’
 writeq(S, ’VAR’(0) < ’VAR(1) ) ==>  A<B
-````
-````
+```
+```
 write_canonical/1
 write_canonical(T)
 write_canonical(+)
@@ -1552,31 +1552,31 @@ write_canonical(+)
 write_canonical/2
 write_canonical(Stream_or_alias, Term)
 write_canonical(+,+)
-````
+```
 write_canonical(T) is equivalent to write_canonical(S, T) where
 S is the current output stream; that is, write_canonical/1 can be defined by:
-````
+```
 write_canonical(T)
     :- current_output(Stream),
        write_canonical(Stream, T).
-````
+```
 write_canonical(Stream_or_alias, Term) is equivalent to
 
     write_term(Stream_or_alias, Term, [quoted(true), ignore_ops(true)]);
 
 that is, write_canonical/2 can be defined by:
-````
+```
 write_canonical(Stream_or_alias, Term)
     :- write_term(Stream_or_alias, Term, [quoted(true), ignore_ops(true)]).
-````
+```
 #### Examples
-````
+```
 write_canonical(S, [1, 2, 3 ]) ==> ’.’(1, ’.’(2, ’.’(3, [] )))
 write _canonical(S, 1 < 2 ) ==> < (1, 2 )
 write _canonical(S, ’1 < 2’ ) ==> ’1<2’
 write_canonical(S, ’VAR’(0) < ’VAR’(1) ) ==> < (’VAR’ (0), ’VAR’ (1))
-````
-````
+```
+```
 write_clause/1.
 write_clause(Clause)
 write_clause(+)
@@ -1588,9 +1588,9 @@ write_clause(+, +)
 write_clause/3.
 write_clause(Alias_or_stream, Clause, Options)
 write_clause(+, +, +)
-````
+```
 These convenience predicates are defined by:
-````
+```
 write_clause(Clause)
     :- get_current_output_stream(Stream),
        write_clause(Stream, Clause).
@@ -1602,9 +1602,9 @@ write_clause(Stream, Clause, Options)
     :- write_term(Stream,Clause, Options),
        put_char(Stream, 0’.),
        nl(Stream).
-````
+```
 Since one often must ouput sequences of clauses, the following predicates are useful:
-````
+```
 write_clauses/1.
 write_clauses(Clauses)
 write_clauses(+)
@@ -1612,23 +1612,23 @@ write_clauses(+)
 write_clauses/2.
 write_clauses(Alias_or_stream, Clauses)
 write_clauses(+, +)
-````
+```
 These predicates are defined by:
-````
+```
 write_clauses(Clauses)
     :- get_current_output_stream(Stream),
        write_clauses(Stream, Clauses, []).
 
 write_clauses(Stream, Clauses)
     :- write_clauses(Stream, Clauses, []).
-````
-````
+```
+```
 write_clauses/3
 write_clauses(Alias_or_stream, Clauses, Options)
 write_clauses(+, +, +)
-````
+```
 If Clauses is a list of terms (to be viewed as clauses), write_clauses/3 recursively applies write_clause/3 to the elements of Clauses.
-````
+```
 printf/1
 printf(Format)
 printf(+)
@@ -1648,7 +1648,7 @@ printf_opt(+,+,+)
 printf/4
 printf(Alias_or_stream,Format,ArgList,Options)
 printf(+,+,+,+)
-````
+```
 The printf/[...] group of predicates provides a powerful formatted printing facility
 closely related to the corresponding facilities in the C programming language.
 printf/[...] accepts a format string together with a list of arguments to print,
@@ -1660,20 +1660,20 @@ and argument placeholders. The figure below illustrates the general structure of
 Figure. printf formatting
 
 As a simple example, the following clause defines a predicate for adding two numbers and printing the result:
-````
+```
 add(X,Y)
     :- Z is X + Y,
        printf("Solution: %t + %t = %t\n",[X,Y,Z]).
-````
+```
 The %t placeholder tells printf/2 that it should take the next argument from the
 argument list, and print it as a Prolog term. The \n at the end of the format string
 causes a newline character to be printed. The following shows the result of calling
 add/2:
-````
+```
 add( 7, 8 ) ==> Solution: 7 + 8 = 15
-````
+```
 The same effect could have been obtained without printf/2. It is instructive to see how it is done:
-````
+```
 add(X,Y)
     :- Z is X + Y,
        write(X),
@@ -1682,12 +1682,12 @@ add(X,Y)
        write(’ = ’),
        write(Z),
        nl.
-````
+```
 The second version of the predicate is longer and somewhat harder to read. If no
 arguments must be supplied to printf (i.e., the string contains no placeholder
 characters), the unary version, printf/1, can be used.
 The fundamental formatted output predicate is printf/4. The first four predicates above are convenience predicates and can be defined as follows:
-````
+```
 printf(Format)
     :- current_output(Stream),
        printf(Stream,Format,[],[]).
@@ -1702,7 +1702,7 @@ printf_opt(Format,ArgList,Options)
 
 printf(Alias_or_stream,Format,ArgList)
     :- printf(Alias_or_stream,Format,ArgList,[]).
-````
+```
 printf/4 is closely related to the C language printf function. Roughly, the formats supported by printf/4 are the same as those allowed by the C language
 printf, with the inclusion of several additional combinations, in particular, ’%t’,
 which indicates that the corresponding Prolog term should be output at that point.
@@ -1718,13 +1718,13 @@ More precisely, formats are specified as follows. An extent expression consist o
 either a sequence of digits, or of two sequences of digits separated by a period(.);
 in addition, an extent expression may be prefixed with a minus sign (-). If K is an
 extent expression, an active format element is one of the following expressions:
-````
+```
 %t
 %p
 %K s
 %K d
 %Ke %Kf %Kg
-````
+```
 The last five elements in this list are also called C format elements. A printf format
 is a single-quoted string, ie., an atom. (Using double quoted strings for formats is accepted for bacwards compatibility; however, it is much more wasteful of storage.) Any
 printf format contains zero or more active format elements, together with other text (possibly none).
@@ -1735,7 +1735,7 @@ the argument is printed on the output stream as a Prolog term. Finally, the form
 allows the programmer to take control of the formatting process as follows. Suppose that the format is %p, 
 that Stream is the stream argument to printf/4, and
 that PArg is the argument corresponding to %p. Then the action of printf/4 is determined by:
-````
+```
 (PArg = Stream^PrintGoal0 ->
         call(PrintGoal0)
         ;
@@ -1745,9 +1745,9 @@ that PArg is the argument corresponding to %p. Then the action of printf/4 is de
                 call(PArg)
         )
 ).
-````
+```
 printf/4 is effectively defined as follows:
-````
+```
 If Format = [],
     printf(Alias_or_stream, Format, ArgList, Options)
 succeeds; otherwise,
@@ -1783,8 +1783,8 @@ else
     Format = [C | FormatTail] &
     put_char(Alias_or_stream, C) &
     printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-````
-````
+```
+```
 sprintf/3
 sprintf(Alias_or_stream,Format,ArgList)
 sprintf(+,+,+)
@@ -1796,9 +1796,9 @@ bufwrite(String,Term)
 bufwriteq/2
 bufwriteq(String,Term)
 bufwriteq(String,Term)
-````
+```
 These very useful convenience predicates are defined by
-````
+```
 sprintf(Output,Format,Args)
     :- open(string(Output),write,Stream),
        printf(Stream,Format,Args),
@@ -1817,33 +1817,33 @@ bufwriteq(String,Term)
           [line_length(10000), quoted(true),
            maxdepth(20000), quoted_strings(false)]),
        close(Stream).
-````
+```
 
 ## 10.8 Operator Declarations
 
-````
+```
 op/3
 op(Priority, Op_specifier, Operator)
 op(+, +, +)
-````
+```
 op/3 is used to specify Operator as a syntactic operator (for the Prolog parser) according to the specifications of Priority and Op_specifier.
-````
+```
 current_op/3
 current_op(Priority, Op_specifier, Operator)
 current_op(?, ?, ?)
-````
+```
 current_op(Priority, Op_specifier, Operator) is true iff Operator is an operator with properties defined by specifier Op_specifier and
 precedence Priority.
 
 #### Examples
 currentop(P, xfy, OP).Succeeds three times if the predefined operators have not been altered, producing the following bindings:
-````
+```
 P ==> 1100        OP ==> ;
 
 P ==> 1050        OP ==> ->
 
 P ==> 1000        OP ==> ,
-````
+```
 
 The order in which the solutions are produced is implementation dependent.
 
@@ -1855,7 +1855,7 @@ calls to read/1 and write/1). Note that the predicates listed here as DEC10-styl
 predicates have been added to the ALS Library, and so the file sio_d10.pro is automatically loaded by the development environment whenever one of them is called.
 
 Below, we present conceptual definitions (which simply suppress some of the detail) of the DEC10 predicates.
-````
+```
 see/1.
     see(Alias_or_stream)
         :- ’is input stream’(Alias_or_stream,Stream),
@@ -1944,7 +1944,7 @@ ttyflush/0.
 display/1.
     display(X)
         :- write_term(X,[quoted(false),ignore_ops(true),numbervars(true)]).
-````
+```
 
 ## 10.10 The user file
 
@@ -2005,10 +2005,10 @@ can also appear on Options.  Whatever HTTP result is produced from the underlyin
 * Appropriate CURLINFO options can be used with any RESTVerb.  For example, including response_code(RC) on Options will bind RC to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including total_time(TTT) will bind TTT to the number of seconds expended in the transaction.
 
 #### Examples:
-````
+```
 ?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
 ?- http(get,'http://example.com', [response_code(RC),total_time=TTT,file='./myfile.txt']).
-````
+```
 For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12’) and 2) free-form text data (e.g., ‘lorem ipsum doler’).  Either type of data can be supplied either directly in an equation on the options lisit, or in a file specified on the options list.  
 
 * If data = &lt;atom&gt; (’DATA’=&lt;atom&gt;) (where &lt;atom&gt; is a symbol or uia) occurs on the options list, then the underlying CURL program will POST the text of &lt;atom&gt; via the equation 'READDATA'=&lt;atom&gt;.
@@ -2020,17 +2020,17 @@ For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) st
 * If fieldsfile = FilePathName (or, ‘FIELDSFILE’= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if ‘FIELDS’=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = &lt;char&gt; ('EOL'=&lt;char&gt;) or eolcode=&lt;charcode&gt; ('EOLCODE'=&lt;charcode&gt;) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
 
 #### Examples:
-````
+```
 ?- http(post, 'https://postman-echo.com/post', [fields='name=admin&shoesize=12', result=RR]).
 ?- http(post, 'https://postman-echo.com/post', [fieldsfile='./foofields.txt', result=RR, eol='&']).
 ?- http(post, 'https://postman-echo.com/post', [datafile='./lorem.txt', eolcode=32,result=RR]).
-````
+```
 
 ### curl/1-3 
 
 An alternate, more direct, way of invoking the immediate interface from prolog to Curl is
 provided by the predicates curl/1-3.  Below, Options must be list of Curl options as described above.
-````
+```
 curl/1:
 curl(Options)
 Cleans up option capitalization and invokes the low-level interface to Curl.
@@ -2047,10 +2047,10 @@ curl(URL, Options, Target)
     :-
     XOptions = [url=URL, result=Target | Options],
     curl(XOptions).
-````
+```
 #### Examples:
-````
+```
 ?- curl('http://example.com', [response_code=RC], RR).
 ?- curl('http://example.com', RR).
 ?- curl([url='http://example.com', response_code(RC), result=RR]).
-````
+```

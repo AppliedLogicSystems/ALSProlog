@@ -80,7 +80,7 @@ Suppose the following program of simple facts has been loaded:
     wavelength(blue, 450-495).
 
 Then the follow are some simple query interations with this program using the shell:
-````
+```
 ?- wavelength(blue,W).
 
 W=450-495 
@@ -101,7 +101,7 @@ C=blue
 W=450-495 ;
 
 no.
-````
+```
 
 Notice that when a success answer is printed, the shell waits for input from the user.  If the user types a semi-colon (;), the shell attempts to find further solutions for the query, and prints the next one if found, or "no." if no solutions are found.  Any input other than a semi-colon is interpreted to mean that no further solutions are required.
 
@@ -109,11 +109,11 @@ Notice that when a success answer is printed, the shell waits for input from the
 
 Declarations are terms that have a special interpretation when seen by consult
 or reconsult. Here are some example declarations:
-````
+```
 use builtins.
 export a/1, b/2, c/3.
 module foobar.
-````
+```
 
 ## 2.2 Program Files
 Program files are sequences of source terms that are meant to be read in by consult/1 or reconsult/1, which interpret the terms as either clauses, declarations, commands, or queries.
@@ -172,7 +172,7 @@ systems. The discussions below are only intended to describe those aspects of fi
 names and path names which affect how ALS Prolog locates files. Examples are
 provided for all the operating systems supported by ALS Prolog. File names follow
 the ordinary naming conventions of the host operating system. Thus all of the following are acceptable file names:
-````
+```
 Linux (including Mac OS X):
     fighter  cave.man  hack/cave.man
     /usr/hack/cave.man
@@ -180,7 +180,7 @@ Linux (including Mac OS X):
 Win32:
     fighter  cave.man  hack\cave.man
     C:\usr\hack\cave.man
-````
+```
 
 In general, file names should be enclosed in single quotes (making them quoted atoms). The exception is any file name which is acceptable as an atom by itself.
 
@@ -296,7 +296,7 @@ occurred in PFile at the point of the directive.
 
 The conditional preprocessor directives #if, #else, #elif, and #endif behave more or less as they do for C programs. However, the expressions following the #if and #elif are taken to be Prolog goals, and are evaluated in the current environment, just as for embedded commands of the form :- G. Here are some
 examples. Let f1.pro be the following file:
-````
+```
 :-dynamic(z/1).
 %z(f).
 p(a).
@@ -306,18 +306,18 @@ p(b).
 p(c).
 #endif
 p(ff).
-````
+```
 After consulting f1.pro, we use listing/0 to see what happened:
-````
+```
 ?- listing.
 % user:p/1
 p(a).
 p(c).
 p(ff).
 yes.
-````
+```
 In this case, p(c) was loaded, but not p(b). Now let f2.pro be the following file:
-````
+```
 :-dynamic(z/1).
 z(f).
 p(a).
@@ -327,9 +327,9 @@ p(b).
 p(c).
 #endif
 p(ff).
-````
+```
 After consulting f2.pro to a clean image, we obtain the following:
-````
+```
 ?- listing.
 % user:p/1
 p(a).
@@ -337,5 +337,5 @@ p(b).
 p(ff).
 % user:z/1
 z(f).
-````
+```
 This time, p(b) was loaded instead of p(c).

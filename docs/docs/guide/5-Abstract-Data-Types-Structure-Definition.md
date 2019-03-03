@@ -29,7 +29,7 @@ no loss in performance. See Section [Ref: Macros] for more information.)
 Consider the following example which is a simplified version of a defStruct used in
 an early ALS windowing package. The definition of the structure is declaratively
 specified by the following in a file with extension .typ, say wintypes.typ :
-````
+```
 :- defStruct(windows,
   [
     propertiesList =
@@ -48,10 +48,10 @@ specified by the following in a file with extension .typ, say wintypes.typ :
     structLabel = wi
   ]
 ).
-````
+```
 We will discuss the details of this specification below. It can be placed anywhere in
 a source file, and acts like a macro, generating the following code in its place:
-````
+```
 export accessWI/3.
 export setWI/3.
 
@@ -77,7 +77,7 @@ makeWindowStruct(_A,_B) :-
 export xmakeWindowStruct/2.
 xmakeWindowStruct(wi(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J),
                   [_A,_B,_C,_D,_E,_F,_G,_H,_I,_J]).
-````
+```
 Now let us examine the details.
 
 ## 5.1 Specifying Structure Definitions
@@ -146,7 +146,7 @@ statements become names for ternary predicates which are surrogates for arg/3 an
 mangle/3, respectively. And the atom on the right side of the makePred equality
 statement becomes the name of a unary predicate producing a new instance of the
 structure when called with a variable as its argument. Formally:
-````
+```
 accessPred=acpr 
     acpr(Slot_name,Struct,Value) succeeds precisely when Slot_name 
     is an atom occurring on the propertiesList in the defStruct, Struct is a structure
@@ -166,7 +166,7 @@ makePred=mkpr
     of the structLabel equality statement of the defStruct and whose airty is the length of the     
     propertiesList of the defStruct, and unifies Struct with that newly created term; as a
     matter of usage, Struct is normally an uninstantiated variable for this call.
-````
+```
 Thus, the goal
 
     makeWindowStruct(ThisWinStruct)
@@ -174,7 +174,7 @@ Thus, the goal
 will create a wi(...) structure with default values and bind it to ThisWinStruct.
 Besides the generated unary ‘make’ predicates, two other construction predicates
 are created:
-````
+```
 makePred=mkpr 
     mkpr(Struct, ValsList) creates a new structured term whose functor is the right side of the
     structLabel equality statement of the defStruct and whose arty list the length of the 
@@ -193,4 +193,4 @@ makePred=xmkpr
     This binary predicate xmkprmkpr(Struct,SlotVars) is equivalent to
 
         Struct =.. [ StructLabel | SlotVars].
-````
+```

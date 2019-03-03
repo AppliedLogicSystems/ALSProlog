@@ -82,10 +82,10 @@ Eqns is a list of equations of the form
     Keyword = Value
 
 The acceptable keywords, together with their associated Value types, are the following:
-````
+```
 instanceOf - atom (name of a class)
 values     - list of equations
-````
+```
 The instanceOf keyword equation is the only required equation; the value on
 the right side of this equation must be an atom which is the name of a class which is
 visible from the module in which the create_object call is made. Here is an
@@ -142,7 +142,7 @@ Here Eqns is a list of equations of the form
     Keyword = Value
 
 The acceptable keywords, together with their associated Value types, are the following:
-````
+```
 name       - atom
 subClassOf - atom (name of a (parent) class)
 addl_slots - list of atoms (names of local slots)
@@ -150,7 +150,7 @@ defaults   - list of default values for slots
 constrs    - list of constraint expressions for slots
 export     - yes or no
 action     - atom
-````
+```
 The name equation and the subClassOf equation are both required.
 
 The ObjectPro system pre-defines one top-level class named genericObjects;
@@ -168,7 +168,7 @@ is a subclass. Reiterating, it is required that the slot names occurring on all 
 addl_slot lists be distinct.
 
 Here are several examples of simple class definitions:
-````
+```
 :- defineClass([name=vehicle,
                 subClassOf=genericObjects,
                 addl_slots=[locomotionType, powerSource] ]).
@@ -184,7 +184,7 @@ Here are several examples of simple class definitions:
 :- defineClass([name=wingedVehicle,
                 subClassOf=vehicle,
                 addl_slots=[numWings] ]).
-````
+```
 The inheritance relations among these classes is shown in the Figure below.
 
 ![](images/VehicleClassInheritance.png)
@@ -192,13 +192,13 @@ Figure. Example Class Inheritance Relations.
 
 The state-schemata (not including the slots provided by genericObjects) for
 each of these classes are shown below:
-````
+```
 vehicle        - [locomotionType, powerSource]
 wheeledVehicle - ]locomotionType, powerSource, numWheels]
 automobile     - [locomotionType, powerSource, numWheels,
                   engine,autoClass,manufacturer]
 wingedVehicle  - [locomotionType, powerSource, numWings]
-````
+```
 An object which is instance of a class has a slot in its state structure corresponding
 to each entry in the state-schema for the class.  A class definition can supply default values for slots using the equation:
 
@@ -252,27 +252,27 @@ instance of the class must meet in order to be installed. The generated code imp
 this test on all attempts to update the value of slotName. The test is imposed by
 binding the incoming candidate value to the variable Var , and then calling the test
 Conditon. Here is a class specification including a constraint of the second type:
-````
+```
 defineClass([name=engine,
      subClassOf=genericObjects,
      addl_slots= [powerType,fuel,engineClass, cur_rpm,running,temp],
      constrs=
        [engineClass < [internalCombustion,steam,electric]]
 ])
-````
+```
 The same condition can be expressed by a constraint of the third type as follows:
-````
+```
 defineClass([name=engine,
      subClassOf=genericObjects,
      addl_slots= [powerType,fuel,engineClass, cur_rpm,running,temp],
      constrs=
        [engineClass - member(X, [internalCombustion,steam,electric])]
 ])
-````
+```
 If a constraint fails either during defineClass or setObjStruct/3, the ObjectPro machinery throws an exception of the form
-````
+```
 constraint_error(<Message>).
-````
+```
 This can be caught with a surrounding catch/3 call and handled as needed by the program.
 
 ## 6.4 Specifying Class Methods
@@ -298,10 +298,10 @@ State argument will be instantiated at execution time to the state of the object
 which is using this method to respond to Message. The programmer has no
 knowledge of the detailed structure of State. However, access to the slots of State
 is provided by two predicates:
-````
+```
 setObjStruct(SlotDescrip, State, Value)
 accessObjStruct(SlotDescrip, State, VarOrValue)
-````
+```
 The first call
 
     setObjStruct(SlotName, State, Value)
@@ -324,7 +324,7 @@ accessObjStruct(SlotName^SlotDescrip, State, V) effectively performs
     accessObjStruct(SlotDescrip, O2, V).
 
 Two convenient alternatives for these predicates are supplied as “syntactic sugar”:
-````
+```
 State^SlotDescrip := Value
     for
 setObjStruct(SlotDescrip, State, Value)
@@ -332,47 +332,47 @@ setObjStruct(SlotDescrip, State, Value)
 VarOrValue := State^SlotDescrip
     for
 accessObjStruct(SlotDescrip, State, VarOrValue)
-````
+```
 Besides these two constructs, calls on send/2 can be used in the clauses defining
 methods. The code for the action predicate should be defined in the same module
 as the definition of the class. (But it can reside in separate files.)
 Consider the class engine specified in the preceeding section. Simple start and
 stop methods can be implemented for this class by the following clauses:
-````
+```
 engineAction(start,State) :- State^running := yes.
 engineAction(stop, State) :- State^running := no.
-````
+```
 A method to query the status of an engine is given by:
 
     engineAction(status(What),State) :- What := State^running.
 
 The genericObjects class provides two pre-defined methods, effectively defined as follows:
-````
+```
 genericObjectsAction(get_value(SlotDesc,Value),State)
     :-  accessObjStruct(SlotDesc,State,Value).
 
 genericObjectsAction(set_value(SlotDesc,Value),State)
     :-  setObjStruct(SlotDesc,State,Value).
-````
+```
 
 ## 6.5 Examples
 (Example code files can be found in the examples/objectpro section of the distribution.)
 
 The first simple example implements an elementary stack object:
-````
+```
 :- defineClass([name=stacker,
                 subclassOf=genericObjects,
                 addl_slots=[theStack, depth]
    ]).
-````
+```
 The call
-````
+```
     create_object([name=stack, instanceOf=stacker, 
                    values=[theStack=[], depth=0] ], Obj),
-````
+```
 will create a stacker-type object; this call is included in the run_stacker driver code below.
 Here are the action clauses:
-````
+```
 stackerAction(push(Item),State)
     :-  accessObjStruct(theStack, State, CurStack),
         setObjStruct(theStack, State, [Item | CurStack]),
@@ -392,9 +392,9 @@ stackerAction(cur_stack(Stack),State)
 
 stackerAction(cur_depth(Depth),State)
     :-  accessObjStruct(depth, State, Depth).
-````
+```
 We can create a small loop to exercise an object of this class as follows:
-````
+```
 run_stack :- 
     create_object([instanceOf=stacker], Obj),
     rs(Obj).
@@ -410,9 +410,9 @@ rs(M, Obj)
        printf(’Msg=%t\n’, [M]),
        flush_output,
        rs(Obj).
-````
+```
 Here is a sample session using this code:
-````
+```
 ?- [stacker].
 Attempting to consult stacker...
 ... consulted /apache/als_dev/tools/objects/new2/stacker.pro
@@ -428,10 +428,10 @@ Msg=cur_stack([rr(tut),2])
 Msg=pop(rr(tut))
 4stack:>quit.
 yes.
-````
+```
 Our second example, using the vehicles sketched earlier, illustrates the construction of
 compound objects. First, here are the class definitions:
-````
+```
 :- defineClass([name=vehicle,
                 subClassOf=genericObjects,
                 addl_slots=[locomotionType, powerSource] ]).
@@ -453,9 +453,9 @@ compound objects. First, here are the class definitions:
                 subClassOf=engine,
                 addl_slots=[manuf],
                 constrs = [engineClass = internalCombustion] ]).
-````
+```
 Now here are the methods:
-````
+```
 engineAction(start,State)
     :- State^running := yes.
 
@@ -474,10 +474,10 @@ automobileAction(status(Status),State)
              Status = running;
              Status = off
        ).
-````
+```
 As in the stack example, we can create a simple loop to exercise this code.
 Here we make four calls to create_object/2 in order to build two automobiles:
-````
+```
 run_vehicles
     :- set_prolog_flag(unknown, fail),
        create_object([instanceOf=iC_Engine ], Engine1),
@@ -507,9 +507,9 @@ exec_vehicles_cmd(Msg > N, Autos)
 
 exec_vehicles_cmd(Cmd, Autos)
     :- printf(’Can\’t understand: %t\n’, [Cmd]).
-````
+```
 And here is a trace of an execution of this code:
-````
+```
 ?- run_vehicles.
 ::>start > 1.
 1-|| start
@@ -525,14 +525,14 @@ And here is a trace of an execution of this code:
 2-|| status(off)
 ::>quit.
 yes.
-````
+```
 
 ## 6.6 Combining ObjectPro with Global Variables
 
 It is often convenient to combine the use of global variables (see [Chapter 8](https://github.com/AppliedLogicSystems/ALSProlog/wiki/8-Global-Variables%2C-Destructive-Update-%26-Hash-Tables)) with ObjectPro objects. In fact, the ALS Prolog shells for alspro and alsdev use this extensively.  Unlike using assertions to the prolog database, placing an object (e.g., the state of a shell) in a global variable preserves any uninstantiated variables contained in the object.
 
 Below is a modified version of the simple 'stack' example, changed to make use of a global variable which holds the stack object (the code is in the distribution in  examples/objectpro/oopex_stack_global.pro):
-````
+```
 :- defineClass([name=stacker,
                          subClassOf=genericObjects,
                          addl_slots=[theStack, depth]
@@ -585,4 +585,4 @@ rs(M) :-
         flush_output,
         rs.
 
-````
+```

@@ -38,12 +38,12 @@ its entry point is the 0-ary predicate start_my_app/0, and that the list of libr
 files which the application uses is
 	[cmdline, listutl1, listutl2, misc_db, misc_io, objs_run, strings]
 Then, for step 3, simply issue the following goal:
-````
+```
 ?- save_image(my_app,
          [start_goal( start_my_app ),
           select_lib([cmdline, listutl1, listutl2,
                       misc_db, misc_io, objs_run, strings] ) ] ).
-````
+```
 You will see a number of cryptic messages, and eventually, the goal will succeed.
 If you exit the running prolog image, and perform a listing of your working directory, you will find a file my_app. Running this file is roughly equivalent to (i.e.,
 will have the same effect as) the following ALS Prolog command-line:
@@ -61,12 +61,12 @@ here is what happens.
 1.  You issue the command to run my_ex_alspro , and it is loaded and running.  
 2.  You issue a consult to load the files making up your application my_app.  
 3.  Your submit the goal
-````
+```
 ?- save_image( my_app,
          [start_goal( start_my_app ),
           select_lib([cmdline, listutl1, listutl2,
                       misc_db, misc_io, objs_run, strings] ) ] ).
-````
+```
 4.  ALS Prolog loads the library files  
     [cmdline, listutl1, listutl2, misc_db, misc_io, objs_run, strings]
 5.  ALS Prolog changes the usual Prolog shell startup to run your goal
@@ -93,12 +93,12 @@ move of the builtins code. Why? Because alspro is just a packaged version of
 alspro_b, packaging the builtins.)
 
 Note that the 3-step process of building the application can be combined into a single-step operating system shell command-line action:
-````
+```
 my_ex_alspro <my_app component files> \
     -g save_image( my_app, [start_goal( start_my_app ), \
     select_lib([cmdline, listutl1, listutl2, \
     misc_db, misc_io, objs_run, strings] ) ] ).
-````
+```
 Such approaches are especially suitable for use in makefiles. (Note the continuation
 characters ‘\’ at the end of each line except the final one.)
 

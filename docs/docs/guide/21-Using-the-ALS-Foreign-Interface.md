@@ -54,7 +54,7 @@ more information on the C programming language.
 Before going into detail about the components of the interface, let’s look at a simple
 example. Let’s consider a simple predicate for testing the eveness of an integer. The
 pure C code for this function is:
-````
+```
 static int even(void)
 {
 PWord arg;
@@ -63,11 +63,11 @@ PI_getan(&arg, &arg_type, 1);
 if (arg_type == PI_INT && arg % 2 == 0) PI_SUCCEED;
 else PI_FAIL;
 }
-````
+```
 This function can be dynamically linked into ALS Prolog according to the following steps (details to be discussed later).
 
 1. First create the file even.c containing the following code:
-````
+```
 #include "alspi.h"
 static int even(void)
 {
@@ -84,7 +84,7 @@ void pi_init(void)
 {
 PI_INIT;
 }
-````
+```
 
 2. Next, compile and link even.c and alspi_slib.c along with any necessary libraries to create a shared or dynamically-linked library called hello.psl (.psl stands
 for Prolog Shared Library). The file alspi_slib.c contains glue code which allows ALS Prolog to connect to the shared/dynamic library. Example makefiles
@@ -98,12 +98,12 @@ C defined predicates. In this example, there is only one C-defined predicate,
 even/1.
 
 4. Now you can invoke the even predicate:
-````
+```
 ?- even(2).
 yes.
 ?- even(1).
 no.
-````
+```
 Now we’ll consider some of the details of the even.c source code to see what they do.
 
 * The line
@@ -122,20 +122,20 @@ vaiables arg and arg_type. The variable arg is a PWord which holds the value of 
 of the argument.
 * The second statement of the even() function does the actual work of the
 predicate.
-````
+```
 if (arg_type == PI_INT && arg % 2 == 0) PI_SUCCEED;
 else PI_FAIL;
-````
+```
 The test checks if the argument is a Prolog integer and whether it is even.
 When arg_type is PI_INT, the PWord arg can be interpreted as a long integer. If the test evaluates to true, the macro PI_SUCCEED is called which
 returns control to Prolog with an indication of success. Otherwise PI_FAIL
 is called, which indicates that the predicate failed.
 * After the definition of the even() function, we see the following macros:
-````
+```
 PI_BEGIN
     PI_DEFINE("even",1,even)
 PI_END
-````
+```
 
 These macros actually construct an internal table which is used by ALS Prolog to call the Prolog predicates defined in C. The figure below (The PI Table
 Structure.)illustrates this table. PI_BEGIN and PI_END bracket the table,
@@ -187,14 +187,14 @@ predicate names in ALS Prolog. This operation is performed by the macro
 This macro is normally placed in the initialization function pi_init(). When the initialization function is called, the PI_INIT macro is run, and the predicates written
 in C become available for use from ALS Prolog. The PI_INIT macro uses a table,
 called the PI Table, of the following form:
-````
+```
 PI_BEGIN
 PI_MODULE(module)
 PI_DEFINE(name,arity,function_name)
 .
 .
 PI_END
-````
+```
 Note that this construct, PI_BEGIN, ..., PI_END must occur outside any function
 definition. The PI_DEFINE macro puts the address of the C function implementing
 the Prolog predicate, along with the predicate’s arity and the name used from Prolog, in a table which Prolog searches during program execution. The PI_MODULE
@@ -225,7 +225,7 @@ value of the Prolog argument. If the type is a Prolog integer, then this variabl
 require further processing, in which case the variable will contain the address of a data structure used by the Prolog system.
 * The second argument is an address of an integer variable which will hold
 the type of the Prolog argument. There are seven Prolog types:
-````
+```
 PI_DOUBLE
 PI_INT
 PI_LIST
@@ -233,14 +233,14 @@ PI_STRUCT
 PI_SYM
 PI_UIA
 PI_VAR
-````
+```
 * The third argument is an integer specifying the number of the argument you
 are retrieving. This number must be greater than or equal to one, and less
 than or equal to the arity of the predicate, as defined in the PI table.
 
 The following is an example of a simple C-defined predicate which retrieves one
 argument from ALS Prolog’s (first) argument register:
-````
+```
 static int speeding(void)
 {
 PWord val;
@@ -255,7 +255,7 @@ PI_FAIL;
 
 PI_SUCCEED;
 }
-````
+```
 The speeding/1 predicate checks to see if an integer is less than or equal to 55.
 If it is, then the predicate fails, otherwise it succeeds. Note that it fails if the type of
 the argument is not an integer. Note that from C’s point of view, speeding() has
@@ -276,10 +276,10 @@ called an uninterned atom (UIA). UIA names are placed on the heap. {ADD LINK}See
 (Working with Uninterned Atoms) . The function PI_getsymname() is used to
 get the C string associated with a symbol. The symbol must be of type PI_SYM. The
 function PI_getuianame() is used to get the C string associated with an uninterned atom. The symbol must be of type PI_UIA. The forms for these two functions are:
-````
+```
 char *PI_getsymname(char *buf,PWord symval, int BUFSIZE);
 char *PI_getuianame(char *buf,PWord uiaval, int BUFSIZE);
-````
+```
 where buf is a character array, and BUFSIZE is an integer specifying the size of
 buf in bytes. The nature of the arguments to PI_getuianame() are the same as
 the arguments to PI_getsymname(). More precisely, these two functions take
@@ -293,7 +293,7 @@ function, or from a PI_getan() call.
 which will hold the symbol’s name.
 
 The following is an example of the use of PI_symname() and PI_getuianame().
-````
+```
 #define BUFSIZE 256
 
 static int printsym(void)
@@ -318,13 +318,13 @@ static int printsym(void)
   }
   PI_SUCCEED;
 }
-````
+```
 The predicate printsym/1 takes one argument. If the argument is a symbol, the
 predicate prints a message indicating whether the symbol is of type PI_SYM or
 PI_UIA, and displays the name of the symbol. The function PI_printf() is used to
 send output to Prolog’s standard output. Here is a conversation with the Prolog shell
 demonstrating the effects of running printsym/1.
-````
+```
 ?- [examples].
 yes.
 ?- printsym(hello).
@@ -333,16 +333,16 @@ yes.
 ?- printsym(’Funky string thing’).
 Uninterned Atom in Buffer: Funky string thing
 yes.
-````
+```
 The reason why ’Funky string thing’ is an uninterned atom is that the symbol was input using quotes.
 
 #### Decomposing Structures
 
 There are two functions for taking apart structures. These functions are:
-````
+```
 void PI_getstruct(PWord *, int *, PWord);
 void PI_getargn(PWord *, int *, PWord, int);
-````
+```
 PI_getstruct() returns the specified structure’s functor and arity. This function takes the following three arguments:
 * The first argument is the address of a variable which will be used to hold the
 *tructure’s functor. The returned functor will be of type PI_SYM.
@@ -358,16 +358,16 @@ the type of the structure argument.
 * The third argument is the value of the structure about which you are inquiring.
 * The fourth argument is an integer specifying which argument in the structure you want to retrieve.
 The forms for these functions are:
-````
+```
 PI_getstruct(&funcval,&arityval,structval);
 PI_getargn(&val,&type,structval,argnum);
-````
+```
 where structval is obtained from a call to PI_getan, from a call to another decomposing function, or from a call to a structure creation function. The following
 example illustrates the use of PI_getstruct() and PI_getargn(). The function printstruct() prints out the functor name and arity of the structure passed
 in from Prolog. If the object passed in from Prolog is not a structure, the predicate
 will fail. In addition to printing the functor and arity, printstruct() cycles
 through all the arguments of the structure, printing out the type of each argument.
-````
+```
 #define BUFSIZE 256
 
 static int printstruct(void)
@@ -389,11 +389,11 @@ static int printstruct(void)
     }
     PI_SUCCEED;
 }
-````
+```
 The supporting function typename(), shown below, takes a Prolog type as an argument, and returns a character string associated with the type. This functionality
 is implemented using a table lookup scheme. The table is implemented below as
 struct table typetable[].
-````
+```
 #define TABLESIZE 7
 struct table {
     int type;
@@ -417,10 +417,10 @@ static const char *typename(int type)
             return(typetable[i].buf);
     return(0);     /* shouldn’t get here */
 }
-````
+```
 Note that the above code, although introduced here after the printstruct()function (for expository reasons), should actually appear at the top of
 the file. Here is a conversation with the Prolog shell showing the use of printstruct/1:
-````
+```
 ?- [examples].
 yes.
 ?- printstruct(hello).
@@ -440,7 +440,7 @@ yes.
 
 ?- printstruct([a,b,c]).
 no.
-````
+```
 Notice that the last goal, with a list as the argument, didn’t succeed. This is because
 a list has the type PI_LIST, not PI_STRUCT. In fact, it is generally a bad idea to
 treat lists as structures from within C. You should use the functions that are specifically meant for manipulating lists.
@@ -448,10 +448,10 @@ treat lists as structures from within C. You should use the functions that are s
 #### Decomposing Lists
 
 There are two functions for taking apart lists. These functions are:
-````
+```
 void PI_gethead (PWord *, int *, PWord);
 void PI_gettail (PWord *, int *, PWord);
-````
+```
 The first is a function for getting the head of a list. PI_gethead()takes three arguments:
 * The first argument is the address of a variable which will hold the head’s
 value.
@@ -465,14 +465,14 @@ takes three arguments:
 type.
 * The third argument is the value of the list.
 The forms for these functions are:
-````
+```
 PI_gethead(&headval,&headtype,listval);
 PI_gettail(&tailval,&tailtype,listval);
-````
+```
 where listval comes from another decomposing function, PI_getan(), or a
 list constructing function. The printlist() example below illustrates the use
 of PI_gethead() and PI_gettail().
-````
+```
 static int printlist(void)
 {
     PWord val, head, tail;
@@ -493,11 +493,11 @@ static int printlist(void)
     };
     PI_SUCCEED;
 }
-````
+```
 Notice that we reassign the variables val, head, tail and their associated type
 variables during the for loop. This does not cause modification to the Prolog data
 structure. The following sample run illustrates the use of the printlist/1 predicate:
-````
+```
 ?- [examples].
 yes.
 
@@ -525,7 +525,7 @@ yes.
 ?- display(a.b.c).
 .(a,.(b,c))
 yes.
-````
+```
 The third goal above, ?- printlist([]), didn’t succeed because [] is not a
 list, it is a symbol of type PI_SYM. We could have written the predicate printlist/1 so that it accepted [] as a list, but we haven’t discussed all the tools for
 doing so yet. {ADD LINK}See Section 21.2.7 (Creating Prolog Data Objects) for an example of
@@ -548,7 +548,7 @@ Note that none of these arguments are addresses, as has been the case in some of
 functions, such as PI_getan(). This is because (in ALS Prolog) the value of an
 unbound variable is itself an address. Consequently, the contents of all the C variables passed in to PI_unify will be the same after the PI_unify()call as they
 were before the call. An example predicate illustrating this functionality follows:
-````
+```
 static int unifytest(void)
 {
     PWord val;
@@ -560,11 +560,11 @@ static int unifytest(void)
                     type == PI_INT ? "integer" : "other");
     PI_SUCCEED;
 }
-````
+```
 The predicate defined above gets the argument, attempts to unify it with the number
 42, and then prints the contents of val. It also prints the string "integer" if the
 variable type is equal to PI_INT. The following is a sample run of the unifytest/1 predicate:
-````
+```
 ?- [examples].
 yes.
 
@@ -579,7 +579,7 @@ yes.
 
 ?- unifytest(3).
 no.
-````
+```
 Notice that things worked fine when the number 42 was passed in. This is because
 the variable val was already set to 42 before the call to PI_unify() was made.
 The second example call passed in an (Prolog) uninstantiated (unbound) variable;
@@ -622,10 +622,10 @@ in the symbol table if it’s not there, and returns the symbol table index as t
 value in either case. The second function, PI_makeuia(), works in the same
 manner as PI_makesym(), except that an uninterned atom is created if the symbol
 is not in the symbol table. The forms for these are functions are:
-````
+```
 PI_makesym(&sym,&symtype,buf)
 PI_makeuia(&uia,&uiatype,buf)
-````
+```
 where buf is a character string specifying the name of the symbol. The two functions, PI_makesym() and PI_makeuia() take three arguments:
 * The first argument is the address of a variable which will hold the symbol
 or uia value.
@@ -642,7 +642,7 @@ does not check if the specified symbol has been created as a UIA before, so mult
 UIAs with the same characters can be created. That is, UIA’s are not stored uniquely. The following code checks whether a symbol is equal to []. Note that the global
 variable nil_sym is uninitialized, so we will initialize it ourselves in pi_init()
 below.
-````
+```
 static PWord nil_sym;
 static int checknil(void)
 {
@@ -655,12 +655,12 @@ static int checknil(void)
         PI_FAIL;
     PI_SUCCEED;
 }
-````
+```
 The initialization of nil_sym is carried out by pi_init() which calls
 PI_makesym() to get the symbol table index of []. It then assigns that index to
 the global variable nil_sym. Forever after that, we can compare symbols to the
 variable nil_sym to see if they are the [] symbol. The code for initialization follows:
-````
+```
 /*
 * This is more efficient than calling PI_makesym()
 * everytime you want to check for the nil symbol.
@@ -671,9 +671,9 @@ void pi_init(void)
     PI_makesym(&nil_sym,&niltype,"[]");
     PI_INIT;
 }
-````
+```
 Here is a conversation with the Prolog shell which illustrates the use of the checknil/1 predicate:
-````
+```
 ?- [examples].
 yes.
 ?- checknil(hello).
@@ -684,7 +684,7 @@ yes.
 ?- checknil(’[]’).
 The object was the nil symbol.
 yes.
-````
+```
 Notice that ’[]’ is not a UIA because it is already in the symbol table.
 
 #### Creating Lists
@@ -704,19 +704,19 @@ a table of strings. Here is a description of the identifiers:
 * MAX is the maximum number of strings there can be.
 * current is the next place an entry will be placed in the table.
 Notice that there are already two entries in the table, so current is initialized to 2.
-````
+```
 #define STRLEN 20
 #define MAX 50
 static int current = 2;
 static char table[MAX][STRLEN] = {"molsons","coors"};
-````
+```
 The following is the function implementing the predicate enter/1. This predicate
 enters the given symbol into the table defined above. The predicate enter/1 first
 checks if the table has run out of space. If so, it prints an error message and fails. If
 the type of the argument is PI_SYM or PI_UIA, the name of the symbol is copied
 into the string table, and the variable current is set to the next space in the table.
 The predicate fails if the type is not PI_SYM or PI_UIA.
-````
+```
 static int enter(void)
 {
     PWord val;
@@ -745,14 +745,14 @@ static int enter(void)
     }
     PI_SUCCEED;
 }
-````
+```
 The second predicate in this table manipulating package is collect/1. This predicate retrieves the entries from the table defined above, and builds a list of uninterned atoms. This list is then unified with the incoming argument, which is usually
 an unbound variable. The reason UIAs are used instead of symbol table entries
 (type PI_SYM), is that UIAs are garbage collected when they are no longer useful.
 If the table we defined was very large and we used symbols of type PI_SYM instead of type PI_UIA, then we might fill up the symbol table, thus rendering the
 Prolog system unusable during the current execution. The list-creating loop will be
 discussed in detail after the code:
-````
+```
 static int collect(void)
 {
     PWord val, /* original variable */
@@ -781,25 +781,25 @@ static int collect(void)
         PI_FAIL;
     PI_SUCCEED;
 }
-````
+```
 Creating a list in a foreign language can be a tough task to perform if you haven’t
 had experience doing it before. The first thing to do is to make it work for the simplest case. For this example, the simplest case is when current is equal to 0. Having current = 0 implies that the table is empty, so we should unify the incoming
 argument with the ‘[]’ symbol. In the collect() code above, the following
 statements are executed when current is equal to 0:
-````
+```
 PI_getan(&val,&type,1);
 if (!PI_unify(val,type,nil_sym,PI_SYM))
 PI_FAIL;
-````
+```
 So we can see that this works for the simplest case. If current > 0, control will
 fall into the for loop. The statement
     PI_makelist(&list,&listtype);
 makes a list with both the head and tail initialized to unbound variables. The next
 statement
-````
+```
 if (!PI_unify(val,type,list,listtype)
 PI_FAIL;
-````
+```
 attempts to unify the argument passed in from Prolog with the newly created list. If
 they don’t unify, (perhaps the argument was a number or something) collect/1
 fails. In the most common case, the argument is an unbound variable, and it is bound
@@ -815,22 +815,22 @@ At this point, we have a data structure that looks like:
 ![](images/C-val-list.png)
 
 The next three statements
-````
+```
 PI_gethead(&head,&headtype,list);
 PI_makeuia(&sym,&symtype,table[index]);
 if (!PI_unify(head,headtype,sym,symtype))
 PI_FAIL;
-````
+```
 cause the head of the new list to be unified with the next string in table.
 
 ![](images/C-val-list-2.png)
 
 Note that we must use unification to bind unbound variables to Prolog data objects.
 It is not correct to do the following:
-````
+```
 PI_gethead(&head,&headtype,list);
 PI_makeuia(&head,&headtype,table[index]);
-````
+```
 If this was used, the head of the list would not be bound to the UIA. The next statement starts the whole process over again:
     PI_gettail(&val,&type,list);
 Originally, val was a handle to the argument passed in by Prolog, and list was
@@ -859,7 +859,7 @@ PI_unify() function is that it works for all cases of instantitation without the
 programmer having to explicitly handle each case.
 Here is a conversation with the Prolog shell which shows the use of the predicates,
 collect/1 and enter/1.
-````
+```
 ?- [examples].
 yes.
 ?- collect(X).
@@ -877,7 +877,7 @@ yes.
 M = molsons
 C = corona
 yes.
-````
+```
 Unification of UIAs with symbol table entries works fine as illustrated in the last
 example. Both coors and miller are symbol table entries, but they are matched
 with the created UIAs in the collect/1 predicate.
@@ -899,7 +899,7 @@ Note that a structure created by PI_makestruct() with the ‘.’ character as t
 functor and 2 as the arity will not unify with a list. If you want to create and manipulate lists, use the functions designed for them, otherwise there could be trouble.
 The following example illustrates the use of PI_makestruct() when creating
 structure.
-````
+```
 static int getinfo(void)
 {
     PWord val, info, struc, arg;
@@ -917,9 +917,9 @@ static int getinfo(void)
         }
     PI_SUCCEED;
 }
-````
+```
 Here are some sample runs of the getinfo/1 predicate:
-````
+```
 ?- [examples].
 yes.
 ?- getinfo(X).
@@ -930,7 +930,7 @@ no.
 ?- getinfo(info(X,2,3)).
 X = 1
 yes.
-````
+```
 
 #### Creating Integers and Reals
 
@@ -945,10 +945,10 @@ by Prolog’s set_output/1 predicate.
 #### Prolog Output Functions
 
 To solve this problem, ALS provides two output functions:
-````
+```
 void PI_printf(const char *format, ...)
 void PI_aprintf(const char *alias, const char *format, ...)
-````
+```
 These functions work the same as their C counterpart printf(). PI_printf() always
 prints to Prolog’s current output stream. PI_aprintf() prints to the Prolog stream
 named by the alias argument. Unless you want the output to always go to C’s standard output for some special reason, you should use the PI_printf and
@@ -970,7 +970,7 @@ counter.
     static int counter;
 Then we implement the four predicates that will perform the operations listed
 above:
-````
+```
 static int init(void)
 {
     PWord val;
@@ -1005,9 +1005,9 @@ static int value(void)
         PI_FAIL;
     PI_SUCCEED;
 }
-````
+```
 The code below declares the predicates, and puts them in Prolog’s procedure table:
-````
+```
 PI_BEGIN
     PI_MODULE("pizza")
     PI_DEFINE("init",1,init)
@@ -1020,9 +1020,9 @@ void pi_init(void)
 {
     PI_INIT;
 }
-````
+```
 Now that we’re done building the counter package, we compile it, load it into Prolog, and run some tests:
-````
+```
 ?- [examples].
 yes.
 ?- value(X).
@@ -1036,7 +1036,7 @@ yes.
 ?- inc, inc, inc, value(X).
 X = 8
 yes.
-````
+```
 Notice that we don’t have to prefix the predicates with the module name pizza.
 This is because all C-defined predicates are automatically exported from the module in which they are defined.
 
@@ -1046,7 +1046,7 @@ An important issue to consider is what happens when you redefine symbols or buil
 code defining a function myfunc and you issue a PI_DEFINE of the form
     PI_DEFINE("prolog_builtin",nn,myfunc)
 where prolog_builtin is the name used by ALS Prolog for one of its builtin predicates. The following source file contains redefinitions illustrating this issue.
-````
+```
 #include “alspi.h”
 static int readme(void)
 {
@@ -1070,10 +1070,10 @@ void pi_init(void)
 {
     PI_INIT;
 }
-````
+```
 Here is a conversation with the Prolog shell which illustrates the effects of loading
 and running the predicates in the above file.
-````
+```
 ?- [testme].
 yes.
 ?- read(X).
@@ -1083,7 +1083,7 @@ yes.
 ?- listing, fail.
 I’ve stolen listing away!
 no.
-````
+```
 Note that it’s not the C function names that are being redefined, but the names that
 Prolog uses to reference the predicates. You should be careful when redefining
 names of builtin predicates because it’s almost impossible to use the original predicates again. Also, redefining a builtin overwrites the procedure entry, so you can’t
@@ -1096,12 +1096,12 @@ even after failure occurs.
 C defined prolog predicates can be statically linked with ALS Prolog to create extended version of the ALS Prolog development system. The even predicate example can be statically linked to ALS Prolog according to the following steps.
 
 1. Starting with the even.c example from above, add the following main() function:
-````
+```
 int main(int argc, char **argv)
 {
     return PI_main(argc, argv, pi_init);
 }
-````
+```
 2. Next, compile and statically link even.c and the ALS Prolog Library along with
 any necessary libraries to create an executable program. Example makefiles and
 projects for common Unix, MacOS and Win32 C development environments
@@ -1111,10 +1111,10 @@ executable is an extended version of ALS Prolog, it requires the alsdir director
 to function.
 4. Run the new executable. Because the even/1 predicate is statically linked it is
 automatically loaded. Invoke the even predicate as before:
-````
+```
 ?- even(2).
 yes.
-````
+```
 The main function added to even.c simply invokes the ALS Prolog’s main function
 and return the result. The third argument to PI_main() is a function pointer for passing C predicate initilization functions. ALS Prolog calls this function to initilize
 any statically linked C predicates.
@@ -1139,7 +1139,7 @@ Prolog libraries.
 ALS Prolog is implemented using C as the primary underlying language, and this
 simplifies the process of embedding an ALS Prolog program into a C program. The
 main function for a very simple Prolog shell is show below:
-````
+```
 void main(int argc, char **argv)
 {
     PI_prolog_init(argc, argv);
@@ -1150,7 +1150,7 @@ void main(int argc, char **argv)
 
     PI_shutdown();
 }
-````
+```
 Figure. The outline main program for ALS Prolog.
 The PI_prolog_init function performs the initilization of ALS Prolog.
 PI_top_level() starts a prolog shell. Finally, when shell terminates and PI_top_level
@@ -1165,7 +1165,7 @@ used standard input and output for communication.
 So now suppose that we wish to embed a Prolog program know/2 into a C program
 named QA (Question and Answer). As a C program, QA will also have the main
 function shown below.
-````
+```
 int main(int argc, char *argv[])
 {
     int status;
@@ -1187,7 +1187,7 @@ int main(int argc, char *argv[])
     printf("Goodbye.\n");
     return EXIT_SUCCESS;
 }
-````
+```
 QA’s main first prints a welcome message, and then initializes the ALS Prolog libry
 with the PI_prolog_init function. Next it calls load_know (described in the next section) which loads the Prolog know/2 program. The function qa_dialog performs a
 simple question and answer dialog with the user. Finally PI_shutdown is called to
@@ -1199,7 +1199,7 @@ Next we will see how the QA program can call on a Prolog predicate for informati
 (Creating Symbols) , Section (Creating Structures) , and Section (Decomposing
 Symbols) . Here, we will specialize that discussion to the task at hand. Consider a
 simple knowledge base in the form of a binary predicate know/2:
-````
+```
 know(lemon, tart).
 know(candy, sweet).
 know(quinine, bitter).
@@ -1208,7 +1208,7 @@ know(sky, blue).
 know(taxes, inevitable).
 know(politicians, scoundrels).
 know(_, unknown).
-````
+```
 Figure. A simple Prolog knowledge base to be accessed from C.
 
 Of course most embedded programs would be more complicated. However, their
@@ -1230,7 +1230,7 @@ where Item is instantiated, submit them to Prolog to be run, and then examine th
 values obtained in the variable What. In order to do this, the C program QA must
 use the interface functions to build Prolog goals of the appropriate form, to submit
 them to Prolog, and to extract the values from What. First, let’s sketch out the function qa_dialog in which the goals are submitted:
-````
+```
 static void
 qa_dialog(void)
 {
@@ -1246,12 +1246,12 @@ qa_dialog(void)
         << Extract result of query and print >>
     }
 }
-````
+```
 Figure. Skeleton of qa_dialog().
 
 In order to execute a call from C into ALS Prolog, the C program must use the interface predicates described in Section (Creating Structures) to construct the Prolog term representing the goal to be run, and then pass this goal to the interface predicate PI_rungoal. Below is a C function which will carry out these steps for a unary
 Prolog goal:
-````
+```
 static int
 run_unary_predicate(PWord module, char *predstr, char *argstr)
 {
@@ -1266,7 +1266,7 @@ run_unary_predicate(PWord module, char *predstr, char *argstr)
     /* run goal & return status: */
     return PI_rungoal(module, gv, gt);
 }
-````
+```
 
 The predicate runs a unary Prolog goal in a given module, and returns a status
 (TRUE/FALSE) corresponding to the success/failure of the invoked goal. The argument module indicates the module in which the goal is to be invoked, predstr
@@ -1277,7 +1277,7 @@ to be an atom).
 The run_unary_predicate function can be reused whenever one needs to call
 into an ALS Prolog program to run a unary predicate with an instantiated argument.
 Here we will use it to make a call on consult/1 to load the file know.pro containing the know/2 knowledge base, as shown below:
-````
+```
 static void
 load_know(void)
 {
@@ -1286,12 +1286,12 @@ load_know(void)
     if (!run_unary_predicate(sym_builtins, "consult", "know"))
         error("Unable to load knowledge base.");
 }
-````
+```
 Figure. Using run_unary_predicate to load know.pro.
 
 Similarly, below is the code for a predicate which runs binary Prolog goals, where
 the first argument is instantiated to an atom, and the second argument is a variable.
-````
+```
 static int
 run_binary_predicate(PWord module, char *predstr,
                      char *arg1str, PWord *a2v, int *a2t)
@@ -1309,13 +1309,13 @@ run_binary_predicate(PWord module, char *predstr,
     PI_getargn(a2v, a2t, gv, 2);        /* Extract arg 2 */
     return stat;
 }
-````
+```
 Note that pointers to variables for the second argument of the goal, and its type, are
 passed into run_binary_predicate. Consequently, the values contained in these
 variables can be examined after the execution of run_binary_predicate. Here is
 some code which runs the goal, extracts the value (if the goal was successful), and
 prints the result on the terminal:
-````
+```
 /* Query "know" knowledge base in Prolog: */
 status = run_binary_predicate(sym_user,
                               "know", item, &arg, &argt);
@@ -1340,11 +1340,11 @@ status = run_binary_predicate(sym_user,
         }
     } else
         printf("Unable to find %s in knowledge base.\n", item);
-````
+```
 Figure. Using info from a call into Prolog.
 
 Now we can put this all together into the program qa.c:
-````
+```
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1466,11 +1466,11 @@ int main(int argc, char *argv[])
     printf("Goodbye.\n");
     return EXIT_SUCCESS;
 }
-````
+```
 Figure. The program qa.c.
 
 Below is a trace of the execution of the program QA (user input is in boldface):
-````
+```
 Welcome to Q&A.
 Consulting know ... know.obp consulted
 Enter item > lemon
@@ -1485,7 +1485,7 @@ Enter item > 4.4
 C: The value of 4.4 is unknown
 Enter item > quit
 Goobye.
-````
+```
 Figure. Trace of the execution of Q&A
 
 ## 21.5 Manipulating C Data Structures from Prolog

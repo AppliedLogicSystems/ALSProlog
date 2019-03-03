@@ -42,10 +42,10 @@ has been parsed. The first part of the sentence, the noun, is constructed from t
 tokens beginning with S up to I0. The verb phrase picks up where the noun left
 off, and consumes tokens up to E. For example, if ‘cat’ is a noun, and ‘ran’ is a
 verb phrase, then the following queries will succeed:
-````
+```
 ?- sentence([cat,ran],[]).
 ?- sentence([cat,ran,away],[away]).
-````
+```
 In the same manner, if noun/2 is given the list [cat,ran], it will consume cat
 and return the list [ran]. Similarly, verbPhrase/2 consumes ran and hands
 back the rest of the input token list.
@@ -57,7 +57,7 @@ rules that define what it means to be a sentence or a noun or a verb. If one rul
 parse the list of tokens, Prolog will fail that rule and try the next rule. The following set of
 rules says that cat, dog, and pig are all nouns. In addition, two compound verb
 phrases are defined.
-````
+```
 noun --> [cat].
 noun --> [dog].
 noun --> [pig].
@@ -68,14 +68,14 @@ verb --> [ran].
 verb --> [chased].
 adverb --> [away].
 adverb --> [fast].
-````
+```
 Here are some examples that make use of these rules; all of the queries succeed:
-````
+```
 ?-noun([dog,chased,cat],[chased,cat]).
 ?-noun([pig,ate,slop],[ate,slop]).
 ?-sentence([cat,ran,away],[]).
 ?-sentence([pig,ran,fast,dog,chased,cat],[dog,chased,cat]).
-````
+```
 The following picture illustrates the consumption of the sentence:
 [pig,ran,fast,dog].
 
@@ -92,40 +92,40 @@ Figure. A Parse Tree.
 
 DCG rules can have variables in the non-terminals which can be used to pass and
 return information. For instance, consider the following collection of DCG rules:
-````
+```
 noun(animal(pig)) --> [pig].
 noun(food(slop)) --> [slop].
 nounPhrase(noun(Det,Noun)) --> 
       determiner(Det),noun(Noun).
 determiner(the) --> [the].
 determiner(a) --> [a].
-````
+```
 Here, noun has been defined to return a structure which would be used to differentiate between the different types of nouns parsed by the DCG rule. These DCGs would be translated into the following Prolog rules:
-````
+```
 noun(animal(pig),[pig|E],E).
 noun(food(slop),[slop|E],E).
 nounPhrase(noun(Det,Noun),S,E) :- 
       determiner(Det,S,I0),noun(Noun,I0,E).
 determiner(the,[the|E],E).
 determiner(a,[a|E],E).
-````
+```
 Prolog goals can also appear within DCGs if placed between curly braces ({ and }).
 Goals thus protected by braces are passed through untouched by the DCG expander
 and do not have the extra arguments added to them. For example, the following rule
 could be used to recognize numbers:
-````
+```
 quantity(quantity(Value,Unit)) -->
       [Number],
       {convertnumber(Number,Value),number(Value),!},
       unit(Unit).
-````
+```
 This rule is translated into:
-````
+```
 quantity(quantity(Value,Unit),[Number|I0],E) :- 
       convertnumber(Number,Value),
       number(Value),!,
       unit(Unit,I0,E).
-````
+```
 Many of the builtin predicates are also left untouched whether enclosed by the curly
 braces or not. These are shown in the table below:
 

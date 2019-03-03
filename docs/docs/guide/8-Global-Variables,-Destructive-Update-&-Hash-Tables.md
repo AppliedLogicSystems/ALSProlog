@@ -19,11 +19,11 @@ The underlying primitive predicates set_global/2 and get_global/2 defined in the
 next section maintain a uniform global association list. This has the disadvantage
 that as the number of distint associations to be mainted grows, the performance of
 both set_global/2 and get_global/2 will degrade. The facility described in this section avoids this problem by providing individual global variables which are accessed by programmer-specified unary predicates; hence this mechanism is said to provide ‘named global variables.’
-````
+```
 make_gv/1
 make_gv(Name)
 make_gv(+)
-````
+```
 This predicate creates a single (primitive) global variable (see the next section), together with predicates for setting and retrieving its value. If Name is either an
 atom or a Prolog string (list of ASCII codes), the call
 
@@ -34,7 +34,7 @@ two predicates, setNAME/1 and getNAME/1, where NAME is the atom Name or the
 atom corresponding to the string Name. The definitions are installed in the module
 in which make_gv/1 is called. These two predicates are used, respectively, to set
 or get the values of the global variable which was allocated. Here are some examples:
-````
+```
 ?-make_gv(‘_flag’).
 yes.
 ?-set_flag(hithere).
@@ -47,7 +47,7 @@ yes.
 yes.
 ?-getCommonCenter(X).
 X = travel_now.
-````
+```
 
 ## 8.2 The Primitive Global Variable Mechanism.
 
@@ -64,7 +64,7 @@ The figure below suggests the global variable mechanism.
 Figure. The Global Variables Area and the Heap.
 
 The underlying mechanism is implemented by the following routines:
-````
+```
 gv_alloc/1
 gv_alloc(Num) - allocates a global variable
 gv_alloc(+)
@@ -77,7 +77,7 @@ gv_get(+, -)
 gv_set/2
 gv_set(Num, Value) - sets the value of a global variable
 gv_set(+, +)
-````
+```
 These four predicates implement the primitive global variable mechanism. They
 achieve an effect often implemented using assertions in the database. The value of
 the present mechanism is its greater speed, its separation from the database, and its
@@ -100,7 +100,7 @@ X is an ordinary Prolog binding which will not survive either backtracking or re
 to the top level of the Prolog shell. Thus variables in a structure which is bound to a global variable do not inherit the globalness of the outermost binding.
 
 Here are some examples:
-````
+```
 ?- gv_alloc(N), gv_set(N,hi), write(hi).
 hi
 N = 2
@@ -120,7 +120,7 @@ V2 = bye
 yes.
 ?- gv_get(2,V).
 V = bye
-````
+```
 Note that gv_set/2 is a constant time operation so long as the second argument
 is an atom or integer. Otherwise, it requires time linearly proportional to the current
 depth of the choicepoint stack.
@@ -142,12 +142,12 @@ Even though mangle/3 implements destructive assignment in Prolog, it is not
 necessarily more efficient than copying a term. This is due to the extensive cleanup
 operation which ensures that the effects of a mangle/3 persist across failure.
 Here are some examples:
-````
+```
 ?- Victim = doNot(fold,staple,mutilate),
 mangle(2,Victim,spindle).
 Victim = doNot(fold,spindle,mutilate)
 yes.
-````
+```
 
 ## 8.4 ‘Named’ Hash Tables
 
@@ -156,11 +156,11 @@ implementation of terms is such that a term is an array of (pointers to) its arg
 which is a more easily usable layer providing ‘named’ hash tables.
 
 The predicate for creating named hash tables is
-````
+```
 make_hash_table/1
 make_hash_table(Name) - creates a hash table with access predicates
 make_hash_table(+)
-````
+```
 If Name is any atom, including a quoted atom, the goal make_hash_table(Name)
 will create a hash table together a set of access methods for that table. The atom
 Name will be used as the suffix to the names of all the hash table access methods.
@@ -170,7 +170,7 @@ Suppose for the sake of the following discussion that Name is bound to the atom
     make_hash_table(‘_xamp_tbl’)
 
 will create the following access predicates:
-````
+```
 reset_xamp_tbl  - throw away old hash table associated with the ’_xamp_tbl’
 hash table and create a brand new one.
 
@@ -188,10 +188,10 @@ through the table and locate associations matching the "pattern" as specified by
 
 pdel_xamp_tbl(KeyPattern,ValPattern) – This functions the same as pget_xamp_tbl except that
 the association is deleted from the table once it is retrieved.
-````
+```
 Consider the following example (where we have omitted all of the ‘yes’ replies, but
 retained the ‘no’ replies):
-````
+```
 ?- make_hash_table(‘_assoc’).
 ?- set_assoc(a, f(1)).
 ?- set_assoc(b, f(2)).
@@ -223,7 +223,7 @@ Guide-75-
 yes.
 ?- pget_assoc(X,Y).
 no.
-````
+```
 
 ## 8.5 Primitive Hash Table Predicates
 
@@ -254,14 +254,14 @@ The complete hash tables are terms of the form
     hashTable(Depth,Size,RehashCount,hashArray(....))
 
 where:
-````
+```
 Depth       = the hashing depth of keys going in;
 
 Size        = arity of the hashArray(...) term;
 
 RehashCount = counts (down) the number of hash entries which have been
 made; when then counter reaches 0, the table is expanded and rehashed.
-````
+```
 The basic (non-multi) versions of these predicates overwrite existing key values;
 i.e., if Key-Value0 is already present in the table, then hash inserting Key-Value1
 will cause the physical entry for Value0 to be physcially altered to become Value1

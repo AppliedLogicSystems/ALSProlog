@@ -39,11 +39,11 @@ rule applies.
 already in the symbol table.
 
 Consider the following clauses:
-````
+```
 p(’x’,y) :- q(’f’,’x’).
 p(f(y),’wombat’).
 p(x,’wombat’).
-````
+```
 Let us assume that none of p, q, x, y, f, or wombat are initially in the symbol table
 when these clauses are first read. Both p and q will be put into the symbol table
 because they are predicate names. y will also be put into the symbol table because
@@ -69,10 +69,10 @@ variable. The way to turn this into a constant is to issue the goal:
 
 If a large number of constants need to be interned, it may be desirable to write an
 intern predicate which might take the following form.
-````
+```
 intern(X) :- atom(X), !, functor(_,X,0).
 intern([H|T]) :- intern(H), intern(T).
-````
+```
 This could then be called in the following manner:
 
     intern([ ’ProgramConstant’, ’AnotherConstant’, ’YetAnotherConstant’ ]).
@@ -130,11 +130,11 @@ Figure. Action of $uia_pokes/3.
 
 $uia_peekb/3, $uia_peeks/3, and $uia_peeks/4 are used to obtain specific
 bytes and symbols (UIAs) from a buffer created by $uia_alloc/2. The parameters for these procedures are specified as follows:
-````
+```
 ‘$uia_peekb’(UIABuf,Offset,Value)
 ‘$uia_peeks’(UIABuf,Offset,Extract)
 ‘$uia_peeks’(UIABuf,Offset,Size,Extract)
-````
+```
 These parameters are interpreted in the same manner as the parameters for
 $uia_pokeb/3 and $uia_pokes/3, where Size must also be an integer.
 $uia_peekb/3 binds Value to the byte at position Offset. $uia_peeks/3 binds Extract to a UIA consisting of the characters beginning at position
@@ -145,7 +145,7 @@ beyond the end of the buffer, Extract simply extends to the end of the buffer.
 
 The following example procedure illustrates how to create a buffer and fill it with
 the name of a given atom with using $uia_pokes/3.
-````
+```
 copy_atom_to_uia(Atom, UIABuf) 
     :- name(Atom,ExplodedAtom),
        copy_list_to_uia(ExplodedAtom,UIABuf).
@@ -160,11 +160,11 @@ copy_list_to_uia([H | T], N, Buf)
     :- ‘$uia_pokeb’(Buf,N,H),
        NN is N+1,
        copy_list_to_uia(T, NN, Buf).
-````
+```
 
 ### 7.3.5 List of Routines for Working with UIAs
 Below is a full list of the routines which may be used to modify and access component values of a UIA. {Details can be found in the ALS Prolog Reference Manual.}
-````
+```
 $uia_clip/2 - clip the given UIA
 $uia_pokeb/3 - modifies the specified byte of a UIA
 $uia_peekb/3 - returns the specified byte of a UIA
@@ -179,7 +179,7 @@ $uia_peeks/3 - returns the specified substring of a UIA
 $uia_peeks/4 - returns the specified substring of a UIA
 $uia_peek/4  - returns the specified region of a UIA
 $uia_poke/4  - modifies the specified region of a UIA
-````
+```
 In addition, there are three useful routines for dealing with the sizes of UIAs. The call
 
     ‘$uia_size’(UIABuf, Size)

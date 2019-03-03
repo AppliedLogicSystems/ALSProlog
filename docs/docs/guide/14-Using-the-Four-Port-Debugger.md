@@ -37,13 +37,13 @@ ports. The ports are:
 * Redo (Retry)is the port (in) through which execution passes when a later
 goal has failed and the procedure must try and find another solution, if possible.
 Take, for example, the program
-````
+```
 likes(john,Who) :female(Who),
 likes(Who,wine).
 likes(mary,wine).
 female(susan).
 female(mary).
-````
+```
 The figure below shows a four-port model of the procedure female/1.
 
 ![](images/ProcBoxFemale.png)
@@ -71,10 +71,10 @@ by passing through the exit port, as shown in Figure (d) below.
 Figure 19. Redo and exit tracing female/1.
 
 The call likes(mary,wine) succeeds, so the original goal succeeds:
-````
+```
 ?- likes(john,Who).
 Who = mary
-````
+```
 If you want Prolog to look for another answer, press ‘;’ (semi-colon) followed by
 Return. This will cause failure to occur, forcing the search for another solution.
 In this example, execution re-enters the procedure box for female/1 through the
@@ -112,74 +112,74 @@ there is to see, you use the creep command. To creep, you should respond with
 ‘c’ followed by return at the ? prompt of the debugger. Return alone will also
 make the debugger creep. However, for the sake of readability, the ‘c’ will appear
 explicitly in all the examples.
-````
+```
 (1) 1 call: likes(john,_93) ? c
 (2) 2 call: female(_93) ?
-````
+```
 The debugger is now at the call port for the procedure female/1. You can see by
 the last line that the program is calling female/1 with one unbound variable and
 that this call is taking place at level 2 of the computation. To continue the computation, you can creep ahead:
-````
+```
 (2) 2 call: female(_93) ? c
 (2) 2 exit: female(susan) ?
-````
+```
 After entering female/1, the program picks up the first solution and binds the
 variable _93 to susan. After this, the program leaves the exit port for female/
 1 and returns to the interior of the first clause for likes/2.
-````
+```
 (2) 2 exit: female(susan) ? c
 (3) 2 call: likes(susan,wine) ?
-````
+```
 The debugger now enters likes/2 through the call port. The number in parentheses has changed from 2 to 3 to show that this is a new procedure call. However,
 the call depth is still 2.
-````
+```
 (3) 2 call: likes(susan,wine) ? c
 (3) 2 fail: likes(susan,wine) ?
-````
+```
 Because there are no clauses in likes/2 that match likes(susan,wine) the
 call to likes/2 fails, and the debugger exits likes/2 through the fail port.
-````
+```
 (3) 2 fail: likes(susan,wine) ? c
 (2) 2 redo: female(_93) ?
-````
+```
 The debugger now re-enters female/1 through the redo port, because the call
 to likes/2 has failed, causing the search for another solution to female/1.
 Note that the number in parentheses becomes 2 again because procedure box 2 (for
 female/1) is being re-entered.
-````
+```
 (2) 2 redo: female(_93) ? c
 (2) 2 exit: female(mary) ?
-````
+```
 Another solution to female/1 is found, so the debugger exits through the exit
 port, and then enters likes/2. Since the call to likes/2 is a new call, the number in parentheses becomes 4.
-````
+```
 (2) 2 exit: female(mary) ? c
 (4) 2 call: likes(mary,wine) ? c
 (4) 2 exit: likes(mary,wine) ? c
 (1) 1 exit: likes(john,mary) ? c
 Who = mary
-````
+```
 Creeping the rest of the way through the program, you end up with a solution to the
 query:
-````
+```
 ?- likes(john,Who).
 Who = mary ;
-````
+```
 If you ask to see another solution to the query (by typing a semicolon), the debugger will pick up where it left off:
-````
+```
 (4) 2 fail: likes(mary,wine) ?
 The call likes(mary,wine) fails, and the computation creeps along.
 (4) 2 redo: likes(mary,wine) ? c
 (4) 2 fail: likes(mary,wine) ?
-````
+```
 The debugger re-enters female/1 through the redo port, but because no more solutions can be found, it leaves through the fail port. The rest of the trace looks like
 this:
-````
+```
 (4) 2 fail: likes(mary,wine) ? c
 (1) 1 redo: likes(john,_93) ? c
 (1) 1 fail: likes(john,_93) ? c
 no.
-````
+```
 
 ## 14.3 Additional Debugger Commands
 
@@ -193,7 +193,7 @@ information printed by the debugger..
 
 The first method of limiting information is the skip command. This causes the debugger to run the current goal, while suppressing the port information for all subgoals in the interior of the call. However, if the traced goal fails because of the failure of a goal submitted after the traced goal, the debugger will print out all subgoals
 of the traced goal at their fail port. The following example demonstrates this behavior:
-````
+```
 ?- trace likes(john,Who).
 (1) 1 call: likes(john,_93) ? s
 (1) 1 exit: likes(john,mary) ? c
@@ -201,7 +201,7 @@ Who = mary;
 (4) 2 fail: likes(mary,wine) ? c
 (2) 2 fail: female(_93) ?
 (1) 1 redo: likes(john,_93) ?
-````
+```
 In this trace, the debugger skips the execution likes(john,Who), and doesn’t
 stop at any of the ports inside the call to likes/2. However, when the call fails
 because of the ;\hveleven return command in the Prolog shell’s answer showing
@@ -212,13 +212,13 @@ mode, the fail ports from the interior of that call are printed.
 The big skip command is similar to the skip command above, except that the internal failure ports are not printed when a call fails. You tell the debugger to do a
 big skip by typing S (uppercase ‘S’) followed by \ReturnKey . A big skip is also
 much more efficient that a normal skip.
-````
+```
 ?- trace likes(john,Who).
 (1) 1 call: likes(john,_93) ? S
 (1) 1 exit: likes(john,mary) ? c
 Who = mary ;
 (1) 1 fail: likes(john,_93) ?
-````
+```
 In this case, only the original call to likes/2 prints out a failure report. All the
 other failures are suppressed by the big skip in call number 1.
 
@@ -229,7 +229,7 @@ what you expected. The retry command gives you another chance to trace the same
 call again, presumably in more detail. In the following example, the debugger is
 waiting at the exit port of call number 1. You can see exactly why
 likes(john,mary)succeeded by retrying the call and creeping through its execution:
-````
+```
 (1) 1 exit: likes(john,mary) ? r
 (1) 1 call: likes(john,_93) ? c
 (2) 2 call: female(_93) ? c
@@ -256,7 +256,7 @@ The spy/1 builtin allows you to set spy points in your program. A spy point will
 interrupt the normal execution of your program and begin tracing at every call to a
 particular procedure. This is useful when most of your program is working correctly, but a few isolated procedures still need attention. The following example uses
 a program that takes derivatives of a function and simplifies the result:
-````
+```
 diff :-
     write(’type in: Var,Fn’), nl,
     read((X,F)),
@@ -271,14 +271,14 @@ simplify(A+B,Sum) :-
     Sum is A+B.
 
 simplify(Exp,Exp).
-````
+```
 Suppose that you are confident that diff/3 itself works correctly, but suspect that
 there are bugs inside simplify/2. Rather than tracing the entire program, you
 can place a spy point on simplify/2:
     ?- spy simplify/2.
 When your program attempts to call simplify/2, the debugger will take control
 and let you begin tracing.
-````
+```
 ?- diff.
 type in Var,Fn
 x,x+x.
@@ -286,15 +286,15 @@ x,x+x.
 (1) 1 call: simplify(1+1,_255) ? c
 (2) 2 call: integer(1) ? c
 (2) 2 exit: integer(1) ?
-````
+```
 The debugger only stops at the ports for simplify/2 and its subgoals. When
 simplify/2 succeeds or fails, normal program execution resumes until the next
 spy point. In this case, there are no more spy points, so the program simply prints
 out its answer.
-````
+```
 (1) 1 exit: simplify(1+1,2) ? c
 2
-````
+```
 If for any reason simplify/2 tries to find another solution, the debugger will
 wake up again at the redo port and allow you to continue tracing.
 
@@ -307,7 +307,7 @@ In the following example, spy points are placed on diff/0 and simplify/2.
 As soon as the program starts, the spy point at diff/0 activates the debugger.
 Then a leap command suppresses the debugger until the call to simplify/2,
 where the debugger picks up again:
-````
+```
 ?- spy simplify/2, spy diff/0.
 yes.
 ?- diff.
@@ -317,16 +317,16 @@ x,x+x.
 (7) 2 call: simplify(1+1,_255) ? s
 (7) 2 exit: simplify(1+1,2) ? c
 (8) 11 call: write(2) ?
-````
+```
 ## 14.7 Turning Off Spy Points
 
 The nospy/0 builtin removes all spy points from your program, while nospy/1
 removes a specific spy point:
-````
+```
 ?- nospy a/1.
 Spy point removed for user:a/1.
 yes.
-````
+```
 
 ## 14.8 Getting Help
 
