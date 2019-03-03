@@ -4,6 +4,9 @@ url: "https://alsprolog.com"
 
 repository: "AppliedLogicSystems/ALSProlog"
 
+# Analytics for production (Piwik/Matomo substituting for GA)
+google_analytics: 6
+
 # Build settings
 markdown: kramdown
 theme: minima
