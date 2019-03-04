@@ -34,17 +34,17 @@ Tcl_eval's `ArgList` may contain atoms, numbers or lists.
 ```
 ?- tcl_call(i, [puts, abc], R).
 R = ''
-%% Prints ‘abc’ to standard output, and binds R to ''.
+%% Prints 'abc' to standard output, and binds R to ''.
 
 ?- tcl_call(i, [set, x, 3.4], R).
 R = 3.4
 %% Sets the Tcl variable x to 3.4 and binds R to 3.4.
 
-?- tcl_call(i, ‘set x’, R).
+?- tcl_call(i, 'set x', R).
 R = 3.4
 %% Binds R to 3.4.
 
-?- tcl_eval(i, [‘if [file exists ‘, Name, ‘] puts file-found’], R).
+?- tcl_eval(i, ['if [file exists ', Name, '] puts file-found'], R).
 ```
 
 ## ERRORS

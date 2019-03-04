@@ -32,6 +32,7 @@ foreign_sdk/*/ALS_Prolog_Foreign_SDK
 docs/Gemfile.lock
 _site
 _local_site
+.jekyll-metadata
 .sass-cache/
 .jekyll-cache/
 .jekyll-metadatabuild-xcode

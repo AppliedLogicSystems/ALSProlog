@@ -2,16 +2,20 @@
 ---
 
 # 9 Freeze, Exceptions, Events, Interrupts, Signals
+{:.no_toc}
+
+* TOC
+{:toc}
 
 ## 9.1 Freeze
 
-ALS Prolog supports a ‘freeze’ control construct similar to those that appear in
-some other prolog systems (See [carlsson] for general information on delay terms and implementation strategies). Using ‘freeze’, one can implement a variety of approaches to co-routining and delayed evaluation.
-````
+ALS Prolog supports a 'freeze' control construct similar to those that appear in
+some other prolog systems (See [carlsson] for general information on delay terms and implementation strategies). Using 'freeze', one can implement a variety of approaches to co-routining and delayed evaluation.
+```
 freeze/2
 freeze(Var, Goal)
 freeze(?, +)
-````
+```
 In normal usage, Var is an uninstantiated variable which occurs in Goal. When invoked in module M, the call
 
     freeze(Var, Goal)
@@ -19,28 +23,28 @@ In normal usage, Var is an uninstantiated variable which occurs in Goal. When in
 behaves as follows:
 1.  If Var is instantiated, then M:Goal is executed;
 
-2.  If Var is not instantiated, then the goal freeze(Var, Goal) immediately succeeds, but creates a ‘delay term’ (on the heap) which encodes information
+2.  If Var is not instantiated, then the goal freeze(Var, Goal) immediately succeeds, but creates a 'delay term' (on the heap) which encodes information
 about this goal. If Var becomes instantiated at some point in the future, at
 that time, the goal M:Goal is run (with, of course, Var as instantiated).
 
 For example, here is an example of an extremely simple producer-consumer coroutine:
-````
+```
 pc2 :- freeze(S, produce2(0,S)), consume2(S).
 produce2(N, [N | T])
     :- M is N+1,
-       write(‘-p-’),
+       write('-p-'),
        freeze(T, produce2(M,T)).
 
 consume2([N | T])
     :- write(n=N),nl,
        ((N > 3, 0 is N mod 3) -> gc; true),
        (N < 300 -> consume2(T) ; true).
-````
-Without the presence of the ‘freeze’ constructs, this program will simply loop in
-produce2/2, doing nothing but incrementing the counter and printing ‘-p-’ on the
-terminal. However, using the freeze construct, the program ‘alternates’ between
+```
+Without the presence of the 'freeze' constructs, this program will simply loop in
+produce2/2, doing nothing but incrementing the counter and printing '-p-' on the
+terminal. However, using the freeze construct, the program 'alternates' between
 produce2/2 and consume2/1, producing the following behavior on the terminal:
-````
+```
 ?- pc2.
 -p-n = 0
 -p-n = 1
@@ -54,9 +58,9 @@ produce2/2 and consume2/1, producing the following behavior on the terminal:
 -p-n = 299
 -p-n = 300
 yes.
-````
+```
 Here is one very simple illustrative example:
-````
+```
 u :- freeze(W1, silly(W1,yellow)),
      freeze(W2, grump(W2,blue)),
      W2=W1,
@@ -67,16 +71,16 @@ grump(A,B)
 
 silly(A,B)
     :- write(silly_running(A,B)),nl,flush_output.
-````
+```
 Running u/0 yields:
-````
+```
 ?- u.
 silly_running(igloo,yellow)
 grump_running(igloo,blue)
 yes.
-````
+```
 Using silly and grump from above, here is another example:
-````
+```
 u1 :- freeze(W1, silly(W1,yellow)),
       u11(W1).
 
@@ -97,33 +101,33 @@ u1_4(W3)
 u111(W1).
 
 u1_4(W3).
-````
+```
 Runing this produces:
-````
+```
 ?- u1.
 silly_running(igloo,yellow)
 grump_running(igloo,blue)
 grump_running(igloo,purple)
 yes.
-````
+```
 The following example (due to Bill Older) illustrates the interaction of freeze with backtracking:
-````
+```
 fred(2) :- write(fred(2)),nl.
 fred(3) :- write(fred(3)),nl.
 fred(4) :- write(fred(4)),nl.
 freeze_backtrack
     :- freeze(X, write(thaw(X))), fred(X), fail.
-````
+```
 The output here is:
-````
+```
 ?- freeze_backtrack.
 thaw(2)fred(2)
 thaw(3)fred(3)
 thaw(4)fred(4)
 no.
-````
+```
 Finally, here is an example (also due to Bill Older) of cascading freezes:
-````
+```
 fd([], 1).
 fd([A | As], B)
     :-!,
@@ -133,9 +137,9 @@ fdtest([A,B,C,D])
     :- fd([A], B),
        fd([A,B], C),
        fd([B,C], D).
-````
+```
 Here are two different uses of fdtest:
-````
+```
 ?- fdtest([A,B,C,D]).
 A-> fd([],B),user:fd([B],C) 
 B-> fd([C],D)
@@ -149,7 +153,7 @@ B= 1
 C= 1 
 D= 1
 yes. 
-````
+```
 
 ## 9.2 Exceptions
 The exception mechanism of ALS Prolog allows programs to react to extraordinary
@@ -163,7 +167,7 @@ in its calling state, and to later be able to return directly to this marked poi
 Figure. Direct Return to an Earlier State.
 
 This exception mechanism is implemented using two predicates, catch/3 and throw/1.
-````
+```
 catch/3
 catch(WatchedGoal, Pattern, ExceptionGoal)
 catch(+, +, +)
@@ -171,7 +175,7 @@ catch(+, +, +)
 throw/1
 throw(Term)
 throw(+)
-````
+```
 The two predicates catch/3 and throw/1 provide a more sophisticated controlled
 abort mechanism than the primitive builtins catch/2 and throw/0 (although the
 former are implemented in terms of the latter, which are described below). catch/
@@ -210,17 +214,17 @@ system aborts to the Prolog shell. The figure below illustrates the behavior of 
 Figure. Action of catch/3 and throw/1.
 
 Consider the sample code:
-````
+```
 ct :- catch(c1, p1(X), e(c1,X)).
 c1 :- write(c1),nl, catch(c2, p2(X), e(c2,X)).
 c2 :- write(c2),nl, catch(c3, p1(X), e(c3,X)).
-c3 :- write(’c3-->’), read(Item),
+c3 :- write('c3-->'), read(Item),
       write(throwing(Item)),nl, 
       throw(Item).
 e(H,I) :- printf("Handler %t caught item %t\n",[H,I]).
-````
+```
 This leads to the following execution behavior on a TTY interface, with the user input indicated by surrounding **.
-````
+```
 ?- ct.
 c1
 c2
@@ -235,18 +239,18 @@ c3-->**p2(a).**
 throwing(p2(a))
 Handler c2 caught item a
 yes.
-````
+```
 The builtins file catch.pro records the item being thrown by throw/1 in the Prolog database, while the file catchg.pro records the item in a global variable. For small
 items, there is no significant difference between the two versions, but for large
 items, the catchy version will be more efficient.
-````
+```
 catch/2
 catch(WatchedGoal,ExceptionGoal)
 catch(WatchedGoal,ExceptionGoal)
 
 throw/0
 throw
-````
+```
 The two predicates catch/2 and throw/0 provide the primitive form of controlled abort underlying catch/3 and throw/1. The builtin abort/0 normally aborts to the Prolog shell.
 * WatchedGoal is simply run from the current module as if by call/1.
 * ExceptionGoal is a goal that will be run as a result of a call to throw/0 during the execution of the WatchedGoal.
@@ -255,34 +259,34 @@ failed. However, instead of backtracking to the most recent choicepoint, the sys
 will instead backtrack to the state it was in just before the most recent enclosing
 catch/2 and then run the corresponding ExceptionGoal. catch/2 and throw/0
 are dynamically scoped in that throw/0 must be called somewhere in the execution of WatchedGoal which is initially invoked by catch/2. If throw/0 is called outside the scope of some invocation of catch/2 (meaning, with nothing to catch its execution), the system aborts to the Prolog shell:
-````
+```
 ?- throw.
 Execution aborted.
-````
+```
 If we define the following clauses:
-````
+```
 goal(Person) 
     :- printf("%t: Chris, take out that garbage!\n",[Person]),
        responseTo(Person), 
        okay(Person).
-responseTo(’Mom’) :- throw.
-responseTo(’Dad’).
+responseTo('Mom') :- throw.
+responseTo('Dad').
 okay(Person) 
-    :- printf("Chris: Okay %t, I’ll do it.\n",[Person]).
+    :- printf("Chris: Okay %t, I'll do it.\n",[Person]).
 interrupt :- printf("Chris: I want to go hiking with Kev.\n").
-````
+```
 Then:
-````
-?- catch(goal(’Mom’),interrupt).
+```
+?- catch(goal('Mom'),interrupt).
 Mom: Chris, take out that garbage!
 Chris: I want to go hiking with Kev.
 yes.
-?- catch(goal(’Dad’),interrupt).
+?- catch(goal('Dad'),interrupt).
 Dad: Chris, take out that garbage!
-Chris: Okay Dad, I’ll do it.
+Chris: Okay Dad, I'll do it.
 yes.
-````
-Notice that with Mom, it’s okay to interrupt, but you don’t try it with Dad. In the
+```
+Notice that with Mom, it's okay to interrupt, but you don't try it with Dad. In the
 above example, Chris responds to Dad with the okay/1 predicate, but Chris did
 not respond to Mom because the okay/1 predicate was never reached. After a
 throw/0 predicate is executed, control is given to the ExceptionGoal. After
@@ -305,7 +309,7 @@ is useful as a general interrupt mechanism in Prolog. Since it is always carried
 upon procedure entry, and since all calls must go through the procedure table, any
 call can be interrupted. If the overflow check believes that the heap safety value is
 larger than the current distance between the heap and backtrack stack, the next call
-will be stopped. The key word is ‘ believes’: the heap safety value could have been
+will be stopped. The key word is ' believes': the heap safety value could have been
 set to an absurdly large value leading to the interruption.
 
 The key to using this as the basis for a general Prolog interrupt mechanism is to provide a method of specifying the reason for the interrupt, together with an interrupt
@@ -325,7 +329,7 @@ Something happens to trigger an interrupt (i.e., to set the heap safety value to
 large value) and f/2 is called. The heap overflow check code will run and the goal
 will now operationally look as though it were
 
-    :- b, c, ‘$int’(f(s,d)), d, f.
+    :- b, c, '$int'(f(s,d)), d, f.
 
 Rather than f/2 running, $int/1 will run. When $int/1 returns, d/0 will run,
 which is what would have happened if f/2 had run and returned. If $int/1
@@ -338,21 +342,21 @@ If some thought is given to the possibilities of this interrupt machanism, it be
 apparent that it can be used for a variety of purposes, as sketched below.
 
 _A clause decompiler in Prolog itself_: The $int/1 code might be of the form
-````
-‘$int’(Goal) 
+```
+'$int'(Goal) 
     :- save Goal somewhere,
-       set a ’decompiler’ interrupt.
-````
+       set a 'decompiler' interrupt.
+```
 The goal would be saved somewhere, and the interrupt code would merely return
 after making sure that the next call would be interrupted. It is not necessary to call
 Goal, because nothing below the clause being decompiled is of interest.
 
 _A debugging trace mechanism_: The $int/1 code would be of the form
-````
-‘$int’(Goal) 
+```
+'$int'(Goal) 
     :- show user Goal,
-       set a ’trace’ interrupt and call Goal.
-````
+       set a 'trace' interrupt and call Goal.
+```
 Here, the code will show the user the goal and then call it, after making sure that all
 subgoals in Goal will be interrupted.
 
@@ -365,7 +369,7 @@ In order for the above operations to take place, the interrupt handler needs to 
 which interrupt has been issued. This is done through the _magic value_. Magic is
 a global variable, which is provided as the first argument to the $int/2 call
 
-    ‘$int’(Magic,Goal)
+    '$int'(Magic,Goal)
 
 Calling $int/2 with the value of Magic passed (as first argument) means that
 the proper interrupt handler will be called. If the value of Magic is allowed to be
@@ -374,10 +378,10 @@ a regular term, information can be passed back from an interrupt, such as the ac
 In order to write code such as the decompiler in Prolog, several routines are needed.
 The system programmer must be able to set and examine the value of Magic. This
 is done with the following calls:
-````
+```
 setPrologInterrupt/1
 getPrologInterrupt/1
-````
+```
 The programmer must also be able to interrupt the next call. This is done with
 the call:
 
@@ -389,7 +393,7 @@ For example, the goal
 
 will call
 
-    ‘$int’(Magic,a)
+    '$int'(Magic,a)
 
 If the clause
 
@@ -401,7 +405,7 @@ is called by the goal
 
 then
 
-    ‘$int’(Magic,a)
+    '$int'(Magic,a)
 
 will be called once again, since after b returns, a/0 is the next goal called. Finally,
 there must be a way of calling a goal, a, without interrupting it, but setting the interrupt
@@ -419,11 +423,11 @@ then
 
 will call
 
-    :- ‘$int’(Magic,b).
+    :- '$int'(Magic,b).
 
 not
 
-    :- ‘$int’(Magic,a).
+    :- '$int'(Magic,a).
 
 However, if a/0 is merely the fact
 
@@ -435,33 +439,33 @@ then the call
 
 will end up calling
 
-    :- ‘$int(Magic,b).
+    :- '$int(Magic,b).
 
 As an extended example of the use of these routines, we will construct a simple
 clause decompiler. The code sketched earlier outlines the general idea:
-````
-‘$int’(Goal) :- 
+```
+'$int'(Goal) :- 
     save Goal somewhere,
-    set a ’decompiler’ interrupt.
-````
+    set a 'decompiler' interrupt.
+```
 The goal can be saved for the next call inside a term in the variable Magic. The
 clause so far would be
-````
-‘$int’(s(Goals,Final),NewGoal) 
+```
+'$int'(s(Goals,Final),NewGoal) 
     :- 
     setPrologInterrupt(s([Goal|Goals],Final)),
     forcePrologInterrupt.
-````
+```
 The term being built inside Magic has the new goal added to it, and the trigger is
 set for the next call. To start the decompiler, the clause should be called as though
 it were to be run. However, each subgoal will be interrupted and discarded before
 it can be run. The starting clause would be something of the form:
-````
+```
 $source(Head,Body) 
     :- 
     setPrologInterrupt(s([],Body)),
     callWithDelayedInterrupt(Head).
-````
+```
 First, the value of Magic is set to the decompiler interrupt term with an initially
 empty body and a variable in which to return the completed body of the decompiled
 clause. The goal is then called with callWithDelayedInterrupt/1, which
@@ -474,28 +478,28 @@ running, each subgoal will pick up its variables from the clause environment. If
 decompiler should ever backtrack, the procedure for Head will backtrack, going on
 to the next clause, which will be treated in the same way. The only tricky thing is
 the stopping of the decompiler. The two clauses given above will decompile the entire computation, including the code which called the decompiler. The best method
-is to have a goal which the decompiler recognizes as being an ‘end of clause flag’.
+is to have a goal which the decompiler recognizes as being an 'end of clause flag'.
 However, having a special goal which would always stop the decompiler would
 mean that the decompiler would not be able to decompile itself. So some way must
-be found to make only the particular call to this ‘distinguished’ goal be the one at
+be found to make only the particular call to this 'distinguished' goal be the one at
 which the decompiler will stop. The clauses above can be changed to the following
 to achieve this goal:
-````
-‘$int’(s(ForReal,Goals,Final),$endSource(Variable)
+```
+'$int'(s(ForReal,Goals,Final),$endSource(Variable)
     :- ForReal == Variable,!.
 
-‘$int’(s(ForReal,Goals,Final),Goal) 
+'$int'(s(ForReal,Goals,Final),Goal) 
     :- setPrologInterrupt(s(ForReal, [Goal|Goals],Final)),
        forcePrologInterrupt.
 
-‘$source’(Head,Body) 
+'$source'(Head,Body) 
     :- setPrologInterrupt(s(ForReal,[],Body)),
        callWithDelayedInterrupt(Head),
-       ‘$endSource’(ForReal).
-````
+       '$endSource'(ForReal).
+```
 Here, $source/2 has a variable ForReal in its environment. This is carried
 through the interrupts inside the term in Magic. If the interrupted goal is ever
-$endSource(ForReal), the decompiler stops. Note that $endSource(ForReal) will be caught when $source/2 is called, since all subgoals are then being caught, and it’s argument will come from the environment of
+$endSource(ForReal), the decompiler stops. Note that $endSource(ForReal) will be caught when $source/2 is called, since all subgoals are then being caught, and it's argument will come from the environment of
 $source/2. Otherwise, the interrupted goal is added to the growing list of subgoals, and the computation continues. If $source/2 is called by $source/2,
 there will be a new environment and the first $endSource/1 encountered will be
 caught and stored, but not the second one. The complete code for the decompiler
@@ -507,7 +511,7 @@ the file debugger.pro.
 
 The event handling mechanism of ALS Prolog (developed by Kevin Buettner, based on [Meier]) implements both the system-level error and exception mechanisms, together with the general user-level event mechanisms such as coupling to signals and application-based interrupts.  Most of the machinery of the event mechanism is readily discernible in the builtins file blt_evt.pro.
 At the present time, there are five predefined types of events:
-````
+```
 sigint - raised when control-C or its equivalent is hit
 
 reisscntrl_c - raised for “reissued control-C”
@@ -517,20 +521,20 @@ lib load - raised when the stub of a library predicate is encountered
 prolog_error - raised by prolog errors (mostly from builtins)
 
 undefined_predicate - raised when an undefined predicate is encountered
-````
+```
 Events are handled (and thereby defined) by a local or global event handler. Global
 handlers are specified in a simple database builtins:global_handler/3:
-````
+```
 global_handler(EventId, Module, Procedure):
     sigint, builtins, default_cntrl_c_handler
     reisscntrl_c, builtins, silent_abort
     libload, builtins, libload
     prolog_error, builtins, prolog_error
     undefined_predicate, builtins, undefined_predicate
-````
+```
 The global_handler/3 database is best manipulated using the following
 predicates (which are not exported from the module builtins):
-````
+```
 set_event_handler/3
 set_event_handler(Module, EventId, Proc)
 set_event_handler(+, +, +)
@@ -538,23 +542,23 @@ set_event_handler(+, +, +)
 remove_event/1
 remove_event(EventId)
 remove_event(+)
-````
+```
 Additional global event handlers, for example to handle the signal sigalarm, are installed using set_event_handler/3, and removed used remove_event/1.
 
 An event can be triggered by a program (including system programs) by the following predicate (which is exported from module builtins):
-````
+```
 trigger_event/2
 trigger_event(EventId, ModuleAndGoal)
 trigger_event(+, +)
-````
+```
 The argument ModuleAndGoal is normally of the form Module:Goal.
 
 Local event handlers are installed and manipulated using the trap/2 system predicate:
-````
+```
 trap/2
 trap(Goal,Handler)
 trap(Goal,Handler)
-````
+```
 Here, `Handler` is a local handler such that
 
 1. `Handler` is in force while `Goal` is running;
@@ -566,25 +570,25 @@ trap/2 is a module closure (meta-predicate), so that the module in which it is c
 is available to its implementing code. Regarding item 4 above, Handler is usually
 devoted to one particular type of event, such as handling specific kinds of signals;
 it will deal with all other events by propagating them to the appropriate “higher level” handlers, either surrounding local handlers, or the global handlers. This propagation is carried out using the following predicate:
-````
+```
 propagate_event/3
 propagate_event(EventId,Goal,Context)
 propagate_event(EventId,Goal,Context)
-````
+```
 For example, here is an alarm handler which will be discussed in more detail in the
 section on signals:
-````
+```
 alarm_handler(EventId, Goal, Context)
     :- EventId \== sigalrm,
        !,
        propagate_event(EventId,Goal,Context).
 
 alarm_handler(_,Goal,_)
-    :- write(‘a_h_Goal’=Goal), nl,
+    :- write('a_h_Goal'=Goal), nl,
        setSavedGoal(Goal),
        remQueue(NewGoal),
        NewGoal.
-````
+```
 Note that the first clause uses propagate_event/3 to pass on all events except
 sigalrm, which is handled by the second clause.
 
@@ -593,7 +597,7 @@ sigalrm, which is handled by the second clause.
 ALS Prolog provides a strong mechanism for interfacing to external operating system signaling
 mechanisms. The machinery allows the programmer to connect external signals to internal Prolog events generally as described in the previous section. The details for the coupling are found in the builtins file blt_evt.pro. The connection between signal numbers and signal names is provied
 by the predicate signal_name/2:
-````
+```
 signal_name(1,sighup).
 signal_name(2,sigint).    %% interrupt (as in Cntrl-C)
 signal_name(3,sigquit).
@@ -605,25 +609,25 @@ signal_name(15,sigterm).
 signal_name(29,siglost).
 signal_name(30,sigusr1).
 signal_name(31,sigusr2).
-````
+```
 This database is used by the predicate signal_handler/3 to convert from numeric signal identifiers to symbolic identifiers:
-````
+```
 signal_handler(SigNum,Module,Goal)
     :- signal_name(SigNum,SigName),
        !,
        get_context(Context),
        propagate_event(SigName,Module:Goal,Context).
-````
+```
 signal_handler/3 is called by the underlying C-defined signal handling
 mechanism to pass in signals from the operating system. At the present time, there
 are only two signals for which this mechanism is in place: sigint (controlC) and sigalrm.
 The alarm mechanism is currently only available for Unix/Linux-based versions of ALS
 Prolog (including Mac OS X). Alarm signals are set using the predicate:
-````
+```
 alarm/2
 alarm(First, Interval)
 alarm(+, +)
-````
+```
 Both First and Interval should be non-negative real numbers. First specifies the number of seconds until the first alarm signal is sent to the ALS Prolog
 process. If Interval > 0, an alarm signal is sent to the process every Interval seconds after the first signal is sent. Thus alarm(First, 0) will result in
 only one alarm signal (if any) being sent. A subsequent call to alarm/2 causes
@@ -631,7 +635,7 @@ the alarm mechanism to be reset according to the parameters of the second call.
 Thus, even if the first alarm has not yet been sent, a call alarm(0, 0) will turn
 off all alarm signals (until another call to alarm/2 is used to set the alarms again).
 The following sample program par1.pro illustrates the use of these mechanisms in implementing a simple producer-consumer program; the entry point is main/0.
-````
+```
 main :- trap(main0,alarm_handler).
 
 main0 :- initQueue,
@@ -659,7 +663,7 @@ alarm_handler(EventId, Goal, Context)
        !,
        propagate_event(EventId,Goal,Context).
 alarm_handler(_,Goal,_) 
-    :- write(‘a_h_Goal’=Goal), nl,
+    :- write('a_h_Goal'=Goal), nl,
        setSavedGoal(Goal),
        remQueue(NewGoal),
        NewGoal.
@@ -715,4 +719,4 @@ addQueue([],Q,NewRear)
 addQueue(Rear,Q,NewRear) 
     :- mangle(2,Rear,NewRear),  %% add the new rear
        mangle(2,Q,NewRear).     %% new rear now rear of queue
-````
+```

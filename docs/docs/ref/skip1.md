@@ -19,7 +19,7 @@ All characters on the current input stream are discarded up to and including the
 ## EXAMPLES
 
 ```
-?- skip(0’*), get(Next).
+?- skip(0'*), get(Next).
 Journey To The *s
 Next = 115
 yes.

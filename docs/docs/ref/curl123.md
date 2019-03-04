@@ -30,7 +30,7 @@ For all equations on the `Options` list passed to the C program, the left side o
 ```
 'DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST',
 ```
-(see below), the left side L of every equation L=R passed to the C plumbing over curl is prefixed with either `‘CURLOPT_’` or `‘CURLINFO_’`. The result of this prefixing must be either an [easy option](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)  or an [info option](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html).
+(see below), the left side L of every equation L=R passed to the C plumbing over curl is prefixed with either `'CURLOPT_'` or `'CURLINFO_'`. The result of this prefixing must be either an [easy option](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)  or an [info option](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html).
 
 Several simple transformations are applied to the elements of the list:
 
@@ -75,7 +75,7 @@ In `curl/1`, the one `Tag` which absolutely must be set is `'URL'=<URL>` (effect
 
 - The special equation
 ```
-‘RESULT’ = Expr [or, result = Expr]
+'RESULT' = Expr [or, result = Expr]
 ```
 can appear on `Options`. Whatever transfer result is produced from the underlying curl call is turned into a UIA and is unified with `Expr`, which can be any prolog expression, including an unbound variable.
 
@@ -89,15 +89,15 @@ Further `CURLOPT_` options are described below in connection with http/3.
 
 Appropriate `CURLINFO` options can be used with any of curl/[1,2,3] or http/3.. For example, including `response_code(RC)` on `Options` will bind `RC` to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including `total_time(TTT)` will bind `TTT` to the number of seconds expended in the transaction.
 
-For transferring information outbound, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12’) and 2) free-form text data (e.g., ‘lorem ipsum doler’). Either type of data can be supplied either directly in an equation on the `Options` list, or in a file specified on the `Options` list:
+For transferring information outbound, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12') and 2) free-form text data (e.g., 'lorem ipsum doler'). Either type of data can be supplied either directly in an equation on the `Options` list, or in a file specified on the `Options` list:
 
-- If `data = <atom> (’DATA’=<atom>)` (where `<atom>` is a symbol or UIA) occurs on the `Options` list, then the underlying curl program will POST the text of `<atom>` via the curl equation `'READDATA'=<atom>`.
+- If `data = <atom> ('DATA'=<atom>)` (where `<atom>` is a symbol or UIA) occurs on the `Options` list, then the underlying curl program will POST the text of `<atom>` via the curl equation `'READDATA'=<atom>`.
 
-- If `datefile=<FilePathName>(‘DATAFILE’=<FilePathName>)` occurs on the `Options` list, then the complete text occurring in `<FilePathName>` is read into a single UIA `DT`, and the information is POSTED as if `‘DATA’=DT` had been included on `Options`. The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA `DT`. For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines. If the equation `eol = <char>` (or, `'EOL'=<char>`) is present on the options list, when `<FilePathName>` is read, the character `<char>` will be used as a separator between the concatenated lines. Equivalently, if `eolcode=<charcode>` (or, `'EOLCODE'=<charcode>`) is present on the list, the character with code `<charcode>` will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
+- If `datefile=<FilePathName>('DATAFILE'=<FilePathName>)` occurs on the `Options` list, then the complete text occurring in `<FilePathName>` is read into a single UIA `DT`, and the information is POSTED as if `'DATA'=DT` had been included on `Options`. The basic method of reading the file is to read it line by line, concatenating the lines to make the single UIA `DT`. For convenience, two special options are provided which allow one to specify a character to be used in concatenating the file lines. If the equation `eol = <char>` (or, `'EOL'=<char>`) is present on the options list, when `<FilePathName>` is read, the character `<char>` will be used as a separator between the concatenated lines. Equivalently, if `eolcode=<charcode>` (or, `'EOLCODE'=<charcode>`) is present on the list, the character with code `<charcode>` will be used as the separator. (So, for example, spaces or newlines could be supplied as the separators.)
 
-- If `fields = <atom>` (or, `‘FIELDS’=<atom>`) occurs on `Options`, then `<atom>` should represent a structured fields expression (e.g., `'name=admin&shoesize=12’`). The underlying curl program will POST the text of `<atom>` via `'POSTFIELDS'=<atom>`.
+- If `fields = <atom>` (or, `'FIELDS'=<atom>`) occurs on `Options`, then `<atom>` should represent a structured fields expression (e.g., `'name=admin&shoesize=12'`). The underlying curl program will POST the text of `<atom>` via `'POSTFIELDS'=<atom>`.
 
-- If `fieldsfile = <FilePathName>` (or, `‘FIELDSFILE’= <FilePathName>`) occurs on `Options`, then the complete text occurring in `<FilePathName>` is read into a UIA `FE`, just as for `'DATAFILE'`, and the information is POSTED as if `‘FIELDS’=FE` had been included on `Options`. As with `'DATAFILE'`, the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the `eol = <char> ('EOL'=<char>)` or `eolcode=<charcode> ('EOLCODE'=<charcode>)` special equations. (So, for example, amperstands (`&`) could be supplied as the separator.)
+- If `fieldsfile = <FilePathName>` (or, `'FIELDSFILE'= <FilePathName>`) occurs on `Options`, then the complete text occurring in `<FilePathName>` is read into a UIA `FE`, just as for `'DATAFILE'`, and the information is POSTED as if `'FIELDS'=FE` had been included on `Options`. As with `'DATAFILE'`, the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the `eol = <char> ('EOL'=<char>)` or `eolcode=<charcode> ('EOLCODE'=<charcode>)` special equations. (So, for example, amperstands (`&`) could be supplied as the separator.)
 
 Inspired by the REST approach to internet file transfer,
 ```

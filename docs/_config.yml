@@ -1,13 +1,17 @@
 # Site settings
-title: "ALS Prolog"
-url: "https://alsprolog.com"
+title: ALS Prolog
+url: https://alsprolog.com
+description: ALS Prolog Compiler & Development Environment
+author: Applied Logic Systems, Inc.
+email: info@applied-logic-systems.com
 
-repository: "AppliedLogicSystems/ALSProlog"
+# Analytics for production (Piwik/Matomo substituting for GA)
+google_analytics: 6
 
 # Build settings
-markdown: kramdown
 theme: minima
-#permalink: pretty
+
+markdown: kramdown
 
 kramdown:
   syntax_highlighter_opts:
@@ -22,6 +26,10 @@ liquid:
   strict_variables  : false
 
 exclude:
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - GNUmakefile
   - src_help_md
 
 header_pages:

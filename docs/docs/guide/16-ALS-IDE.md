@@ -2,6 +2,10 @@
 ---
 
 # 16 ALS IDE
+{:.no_toc}
+
+* TOC
+{:toc}
 
 The ALS Integrated Development Environment (IDE) provides a GUI-based developer-friendly setting for developing ALS Prolog programs. Start the ALS IDE by issuing alsdev
 in an appropriate command window. The IDE displays an initial spash screen
@@ -135,7 +139,7 @@ Selecting IDE Settings raises the following dialog:
 The Heartbeat is the time interval between moments when a Prolog program temporarily yields control to the Tcl/Tk interface to allow for processing of GUI events,
 including clicks on the Interrupt button.
 The Print depth setting contols how deep printing of nested terms will proceed;
-when the depth limit is reached, some representation (normally ‘*’ or ‘...’) is printed
+when the depth limit is reached, some representation (normally '*' or '...') is printed
 instead of continuing with the nested term.
 The Printing depth type setting determines whether traversing a list or the top-level arguments of a term increases the print depth counter. The Flat setting indicates
 that the counter will not increase as one traverses a list or the top level of a term,

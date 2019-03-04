@@ -16,4 +16,9 @@ then
 	make testdocs
 fi
 make test
+
+# Test clean and check that no source files are modified
+make distclean
+[ -z "$(git status --short --ignored)" ]
+
 popd
