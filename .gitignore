@@ -17,6 +17,7 @@
 foonew
 alspro
 core/unix/*/alsdev
+core/unix/*/app_image*
 alspro_b
 alsdev_b
 *.tgz
