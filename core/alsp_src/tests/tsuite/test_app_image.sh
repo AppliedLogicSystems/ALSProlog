@@ -36,7 +36,7 @@ if [ ! -f "./app_image0.pst" ]; then
     exit 1
 fi
 
-TEST_C_OUT=$(app_image0)
+TEST_C_OUT=$(./app_image0)
 
 if [ $TEST_C_OUT != "app_image0_running" ];
 then
@@ -69,7 +69,7 @@ fi
 
 # app_image1 running & making app_image2
 
-TEST_C_OUT=$(app_image1)
+TEST_C_OUT=$(./app_image1)
 
 if [ $TEST_C_OUT != "app_image1_making_app_image2" ];
 then
@@ -88,7 +88,7 @@ if [ ! -f "./app_image2.pst" ]; then
     exit 1
 fi
 
-TEST_C_OUT=$(app_image2)
+TEST_C_OUT=$(./app_image2)
 
 if [ $TEST_C_OUT != "app_image2_running" ];
 then
