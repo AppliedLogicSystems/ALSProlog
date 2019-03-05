@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-set -Eeuxo pipefail
+set -eux
 
 # Testing for save_image functionality on unix/linux/macOS
 #
