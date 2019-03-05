@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+
+set -Eeuxo pipefail
+
 # Testing for save_image functionality on unix/linux/macOS
 #
 if [ -f "./app_image0" ]; then
