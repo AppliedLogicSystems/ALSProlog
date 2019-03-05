@@ -1,0 +1,81 @@
+
+About ALSProlog/docs
+
+A very useful item: docs/GNUmakefile consolidates commands for building parts of the docs subsystem.  Execute 'make' in ALSProlog/docs to see the targets available:
+
+SSD > make
+Makefile Targets:
+all                   Build site and local docs
+run                   Run site for live development
+site                  Build site in _site
+local                 Build local docs in _local_site
+test                  Test all markup and links
+test-site             Test site
+test-local            Test local docs
+clean                 Clean all generated files
+help                  Display this help
+
+Here are the top-level files and folders appearing in ALSProlog/docs:
+
+AboutDocs.txt		-- This document
+CNAME			-- ??
+GNUmakefile		-- Makefile described above
+Gemfile			-- Ruby gems used
+Gemfile.lock		-- As it's name suggests, a lockfile
+_build_local_docs.sh*	-- (re-)builds the _local_site folder
+_config.yml		-- Basic configurations file for _site, _local_site
+_data/			-- *.yml files for references to books
+_includes/		-- various *.md and *.html include files, appearing as follows:
+			book.md:
+				appears in various source files in docs/ref
+			edit-source.html
+				_layouts/guide-page.html
+				_layouts/reference-page.html
+			google-analytics.html
+				??
+			ref-packtoc.html
+				??
+			ref-toc.html
+				??
+_layouts/		-- various layouts referenced as follows:
+			guide-page.html:
+				_config.yml:      layout: "guide-page"
+			reference-page.html:
+				_config.yml:      layout: "reference-page"
+			toc-page.html:
+				docs/guide/index.md:layout: toc-page
+				docs/ref/index.md:layout: toc-page
+			toc-frame.html:
+				docs/ref/toc_alsdev.html:layout: toc-frame
+				docs/ref/toc_alslib.html:layout: toc-frame
+				docs/ref/toc_c_intf.html:layout: toc-frame
+				docs/ref/toc_core_prolog.html:layout: toc-frame
+_local_config.yml	-- Overrides _config.yml configurations for 
+			   docs-only local site
+_local_site/		-- Local version for inclusion in distributions
+_site/			-- Complete documentation available at 
+			   https://alsprolog.netlify.com
+about.md		-- Markdown source for the About appearing in the 
+			   headers of the Documentation pages
+assets/			-- ??
+docs/			-- Source markdown for the User's Guide and the Reference Manual
+				guide/    ref/
+				index.md: alspro.com > Documentation page
+index.md		-- Markdown source for http://alsprolog.com
+ref-manual/		-- empty??
+src_help_md/		-- various (prolog) scripts for dealing with docs
+
+Broadly, "make all" uses <a href="https://jekyllrb.com">Jekyll</a> to process the sources (docs/[guide,ref] and the various index.md files, etc., using the _layouts and _includes, etc.) into two versions of the html ALSProlog documentation: the full version in _site and a slightly reduced version in _local_site. The full version in _site appears online at https://alsprolog.netlify.com and the slightly reduced version in _local_site is packaged with the ALS Prolog releases.
+
+[More] 
+
+Basic format of docs/guide/*.md
+	Front-matter (empty)
+	TOC/toc/no_toc
+
+Basic format of docs/ref/*.md
+	Front-matter details
+	{% include book.md ...
+
+[More: What happens when a new commit is made: To ~docs; To somewhere else]
+
