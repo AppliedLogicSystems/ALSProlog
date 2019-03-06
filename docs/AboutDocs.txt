@@ -68,14 +68,78 @@ src_help_md/		-- various (prolog) scripts for dealing with docs
 Broadly, "make all" uses <a href="https://jekyllrb.com">Jekyll</a> to process the sources (docs/[guide,ref] and the various index.md files, etc., using the _layouts and _includes, etc.) into two versions of the html ALSProlog documentation: the full version in _site and a slightly reduced version in _local_site. The full version in _site appears online at https://alsprolog.netlify.com and the slightly reduced version in _local_site is packaged with the ALS Prolog releases.
 
 [More] 
+YAML Front-matter occurs at the beginning of a file (*.md), and is delineated by 2 lines of 3 dashes:
+---
+---
 
 Basic format of docs/guide/*.md
-	Front-matter (empty)
+	YAML Front-matter (empty) - just the two lines:
+		---
+		---
+
 	TOC/toc/no_toc
 
 Basic format of docs/ref/*.md
-	Front-matter details
+	YAML Front-matter details
+Samples:
+	append3.md:
+---
+title: 'append/3'
+group: Terms
+predicates:
+- {sig: 'append/3', desc: 'append two lists'}
+- {sig: 'dappend/3', desc: 'append two lists'}
+---
+
+	listutl1.md:
+---
+title: 'list_diff/3'
+package: alslib
+group: Lists
+module: builtins
+predicates:
+- {sig: 'append/2', desc: 'appends a list of lists together'}
+- {sig: 'int_diff/4', desc: 'returns the intersection and one difference of two lists'}
+- {sig: 'intersect/2', desc: 'returns the intersection of a list of lists'}
+...........
+---
+
+	clause23.md:
+---
+title: 'clause/[2,3]'
+group: Prolog Database
+predicates:
+- {sig: 'clause', args: {
+    2: 'retrieve a clause',
+    3: 'retrieve a clause with a database reference'
+  }}
+- {sig: 'instance/2', desc: 'retrieve a clause from the database reference'}
+---
+
+General Format:
+---
+title: <one of the predicates described on this page>
+package: <one of ref_packages: from _config.yml; default = Core Prolog>
+group: Lists <Anything meaningful for the given page>
+
+	Although packages are a fixed/declared set (in_config.yml), groups are an open set. 
+	A group will exist as long as a ref page uses it. For example, if you add a /docs/ref/foo1.md 
+	file that uses group "Foobars", then "Foobars" will auto-magically appear in the TOC as a group. 
+
+module: <default = builtins; nearly all pages should be a single module>
+predicates:
+	format for a predicate with a single NAME/ARITY occurrence on the page:
+- {sig: 'append/2', desc: 'appends a list of lists together'}
+	format for predicate with multiple NAME/ARITIES occurrences on the page:
+- {sig: 'clause', args: {
+    2: 'retrieve a clause',
+    3: 'retrieve a clause with a database reference'
+  }}
+<These formats can occur multiply in any mixed order.>
+---
+
 	{% include book.md ...
+
 
 [More: What happens when a new commit is made: To ~docs; To somewhere else]
 
