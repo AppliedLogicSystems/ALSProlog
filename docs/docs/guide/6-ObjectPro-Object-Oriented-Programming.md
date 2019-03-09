@@ -96,7 +96,7 @@ class:
 
 The equations appearing on a list which is the right side of a
 
-    values =ValuesList
+    values = ValuesList
 
 equation are expressions of the form
 
