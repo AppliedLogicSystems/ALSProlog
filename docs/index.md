@@ -1,27 +1,25 @@
 ---
+layout: default
 ---
 # <img src="https://avatars2.githubusercontent.com/u/15176335?v=3"> ALS Prolog
 
-ALS Prolog is a project of [Applied Logic Systems, Inc.](https://applied-logic-systems.com)  It is an open source version of the original ALS Prolog active in the 1980-90s.
+ALS Prolog is a Prolog compiler and development environment,
+available for most desktop platforms.
+ALS Prolog is a project of [Applied Logic Systems, Inc.](https://applied-logic-systems.com)
+It is an open source version of the original commercial ALS Prolog active in the 1980-90's.
 
-The GitHub organization home for ALS is located [here .](https://github.com/AppliedLogicSystems)
+Source code is maintained in the
+[ALS Prolog Github repository](https://github.com/AppliedLogicSystems/ALSProlog),
+under the [ALS organization](https://github.com/AppliedLogicSystems).
 
 ## [Download Latest Release](https://github.com/AppliedLogicSystems/ALSProlog/releases/latest)
 
-## [Documentation](/docs/)
+## [Install with Homebrew/Linuxbrew Formula](https://github.com/AppliedLogicSystems/homebrew-als-prolog)
 
-### ☆ ALS Prolog
+## [Browse the Documentation](/docs/)
 
-Gui and TTY versions are available for modern Macintosh, Linux, and Windows systems.
+### ☆ Current Status of ALS Prolog
 
-The initial release of the open source ALS Prolog can be characterized as a "minimal viable open source prolog".  It is a 32-bit system, and provides most everything expected in a prolog TTY shell.  The Gui shell is based on Tcl/Tk, and provides a basic core, including a console and visual editor windows supporting source trace debugging.  A partially complete project-oriented subsystem is present; several repository Issues indicate directions for its completion.
+Command-line and GUI versions are available for modern Macintosh, Linux, and Windows systems.
 
-#### ☞ [Open Source ALS Prolog project page](https://github.com/AppliedLogicSystems/ALSProlog)
-
-#### ☞ [Wiki Manual](https://github.com/AppliedLogicSystems/ALSProlog/wiki)
-
-#### ☞ [ALS-Prolog Homebrew/Linuxbrew Formula](https://github.com/AppliedLogicSystems/homebrew-als-prolog)
-
-#### ☞ Developer Release
-
-[zip and tar.gz link](https://github.com/AppliedLogicSystems/ALSProlog/releases/latest)
+The initial release of the open source ALS Prolog can be characterized as a "minimal viable open source prolog".  It is a 32-bit system, and provides most everything expected in a prolog TTY shell.  The GUI shell is based on Tcl/Tk, and provides a basic core, including a console and visual editor windows supporting source trace debugging. A partially complete project-oriented subsystem is present; several repository Issues indicate directions for its completion.
