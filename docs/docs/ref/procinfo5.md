@@ -17,9 +17,8 @@ predicates:
 '$exported_proc'(Module,Pred,Arity)
 
 '$resolve_module'(Mod, Pred, Arity, ResMod)
-
-
 ```
+
 ## DESCRIPTION
 
  `'$procinfo'(N,M,P,A,DBRef,ProcType)`
