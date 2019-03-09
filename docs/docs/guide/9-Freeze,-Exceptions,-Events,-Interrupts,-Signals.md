@@ -439,7 +439,7 @@ then the call
 
 will end up calling
 
-    :- '$int(Magic,b).
+    :- '$int'(Magic,b).
 
 As an extended example of the use of these routines, we will construct a simple
 clause decompiler. The code sketched earlier outlines the general idea:
@@ -461,7 +461,7 @@ set for the next call. To start the decompiler, the clause should be called as t
 it were to be run. However, each subgoal will be interrupted and discarded before
 it can be run. The starting clause would be something of the form:
 ```
-$source(Head,Body) 
+'$source'(Head,Body) 
     :- 
     setPrologInterrupt(s([],Body)),
     callWithDelayedInterrupt(Head).
@@ -485,7 +485,7 @@ be found to make only the particular call to this 'distinguished' goal be the on
 which the decompiler will stop. The clauses above can be changed to the following
 to achieve this goal:
 ```
-'$int'(s(ForReal,Goals,Final),$endSource(Variable)
+'$int'(s(ForReal,Goals,Final),'$endSource'(Variable)
     :- ForReal == Variable,!.
 
 '$int'(s(ForReal,Goals,Final),Goal) 
