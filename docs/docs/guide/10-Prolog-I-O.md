@@ -296,7 +296,7 @@ S=stream_descriptor('',closed,string,string("abcdef"),[noinput|output],false,
 yes.
 ```
 
-### 10.2.3 Immediate versu Delayed Streams.
+### 10.2.3 Immediate versus Delayed Streams.
 
 A file sourcesink is said to be immediate in the sense that (normally) all of the characters (data) which will make up the stream are immediately available once the
 stream is opened to the file. In contrast, a socket sourcesink is called delayed in the
