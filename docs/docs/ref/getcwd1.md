@@ -55,8 +55,8 @@ remove_file(FileName)
 
 
 **`must_exist_file/1`** If FileName is a (quoted) atom representing a possible entry
-    in the file system, calls exists_file/1 to determine if FileName exists.  If FileName
-    does not exist, raises a system error (while exists_file/1 simply fails). 
+    in the file system, calls `exists_file/1` to determine if FileName exists.  If FileName
+    does not exist, raises a system error (while `exists_file/1` simply fails). 
 
 
 **`remove_file/1`** If FileName is a (quoted) atom naming a file in the

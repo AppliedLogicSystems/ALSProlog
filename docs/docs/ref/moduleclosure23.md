@@ -36,7 +36,7 @@ The actual predicate that you write should expect to receive the calling module 
 
 The procedure that the user will call should be exported if it is contained within a module. The actual (unclosed) procedure does not need to be exported. 
 
-`module_closure/2` simply identifies the first and third arguments of module_closure/3. That is, the command
+`module_closure/2` simply identifies the first and third arguments of `module_closure/3`. That is, the command
 ```
 :- module_closure(foo, 5) .
 ```
@@ -89,7 +89,7 @@ no.
 
 no.
 ```
-This is because the call to p(X) runs in module m3 which has no clauses defining p/1. Now let us change module m3 to read as follows :
+This is because the call to p(X) runs in module m3 which has no clauses defining `p/1`. Now let us change module m3 to read as follows :
 ```
 module m3.
 

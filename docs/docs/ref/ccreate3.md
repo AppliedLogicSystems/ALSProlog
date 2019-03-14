@@ -70,6 +70,6 @@ Implemented in ~builtins/cutils.pro over the predicates in ['$c_malloc'/2](cmall
 
 ## SEE ALSO
 
-- ['$c_malloc'/2](cmalloc2.html)
-- [c_alloc/[2,3]](calloc23.html)
+- [`'$c_malloc'/2`](cmalloc2.html)
+- [`c_alloc/[2,3]`](calloc23.html)
 

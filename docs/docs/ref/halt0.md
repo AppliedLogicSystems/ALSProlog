@@ -14,7 +14,7 @@ halt
 
 ## EXAMPLES
 
-In this example, halt/0 is called from the Prolog shell on a Unix C shell system on a machine named 'wizard':
+In this example, `halt/0` is called from the Prolog shell on a Unix C shell system on a machine named 'wizard':
 
 ```
 ?- halt.

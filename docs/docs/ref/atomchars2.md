@@ -49,11 +49,11 @@ yes.
 
 ## ERRORS
 
-Atom and CharList are both variables(atom_chars/2)
+Atom and CharList are both variables(`atom_chars/2`)
 
 -- -- -- -- &gt; instantiation_error.
 
-Atom and CodeList are both variables(atom_codes/2)
+Atom and CodeList are both variables(`atom_codes/2`)
 
 -- -- -- -- &gt; instantiation_error.
 

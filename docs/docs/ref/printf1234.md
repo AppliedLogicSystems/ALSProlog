@@ -25,9 +25,9 @@ printf(Stream_or_Alias, Format, ArgList, WriteOptions)
 ```
 ## DESCRIPTION
 
-printf/2 takes a format string and a list of arguments to include in the format string. printf/1 is the same as printf/2 except no argument list is given. The following is a list of the special formatting possible within the format string :
+`printf/2` takes a format string and a list of arguments to include in the format string. `printf/1` is the same as `printf/2` except no argument list is given. The following is a list of the special formatting possible within the format string :
 
-`\n` -- prints a newline(same as `nl/0`)
+`\n` -- prints a newline (same as `nl/0`)
 
 `\t` -- prints a tab character
 

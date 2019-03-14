@@ -27,4 +27,4 @@ yes.
 ```
 ## SEE ALSO
 
-- `arg/3
+- `arg/3`

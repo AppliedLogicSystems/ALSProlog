@@ -106,4 +106,4 @@ yes.
 ```
 
 ## NOTES
-A slightly higher-level collection of C data access predicates is implemented over the predicates above in ~builtins/cutils.pro.  See [c_alloc/[2,3]](calloc23.html) and [c_create/3](ccreate3.html).
+A slightly higher-level collection of C data access predicates is implemented over the predicates above in ~builtins/cutils.pro.  See [`c_alloc/[2,3]`](calloc23.html) and [`c_create/3`](ccreate3.html).

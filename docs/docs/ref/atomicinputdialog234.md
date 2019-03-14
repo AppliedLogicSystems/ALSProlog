@@ -58,4 +58,4 @@ The default Tcl interpreter for `atomic_input_dialog/[2,3,4]` is `tcli` as shown
 
 ## SEE ALSO
 
-- init_tk_alslib/[0,1,2]
+- `init_tk_alslib/[0,1,2]`

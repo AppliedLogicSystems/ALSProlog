@@ -96,4 +96,4 @@ copy_list_to_uia([H | T ], N, Buf) :-
 
 - `atom_concat/3`
 - `sub_atom/3`
-- `atom_char/2
+- `atom_char/2`

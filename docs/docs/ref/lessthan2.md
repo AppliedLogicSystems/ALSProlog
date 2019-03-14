@@ -26,7 +26,7 @@ Expression1 >= Expression2
 
 ## DESCRIPTION
 
-Both arguments to each relational operator should be instantiated to expressions which can be evaluated by is/2. The relational operator succeeds if the relation holds for the value of the two arguments, and fails otherwise. A relational operator will fail if one or both of its arguments cannot be evaluated.
+Both arguments to each relational operator should be instantiated to expressions which can be evaluated by `is/2`. The relational operator succeeds if the relation holds for the value of the two arguments, and fails otherwise. A relational operator will fail if one or both of its arguments cannot be evaluated.
 
 
 ## EXAMPLES

@@ -18,7 +18,7 @@ free_gv(Name)
 
 ## DESCRIPTION
 
-`make_gv/1` allocates an internal global variable and creates two access predicates called `setNAME/1` and `getNAME/1` where `NAME` is the atom `Name`. These access predicates are installed in the module from which make_gv/1 is called.
+`make_gv/1` allocates an internal global variable and creates two access predicates called `setNAME/1` and `getNAME/1` where `NAME` is the atom `Name`. These access predicates are installed in the module from which `make_gv/1` is called.
 
 The `setNAME/1` predicate is used to set the allocated global variable to the term given to `setNAME` as its (only) argument. This operation is safe in that the contents of the global variable will survive backtracking without any dangling references. Care should be taken when using these global variables with backtracking as it is easy to create a ground structure in which &quot;holes&quot; will appear upon backtracking. These holes are uninstantiated variables where there used to be a term. They are caused by some bit of non-determinism when creating the term. If the non-determinism is removed via cut prior to a global variable operation, these &quot;holes&quot; will often not show up upon backtracking. If the non-determinism is removed after the global variable operation takes place, these holes will very likely show up on backtracking. The reason that this is so is because the global variable mechanism will (as a consequence of making the structure safe to backtrack over) eliminate the ability of cut to discriminate among those trail entries which may be safely cut and those which are needed in the event of failure.
 
@@ -116,8 +116,8 @@ demo7:f(i)
 demo7:f(i)
 ```
 
-In each of these seven different tests, some non-determinism is introduced through the use of ;/2.
-demo1 makes no attempt to eliminate this non-determinism. Yet the results might be somewhat surprising.  set_demo/1 is called twice; once with X instantiated to f(i), the second time with X instantiated to f(j).  Yet when we fail out of demo1/1, print_demo/1 reports the &quot;demo&quot; variable to have an uninstantiated portion.
+In each of these seven different tests, some non-determinism is introduced through the use of `;/2`.
+demo1 makes no attempt to eliminate this non-determinism. Yet the results might be somewhat surprising.  `set_demo/1` is called twice; once with X instantiated to f(i), the second time with X instantiated to f(j).  Yet when we fail out of `demo1/1`, `print_demo/1` reports the &quot;demo&quot; variable to have an uninstantiated portion.
 
 demo2 eliminates the non-determinism in a straightforward fashion through the use of a cut.  Here the f(i) is made to &quot;stick&quot;.
 
@@ -129,9 +129,9 @@ demo5 shows that an intervening global variable operation may screw things up by
 
 demo6 shows that creating the variable after the global variable operation has the same effect as demo4.
 
-demo7 demonstrates a technique that may be used to always make instantiations &quot;stick&quot;. It creates a new copy of the term and calls set_demo/1 with this new copy.
+demo7 demonstrates a technique that may be used to always make instantiations &quot;stick&quot;. It creates a new copy of the term and calls `set_demo/1` with this new copy.
 
-If the call to make_gv/1 at the top of the file were replaced with a call to make_det_gv/1, then all of the instantiations would &quot;stick&quot; as make_det_gv/1 automatically makes a copy of the term thus doing implicitly what demo7 does explicitly.
+If the call to `make_gv/1` at the top of the file were replaced with a call to `make_det_gv/1`, then all of the instantiations would &quot;stick&quot; as `make_det_gv/1` automatically makes a copy of the term thus doing implicitly what demo7 does explicitly.
 
 ## BUGS
 

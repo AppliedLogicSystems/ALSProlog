@@ -46,4 +46,4 @@ The default Tcl interpreter for `info_dialog/[1,2]` is `tcli` as shown above.  T
 
 ## SEE ALSO
 
-- init_tk_alslib/[0,1,2]
+- `init_tk_alslib/[0,1,2]`

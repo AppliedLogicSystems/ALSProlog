@@ -55,7 +55,7 @@ Note that the last two lines `Goal=...` and `Message=..` are the Prolog interpre
 
 ## ERRORS
 
-If Goal is an uninstantiated variable or a number, call/1 will fail.
+If Goal is an uninstantiated variable or a number, `call/1` will fail.
 
 ## SEE ALSO
 

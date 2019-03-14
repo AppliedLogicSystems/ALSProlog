@@ -14,8 +14,8 @@ Condition -> TrueGoal ; FalseGoal
 ## DESCRIPTION
 
 
-If `Condition` succeeds, then `TrueGoal` will be executed. `If-then` implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to -&gt;/2 fails. The second form, results from the interaction between ;/2 and
--&gt;/2 because
+If `Condition` succeeds, then `TrueGoal` will be executed. `If-then` implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to `-&gt;/2` fails. The second form, results from the interaction between `;/2` and
+`-&gt;/2` because
 
 ```
 Condition -> TrueGoal ; FalseGoal

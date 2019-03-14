@@ -31,7 +31,7 @@ In other words,
 
 ## EXAMPLES
 
-In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal eats/2. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
+In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
 
 ```
 ?- listing.
