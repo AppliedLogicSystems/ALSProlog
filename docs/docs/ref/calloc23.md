@@ -124,6 +124,7 @@ These predicates make use of the same C type encoding as used on ['$c_malloc'/2]
 **`c_examinen(Obj,Type,I,Val)`**
 <br>**`c_examinen(Obj,SType,I,[FieldName,Val,...])`** examine the `I-th` the component of an array of type `Type/SType`.
 
+{% comment %}
 ## EXAMPLES
 
 ```
@@ -137,6 +138,7 @@ These predicates make use of the same C type encoding as used on ['$c_malloc'/2]
 ## ERRORS
 
 Errors text...
+{% endcomment %}
 
 ## NOTES
 

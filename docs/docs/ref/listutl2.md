@@ -75,5 +75,7 @@ predicates:
     the Nth element of List to become NewItem.  
     This predicate numbers the list beginning with 0.  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 

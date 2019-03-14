@@ -27,5 +27,7 @@ predicates:
 **`tokenize_file/2`** Opens a stream to File, and uses read_tokens/2 to read all  
     tokens found in File into the list Tokens.  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 

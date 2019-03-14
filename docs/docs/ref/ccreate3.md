@@ -50,6 +50,7 @@ c_call(CFuncPtr, Arglist, RetVal)
 **`c_call(CFuncPtr, Arglist, RetVal)`** calls the C function whose address is `CFuncPtr` with arguments from `Arglist` that are assumed to be longs and binds `RetVal` with the return value of function.
 
 
+{% comment %}
 ## EXAMPLES
 
 ```
@@ -63,6 +64,7 @@ c_call(CFuncPtr, Arglist, RetVal)
 ## ERRORS
 
 Errors text...
+{% endcomment %}
 
 ## NOTES
 

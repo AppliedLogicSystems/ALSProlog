@@ -178,5 +178,7 @@ i**`insert_spaces/2`** If In_List is a list of arbitrary terms, then Out_List is
     to become Tag=NewValue;  
     ii)	Otherwise, NewPList = OldPList.  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 
