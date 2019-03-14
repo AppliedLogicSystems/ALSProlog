@@ -59,4 +59,4 @@ yes.
 - `put_char/1`
 - `write/1`
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

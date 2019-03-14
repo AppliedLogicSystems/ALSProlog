@@ -45,6 +45,6 @@ Note that using an empty list as the argument to `leash/1`, as shown in the exam
 - `trace/1`
 - `spy/1`
 
-- `Tools (Using the Debugger)`
+- [Tools (Using the Debugger)](../guide/14-Using-the-Four-Port-Debugger.md)
 - {% include book.md id="clocksin81" sec="8.4" %}
 

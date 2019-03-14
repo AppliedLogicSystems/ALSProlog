@@ -122,5 +122,5 @@ Note that we exported `leading/1` from `module m3`, and both `module m1` and `mo
 
 - `:/2`
 
-- `User Guide (Modules)
+- [User Guide (Modules)](../guide/3-Modules.md)
 

@@ -106,5 +106,5 @@ Note in the above examples that `write/[1,2]` does not pay attention to the line
 - `stream_property/2`
 - `open/4`
 - `write_term/3`
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

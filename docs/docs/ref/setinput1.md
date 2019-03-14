@@ -87,5 +87,5 @@ text,eof_code,0,0)
 - `current_input/1`
 - `open/3`
 - `close/1`
-- User Guide (Prolog I/O).
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

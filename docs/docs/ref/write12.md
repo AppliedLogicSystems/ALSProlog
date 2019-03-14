@@ -198,7 +198,7 @@ T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
 - `set_line_length/2`
 - `op/3`
 - `tell/1`
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="6.9" %}
 - {% include book.md id="sterling86" sec="12.1" %}

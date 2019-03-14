@@ -27,7 +27,7 @@ nospy(Module : Name/Arity)
 
 ## SEE ALSO
 
-- Tools (Using the Debugger)
+- [Tools (Using the Debugger)](../guide/14-Using-the-Four-Port-Debugger.md)
 - {% include book.md id="bowen91"    sec="6.5" %}
 - {% include book.md id="clocksin81" sec="6.13" %}
 - {% include book.md id="bratko86"   sec="8.4" %}

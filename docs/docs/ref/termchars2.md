@@ -76,4 +76,4 @@ text,eof_code,0,0))])
 - `write_canonical/2`
 - `number_chars`
 - `atom_chars`
-- User Guide (Prolog I/O).
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

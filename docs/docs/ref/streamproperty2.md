@@ -93,5 +93,5 @@ L = ['$stderr','$stdin','$stdout',foo]
 - `set_stream_position/2`
 - `at_end_of_stream/1`
 - `set_line_length/2`
-- `User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

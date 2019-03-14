@@ -44,4 +44,4 @@ Above, we hit return after `Op=/\` to skip further answers
 - `op/3`
 - `read_term/[2,3]`
 
-- `User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

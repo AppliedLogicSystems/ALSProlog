@@ -46,4 +46,4 @@ Calling `at_end_of_stream` may cause an input operation to take place. Thus a ca
 - `current_input/1`
 - `flush_output/1`
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

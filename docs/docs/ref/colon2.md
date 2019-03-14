@@ -60,4 +60,4 @@ If `Module` is unbound or not bound to a valid module name, the call to `:/2` wi
 
 - `call/1`
 
-- `User Guide (Modules)`
+- [User Guide (Modules)](../guide/3-Modules.html)

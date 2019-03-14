@@ -70,5 +70,5 @@ yes.
 - `put/1`
 - `write/0`
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - Unix/C Reference Manuals: printf(3S)

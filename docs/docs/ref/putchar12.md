@@ -66,4 +66,4 @@ yes.
 - `char_code/2`
 - `nl/1`
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

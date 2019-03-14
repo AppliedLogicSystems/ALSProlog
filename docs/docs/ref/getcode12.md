@@ -74,4 +74,4 @@ A character code is simply an integer restricted to a certain range of values.
 - `close/1`
 - `char_code/2`
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

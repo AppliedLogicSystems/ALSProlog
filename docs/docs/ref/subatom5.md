@@ -80,4 +80,4 @@ no.
 - `atom_concat/3`
 - `atom_chars/2`
 - `atom_codes/2`
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

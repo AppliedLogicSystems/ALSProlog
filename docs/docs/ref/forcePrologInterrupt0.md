@@ -27,4 +27,4 @@ callWithDelayedInterrupt(Module, Call)
 - `setPrologInterrupt/1`
 - `getPrologInterrupt/1`
 
-- `User Guide (Prolog Interrupts)`
+- [User Guide (Prolog Interrupts)](../guide/9-Freeze,-Exceptions,-Events,-Interrupts,-Signals.md)

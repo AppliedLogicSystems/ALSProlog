@@ -58,7 +58,7 @@ firstTerm(File, Term) :-
 - `open/4`
 - `close/1`
 - `close/2`
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="5.4" %}
 - {% include book.md id="bratko86"   sec="6.1" %}

@@ -168,7 +168,7 @@ The stream associated with Stream_or_Alias has no input ready to be read and the
 - `get_char/[1,2]`
 - `get_code/[1,2]`
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="sterling86" sec="12.2" %}
 - {% include book.md id="bratko86"   sec="6.2.1" %}

@@ -214,4 +214,4 @@ The DEC-10 compatibility predicates `see/1` and `tell/1` are defined in terms of
 - `put_char/1`
 - `set_stream_position/2`
 
-- `User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

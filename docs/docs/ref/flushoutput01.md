@@ -78,4 +78,4 @@ yes.
 - `close/1`
 - `current_output/1`
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

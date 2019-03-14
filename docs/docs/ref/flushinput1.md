@@ -40,4 +40,4 @@ This operation is also useful for use with datagram sockets. The buffer contents
 - `open/[3,4]`
 - `flush_output/[0,1]`
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
