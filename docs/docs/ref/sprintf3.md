@@ -49,7 +49,7 @@ yes.
 
 ## SEE ALSO
 
-- `printf/[2/3/4]`  
+- `printf/[2/3/4]`
 - `write/1`
 - `op/3`
 - `writeq/1`

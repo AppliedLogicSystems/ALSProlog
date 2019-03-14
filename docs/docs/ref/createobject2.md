@@ -57,5 +57,5 @@ When a global atomic name for the object is required, Eqns includes an equation 
 ```
 ## SEE ALSO
 
- - `defStruct/2`  
-`defineClass/1`
+- `defStruct/2`
+- `defineClass/1`

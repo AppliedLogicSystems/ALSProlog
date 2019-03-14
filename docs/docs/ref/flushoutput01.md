@@ -74,8 +74,8 @@ yes.
 
 ## SEE ALSO
 
-- `open/4`  
-`close/1`  
-`current_output/1`
+- `open/4`
+- `close/1`
+- `current_output/1`
 
 - `User Guide (Prolog I/O)`

@@ -103,4 +103,4 @@ See the discussion in `make_gv/1` concerning global variable modification and ba
 
 ## SEE ALSO
 
-- `make_gv/1
+- `make_gv/1`

@@ -140,6 +140,6 @@ If the call to `make_gv/1` at the top of the file were replaced with a call to `
 
 ## SEE ALSO
 
-- `make_hash_table/1`  
-`copy_term/2`  
-`mangle/3`
+- `make_hash_table/1`
+- `copy_term/2`
+- `mangle/3`

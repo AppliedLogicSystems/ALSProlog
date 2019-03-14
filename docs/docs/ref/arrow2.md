@@ -62,8 +62,8 @@ yes.
 
 ## SEE ALSO
 
-- `!/0`  
-`not/1`
+- `!/0`
+- `not/1`
 
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="sterling86" sec="11" %}

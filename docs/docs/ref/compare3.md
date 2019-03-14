@@ -95,8 +95,8 @@ in the standard order, because the second structure has a greater arity than the
 
 ## SEE ALSO
 
-- `==/2`  
-`@</2`  
-`sort/2`
+- `==/2`
+- `@</2`
+- `sort/2`
 
 - {% include book.md id="bowen91"    sec="7.4" %}

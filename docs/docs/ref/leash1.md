@@ -42,8 +42,8 @@ Note that using an empty list as the argument to `leash/1`, as shown in the exam
 
 ## SEE ALSO
 
-- `trace/1`  
-`spy/1`
+- `trace/1`
+- `spy/1`
 
 - `Tools (Using the Debugger)`
 - {% include book.md id="clocksin81" sec="8.4" %}

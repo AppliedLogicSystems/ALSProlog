@@ -161,12 +161,12 @@ The stream associated with Stream_or_Alias has no input ready to be read and the
 
 ## SEE ALSO
 
-- `write/[1,2]`  
-`write_term/[2,3]`  
-`open/4`  
-`close/1`  
-`get_char/[1,2]`  
-`get_code/[1,2]`  
+- `write/[1,2]`
+- `write_term/[2,3]`
+- `open/4`
+- `close/1`
+- `get_char/[1,2]`
+- `get_code/[1,2]`
 
 - User Guide (Prolog I/O)
 - {% include book.md id="bowen91"    sec="7.8" %}

@@ -59,8 +59,8 @@ If Goal is an uninstantiated variable or a number, `call/1` will fail.
 
 ## SEE ALSO
 
-- `!/0`  
-`:/2`
+- `!/0`
+- `:/2`
 
 - {% include book.md id="clocksin81" sec="6.7" %}
 - {% include book.md id="bratko86"   sec="7.2" %}

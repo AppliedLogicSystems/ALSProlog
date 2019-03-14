@@ -25,6 +25,6 @@ callWithDelayedInterrupt(Module, Call)
 ## SEE ALSO
 
 - `setPrologInterrupt/1`
-`getPrologInterrupt/1`
+- `getPrologInterrupt/1`
 
 - `User Guide (Prolog Interrupts)`

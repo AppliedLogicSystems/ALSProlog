@@ -59,11 +59,11 @@ yes.
 
 ## SEE ALSO
 
-- `get_code/1`  
-`put_char/1`  
-`open/4`  
-`close/1`  
-`char_code/2`  
-`nl/1`
+- `get_code/1`
+- `put_char/1`
+- `open/4`
+- `close/1`
+- `char_code/2`
+- `nl/1`
 
 - User Guide (Prolog I/O)

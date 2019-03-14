@@ -48,14 +48,14 @@ We recommend the use of `atom_chars/2` and `number_chars/2` instead of `name/2`.
 
 ## SEE ALSO
 
-- `atom_chars/2`  
-`atom_codes/2`  
-`number_chars/2`  
-`number_codes/2`  
-`term_chars/2`  
-`term_codes/2`
+- `atom_chars/2`
+- `atom_codes/2`
+- `number_chars/2`
+- `number_codes/2`
+- `term_chars/2`
+- `term_codes/2`
 
-- `User Guide (Syntax of ALS Prolog)`  
+- `User Guide (Syntax of ALS Prolog)`
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="6.5" %}
 - {% include book.md id="bratko86"   sec="6.4" %}

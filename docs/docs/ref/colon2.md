@@ -58,6 +58,6 @@ If `Module` is unbound or not bound to a valid module name, the call to `:/2` wi
 
 ## SEE ALSO
 
-- `call/1`  
+- `call/1`
 
 - `User Guide (Modules)`

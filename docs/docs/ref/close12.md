@@ -61,8 +61,8 @@ Certain streams which are opened at system startup time can not be closed. Among
 
 ## SEE ALSO
 
-- `open/4`  
-`current_input/1`  
-`flush_output/1`
+- `open/4`
+- `current_input/1`
+- `flush_output/1`
 
 - `User Guide (Prolog I/O)`

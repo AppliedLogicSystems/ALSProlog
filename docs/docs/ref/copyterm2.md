@@ -42,6 +42,6 @@ no.
 
 ## SEE ALSO
 
-- `make_gv/1`  
-`make_hash_table/1`  
-`mangle/3`
+- `make_gv/1`
+- `make_hash_table/1`
+- `mangle/3`

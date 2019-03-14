@@ -53,10 +53,10 @@ yes.
 
 ## SEE ALSO
 
-- `set_input/1`  
-`get_char/1`  
-`read/1`  
-`put_char/1`  
-`write/1`
+- `set_input/1`
+- `get_char/1`
+- `read/1`
+- `put_char/1`
+- `write/1`
 
 - `User Guide (Prolog I/O)`

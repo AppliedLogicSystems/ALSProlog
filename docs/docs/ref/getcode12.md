@@ -68,10 +68,10 @@ A character code is simply an integer restricted to a certain range of values.
 
 ## SEE ALSO
 
-- `put_code/2`  
-`get_char/2`  
-`open/4`  
-`close/1`  
-`char_code/2`
+- `put_code/2`
+- `get_char/2`
+- `open/4`
+- `close/1`
+- `char_code/2`
 
-- `User Guide (Prolog I/O)`  
+- `User Guide (Prolog I/O)`

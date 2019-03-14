@@ -132,7 +132,7 @@ As the example above demonstrates, `set_stream_position/2` may be used when used
 
 ## SEE ALSO
 
-- `open/4`  
-- `get_char/2`  
+- `open/4`
+- `get_char/2`
 - `stream_property/2`
 - User Guide (Prolog I/O)

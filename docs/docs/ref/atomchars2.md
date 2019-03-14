@@ -80,7 +80,7 @@ CodeList is a list but there is a sublist L of CodeList whose first element is n
 
 ## SEE ALSO
 
-- `number_chars/2`  
-`number_codes/2`  
-`term_chars/2`  
-`term_codes/2`
+- `number_chars/2`
+- `number_codes/2`
+- `term_chars/2`
+- `term_codes/2`

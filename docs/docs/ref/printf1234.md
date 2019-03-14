@@ -66,9 +66,9 @@ yes.
 ```
 ## SEE ALSO
 
-- `nl/0`  
-`put/1`  
-`write/0`  
+- `nl/0`
+- `put/1`
+- `write/0`
 
 - User Guide (Prolog I/O)
 - Unix/C Reference Manuals: printf(3S)

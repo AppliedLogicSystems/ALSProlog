@@ -118,8 +118,8 @@ succeeds because the '!' is never reached in the condition of -&gt;. The -&gt; f
 
 ## SEE ALSO
 
-- `->/2`  
-`not/1`
+- `->/2`
+- `not/1`
 
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="sterling86" sec="11" %}

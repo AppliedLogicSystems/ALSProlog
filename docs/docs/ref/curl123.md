@@ -184,7 +184,7 @@ Access to curl is also provided by ALS Prolog streams.  See the discussion under
 
 ## SEE ALSO
 
-- [curl](https://curl.haxx.se/)  
-- [libcurl - the multiprotocol file transfer library](https://curl.haxx.se/libcurl/)  
-- [curl_easy_setopt - set options for a curl easy handle](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)  
-- [curl_easy_getinfo - extract information from a curl handle](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html)  
+- [curl](https://curl.haxx.se/)
+- [libcurl - the multiprotocol file transfer library](https://curl.haxx.se/libcurl/)
+- [curl_easy_setopt - set options for a curl easy handle](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)
+- [curl_easy_getinfo - extract information from a curl handle](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html)

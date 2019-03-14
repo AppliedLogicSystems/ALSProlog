@@ -24,8 +24,8 @@ error(Message) :-
 
 ## SEE ALSO
 
-- `see/1`  
-`tell/1`
+- `see/1`
+- `tell/1`
 
 ## NOTES
 

@@ -92,5 +92,5 @@ CharList(or CodeList) is not parsable as a number
 
 ## SEE ALSO
 
-- `read_term/3`  
-`write_canonical/2`
+- `read_term/3`
+- `write_canonical/2`

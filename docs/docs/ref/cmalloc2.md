@@ -21,7 +21,7 @@ predicates:
 ```
 ## DESCRIPTION
 
-The following predicates are low-level C-defined builtins in ALS Prolog, providing access to C data areas, as well as UIAs treated as such data areas.  
+The following predicates are low-level C-defined builtins in ALS Prolog, providing access to C data areas, as well as UIAs treated as such data areas.
 
 **`'$c_malloc'/2`** allocates a C data area.  `'$c_malloc'(Size, Ptr)` is true if `Size` is a positive integer and `Ptr` (an integer) unifies with the address of the first byte of a data area allocated by the system call &quot;malloc&quot;. The call fails if malloc returns a null pointer. 
 
