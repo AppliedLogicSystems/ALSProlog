@@ -27,7 +27,6 @@ site : _site/index.html
 local : _local_site/index.html
 
 Gemfile.lock : Gemfile GNUmakefile
-	echo $(BUNDLE)
 	rm -f Gemfile.lock
 	$(BUNDLE) install
 
