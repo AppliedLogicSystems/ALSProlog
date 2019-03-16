@@ -13,7 +13,7 @@ throw(Reason)
 ```
 ## DESCRIPTION
 
-`catch/3` provides a facility for catching errors or exceptions and handling them gracefully. Execution of `catch/3` will cause the goal `Goal` to be executed. If no errors or throws occur during the execution of `Goal`, then `catch/3` behaves just as if `call/1` were called with `Goal`. `Goal` may succeed thus giving control to portions of the program outside the scope of the catch. Failures in these portions of the program may cause reexecution(via backtracking) of goals in the scope of the catch of which `Goal` is the ancestor.
+`catch/3` provides a facility for catching errors or exceptions and handling them gracefully. Execution of `catch/3` will cause the goal `Goal` to be executed. If no errors or throws occur during the execution of `Goal`, then `catch/3` behaves just as if [`call/1`](call1.html) were called with `Goal`. `Goal` may succeed thus giving control to portions of the program outside the scope of the catch. Failures in these portions of the program may cause reexecution(via backtracking) of goals in the scope of the catch of which `Goal` is the ancestor.
 
 If a goal of the form `throw(Reason)` is encountered during the execution of `Goal` or in any subsequent reexecution of `Goal`, then the goal `ExceptionGoal` of the `catch` with the innermost scope capable of unifying `Reason` and `Pattern` together will be executed with this unification intact. Once started, the execution of the goal `ExceptionGoal` behaves just like the execution of any other goal. The goal `ExceptionGoal` is outside of the scope of the catch which initiated the execution of `ExceptionGoal`, so any throws encountered during the execution of `ExceptionGoal` will be handled by `catch`es which are ancestors of the `catch` which initiated the execution of `ExceptionGoal`. This means that a handler may catch some fairly general pattern, deal with some aspects which it is prepared for, but throw on back to some earlier handler for those aspects for which it is not prepared.
 
@@ -37,7 +37,7 @@ The ISO Prolog Standard specifies that ErrorTerm be one of the following forms :
 
 - `resource_error(Resource)` -- There are insufficient resources to complete execution. The type of resource exhausted is indicated by the implementation-defined term `Resource`.
 
-- `syntax_error` -- A sequence of characters being read by `read_term/4` cannot be parsed with the current operator definitions. The reason for the syntax error (in ALS Prolog) is given in the implementation-defined `ErrorInfo` (see below).
+- `syntax_error` -- A sequence of characters being read by [`read_term/4`](read12.html) cannot be parsed with the current operator definitions. The reason for the syntax error (in ALS Prolog) is given in the implementation-defined `ErrorInfo` (see below).
 
 - `system_error` -- Other sorts of errors. These will commonly be operating system-related errors such as being unable to complete a write operation due to the disk being full. Additional details about this type of error might be found in the implementation-defined term `ErrorInfo`.
 

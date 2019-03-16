@@ -33,7 +33,7 @@ Within a call to `setof/3` or `bagof/3`, free variables can be existentially qua
 
 The collection to be enumerated should be finite, and should be enumerable by Prolog in finite time. It is possible for the provable instances of `Template` to contain variables, but in this case `Collection` will only provide an imperfect representation of what is actually an infinite collection.
 
-`setof/3` calls upon `sort/2` to eliminate duplicate solutions from `Collection`, which seriously impacts its efficiency. In addition, even though `bagof/3` leaves duplicate solutions, it still calls `keysort/2`.
+`setof/3` calls upon [`sort/2`](sort2.html) to eliminate duplicate solutions from `Collection`, which seriously impacts its efficiency. In addition, even though `bagof/3` leaves duplicate solutions, it still calls [`keysort/2`](sort2.html).
 
 `findall/3` neither removes duplicates nor generates alternative bindings for free variables; it assumes that all variables occurring within `Goal` are existentially quantified. As a result, `findall/3` is much more efficient than either `setof/3` or `bagof/3`.
 

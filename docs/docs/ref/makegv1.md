@@ -22,7 +22,7 @@ free_gv(Name)
 
 The `setNAME/1` predicate is used to set the allocated global variable to the term given to `setNAME` as its (only) argument. This operation is safe in that the contents of the global variable will survive backtracking without any dangling references. Care should be taken when using these global variables with backtracking as it is easy to create a ground structure in which &quot;holes&quot; will appear upon backtracking. These holes are uninstantiated variables where there used to be a term. They are caused by some bit of non-determinism when creating the term. If the non-determinism is removed via cut prior to a global variable operation, these &quot;holes&quot; will often not show up upon backtracking. If the non-determinism is removed after the global variable operation takes place, these holes will very likely show up on backtracking. The reason that this is so is because the global variable mechanism will (as a consequence of making the structure safe to backtrack over) eliminate the ability of cut to discriminate among those trail entries which may be safely cut and those which are needed in the event of failure.
 
-In situations where this is a problem, a call to `copy_term/2` may be used to create a copy of the term prior to setting the global variable. The instantiation of the term that exists at the time of the copy will be the instantiation of the term which survives backtracking over the copy operation.
+In situations where this is a problem, a call to [`copy_term/2`](copyterm2.html) may be used to create a copy of the term prior to setting the global variable. The instantiation of the term that exists at the time of the copy will be the instantiation of the term which survives backtracking over the copy operation.
 
 Also of interest is the time complexity of the set operation. So long as the argument to `setNAME/1` is a non-pointer type that is a suitably small integer or is of certain types of atoms (the non-UIA variety), the set operation is a constant time operation. Otherwise it requires time linearly proportional to the current depth of the choice point stack.
 
@@ -116,7 +116,7 @@ demo7:f(i)
 demo7:f(i)
 ```
 
-In each of these seven different tests, some non-determinism is introduced through the use of `;/2`.
+In each of these seven different tests, some non-determinism is introduced through the use of [`;/2`](semicolon2.html).
 demo1 makes no attempt to eliminate this non-determinism. Yet the results might be somewhat surprising.  `set_demo/1` is called twice; once with X instantiated to f(i), the second time with X instantiated to f(j).  Yet when we fail out of `demo1/1`, `print_demo/1` reports the &quot;demo&quot; variable to have an uninstantiated portion.
 
 demo2 eliminates the non-determinism in a straightforward fashion through the use of a cut.  Here the f(i) is made to &quot;stick&quot;.

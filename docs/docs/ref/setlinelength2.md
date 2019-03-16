@@ -20,9 +20,9 @@ set_depth_computation(Stream_or_Alias, Flat_Nonflat)
 
 ## DESCRIPTION
 
-`set_line_length/2` sets the default line length for the output stream associated with `Stream_or_Alias` to the integer value bound to `Length`. The default line length is an integer parameter used by `writeq/[1,2]`, `write_canonical/[1,2]`, and `write_term/[2,3]` to determine where line breaks should occur when outputting a term. A call to `write_term` may temporarily overide this parameter by specifying the `line_length` option in the `write` options list. The default line length may also be set at the time the stream is opened by specifying the `line_length` option in the options list to `open/[3,4]`.
+`set_line_length/2` sets the default line length for the output stream associated with `Stream_or_Alias` to the integer value bound to `Length`. The default line length is an integer parameter used by [`writeq/[1,2]`, `write_canonical/[1,2]`, and `write_term/[2,3]`](write12.html) to determine where line breaks should occur when outputting a term. A call to `write_term` may temporarily overide this parameter by specifying the `line_length` option in the `write` options list. The default line length may also be set at the time the stream is opened by specifying the `line_length` option in the options list to [`open/[3,4]`](open34.html).
 
-`set_maxdepth/2` sets the default depth limit to which terms are output for the output stream associated with `Stream_or_Alias` to the integer value bound to `Depth`. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to `write_term/[3,4]` with the appropriate write option.
+`set_maxdepth/2` sets the default depth limit to which terms are output for the output stream associated with `Stream_or_Alias` to the integer value bound to `Depth`. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to [`write_term/[3,4]`](write12.html) with the appropriate write option.
 
 `set_depth_computation/2` sets the manner in which the depth of a term is computed for the output stream associated with `Stream_or_Alias` to the atomic value bound to `Flat_Nonflat`. As the name of the variable implies, `Flat_Nonflat` must be bound to one of the two atoms, flat or nonflat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is nonflat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.
 
@@ -98,7 +98,7 @@ g,...]
 
 ## NOTES
 
-Note in the above examples that `write/[1,2]` does not pay attention to the line length. It does however, observe the default maximum depth and the method for computing the depth.
+Note in the above examples that [`write/[1,2]`](write12.html) does not pay attention to the line length. It does however, observe the default maximum depth and the method for computing the depth.
 
 
 ## SEE ALSO

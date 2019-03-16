@@ -26,7 +26,7 @@ In other words,
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`;`
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`:`
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`,`
-<br>are all transparent to cut. The ISO Prolog Standard requires that `call/1` be opaque to cut. At this time, ALS Prolog deviates from the standard.
+<br>are all transparent to cut. The ISO Prolog Standard requires that [`call/1`](call1.html) be opaque to cut. At this time, ALS Prolog deviates from the standard.
 
 
 ## EXAMPLES
@@ -48,14 +48,14 @@ Person=chris;
 no.
 ```
 
-The next example shows that `not/1` is opaque to cut. This means that a '!' inside the call to `not/1` will not cut out the choicepoint for `not/1`, or any other choicepoints created by goals to the left of `not/1`.
+The next example shows that [`not/1`](not1.html) is opaque to cut. This means that a '!' inside the call to `not/1` will not cut out the choicepoint for `not/1`, or any other choicepoints created by goals to the left of `not/1`.
 ```
 ?- not((!,fail)).
 
 yes.
 ```
 
-Notice the extra pair of parentheses above. This is to prevent the parser from creating a goal to `not/2` instead of `not/1`. In the next example, the transparency of `call/1` with respect to cut is shown:
+Notice the extra pair of parentheses above. This is to prevent the parser from creating a goal to `not/2` instead of `not/1`. In the next example, the transparency of [`call/1`](call1.html) with respect to cut is shown:
 
 ```
 ?- listing.

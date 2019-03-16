@@ -31,13 +31,13 @@ c_call(CFuncPtr, Arglist, RetVal)
 ## DESCRIPTION
 
 **`c_create(Type, Val, UIA)`**
-<br>**`c_create(SType,[ FieldName, Val,...], UIA)`** equivalent to `c_alloc/2` plus `c_set/3`. `Type` can be an integral type or `'str'`. `SType` must be a structure type.
+<br>**`c_create(SType,[ FieldName, Val,...], UIA)`** equivalent to [`c_alloc/2` plus `c_set/3`](calloc23.html). `Type` can be an integral type or `'str'`. `SType` must be a structure type.
 
 **`c_create_abs(Type, Val, Ptr)`**
-<br>**`c_create_abs(SType,[ FieldName, Val,...], Ptr)`** equivalent to `c_alloc_abs/2` plus `c_set/3`. `Type` can be an integral type or `'str'`. `SType` must be a structure type.
+<br>**`c_create_abs(SType,[ FieldName, Val,...], Ptr)`** equivalent to [`c_alloc_abs/2` plus `c_set/3`](calloc23.html). `Type` can be an integral type or `'str'`. `SType` must be a structure type.
 
 **`c_createn(Type, Num,[ Val,...], UIA)`**
-<br>**`c_createn( SType, Num,[[ FieldName, Val,...], ...],  UIA)`** allocate and initialize an array of data valuesin a UIA.  equivalent to `c_allocn/3` plus several `c_setn/4`.
+<br>**`c_createn( SType, Num,[[ FieldName, Val,...], ...],  UIA)`** allocate and initialize an array of data valuesin a UIA.  equivalent to [`c_allocn/3` plus several `c_setn/4`](calloc23.html).
 
 **`c_createn_abs(Type, Num,[ Val,...], Ptr)`**
 <br>**`c_createn_abs( SType, Num,[[ FieldName, Val,...], ...],  Ptr)`** same as `c_createn/4`, except that the data is created in a C malloced area.

@@ -99,7 +99,7 @@ Unlike `assert` and `retract`, the methods created by `make_hash_table/1` do not
 
 These predicates have an advantage over `assert` and `retract` in that no copies are made. In fact structure may be shared between hash table entries.
 
-See the discussion in `make_gv/1` concerning global variable modification and backtracking.
+See the discussion in [`make_gv/1`](makegv1.html) concerning global variable modification and backtracking.
 
 ## SEE ALSO
 

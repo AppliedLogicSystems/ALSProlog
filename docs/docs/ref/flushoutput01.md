@@ -18,7 +18,7 @@ A call to `flush_output/0` will cause the buffer contents associated with the cu
 
 A call to `flush_output/1` will cause the buffer contents associated with the open output stream `Stream_or_Alias` to be written out.
 
-An output operation such as `put_char/2` or `write/2` is used to put some data out to a stream. Unless byte buffering `[buffering((byte)]` is specified when the stream is opened, the data will not be immediately output. Rather, the data will be buffered in an area associated with the open output stream. The `flush_output` builtins cause this buffer to be written out to the sink associated with the open stream.
+An output operation such as [`put_char/2`](putchar12.html) or [`write/2`](write12.html) is used to put some data out to a stream. Unless byte buffering `[buffering((byte)]` is specified when the stream is opened, the data will not be immediately output. Rather, the data will be buffered in an area associated with the open output stream. The `flush_output` builtins cause this buffer to be written out to the sink associated with the open stream.
 
 ## EXAMPLES
 

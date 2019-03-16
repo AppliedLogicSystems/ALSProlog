@@ -20,7 +20,7 @@ Arg1 @> Arg2
 ```
 ## DESCRIPTION
 
-These predicates compare two terms according to the standard order as defined by `compare/3`. The terms are compared as-is without any transformation or interpretation. The order of a partially instantiated term may change as the level of instantiation changes.
+These predicates compare two terms according to the standard order as defined by [`compare/3`](compare3.html). The terms are compared as-is without any transformation or interpretation. The order of a partially instantiated term may change as the level of instantiation changes.
 
 ## EXAMPLES
 

@@ -127,7 +127,7 @@ C2 = f
 
 ## NOTES
 
-As the example above demonstrates, `set_stream_position/2` may be used when used in conjunction with `stream_property/2`. Typically a program will get the current position using `stream_property/2` and later set the stream position using this saved position.
+As the example above demonstrates, `set_stream_position/2` may be used when used in conjunction with [`stream_property/2`](streamproperty2.html). Typically a program will get the current position using `stream_property/2` and later set the stream position using this saved position.
 
 
 ## SEE ALSO

@@ -17,7 +17,7 @@ callWithDelayedInterrupt(Module, Call)
 
 `forcePrologInterrupt` forces an interrupt on the next call by setting the heap safety margin to a sufficiently large number which is guaranteed to be larger than the actual heap margin.
 
-`callWithDelayedInterrupt(Call)` acts like `call/1`, invoking `Call`. However, it arranges the system so that an interrupt will take place on the first call occurring after the invocation of `Call`.
+`callWithDelayedInterrupt(Call)` acts like [`call/1`](call1.html), invoking `Call`. However, it arranges the system so that an interrupt will take place on the first call occurring after the invocation of `Call`.
 
 `callWithDelayedInterrupt(Module, Call)` acts like `callWithDelayedInterrupt/1`, except that it invokes `Call` within module `Module`.
 

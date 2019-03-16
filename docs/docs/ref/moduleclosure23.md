@@ -16,7 +16,7 @@ predicates:
 ```
 ## DESCRIPTION
 
-For some Prolog procedures, it is essential to know the module within which they are invoked. For example, `setof/3` must invoke the goal in its second argument relative to the correct module. The problem is that `setof/3` is defined in `module builtins`, while it may invoked in some other module which is where the code defining the goal in the second argument should be run. In reality, `setof/3` is defined as the module closure of another predicate `setof/4` (whose definition appears in the `builtins module`). The extra argument to `setof/4` is the module in which the goal in the second argument of `setof/3` is to be run. Declaring `setof/3` to be a module closure of `setof/4` means that goals of the form
+For some Prolog procedures, it is essential to know the module within which they are invoked. For example, [`setof/3`](setof3.html) must invoke the goal in its second argument relative to the correct module. The problem is that `setof/3` is defined in `module builtins`, while it may invoked in some other module which is where the code defining the goal in the second argument should be run. In reality, `setof/3` is defined as the module closure of another predicate `setof/4` (whose definition appears in the `builtins module`). The extra argument to `setof/4` is the module in which the goal in the second argument of `setof/3` is to be run. Declaring `setof/3` to be a module closure of `setof/4` means that goals of the form
 ```
 ..., setof(X, G, L), ...
 ```

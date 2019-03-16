@@ -43,7 +43,7 @@ yes.
 ```
 ## NOTES
 
-We recommend the use of `atom_chars/2` and `number_chars/2` instead of `name/2`.
+We recommend the use of [`atom_chars/2`](atomchars2.html) and [`number_chars/2`](numberchars2.html) instead of `name/2`.
 
 
 ## SEE ALSO

@@ -16,7 +16,7 @@ stream_property(Stream, Property)
 
 `stream_property/2` is used to retrieve information on a particular stream. It may also be used to find those streams satisfying a particular property.
 
-`Stream` may be either an input or output argument. If used as an input argument it should be bound to either a stream descriptor as returned by `open/4` or an alias established in a call to `open/4`. If used as an output argument, `Stream` will only be bound to stream descriptors. This predicate may be used to retrieve those streams whose handles were "lost" for some reason.
+`Stream` may be either an input or output argument. If used as an input argument it should be bound to either a stream descriptor as returned by [`open/4`](open34.html) or an alias established in a call to `open/4`. If used as an output argument, `Stream` will only be bound to stream descriptors. This predicate may be used to retrieve those streams whose handles were "lost" for some reason.
 
 `Property` is a term which may take any of the following forms:
 

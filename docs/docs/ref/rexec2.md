@@ -19,7 +19,7 @@ rexec(Command, Options)
 
 `password(Password)` -- provides the password for authentication purposes. If no password is supplied, you will be prompted for one (by the rexec daemon) .
 
-`rstream(Stream, OpenOpts)` -- designates the input stream from which to read the output of the command. This stream will be connected to the standard output of the command. `Stream` will be bound to a stream descriptor. `OpenOpts` is a list containing options suitable for a call to `open/4`.
+`rstream(Stream, OpenOpts)` -- designates the input stream from which to read the output of the command. This stream will be connected to the standard output of the command. `Stream` will be bound to a stream descriptor. `OpenOpts` is a list containing options suitable for a call to [`open/4`](open34.html).
 
 `wstream(Stream, OpenOpts)` -- designates the output stream to write to. This output stream will be connected to standard input of the command.
 

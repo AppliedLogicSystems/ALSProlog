@@ -16,7 +16,7 @@ keysort(List, SortedList)
 
 ## DESCRIPTION
 
-`sort/2` sorts the `List` according to the standard order. Identical elements, as defined by `==/2`, are merged, so that each element appears only once in `SortedList`.
+`sort/2` sorts the `List` according to the standard order. Identical elements, as defined by [`==/2`](identity2.html), are merged, so that each element appears only once in `SortedList`.
 
 `keysort/2` expects `List` to be a list of terms of the form: `Key-Data`. Each pair is sorted by the `Key` alone. Pairs with duplicate `Keys` will not be removed from `SortedList`.
 

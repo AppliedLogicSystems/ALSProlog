@@ -71,7 +71,7 @@ Error: Execution aborted.
 
 ## NOTES
 
-The ISO Standard mandates that `flush_output/[0,1]` is preferred over `ttyflush/0`.
+The ISO Standard mandates that [`flush_output/[0,1]`](flushoutput01.html) is preferred over `ttyflush/0`.
 
 
 ## SEE ALSO

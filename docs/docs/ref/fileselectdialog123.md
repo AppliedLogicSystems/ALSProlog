@@ -63,7 +63,7 @@ would produce this popup :
 
 ## NOTES
 
-The default Tcl interpreter for `file_select_dialog/[1,2]` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run `init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`.  If you wish to run `file_select_dialog/3` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
+The default Tcl interpreter for `file_select_dialog/[1,2]` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run [`init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`](inittkalslib012.html).  If you wish to run `file_select_dialog/3` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
 
 ## SEE ALSO
 

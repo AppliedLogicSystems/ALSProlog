@@ -17,11 +17,11 @@ set_output(Stream_or_Alias)
 
 ## DESCRIPTION
 
-For both forms `Stream_or_Alias` must be either a stream descriptor returned by a call to `open/3` or `open/4` or an alias created during a successful call to `open`. For the sake of the following discussion, let us suppose that `Stream` is `Stream_or_Alias` if `Stream_or_Alias` is a stream descriptor. If `Stream_or_Alias` is an alias, then let `Stream` be the stream associated with that alias.
+For both forms `Stream_or_Alias` must be either a stream descriptor returned by a call to [`open/3` or `open/4`](open34.html) or an alias created during a successful call to `open`. For the sake of the following discussion, let us suppose that `Stream` is `Stream_or_Alias` if `Stream_or_Alias` is a stream descriptor. If `Stream_or_Alias` is an alias, then let `Stream` be the stream associated with that alias.
 
-`set_input/1` will set the stream associated with the current input stream to `Stream`. The current input stream is the stream that is read when predicates such as `get_char/1` or `read/1` are called. The current input stream may be retrieved by calling `current_input/1`.
+`set_input/1` will set the stream associated with the current input stream to `Stream`. The current input stream is the stream that is read when predicates such as [`get_char/1`](getchar12.html) or [`read/1`](read12.html) are called. The current input stream may be retrieved by calling [`current_input/1`](currentinput1.html).
 
-`set_output/1` will set the stream associated with the current output stream to `Stream`. The current output stream is the stream which is written to when predicates such as `put_char/1` or `write/1` are called. The current output stream may be retrieved by calling `current_output/1`.
+`set_output/1` will set the stream associated with the current output stream to `Stream`. The current output stream is the stream which is written to when predicates such as [`put_char/1`](putchar12.html) or [`write/1`](write12.html) are called. The current output stream may be retrieved by calling [`current_output/1`](currentinput1.html).
 
 
 ## EXAMPLES
@@ -79,7 +79,7 @@ text,eof_code,0,0)
 
 ## NOTES
 
-`close/1` may also change the setting of the current input or output streams.
+[`close/1`](close12.html) may also change the setting of the current input or output streams.
 
 
 ## SEE ALSO
