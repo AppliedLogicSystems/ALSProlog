@@ -1,5 +1,38 @@
-
 About ALSProlog/docs
+====================
+
+The issues leading to the current setup were:
+
+<a href="https://github.com/AppliedLogicSystems/ALSProlog/issues/128">#128</a>
+The Problem: Docs are scattered in three different locations.
+
+* gh_pages branch for alsprolog.com
+* alshelp on master branch (partial reference manual)
+* wiki repo for user manual
+For developers, this means that making simple fixes/additions to the docs involves making changes to 2 repos on 2 or 3 different branches -- all the downsides of version control, without functional version control! For users, docs are scattered and not fully available online.
+
+The Solution (on alldocs branch):
+
+  []Move all docs into the ALSProlog repo on the master branch
+  []Orginize/compile docs with Github-Pages compatible Jekyll to produce integrated site with all docs
+  []Reconfigure packaged docs to be build from docs folder
+Downsides:
+
+*Increased complexity for generating docs (Jekyll themes and templates)
+*Heavier toolset required and a more complex build (Jekyll, etc)
+---------------------------------------------------------
+
+<a href="https://github.com/AppliedLogicSystems/ALSProlog/issues/129">#129</a>
+Once #128 is complete, the following steps are needed to switch:
+
+  Reconfigure alsprolog.com to serve from master docs folder
+  Delete gh_pages branch
+  Delete Wiki (leave stub pointing to new location on alsprolog.com)
+++++++
+  Ken switched the site, and I deleted gh_pages branch and deactivated the wiki. 
+  When a wiki is deactivated, the URLs redirect to the repo page (i.e. ALSProlog Github page).
+
+=================================
 
 A very useful item: docs/GNUmakefile consolidates commands for building parts of the docs subsystem.  Execute 'make' in ALSProlog/docs to see the targets available:
 
@@ -82,6 +115,9 @@ About alsprolog.com
 (As of 3/11/2019) The url alsprolog.com is registered in Ken Bowen's account at DreamHost (https://panel.dreamhost.com :: ken@desert-light.org). [ToDo: Setup another user on this account, with near-owner privileges and print-out recovery codes and secret Q&A:
 https://panel.dreamhost.com/index.cgi?tree=users.access&
 https://panel.dreamhost.com/index.cgi?tree=billing.secure&    ]
+alsprolog.com is hosted by GitHub Pages.  To control this, use
+	https://github.com/AppliedLogicSystems/ALSProlog/settings
+and scroll down to GitHup Pages.
 
 Details About *.md Source Files
 ===============================
@@ -93,7 +129,7 @@ Basic format of docs/guide/*.md
 	YAML Front-matter (empty) - just the two lines:
 		---
 		---
-	Includes:
+	Includes:     [need details]
 	    toc/no_toc
 
 Basic format of docs/ref/*.md
@@ -136,32 +172,42 @@ Basic format of docs/ref/*.md
 	    General Format:
 	    ---
 	    title: <one of the predicates described on this page>
+
 	    package: <one of ref_packages: from _config.yml; default = Core Prolog>
+
 	    group: Lists <Anything meaningful for the given page>
 	    
 	    	Although packages are a fixed/declared set (in_config.yml), groups are an open set. 
-	    	A group will exist as long as a ref page uses it. For example, if you add a /docs/ref/foo1.md 
-	    	file that uses group "Foobars", then "Foobars" will auto-magically appear in the TOC as a group. 
+	    	A group will exist as long as a ref page uses it. For example, if you add a 
+		/docs/ref/foo1.md file that uses group "Foobars", then "Foobars" will auto-magically 
+		appear in the TOC as a group. 
 	    
 	    module: <default = builtins; nearly all pages should be a single module>
+
 	    predicates:
 	    	format for a predicate with a single NAME/ARITY occurrence on the page:
 	    - {sig: 'append/2', desc: 'appends a list of lists together'}
-	    	format for predicate with multiple NAME/ARITIES occurrences on the page:
+	    	format for predicate with multiple NAME/ARITIES occurrences on the page,
+		where the arities of the predicates are 2 & 3:
 	    - {sig: 'clause', args: {
 	        2: 'retrieve a clause',
 	        3: 'retrieve a clause with a database reference'
 	      }}
-	    <These formats can occur multiply in any mixed order.>
+	    <These two formats can occur multiply in any mixed order.>
 	    ---
 
-	Includes:
+	Includes:     [need details]
 	    toc/no_toc
 
 	    {% include book.md ...
 
+Tracking Code:
+=============================================
+The piwik tracking code displays at:
+https://piwik.strong-brain.com/index.php?module=CoreHome&action=index&date=previous30&period=range&idSite=6#?module=Dashboard&action=embeddedIndex&date=previous30&period=range&idSite=6&idDashboard=1
 
-[More: What happens when a new commit is made: To ~docs; To somewhere else]
+
+[More: What(how) happens when a new commit is made: To ~docs; To somewhere else]
 =============================================
 
 
