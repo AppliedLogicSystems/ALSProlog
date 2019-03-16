@@ -50,5 +50,5 @@ yes.
 
 ## SEE ALSO
 
-- `compare/3`
+- [`compare/3`](compare3.html)
 - {% include book.md id="bowen91"    sec="7.4" %}

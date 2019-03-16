@@ -71,4 +71,4 @@ This function is not very consistent with regards to error handling. Some errors
 
 ## SEE ALSO
 
-- `open/[3,4]`
+- [`open/[3,4]`](open34.html)

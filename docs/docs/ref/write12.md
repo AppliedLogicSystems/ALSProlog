@@ -188,16 +188,16 @@ T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
 
 ## SEE ALSO
 
-- `read_term/[2,3]`
-- `read/[1,2]`
-- `open/4`
-- `close/1`
-- `nl/[0,1]`
-- `put_char/[1,2]`
-- `put_code/[1,2]`
-- `set_line_length/2`
-- `op/3`
-- `tell/1`
+- [`read_term/[2,3]`](read12.html)
+- [`read/[1,2]`](read12.html)
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- `nl/[0,1]` {%- comment %} TODO: missing {% endcomment %}
+- [`put_char/[1,2]`](putchar12.html)
+- [`put_code/[1,2]`](putcode12.html)
+- [`set_line_length/2`](setlinelength2.html)
+- [`op/3`](op3.html)
+- [`tell/1`](tell1.html)
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="6.9" %}

@@ -120,7 +120,7 @@ Note that we exported `leading/1` from `module m3`, and both `module m1` and `mo
 
 ## SEE ALSO
 
-- `:/2`
+- [`:/2`](colon2.html)
 
 - [User Guide (Modules)](../guide/3-Modules.md)
 

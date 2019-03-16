@@ -24,8 +24,8 @@ error(Message) :-
 
 ## SEE ALSO
 
-- `see/1`
-- `tell/1`
+- [`see/1`](see1.html)
+- [`tell/1`](tell1.html)
 
 ## NOTES
 

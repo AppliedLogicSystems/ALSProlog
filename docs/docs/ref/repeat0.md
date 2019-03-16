@@ -30,7 +30,7 @@ loop
 ```
 ## SEE ALSO
 
-- `fail/0`
+- [`fail/0`](fail0.html)
 
 - {% include book.md id="sterling86" sec="12.5" %}
 - {% include book.md id="bratko86"   sec="7.5" %}

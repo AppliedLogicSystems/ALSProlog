@@ -26,7 +26,7 @@ On most systems, typing the end of file characters after the `?-` prompt of the 
 
 ## SEE ALSO
 
-- `abort/0`
+- [`abort/0`](abort0.html)
 
 ## BUGS
 

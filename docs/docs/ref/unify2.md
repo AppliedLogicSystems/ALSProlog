@@ -57,10 +57,10 @@ Note that in the next to last example, the depth of the printing is much deeper 
 
 ## SEE ALSO
 
-- `==/2`
-- `\==/2`
-- `eq`
-- `noneq`
+- [`==/2`](identity2.html)
+- [`\==/2`](identity2.html)
+- `eq` {%- comment %} TODO: missing {% endcomment %}
+- `noneq` {%- comment %} TODO: missing {% endcomment %}
 - {% include book.md id="bowen91"    sec="4.6" %}
 - {% include book.md id="bratko86"   sec="2.7" %}
 - {% include book.md id="clocksin81" sec="6.8" %}

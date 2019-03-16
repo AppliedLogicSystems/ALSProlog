@@ -200,18 +200,18 @@ The DEC-10 compatibility predicates `see/1` and `tell/1` are defined in terms of
 
 ## SEE ALSO
 
-- `close/1`
-- `current_input/1`
-- `current_output/1`
-- `flush_input/1`
-- `flush_output/1`
-- `stream_property/2`
-- `curl/[1,3]`
-- `http/3`
-- `read_term/3`
-- `write_term/3`
-- `get_char/1`
-- `put_char/1`
-- `set_stream_position/2`
+- [`close/1`](close12.html)
+- [`current_input/1`](currentinput1.html)
+- [`current_output/1`](currentinput1.html)
+- [`flush_input/1`](flushinput1.html)
+- [`flush_output/1`](flushoutput01.html)
+- [`stream_property/2`](streamproperty2.html)
+- [`curl/[1,2,3]`](curl123.html)
+- [`http/3`](curl123.html)
+- [`read_term/3`](read12.html)
+- [`write_term/3`](write12.html)
+- [`get_char/1`](getchar12.html)
+- [`put_char/1`](putchar12.html)
+- [`set_stream_position/2`](setstreamposition2.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

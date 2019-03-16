@@ -88,10 +88,10 @@ L = ['$stderr','$stdin','$stdout',foo]
 
 ## SEE ALSO
 
-- `open/4`
-- `close/1`
-- `set_stream_position/2`
-- `at_end_of_stream/1`
-- `set_line_length/2`
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`set_stream_position/2`](setstreamposition2.html)
+- [`at_end_of_stream/1`](atendofstream01.html)
+- [`set_line_length/2`](setlinelength2.html)
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

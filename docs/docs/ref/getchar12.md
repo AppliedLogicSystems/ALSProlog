@@ -71,10 +71,10 @@ If `get_char/[1,2]` is called with `Char` instantiated to a term which is not a 
 
 ## SEE ALSO
 
-- `put_char/2`
-- `get_code/2`
-- `open/4`
-- `close/1`
-- `char_code/2`
+- [`put_char/2`](putchar12.html)
+- [`get_code/2`](getcode12.html)
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`char_code/2`](charcode2.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

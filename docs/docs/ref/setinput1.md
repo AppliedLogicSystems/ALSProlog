@@ -84,8 +84,8 @@ text,eof_code,0,0)
 
 ## SEE ALSO
 
-- `current_input/1`
-- `open/3`
-- `close/1`
+- [`current_input/1`](currentinput1.html)
+- [`open/3`](open34.html)
+- [`close/1`](close12.html)
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

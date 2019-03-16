@@ -51,13 +51,12 @@ firstTerm(File, Term) :-
 
 ## SEE ALSO
 
-- `see/1`
-- `seeing/1`
-- `seen/1`
-- `open/3`
-- `open/4`
-- `close/1`
-- `close/2`
+- [`see/1`](see1.html)
+- [`seeing/1`](see1.html)
+- [`seen/1`](see1.html)
+- [`open/[3,4]`](open34.html)
+- [`close/1`](close12.html)
+- [`close/2`](close12.html)
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="5.4" %}

@@ -142,4 +142,4 @@ The default Tcl interpreter for `menu_entries_list/3` and `path_to_main_menu_ent
 
 ## SEE ALSO
 
-- `init_tk_alslib/[0,1,2]`
+- [`init_tk_alslib/[0,1,2]`](inittkalslib012.html)

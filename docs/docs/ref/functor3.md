@@ -36,8 +36,8 @@ yes.
 
 ## SEE ALSO
 
-- `arg/3`
-- `mangle/3`
+- [`arg/3`](arg3.html)
+- [`mangle/3`](mangle3.html)
 
 - {% include book.md id="bowen91"    sec="7.6" %}
 - {% include book.md id="clocksin81" sec="6.5" %}

@@ -67,4 +67,4 @@ The default Tcl interpreter for `file_select_dialog/[1,2]` is `tcli` as shown ab
 
 ## SEE ALSO
 
-- `init_tk_alslib/[0,1,2]`
+- [`init_tk_alslib/[0,1,2]`](inittkalslib012.html)

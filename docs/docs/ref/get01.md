@@ -32,9 +32,9 @@ yes.
 ```
 ## SEE ALSO
 
-- `skip/1`
-- `get_char/2`
-- `get_code/2`
+- [`skip/1`](skip1.html)
+- [`get_char/2`](getchar12.html)
+- [`get_code/2`](getcode12.html)
 
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="6.9" %}

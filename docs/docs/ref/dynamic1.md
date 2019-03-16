@@ -25,5 +25,5 @@ Calling `assert/1` or one of its variants for an undefined procedure will also e
 
 ## SEE ALSO
 
-- `consult/1`
-- `assert/[1,2]`
+- [`consult/1`](consult12.html)
+- [`assert/[1,2]`](assert12.html)

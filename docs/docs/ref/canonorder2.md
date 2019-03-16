@@ -45,4 +45,4 @@ yes.
 ```
 ## SEE ALSO
 
-- `compare/3`
+- [`compare/3`](compare3.html)

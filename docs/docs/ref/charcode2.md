@@ -53,6 +53,6 @@ Code is an integer but is not a character code
 
 ## SEE ALSO
 
-- `atom_chars/2`
-- `number_chars/2`
-- `term_chars/2`
+- [`atom_chars/2`](atomchars2.html)
+- [`number_chars/2`](numberchars2.html)
+- [`term_chars/2`](termchars2.html)

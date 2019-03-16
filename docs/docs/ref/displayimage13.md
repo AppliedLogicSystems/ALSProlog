@@ -64,5 +64,5 @@ The default Tcl interpreter for `create_image/3` and `display_image/3` is `tcli`
 
 ## SEE ALSO
 
-- `init_tk_alslib/[0,1,2]`
+- [`init_tk_alslib/[0,1,2]`](inittkalslib012.html)
 

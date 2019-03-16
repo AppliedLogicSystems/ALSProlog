@@ -74,8 +74,8 @@ yes.
 
 ## SEE ALSO
 
-- `open/4`
-- `close/1`
-- `current_output/1`
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`current_output/1`](currentinput1.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

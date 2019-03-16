@@ -185,7 +185,7 @@ ALS Prolog provides a global variable mechanism separate from the Prolog databas
 
 ## SEE ALSO
 
-- `:/2`
+- [`:/2`](colon2.html)
 
 - {% include book.md id="bowen91"    sec="7.3" %}
 - {% include book.md id="clocksin81" sec="6.4" %}

@@ -103,8 +103,8 @@ Note in the above examples that `write/[1,2]` does not pay attention to the line
 
 ## SEE ALSO
 
-- `stream_property/2`
-- `open/4`
-- `write_term/3`
+- [`stream_property/2`](streamproperty2.html)
+- [`open/4`](open34.html)
+- [`write_term/3`](write12.html)
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 

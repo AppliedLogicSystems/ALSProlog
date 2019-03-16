@@ -59,11 +59,11 @@ yes.
 
 ## SEE ALSO
 
-- `get_char/1`
-- `put_code/1`
-- `open/4`
-- `close/1`
-- `char_code/2`
-- `nl/1`
+- [`get_char/1`](getchar12.html)
+- [`put_code/1`](putcode12.html)
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`char_code/2`](charcode2.html)
+- `nl/1` {%- comment %} TODO: missing {% endcomment %}
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

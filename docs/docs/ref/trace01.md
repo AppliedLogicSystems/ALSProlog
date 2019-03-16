@@ -39,9 +39,9 @@ In the `trace/1` case, the `Goal` will be single stepped according to the debugg
 
 ## SEE ALSO
 
-- `spy/1`
-- `nospy/0`
-- `leash/0`
+- [`spy/1`](spy01.html)
+- [`nospy/0`](spy01.html)
+- [`leash/0`](leash1.html)
 - {% include book.md id="bowen91"    sec="4.5" %}
 - {% include book.md id="bratko86"   sec="8.4" %}
 - {% include book.md id="clocksin81" sec="8.3" %}

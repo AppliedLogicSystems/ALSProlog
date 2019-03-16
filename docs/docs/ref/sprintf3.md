@@ -49,7 +49,7 @@ yes.
 
 ## SEE ALSO
 
-- `printf/[2/3/4]`
-- `write/1`
-- `op/3`
-- `writeq/1`
+- [`printf/[1-4]`](printf1234.html)
+- [`write/1`](write12.html)
+- [`op/3`](op3.html)
+- [`writeq/1`](write12.html)

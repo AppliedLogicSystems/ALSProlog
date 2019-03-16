@@ -66,9 +66,9 @@ yes.
 ```
 ## SEE ALSO
 
-- `nl/0`
-- `put/1`
-- `write/0`
+- `nl/0` {%- comment %} TODO: missing {% endcomment %}
+- [`put/1`](put1.html)
+- [`write/0`](write12.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - Unix/C Reference Manuals: printf(3S)

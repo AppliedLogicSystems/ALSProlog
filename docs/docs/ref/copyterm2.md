@@ -42,6 +42,6 @@ no.
 
 ## SEE ALSO
 
-- `make_gv/1`
-- `make_hash_table/1`
-- `mangle/3`
+- [`make_gv/1`](makegv1.html)
+- [`make_hash_table/1`](makehashtable1.html)
+- [`mangle/3`](mangle3.html)

@@ -20,7 +20,7 @@ no.
 ```
 ## SEE ALSO
 
-- `true/0`
+- [`true/0`](true0.html)
 
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="clocksin81" sec="6.2" %}

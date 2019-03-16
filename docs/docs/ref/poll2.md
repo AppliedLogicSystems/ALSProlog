@@ -44,6 +44,6 @@ Note that an input operation such as `read/2` may block anyway if there is insuf
 
 ## SEE ALSO
 
-- `open/[3,4]`
+- [`open/[3,4]`](open34.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
