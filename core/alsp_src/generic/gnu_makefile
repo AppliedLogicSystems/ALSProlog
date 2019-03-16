@@ -127,7 +127,7 @@ test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
 
 test_app_image: alspro
-	sh $(TEST_DIR)/tsuite/test_app_image.sh
+	$(TEST_DIR)/tsuite/test_app_image.sh
 
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."

@@ -85,5 +85,7 @@ predicates:
     https://html.spec.whatwg.org/multipage/parsing.html  
     unary_tag/1 is exported for use by pxml_utils.pro.  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 

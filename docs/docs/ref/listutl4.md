@@ -34,5 +34,7 @@ predicates:
     -	Head = Lines  
     -	Tail = []  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 

@@ -80,5 +80,7 @@ predicates:
     If both lists have the property that each element occurs no more  
     than once, then the union also has this property.  
 
+{% comment %}
 ## EXAMPLES
+{% endcomment %}
 

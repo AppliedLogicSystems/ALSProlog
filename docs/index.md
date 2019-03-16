@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-# <img src="https://avatars2.githubusercontent.com/u/15176335?v=3"> ALS Prolog
+# ALS Prolog
 
 ALS Prolog is a Prolog compiler and development environment,
 available for most desktop platforms.

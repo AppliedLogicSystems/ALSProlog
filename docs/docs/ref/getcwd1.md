@@ -91,5 +91,7 @@ Error: System error: must_exist_file('./zpper.foo')
 - Throw pattern: error(system_error,[must_exist_file('./zpper.foo')])
 ```
 
+{% comment %}
 ## ERRORS
+{% endcomment %}
 

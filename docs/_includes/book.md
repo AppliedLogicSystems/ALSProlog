@@ -35,7 +35,7 @@ sec2page:
 
 {%- assign book = site.data[ include.id ] -%}
 
-<a title="{{ book.cite.short }}"
+<a title="{{ book.cite.long | escape }}"
 href="
 {{- book.url -}}
 {%- if book.sec2page -%}
