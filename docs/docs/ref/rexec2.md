@@ -19,7 +19,7 @@ rexec(Command, Options)
 
 `password(Password)` -- provides the password for authentication purposes. If no password is supplied, you will be prompted for one (by the rexec daemon) .
 
-`rstream(Stream, OpenOpts)` -- designates the input stream from which to read the output of the command. This stream will be connected to the standard output of the command. `Stream` will be bound to a stream descriptor. `OpenOpts` is a list containing options suitable for a call to `open/4`.
+`rstream(Stream, OpenOpts)` -- designates the input stream from which to read the output of the command. This stream will be connected to the standard output of the command. `Stream` will be bound to a stream descriptor. `OpenOpts` is a list containing options suitable for a call to [`open/4`](open34.html).
 
 `wstream(Stream, OpenOpts)` -- designates the output stream to write to. This output stream will be connected to standard input of the command.
 
@@ -47,7 +47,7 @@ Len=17
 yes.
 ```
 
-The version of slow_atom_length/2 above assumes one is running on a Unix machine and calls wc running on the same machine. The version below, slow_atom_length/3, will work on any system which supports sockets (Unix workstations, Windows 95 with WinSock, Macintosh):
+The version of `slow_atom_length/2` above assumes one is running on a Unix machine and calls wc running on the same machine. The version below, `slow_atom_length/3`, will work on any system which supports sockets (Unix workstations, Windows 95 with WinSock, Macintosh):
 ```
 rstrlen(Host, A, Len) 
     :-
@@ -71,4 +71,4 @@ This function is not very consistent with regards to error handling. Some errors
 
 ## SEE ALSO
 
-- `open/[3,4]
+- [`open/[3,4]`](open34.html)

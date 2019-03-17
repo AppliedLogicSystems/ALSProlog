@@ -24,7 +24,7 @@ predicates:
 
 ## DESCRIPTION
 
-[curl](https://curl.haxx.se/) is an open source software command line tool and library ([libcurl](https://curl.haxx.se/libcurl/)) "for transferring data with URLs".  The ALS Prolog interface to curl is built using the so-called “Easy interface” of the curl library.  In this approach, everything about any of the calls curl/[1,2,3] or http/3 is converted into a single list of Easy-oriented curl option equations, and that list is then passed to a C program built over the curl Easy interface API.  The predicates `curl/[1,2,3]` provide three variations on the theme of a rather direct interface to curl, while http/3 provides slightly higher-level REST-inspired transfer services.
+[curl](https://curl.haxx.se/) is an open source software command line tool and library ([libcurl](https://curl.haxx.se/libcurl/)) "for transferring data with URLs".  The ALS Prolog interface to curl is built using the so-called “Easy interface” of the curl library.  In this approach, everything about any of the calls `curl/[1,2,3]` or `http/3` is converted into a single list of Easy-oriented curl option equations, and that list is then passed to a C program built over the curl Easy interface API.  The predicates `curl/[1,2,3]` provide three variations on the theme of a rather direct interface to curl, while `http/3` provides slightly higher-level REST-inspired transfer services.
 
 For all equations on the `Options` list passed to the C program, the left side of every equation, which must be an atom,  is first converted to uppercase. Then, with the exception of the special equation tags 
 ```
@@ -46,13 +46,13 @@ or must be a [`CURLOPT` expression](https://curl.haxx.se/libcurl/c/curl_easy_set
 
 The acceptable expressions for `Value` will depend on `Tag` (see below).
 
-Among curl/[1,2,3], curl/1 is basic:
+Among `curl/[1,2,3]`, `curl/1` is basic:
 ```
 curl/1:
 curl(Options)
 Cleans up option capitalization and invokes the low-level interface to curl.
 ```
-The other two are defined in terms of cur/1:
+The other two are defined in terms of `cur/1`:
 ```
 curl/2:
 Effectively:
@@ -85,9 +85,9 @@ can appear on `Options`. Whatever transfer result is produced from the underlyin
 ```
 can also appear on `Options`. Whatever transfer result is produced from the underlying curl call is written into the file at `<local file path>`.  Note that both `result = Expr` and `resultfile = '<local file path>'` can occur together on an `Options` list: the transfer result will be unified (as a UIA) with `Expr` and also written into the file at `<local file path>`.
 
-Further `CURLOPT_` options are described below in connection with http/3.
+Further `CURLOPT_` options are described below in connection with `http/3`.
 
-Appropriate `CURLINFO` options can be used with any of curl/[1,2,3] or http/3.. For example, including `response_code(RC)` on `Options` will bind `RC` to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including `total_time(TTT)` will bind `TTT` to the number of seconds expended in the transaction.
+Appropriate `CURLINFO` options can be used with any of `curl/[1,2,3]` or `http/3`. For example, including `response_code(RC)` on `Options` will bind `RC` to the HTTP response code returned by the server (e.g., 200, 404, etc.), and including `total_time(TTT)` will bind `TTT` to the number of seconds expended in the transaction.
 
 For transferring information outbound, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12') and 2) free-form text data (e.g., 'lorem ipsum doler'). Either type of data can be supplied either directly in an equation on the `Options` list, or in a file specified on the `Options` list:
 
@@ -112,7 +112,7 @@ The available `Options` overall are the same as for `curl/[1,2,3]`, but in indiv
 
 ## EXAMPLES
 
-These three calls provide the same service and response, except that curl/2 cannot provide the `response_code`:
+These three calls provide the same service and response, except that `curl/2` cannot provide the `response_code`:
 ```
 ?- curl('http://example.com', [response_code(RC)], RR).
 ?- curl('http://example.com', RR).
@@ -184,7 +184,7 @@ Access to curl is also provided by ALS Prolog streams.  See the discussion under
 
 ## SEE ALSO
 
-- [curl](https://curl.haxx.se/)  
-- [libcurl - the multiprotocol file transfer library](https://curl.haxx.se/libcurl/)  
-- [curl_easy_setopt - set options for a curl easy handle](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)  
-- [curl_easy_getinfo - extract information from a curl handle](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html)  
+- [curl](https://curl.haxx.se/)
+- [libcurl - the multiprotocol file transfer library](https://curl.haxx.se/libcurl/)
+- [curl_easy_setopt - set options for a curl easy handle](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html)
+- [curl_easy_getinfo - extract information from a curl handle](https://curl.haxx.se/libcurl/c/curl_easy_getinfo.html)

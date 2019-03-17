@@ -14,11 +14,11 @@ close(Stream_or_Alias, CloseOptions)
 ```
 ## DESCRIPTION
 
-`close/1` and `close/2` close a stream previously opened with `open/3` or `open/4`. Closing a stream consists of flushing the buffer associated with the stream and freeing resources associated with maintaining an open stream. If there is an alias associated with the stream, this alias is disassociated and freed up for potential use by some other stream. If the stream to be closed is the current input stream, then the current input stream is set to the stream associated with the alias `user_input`. If the stream to be closed is associated with the current output stream, then the current output stream is set to the stream associated with the alias `user_output`.
+`close/1` and `close/2` close a stream previously opened with [`open/3` or `open/4`](open34.html). Closing a stream consists of flushing the buffer associated with the stream and freeing resources associated with maintaining an open stream. If there is an alias associated with the stream, this alias is disassociated and freed up for potential use by some other stream. If the stream to be closed is the current input stream, then the current input stream is set to the stream associated with the alias `user_input`. If the stream to be closed is associated with the current output stream, then the current output stream is set to the stream associated with the alias `user_output`.
 
 Certain types of streams may have other actions performed. `Atom` streams opened for write will have the stream contents unified with the atom `A` which appeared in the sink specification in the call to `open`.
 
-`Stream_or_Alias` is either a stream descriptor or an alias established via a call to `open/3` or `open/4`.
+`Stream_or_Alias` is either a stream descriptor or an alias established via a call to [`open/3` or `open/4`](open34.html).
 
 `CloseOptions` is a list consisting of options to `close/2`. The close options are :
 
@@ -61,8 +61,8 @@ Certain streams which are opened at system startup time can not be closed. Among
 
 ## SEE ALSO
 
-- `open/4`  
-`current_input/1`  
-`flush_output/1`
+- [`open/4`](open34.html)
+- [`current_input/1`](currentinput1.html)
+- [`flush_output/1`](flushoutput01.html)
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

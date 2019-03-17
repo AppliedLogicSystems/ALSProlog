@@ -76,8 +76,8 @@ no.
 
 ## SEE ALSO
 
-- `atom_length/2`
-- `atom_concat/3`
-- `atom_chars/2`
-- `atom_codes/2`
-- User Guide (Prolog I/O)
+- `atom_length/2` {%- comment %} TODO: missing {% endcomment %}
+- `atom_concat/3` {%- comment %} TODO: missing {% endcomment %}
+- [`atom_chars/2`](atomchars2.html)
+- [`atom_codes/2`](atomchars2.html)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

@@ -47,7 +47,7 @@ yes.
 
 yes.
 ```
-Continuing the example, we show what heroes are left by using the `listing/1` procedure. After that, we remove `hero(superman)` with a `retract/2` call. The old database reference to the man of steel is instantiated to `Ref`.
+Continuing the example, we show what heroes are left by using the [`listing/1`](listing01.html) procedure. After that, we remove `hero(superman)` with a `retract/2` call. The old database reference to the man of steel is instantiated to `Ref`.
 
 ```
 ?- listing(hero/1).
@@ -64,7 +64,7 @@ Ref='$dbref'(5208,15,2384,1)
 
 yes.
 ```
-Next, we use `clause/3` to find the database reference of hero(batman). With this, we use the database reference in a `retract/2` call to remove `hero(batman)` from the database. Note that when the call to  `retract/2` is made,
+Next, we use [`clause/3`](clause23.html) to find the database reference of hero(batman). With this, we use the database reference in a `retract/2` call to remove `hero(batman)` from the database. Note that when the call to  `retract/2` is made,
 the `Clause` argument is uninstantiated. After the call to `retract/2` has succeeded, `Clause` is instantiated to 
 the clause that was removed.
 ```
@@ -94,15 +94,15 @@ yes.
 ?- listing(hero/1).
 yes.
 ```
-As the last call to `listing/1` shows, there are no more heroes left in the database. (Who knows what evil may be lurking in the garbage collector though!)
+As the last call to [`listing/1`](listing01.html) shows, there are no more heroes left in the database. (Who knows what evil may be lurking in the garbage collector though!)
 
 ## SEE ALSO
 
-- `abolish/1`  
-`clause/1`
+- [`abolish/2`](abolish2.html)
+- [`clause/2`](clause23.html)
 
 - {% include book.md id="bowen91"    sec="7.3" %}
 - {% include book.md id="clocksin81" sec="6.4" %}
 - {% include book.md id="bratko86"   sec="7.4" %}
 - {% include book.md id="sterling86" sec="12.2" %}
-  
+

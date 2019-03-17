@@ -71,12 +71,12 @@ Error: Execution aborted.
 
 ## NOTES
 
-The ISO Standard mandates that `flush_output/[0,1]` is preferred over `ttyflush/0`.
+The ISO Standard mandates that [`flush_output/[0,1]`](flushoutput01.html) is preferred over `ttyflush/0`.
 
 
 ## SEE ALSO
 
-- `printf/1`
-- `write/1`
-- `put/1`
-- `flush_output/[0,1]`
+- [`printf/1`](printf1234.html)
+- [`write/1`](write12.html)
+- [`put/1`](put1.html)
+- [`flush_output/[0,1]`](flushoutput01.html)

@@ -47,7 +47,7 @@ consultq(File) :- consult(File, [verbosity(quiet) ]) .
 ```
 If File is the atom user, then clauses and commands will be read in from the keyboard until an end of file is read.
 
-The Options argument of consult/2 is a list of consult options, and their effects, are as follows :
+The Options argument of `consult/2` is a list of consult options, and their effects, are as follows :
 
 `verbosity(Value)`
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Value = noisy/quiet`; turns on/off the printing of messages during consulting.
@@ -119,7 +119,7 @@ nut(acorn).
 
 yes.
 ```
-The following example illustrates the practice of putting calls to consult/1 inside of files to be(re) consulted. We have the three files with contents as follows :
+The following example illustrates the practice of putting calls to `consult/1` inside of files to be(re) consulted. We have the three files with contents as follows :
 ```
 letters.pro
 -----------

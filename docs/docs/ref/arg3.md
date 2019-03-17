@@ -33,8 +33,8 @@ If `Nth` is not an integer greater than `0` and less than or equal to the arity 
 
 ## SEE ALSO
 
-- `functor/3`  
-`=../2`
+- [`functor/3`](functor3.html)
+- `=../2` {%- comment %} TODO: missing {% endcomment %}
 
 - {% include book.md id="bowen91"    sec='9.1' %}
 - {% include book.md id="sterling86" sec='9.2' %}

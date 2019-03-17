@@ -55,12 +55,12 @@ Note that the last two lines `Goal=...` and `Message=..` are the Prolog interpre
 
 ## ERRORS
 
-If Goal is an uninstantiated variable or a number, call/1 will fail.
+If Goal is an uninstantiated variable or a number, `call/1` will fail.
 
 ## SEE ALSO
 
-- `!/0`  
-`:/2`
+- [`!/0`](cut0.html)
+- [`:/2`](colon2.html)
 
 - {% include book.md id="clocksin81" sec="6.7" %}
 - {% include book.md id="bratko86"   sec="7.2" %}

@@ -16,7 +16,7 @@ predicates:
 ```
 ## DESCRIPTION
 
-For some Prolog procedures, it is essential to know the module within which they are invoked. For example, `setof/3` must invoke the goal in its second argument relative to the correct module. The problem is that `setof/3` is defined in `module builtins`, while it may invoked in some other module which is where the code defining the goal in the second argument should be run. In reality, `setof/3` is defined as the module closure of another predicate `setof/4` (whose definition appears in the `builtins module`). The extra argument to `setof/4` is the module in which the goal in the second argument of `setof/3` is to be run. Declaring `setof/3` to be a module closure of `setof/4` means that goals of the form
+For some Prolog procedures, it is essential to know the module within which they are invoked. For example, [`setof/3`](setof3.html) must invoke the goal in its second argument relative to the correct module. The problem is that `setof/3` is defined in `module builtins`, while it may invoked in some other module which is where the code defining the goal in the second argument should be run. In reality, `setof/3` is defined as the module closure of another predicate `setof/4` (whose definition appears in the `builtins module`). The extra argument to `setof/4` is the module in which the goal in the second argument of `setof/3` is to be run. Declaring `setof/3` to be a module closure of `setof/4` means that goals of the form
 ```
 ..., setof(X, G, L), ...
 ```
@@ -36,7 +36,7 @@ The actual predicate that you write should expect to receive the calling module 
 
 The procedure that the user will call should be exported if it is contained within a module. The actual (unclosed) procedure does not need to be exported. 
 
-`module_closure/2` simply identifies the first and third arguments of module_closure/3. That is, the command
+`module_closure/2` simply identifies the first and third arguments of `module_closure/3`. That is, the command
 ```
 :- module_closure(foo, 5) .
 ```
@@ -89,7 +89,7 @@ no.
 
 no.
 ```
-This is because the call to p(X) runs in module m3 which has no clauses defining p/1. Now let us change module m3 to read as follows :
+This is because the call to p(X) runs in module m3 which has no clauses defining `p/1`. Now let us change module m3 to read as follows :
 ```
 module m3.
 
@@ -120,7 +120,7 @@ Note that we exported `leading/1` from `module m3`, and both `module m1` and `mo
 
 ## SEE ALSO
 
-- `:/2`
+- [`:/2`](colon2.html)
 
-- `User Guide (Modules)
+- [User Guide (Modules)](../guide/3-Modules.md)
 

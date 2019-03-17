@@ -25,9 +25,9 @@ printf(Stream_or_Alias, Format, ArgList, WriteOptions)
 ```
 ## DESCRIPTION
 
-printf/2 takes a format string and a list of arguments to include in the format string. printf/1 is the same as printf/2 except no argument list is given. The following is a list of the special formatting possible within the format string :
+`printf/2` takes a format string and a list of arguments to include in the format string. `printf/1` is the same as `printf/2` except no argument list is given. The following is a list of the special formatting possible within the format string :
 
-`\n` -- prints a newline(same as `nl/0`)
+`\n` -- prints a newline (same as `nl/0`)
 
 `\t` -- prints a tab character
 
@@ -41,11 +41,11 @@ printf/2 takes a format string and a list of arguments to include in the format 
 
 `%s` -- prints the corresponding Prolog string in the argument list
 
-`%t` -- prints the corresponding Prolog term in the argument list (same as `write/1`)
+`%t` -- prints the corresponding Prolog term in the argument list (same as [`write/1`](write12.html))
 
 All other characters are printed as they appear in the format string.
 
-Using printf is generally much easier than using the equivalent `write/1`, `put/1`, and `nl/0` predicates because the whole message you want to print out can be assembled and carried out by one call to `printf`.
+Using printf is generally much easier than using the equivalent [`write/1`](write12.html), [`put/1`](put1.html), and `nl/0` predicates because the whole message you want to print out can be assembled and carried out by one call to `printf`.
 
 ## EXAMPLES
 ```
@@ -66,9 +66,9 @@ yes.
 ```
 ## SEE ALSO
 
-- `nl/0`  
-`put/1`  
-`write/0`  
+- `nl/0` {%- comment %} TODO: missing {% endcomment %}
+- [`put/1`](put1.html)
+- [`write/0`](write12.html)
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - Unix/C Reference Manuals: printf(3S)

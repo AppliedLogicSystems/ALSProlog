@@ -161,14 +161,14 @@ The stream associated with Stream_or_Alias has no input ready to be read and the
 
 ## SEE ALSO
 
-- `write/[1,2]`  
-`write_term/[2,3]`  
-`open/4`  
-`close/1`  
-`get_char/[1,2]`  
-`get_code/[1,2]`  
+- [`write/[1,2]`](write12.html)
+- [`write_term/[2,3]`](write12.html)
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`get_char/[1,2]`](getchar12.html)
+- [`get_code/[1,2]`](getcode12.html)
 
-- User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="sterling86" sec="12.2" %}
 - {% include book.md id="bratko86"   sec="6.2.1" %}

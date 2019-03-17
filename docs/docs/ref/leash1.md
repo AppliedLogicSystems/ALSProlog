@@ -28,7 +28,7 @@ Note that it does not make sense to use the list argument format for specifying 
 
 ## EXAMPLES
 
-The following examples illustrate the use of leash/1:
+The following examples illustrate the use of `leash/1`:
 
 ```
 ?- leash([call,redo]).
@@ -38,13 +38,13 @@ yes.
 yes.
 ```
 
-Note that using an empty list as the argument to leash/1, as shown in the example above, results in no ports being leashed.
+Note that using an empty list as the argument to `leash/1`, as shown in the example above, results in no ports being leashed.
 
 ## SEE ALSO
 
-- `trace/1`  
-`spy/1`
+- [`trace/1`](trace01.html)
+- [`spy/1`](spy01.html)
 
-- `Tools (Using the Debugger)`
+- [Tools (Using the Debugger)](../guide/14-Using-the-Four-Port-Debugger.md)
 - {% include book.md id="clocksin81" sec="8.4" %}
 

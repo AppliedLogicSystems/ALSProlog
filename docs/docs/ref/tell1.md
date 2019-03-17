@@ -42,10 +42,10 @@ firstTerm(File, Term) :-
 
 ## SEE ALSO
 
-- `see/1`
-- `seeing/1`
-- `seen/0`
-- User Guide (Prolog I/O)
+- [`see/1`](see1.html)
+- [`seeing/1`](see1.html)
+- [`seen/0`](see1.html)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="5.4" %}
 - {% include book.md id="bratko86"   sec="6.1" %}

@@ -18,7 +18,7 @@ command_line(SWITCHES)
 ```
 is asserted in module builtins. This assertion is always made, even when -p is not used, in which case the argument of `command_line/1` is the empty list.
 
-The -P switch will force the name of the invoking program to be the argument(usually alspro) .. the switch is useful for developing applications which will eventually be packaged(via save_image/2) . Packaged applications will place the entire command line into command_line/1. In particular, the first element in the list obtained from command_line/1 in a packaged application will be the name of the application.
+The -P switch will force the name of the invoking program to be the argument(usually alspro) .. the switch is useful for developing applications which will eventually be packaged (via [`save_image/2`](saveimage2.html)). Packaged applications will place the entire command line into `command_line/1`. In particular, the first element in the list obtained from `command_line/1` in a packaged application will be the name of the application.
 
 
 ## EXAMPLES

@@ -71,8 +71,8 @@ no.
 
 ## SEE ALSO
 
-- `!/0`
-- `->/2`
+- [`!/0`](cut0.html)
+- [`->/2`](arrow2.html)
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="sterling86" sec="10.4" %}
 - {% include book.md id="bratko86"   sec="2.3" %}

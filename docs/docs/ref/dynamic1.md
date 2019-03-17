@@ -21,9 +21,9 @@ dynamic(Module:Pred/Arity)
 ```
 ## NOTES
 
-Calling `assert/1` or one of its variants for an undefined procedure will also effectively declare the procedure to be dynamic.
+Calling [`assert/1`](assert12.html) or one of its variants for an undefined procedure will also effectively declare the procedure to be dynamic.
 
 ## SEE ALSO
 
-- `consult/1`  
-`assert/[1,2]`
+- [`consult/1`](consult12.html)
+- [`assert/[1,2]`](assert12.html)

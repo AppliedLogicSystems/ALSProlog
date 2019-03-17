@@ -45,7 +45,7 @@ datetime_less(DateTime0, DateTime1)
 
 `gm_date_time(Date, Time)` obtains the current Geenwich UTC `Date` and `Time` from the same call to the OS/system clock. 
 
-date/1 and time/1 are effectively defined by:
+`date/1` and `time/1` are effectively defined by:
 ```
 date(Date) :- date_time(Date, _).
 
@@ -61,7 +61,7 @@ date_pattern(YY,MM,DD,YY/MM/DD).
 `set_date_pattern/1` is used to change the pattern term to be used for displaying dates, that is, to change the fact defining `date_pattern/4`.  It should be passed a term AA/BB/CC representing the desired date display expression, where the values of AA,BB,CC are atoms beginning with `y`, `m`, and `d` in the desired order. [Note that 
 `set_date_pattern(m/d/y), set_date_pattern(mm/dd/yy)`, and `set_date_pattern(month/day/year)` would all set the same date pattern display.]
 
-`valid_date(Date)` is true if and only if Date represents a meaningful date, that is, whether the numerical values of `YY,MM,DD` (whatever the date_pattern) are in the correct ranges.  If PP is a pattern made out of Y,M,D and '-' matches the current date_pattern [e.g., PP is M-D-Y], then PP is an acceptable input to valid_date/1.
+`valid_date(Date)` is true if and only if Date represents a meaningful date, that is, whether the numerical values of `YY,MM,DD` (whatever the date_pattern) are in the correct ranges.  If PP is a pattern made out of Y,M,D and '-' matches the current date_pattern [e.g., PP is M-D-Y], then PP is an acceptable input to `valid_date/1`.
 
 `valid_date/1` is defined in terms of `valid_date/3` by:
 ```

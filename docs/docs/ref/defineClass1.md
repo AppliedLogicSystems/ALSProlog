@@ -125,7 +125,7 @@ for
 ```
      accessObjStruct(SlotDescrip, State, VarOrValue)
 ```
-The bodies of clauses defining the action predicate of a class can contain calls on `accessObjStruct/3, setObjStruct/3, :=, send/2, send_self/2`, and any other built-in or program-defined Prolog predicate.
+The bodies of clauses defining the action predicate of a class can contain calls on [`accessObjStruct/3`, `setObjStruct/3`](setObjStruct3.html), `:=`, [`send/2`, `send_self/2`](send2.html), and any other built-in or program-defined Prolog predicate.
 
 ## EXAMPLES
 ```

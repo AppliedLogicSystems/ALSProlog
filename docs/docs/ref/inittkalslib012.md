@@ -59,4 +59,4 @@ A number of useful utility predicates are available in the ALS Prolog library fo
     path_to_main_menu_entry/2
     path_to_menu_entry/[3,4]
 ```
-The (short) versions of these predicates which do not use an `Interp` argument default their Tcl interpreter to `tcli`.  To use these, you need only ensure that you run one of init_tk_alslib/[0,1] (just once) before calling the short predicates.  To use the versions of these predicates with an `Interp` argument other than `tcli`, you must ensure that you first run (just once) the predicate init_tk_alslib/2 with `Interp` set to the name for the interpreter you wish to use.
+The (short) versions of these predicates which do not use an `Interp` argument default their Tcl interpreter to `tcli`.  To use these, you need only ensure that you run one of `init_tk_alslib/[0,1]` (just once) before calling the short predicates.  To use the versions of these predicates with an `Interp` argument other than `tcli`, you must ensure that you first run (just once) the predicate `init_tk_alslib/2` with `Interp` set to the name for the interpreter you wish to use.

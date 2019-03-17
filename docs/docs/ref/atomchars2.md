@@ -49,11 +49,11 @@ yes.
 
 ## ERRORS
 
-Atom and CharList are both variables(atom_chars/2)
+Atom and CharList are both variables(`atom_chars/2`)
 
 -- -- -- -- &gt; instantiation_error.
 
-Atom and CodeList are both variables(atom_codes/2)
+Atom and CodeList are both variables(`atom_codes/2`)
 
 -- -- -- -- &gt; instantiation_error.
 
@@ -80,7 +80,7 @@ CodeList is a list but there is a sublist L of CodeList whose first element is n
 
 ## SEE ALSO
 
-- `number_chars/2`  
-`number_codes/2`  
-`term_chars/2`  
-`term_codes/2`
+- [`number_chars/2`](numberchars2.html)
+- [`number_codes/2`](numberchars2.html)
+- [`term_chars/2`](termchars2.html)
+- [`term_codes/2`](termchars2.html)

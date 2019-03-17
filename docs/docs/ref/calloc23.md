@@ -112,7 +112,7 @@ These predicates make use of the same C type encoding as used on ['$c_malloc'/2]
 **`c_set_raw(Obj,Off,Len,UIA)`** writes `Len` characters from UIA into `Obj` starting at offset `Off`.
 
 **`c_setn(Obj,Type,I,Val)`**
-<br>**`c_setn(Obj,SType,I,[FieldName,Val,...])`** perform c_set/3 on the `I-th` component of an array, where `I=0` refers to the first element and so on. In the first form, `Type` must be a base type. In the second form `SType` must be a structure type (substructures are handled in the same manner as in c_set/3).
+<br>**`c_setn(Obj,SType,I,[FieldName,Val,...])`** perform `c_set/3` on the `I-th` component of an array, where `I=0` refers to the first element and so on. In the first form, `Type` must be a base type. In the second form `SType` must be a structure type (substructures are handled in the same manner as in c_set/3).
 
 **`c_examine(Obj,Type,Val)`**
 <br>**`c_examine(Obj,SType,[FieldName,Val,...])`** examine a UIA or C ptr `Obj`, assuming its type to be `Type`. In the first form, `Type` is either an intergral type or `'str'`. In the second form, `SType` must be a structure type.
@@ -146,5 +146,5 @@ Implemented in ~builtins/cutils.pro over the predicates in ['$c_malloc'/2](cmall
 
 ## SEE ALSO
 
-- ['$c_malloc'/2](cmalloc2.html)
-- [c_create/3](ccreate3.html)
+- [`'$c_malloc'/2`](cmalloc2.html)
+- [`c_create/3`](ccreate3.html)

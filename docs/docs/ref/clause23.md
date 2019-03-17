@@ -30,7 +30,7 @@ When a fact is found, `Body` will be unified with the atom `true`.
 
 ## EXAMPLES
 
-The following examples show the use of clause/2 :
+The following examples show the use of `clause/2` :
 
 ```
 ?- listing(fruit/1).

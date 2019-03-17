@@ -72,8 +72,8 @@ text,eof_code,0,0))])
 
 ## SEE ALSO
 
-- `read_term/3`
-- `write_canonical/2`
-- `number_chars`
-- `atom_chars`
-- User Guide (Prolog I/O).
+- [`read_term/3`](read12.html)
+- [`write_canonical/2`](write12.html)
+- [`number_chars/2`](numberchars2.html)
+- [`atom_chars/2`](atomchars2.html)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

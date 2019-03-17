@@ -41,7 +41,7 @@ Above, we hit return after `Op=/\` to skip further answers
 
 ## SEE ALSO
 
-- `op/3`  
-`read_term/[2,3]`
+- [`op/3`](op3.html)
+- [`read_term/[2,3]`](read12.html)
 
-- `User Guide (Prolog I/O)
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

@@ -14,7 +14,7 @@ halt
 
 ## EXAMPLES
 
-In this example, halt/0 is called from the Prolog shell on a Unix C shell system on a machine named 'wizard':
+In this example, `halt/0` is called from the Prolog shell on a Unix C shell system on a machine named 'wizard':
 
 ```
 ?- halt.
@@ -26,7 +26,7 @@ On most systems, typing the end of file characters after the `?-` prompt of the 
 
 ## SEE ALSO
 
-- `abort/0`
+- [`abort/0`](abort0.html)
 
 ## BUGS
 

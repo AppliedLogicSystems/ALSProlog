@@ -49,8 +49,8 @@ no.
 
 ## SEE ALSO
 
-- `ar/1`  
-`nonvar/1`
+- [`var/1`](var1.html)
+- [`nonvar/1`](var1.html)
 - {% include book.md id="bowen91"    sec="7.6" %}
 - {% include book.md id="sterling86" sec="9.1" %}
 - {% include book.md id="bratko86"   sec="7.1" %}

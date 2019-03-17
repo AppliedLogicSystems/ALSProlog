@@ -33,10 +33,10 @@ predicates:
 
 ## DESCRIPTION
 
-**`grab_pxml/2`** Calls grab_html_tokens/2 to read the list L of HTML tokens out  
+**`grab_pxml/2`** Calls [`grab_html_tokens/2`](html_tokens.html) to read the list L of HTML tokens out  
     of Path, and then parses L into a (single !doctype) PXML term.  
 
-**`grab_pxml_with_paths/5`** Calls grab_html_tokens/2 to read the list L of HTML tokens out  
+**`grab_pxml_with_paths/5`** Calls [`grab_html_tokens/2`](html_tokens.html) to read the list L of HTML tokens out  
     of FilePath, and then parses L into a (single !doctype) PXML term,  
     where it accumulates tags of component terms in MTags, with  
     the tagged terms accumulated in (lists) on TagVals, and  
@@ -46,13 +46,13 @@ predicates:
     the reversed parser stack with Tg1 belonging to TgtTags, and  
     3) Term was parsed out as Tg1 was popped from Stack.  
 
-**`grab_pxml_with_tagged/3`** Calls grab_html_tokens/2 to read the list L of HTML tokens out  
+**`grab_pxml_with_tagged/3`** Calls [`grab_html_tokens/2`](html_tokens.html) to read the list L of HTML tokens out  
     of FilePath, and then parses L into a (single !doctype) PXML term,  
     where it accumulates tags of component terms in MTags, with  
     the tagged terms accumulated in (lists) on MTagVals.  
 
 **`parse_html_toks_to_pxml/5`** The workhorse. Parses a list of HTML-tokens, as produced by  
-    read_tokens/5 in html_tokens.pro, into a collection of Prolog Terms  
+    [`read_tokens/5`](html_tokens.html) in html_tokens.pro, into a collection of Prolog Terms  
     consituting a PXML representation of the source.  
     The pair (StackIn, StackOut) implements the parser stack.  
     The difference list  
@@ -83,7 +83,7 @@ predicates:
     See also:  
     https://html.spec.whatwg.org/multipage/syntax.html  
     https://html.spec.whatwg.org/multipage/parsing.html  
-    unary_tag/1 is exported for use by pxml_utils.pro.  
+    `unary_tag/1` is exported for use by pxml_utils.pro.  
 
 {% comment %}
 ## EXAMPLES

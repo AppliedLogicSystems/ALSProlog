@@ -22,5 +22,5 @@ yes.
 
 ## SEE ALSO
 
-- `fail/0`
+- [`fail/0`](fail0.html)
 - {% include book.md id="clocksin81" sec="6.2" %}

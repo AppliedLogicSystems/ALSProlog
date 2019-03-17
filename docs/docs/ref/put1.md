@@ -29,9 +29,9 @@ If `Char` is bound to an integer within the range 0 -- 255, `put/1` will write o
 
 ## SEE ALSO
 
-- `nl/0`  
+- `nl/0` {%- comment %} TODO: missing {% endcomment %}
 
-`User Guide (Prolog I/O)`  
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - {% include book.md id="bowen91"    sec="7.8" %}
 - {% include book.md id="clocksin81" sec="5.2" %}
 - {% include book.md id="bratko86"   sec="6.3" %}

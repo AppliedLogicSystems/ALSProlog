@@ -37,11 +37,11 @@ no.
 
 ## NOTES
 
-`copy_term/2` is useful in situations involving destructive assignment. It is useful not only for the obvious situation of making a copy which is then destructively modified, but also for avoiding certain problems regarding structures becoming uninstantiated upon backtracking, as in `findall`, `bagof`, etc.  It is also useful when using access predicates created with either `make_gv/1` or `make_hashtable/1`. See `make_gv/1` for further discussion.
+`copy_term/2` is useful in situations involving destructive assignment. It is useful not only for the obvious situation of making a copy which is then destructively modified, but also for avoiding certain problems regarding structures becoming uninstantiated upon backtracking, as in `findall`, `bagof`, etc.  It is also useful when using access predicates created with either [`make_gv/1`](makegv1.html) or [`make_hashtable/1`](makehashtable1.html). See [`make_gv/1`](makegv1.html) for further discussion.
 
 
 ## SEE ALSO
 
-- `make_gv/1`  
-`make_hash_table/1`  
-`mangle/3`
+- [`make_gv/1`](makegv1.html)
+- [`make_hash_table/1`](makehashtable1.html)
+- [`mangle/3`](mangle3.html)

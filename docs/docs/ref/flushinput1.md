@@ -37,7 +37,7 @@ This operation is also useful for use with datagram sockets. The buffer contents
 
 ## SEE ALSO
 
-- `open/[3,4]`  
-`flush_output/[0,1]
+- [`open/4`](open34.html)
+- [`flush_output/[0,1]`](flushoutput01.html)
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

@@ -43,21 +43,21 @@ The subgoals are connected together by using the `','` connective. In the next e
 no.
 ```
 
-The following shows that ', ' works the same in call/1 :
+The following shows that ', ' works the same in [`call/1`](call1.html) :
 
 ```
 ?- call((fail,write('Help, I am stuck in an example'),nl)).
 no.
 ```
 
-Note that the parentheses around the argument to call/1 are to keep the parser from creating a call to call/3.
+Note that the parentheses around the argument to [`call/1`](call1.html) are to keep the parser from creating a call to `call/3`.
 
 
 ## SEE ALSO
 
-- `call/1`  
-`:/2`  
-`;/2`
+- [`call/1`](call1.html)
+- [`:/2`](colon2.html)
+- [`;/2`](semicolon2.html)
 
 - {% include book.md id="bratko86"   sec="2.3" %}
 - {% include book.md id="clocksin81" sec="6.7" %}`

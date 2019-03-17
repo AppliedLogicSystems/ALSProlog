@@ -65,16 +65,16 @@ The stream associated with `Stream_or_Alias` has no input ready to be read and t
 
 ## NOTES
 
-A character is simply an atom with length 1. `get_code/[1,2]` is used to retrieve a character code.
+A character is simply an atom with length 1. [`get_code/[1,2]`](getcode12.html) is used to retrieve a character code.
 
-If `get_char/[1,2]` is called with `Char` instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from `char_code/2`, not `get_char/[1,2]`.
+If `get_char/[1,2]` is called with `Char` instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from [`char_code/2`](charcode2.html), not `get_char/[1,2]`.
 
 ## SEE ALSO
 
-- `put_char/2`  
-`get_code/2`  
-`open/4`  
-`close/1`  
-`char_code/2`
+- [`put_char/2`](putchar12.html)
+- [`get_code/2`](getcode12.html)
+- [`open/4`](open34.html)
+- [`close/1`](close12.html)
+- [`char_code/2`](charcode2.html)
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

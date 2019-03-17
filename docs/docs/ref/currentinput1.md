@@ -15,9 +15,9 @@ current_output(Stream)
 ```
 ## DESCRIPTION
 
-`current_input/1` will unify `Stream` with the stream descriptor associated with the current input stream. The current input stream is the stream that is read when predicates such as `get_char/1` or `read/1` are called. The current input stream may be set by calling `set_input/1`.
+`current_input/1` will unify `Stream` with the stream descriptor associated with the current input stream. The current input stream is the stream that is read when predicates such as [`get_char/1`](getchar12.html) or [`read/1`](read12.html) are called. The current input stream may be set by calling [`set_input/1`](setinput1.html).
 
-`current_output/1` will unify `Stream` with the stream descriptor associated with the current output stream. The current output stream is the stream which is written to when predicates such as `put_char/1` or `write/1` are called. The current output stream may be set by calling `set_output/1`.
+`current_output/1` will unify `Stream` with the stream descriptor associated with the current output stream. The current output stream is the stream which is written to when predicates such as [`put_char/1`](putchar12.html) or [`write/1`](write12.html) are called. The current output stream may be set by calling [`set_output/1`](setinput1.html).
 
 ## EXAMPLES
 
@@ -49,14 +49,14 @@ yes.
 ```
 ## NOTES
 
-`close/1` applied to an input or output stream  may change the current output or current input streams.
+[`close/1`](close12.html) applied to an input or output stream  may change the current output or current input streams.
 
 ## SEE ALSO
 
-- `set_input/1`  
-`get_char/1`  
-`read/1`  
-`put_char/1`  
-`write/1`
+- [`set_input/1`](setinput1.html)
+- [`get_char/1`](getchar12.html)
+- [`read/1`](read12.html)
+- [`put_char/1`](putchar12.html)
+- [`write/1`](write12.html)
 
-- `User Guide (Prolog I/O)`
+- [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

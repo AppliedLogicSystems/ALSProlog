@@ -24,7 +24,7 @@ getPrologInterrupt(Term)
 
 ## SEE ALSO
 
-- `forcePrologInterrupt/1`
-- `callWithDelayedInterrupt/1`
-- User Guide (Prolog Interrupts)
+- [`forcePrologInterrupt/0`](forcePrologInterrupt0.html)
+- [`callWithDelayedInterrupt/1`](forcePrologInterrupt0.html)
+- [User Guide (Prolog Interrupts)](../guide/9-Freeze,-Exceptions,-Events,-Interrupts,-Signals.md)
 

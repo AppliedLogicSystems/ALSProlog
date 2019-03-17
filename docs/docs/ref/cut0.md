@@ -26,12 +26,12 @@ In other words,
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`;`
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`:`
 <br>&nbsp;&nbsp;&nbsp;&nbsp;`,`
-<br>are all transparent to cut. The ISO Prolog Standard requires that `call/1` be opaque to cut. At this time, ALS Prolog deviates from the standard.
+<br>are all transparent to cut. The ISO Prolog Standard requires that [`call/1`](call1.html) be opaque to cut. At this time, ALS Prolog deviates from the standard.
 
 
 ## EXAMPLES
 
-In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal eats/2. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
+In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
 
 ```
 ?- listing.
@@ -48,14 +48,14 @@ Person=chris;
 no.
 ```
 
-The next example shows that `not/1` is opaque to cut. This means that a '!' inside the call to `not/1` will not cut out the choicepoint for `not/1`, or any other choicepoints created by goals to the left of `not/1`.
+The next example shows that [`not/1`](not1.html) is opaque to cut. This means that a '!' inside the call to `not/1` will not cut out the choicepoint for `not/1`, or any other choicepoints created by goals to the left of `not/1`.
 ```
 ?- not((!,fail)).
 
 yes.
 ```
 
-Notice the extra pair of parentheses above. This is to prevent the parser from creating a goal to `not/2` instead of `not/1`. In the next example, the transparency of `call/1` with respect to cut is shown:
+Notice the extra pair of parentheses above. This is to prevent the parser from creating a goal to `not/2` instead of `not/1`. In the next example, the transparency of [`call/1`](call1.html) with respect to cut is shown:
 
 ```
 ?- listing.
@@ -118,8 +118,8 @@ succeeds because the '!' is never reached in the condition of -&gt;. The -&gt; f
 
 ## SEE ALSO
 
-- `->/2`  
-`not/1`
+- [`->/2`](arrow2.html)
+- [`not/1`](not1.html)
 
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="sterling86" sec="11" %}

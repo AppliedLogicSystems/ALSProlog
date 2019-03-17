@@ -14,8 +14,8 @@ Condition -> TrueGoal ; FalseGoal
 ## DESCRIPTION
 
 
-If `Condition` succeeds, then `TrueGoal` will be executed. `If-then` implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to -&gt;/2 fails. The second form, results from the interaction between ;/2 and
--&gt;/2 because
+If `Condition` succeeds, then `TrueGoal` will be executed. `If-then` implicitly cuts the Condition. Cuts that occur within Condition or TrueGoal will cut back to the head of the parent clause. If Condition fails, then the call to `-&gt;/2` fails. The second form, results from the interaction between [`;/2`](semicolon2.html) and
+`-&gt;/2` because
 
 ```
 Condition -> TrueGoal ; FalseGoal
@@ -62,8 +62,8 @@ yes.
 
 ## SEE ALSO
 
-- `!/0`  
-`not/1`
+- [`!/0`](cut0.html)
+- [`not/1`](not1.html)
 
 - {% include book.md id="bowen91"    sec="7.1" %}
 - {% include book.md id="sterling86" sec="11" %}

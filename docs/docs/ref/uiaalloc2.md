@@ -94,6 +94,6 @@ copy_list_to_uia([H | T ], N, Buf) :-
 
 ## SEE ALSO
 
-- `atom_concat/3`
-- `sub_atom/3`
-- `atom_char/2
+- `atom_concat/3` {%- comment %} TODO: missing {% endcomment %}
+- [`sub_atom/5`](subatom5.html)
+- [`atom_chars/2`](atomchars2.html)

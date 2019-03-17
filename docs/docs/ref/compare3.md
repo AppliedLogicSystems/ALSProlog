@@ -37,7 +37,7 @@ are ordered according to their signed magnitude. Integers and floating point val
 are sorted by the ASCII order of their print names. If one atom is an initial substring of another, the longer atom will appear later in the standard order.
 
 **_[Structured,terms]_**
-are ordered first by arity, then by the ASCII order of their principal functor. If two terms have the same functor and arity, then compare/3 will recursively compare their arguments to determine the order of the two.
+are ordered first by arity, then by the ASCII order of their principal functor. If two terms have the same functor and arity, then `compare/3` will recursively compare their arguments to determine the order of the two.
 
 More precisely, if `TermL` and `TermR` are structured terms, then
 
@@ -55,7 +55,7 @@ the Nth argument of `TermL` preceeds the Nth argument of `TermR` in the standard
 
 ## EXAMPLES
 
-The following examples show the use of compare/3 :
+The following examples show the use of `compare/3` :
 
 ```
 ?- Myself=I, compare(=,Myself,I).
@@ -95,8 +95,8 @@ in the standard order, because the second structure has a greater arity than the
 
 ## SEE ALSO
 
-- `==/2`  
-`@</2`  
-`sort/2`
+- [`==/2`](identity2.html)
+- [`@</2`](canonorder2.html)
+- [`sort/2`](sort2.html)
 
 - {% include book.md id="bowen91"    sec="7.4" %}
