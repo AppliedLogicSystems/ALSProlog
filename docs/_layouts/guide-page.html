@@ -5,7 +5,7 @@ layout: default
 <nav>
 <a href="../">Docs</a>
 &gt; <a href="./">User's Guide</a>
-{% include edit-source.html %}
+{% if jekyll.environment == "production" %}{% include edit-source.html %}{% endif %}
 </nav>
 
 {{ content }}
