@@ -48,6 +48,8 @@ test-local            Test local docs
 clean                 Clean all generated files
 help                  Display this help
 
+=================================
+
 Here are the top-level files and folders appearing in ALSProlog/docs:
 
 AboutDocs.txt		-- This document
@@ -98,8 +100,10 @@ index.md		-- Markdown source for http://alsprolog.com
 ref-manual/		-- empty??
 src_help_md/		-- various (prolog) scripts for dealing with docs
 
-Generation Of html Files
 ========================
+
+Generation Of html Files
+
 Broadly, "make all" uses <a href="https://jekyllrb.com">Jekyll</a> to process the sources (docs/[guide,ref] and the various index.md files, etc., using the _layouts and _includes, etc.) into two versions of the html ALSProlog documentation: the full version in _site and a slightly reduced version in _local_site. The full version in _site appears online at 
 
 	https://alsprolog.com > Documentation [https://alsprolog.com/docs/]
@@ -110,8 +114,10 @@ Currently (3/10/19), it also appears at the free testing account
 
 The slightly reduced version in _local_site is packaged with the ALS Prolog releases.
 
-About alsprolog.com
 ===================
+
+About alsprolog.com
+
 (As of 3/11/2019) The url alsprolog.com is registered in Ken Bowen's account at DreamHost (https://panel.dreamhost.com :: ken@desert-light.org). [ToDo: Setup another user on this account, with near-owner privileges and print-out recovery codes and secret Q&A:
 https://panel.dreamhost.com/index.cgi?tree=users.access&
 https://panel.dreamhost.com/index.cgi?tree=billing.secure&    ]
@@ -119,8 +125,10 @@ alsprolog.com is hosted by GitHub Pages.  To control this, use
 	https://github.com/AppliedLogicSystems/ALSProlog/settings
 and scroll down to GitHup Pages.
 
-Details About *.md Source Files
 ===============================
+
+Details About *.md Source Files
+
 YAML Front-matter occurs at the beginning of a file (*.md), and is delineated by 2 lines of 3 dashes:
 ---
 ---
@@ -201,10 +209,58 @@ Basic format of docs/ref/*.md
 
 	    {% include book.md ...
 
-Tracking Code:
 =============================================
+
+Tracking Code:
+
 The piwik tracking code displays at:
 https://piwik.strong-brain.com/index.php?module=CoreHome&action=index&date=previous30&period=range&idSite=6#?module=Dashboard&action=embeddedIndex&date=previous30&period=range&idSite=6&idDashboard=1
+
+=============================================
+
+Display theme and some mechanics:
+
+* The ALS Prolog jekyll-generated html files utilize the Minima theme, to be found at:
+
+https://github.com/jekyll/minima/tree/v2.5.0
+
+* Minima's ReadMe file has some info on usage and customization, although I've found I [Chuck] often need to read the source to see what it is doing.
+
+Jekyll Themes in general are documented at:
+
+https://jekyllrb.com/docs/themes/
+
+* Without customization, the Minima theme seems to duplicate site.title in the footer. To customize the footer's contact info, you can define site.author and site.email in _config.yml. I was thinking something like this:
+
+author: Applied Logic Systems, Inc.
+email: info@applied-logic-systems.com
+
+
+* The header on netlify has
+	ALS Prolog          Documentation       About
+but the packaged version only has
+	ALS Prolog
+
+I [Chuck] did this intentionally. The packaged version only includes the manual/documentation for alspro, not a complete copy of the alsprolog.com web site. I.e. _local_site only contains pages from /docs/docs. As a result it has no menu nav. If it seems too weird, we can adjust things.
+
+* Info about ALS Prolog packages under Reference Manual:
+
+The ordering of the ALS Prolog packages is defined in _config.yml:
+
+ref_packages:
+ - Core Prolog
+ - alslib
+ - C Interface
+ - ALSDev
+
+The names of packages are as they appear on each ref page's YAML front-matter and in the above ref_packages. To change a name {e.g. “alslib”}, modify ref_packages in _config.yml, and all that package's ref pages.
+
+Similarly, how do I get at the order the sub-subdivisions appear in? (Under ALSLib, the order ought to be Lists, Web [and later Strings in between]; again a small item to learn about).
+
+
+
+
+
 
 
 [More: What(how) happens when a new commit is made: To ~docs; To somewhere else]
