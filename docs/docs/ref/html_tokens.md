@@ -1,6 +1,6 @@
 ---
 title: 'read_tokens/2'
-package: alslib
+package: ALS Library
 group: Web
 module: pxml
 predicates:

@@ -1,6 +1,6 @@
 ---
 title: 'number_list/3'
-package: alslib
+package: ALS Library
 group: Lists
 module: builtins
 predicates:
