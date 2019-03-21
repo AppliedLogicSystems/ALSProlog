@@ -20,7 +20,7 @@ export same_uc/2.
 export change_case_sym/2.
 export string_to_uia/2.
 export string_to_uia/3.
-export sized_string_to_uia/3.
+export string_to_sized_uia/3.
 export atomic_to_uia/2.
 export cnvrt_to_UIA/2.
 export truncate/3.
@@ -535,7 +535,6 @@ char_in(Atom, Char, Pos)
 	sub_atom(Atom,Pos0,1,_,Char),
 	Pos is Pos0 + 1.
 
-
 /*!-----------------------------------------------------------------------
  |	replace_char_string/4
  |	replace_char_string(InString, OrigCharNum, NewCharNum, OutString)
@@ -545,7 +544,7 @@ char_in(Atom, Char, Pos)
  |
  |	Creates OutString by replacing all occurrences (possibly zero) of 
  |	OrigCharNum in InString by NewCharNum.
- *-----------------------------------------------------------------------*/
+ *!-----------------------------------------------------------------------*/
 
 replace_char_string([], _, _, []).
 replace_char_string([OrigCharNum | InString], OrigCharNum, 
@@ -565,7 +564,8 @@ replace_char_string([C | InString], OrigCharNum, NewCharNum, [C | OutString])
  |
  |	Creates AtomOut by replacing all occurrences (possibly zero) of 
  |	OrigCharNum in AtomIn by NewCharNum.
- *-----------------------------------------------------------------------*/
+ *!-----------------------------------------------------------------------*/
+
 replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
 	:-
 	atom_codes(AtomIn,  AICs),
