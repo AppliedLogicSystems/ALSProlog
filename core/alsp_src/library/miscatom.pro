@@ -1,7 +1,7 @@
 /*========================================================================*
  |			miscatom.pro
  |	Copyright (c) 1995-2019 Applied Logic Systems, Inc.
- |		Group: Terms
+ |		Group: Atoms
  |		DocTitle: catenate/3
  |		-- Various atom utilities
  *========================================================================*/
@@ -92,7 +92,7 @@ trim_atoms([InAtom | RestInAtoms],[TruncSize | RestSizes],[OutAtom | RestOutAtom
  |	end-of-line character(s) [\n for Linux,MacOS and \r\n for Windows]
  |	between each pair of atoms, and concatentating the result to
  |	obtain a single atom.
- *-----------------------------------------------------------------------*/
+ *!-----------------------------------------------------------------------*/
 cat_together_seplines(List, Result)
 	:-
 	als_system(SystemList),
@@ -116,7 +116,7 @@ cat_together_seplines(List, Result)
  |	If List is a list of atoms, then Result is obtained by interspersing
  |	a blank space between each pair of atoms, and concatentating the 
  |	result to obtain a single atom.
- *-----------------------------------------------------------------------*/
+ *!-----------------------------------------------------------------------*/
 cat_together_spaced(List, Result)
 	:-
 	insert_item_in_list(List, ' ', L2),
@@ -151,7 +151,7 @@ prefix_to([Item | List], Atom, [XItem | XList])
  |	XList is that list obtained from list by combining Dir 
  |	successively with each element of List to create a path
  |	terminating in that List element.
- *-----------------------------------------------------------------------*/
+ *!-----------------------------------------------------------------------*/
 prefix_dir([], _, []).
 prefix_dir([Item | RestList], Dir, [XItem | RestXList])
 	:-
