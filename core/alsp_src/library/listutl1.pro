@@ -18,6 +18,7 @@ export union/3.
 export sorted_merge/3.
 export sorted_merge/2.
 export subset/2.
+export init_seg_list/2.
 
 /*!---------------------------------------------------------------------
  |	append/2
@@ -223,5 +224,20 @@ subset([E | T], RL)
 	:-
 	dmember(E, RL),
 	subset(T, RL).
+
+/*!--------------------------------------------------------------------*
+ |	init_seg_list/2
+ |	init_seg_list(LeftList, RightList)
+ |	init_seg_list(+, +)
+ |
+ |	- determines if one list is an initial segment of another
+ |
+ |	If LeftList and RightList are both lists, this predicate is
+ |	true if and only if LeftList is an initial sublist of  RightList.
+ *!--------------------------------------------------------------------*/
+init_seg_list([], _) :-!.
+init_seg_list([A | LeftTail], [A | RightTail])
+        :-!,
+        init_seg_list(LeftTail, RightTail).
 
 endmod.

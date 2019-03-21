@@ -5,6 +5,7 @@ group: Lists
 module: builtins
 predicates:
 - {sig: 'append/2', desc: 'appends a list of lists together'}
+- {sig: 'init_seg_list/2', desc: 'determines if one list is an initial segment of another'}
 - {sig: 'int_diff/4', desc: 'returns the intersection and one difference of two lists'}
 - {sig: 'intersect/2', desc: 'returns the intersection of a list of lists'}
 - {sig: 'intersect/3', desc: 'returns the intersection of two lists'}
@@ -19,6 +20,8 @@ predicates:
 ## FORMS
 
 `append(ListOfLists, Result)`
+
+`init_seg_list(LeftList, RightList)`
 
 `int_diff(A,B,AintB,AnotB)`
 
@@ -44,6 +47,9 @@ predicates:
 
 **`append/2`** If ListOfLists if a list, each of whose elements is a list, Result  
     is obtained by appending the members of ListOfLists together in order.  
+
+**`init_seg_list/2`** If LeftList and RightList are both lists, this predicate is  
+    true if and only if LeftList is an initial sublist of  RightList.  
 
 **`int_diff/4`** If A and B are lists, returns the intersection AintB of A and B,  
     together with the difference A - B.  
@@ -80,7 +86,5 @@ predicates:
     If both lists have the property that each element occurs no more  
     than once, then the union also has this property.  
 
-{% comment %}
 ## EXAMPLES
-{% endcomment %}
 
