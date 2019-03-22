@@ -2,7 +2,6 @@
 title: 'make_lc/2'
 package: ALS Library
 group: Strings
-module: builtins
 predicates:
 - {sig: 'asplit/4', desc: 'divides an atom as determined by a character'}
 - {sig: 'asplit00/4', desc: 'divides a list of character codes as det. by a list of char codes'}
@@ -23,8 +22,10 @@ predicates:
 - {sig: 'replace_char_string/4', desc: 'Replace occurrences of a char in a string by another char'}
 - {sig: 'same_uc/2', desc: 'Term1,Term2 unify after converting all characters to upper case'}
 - {sig: 'string_to_sized_uia/3', desc: 'creates a UIA containg chars corresponding to a string'}
-- {sig: 'string_to_uia/2', desc: 'creates a UIA corresponding to an arbitrary string'}
-- {sig: 'string_to_uia/3', desc: 'insert list of char (codes) into a UIA '}
+- {sig: 'string_to_uia', args: {
+    2: 'creates a UIA corresponding to an arbitrary string',
+    3: 'insert list of char (codes) into a UIA'
+  }}
 - {sig: 'strip_both_white/2', desc: 'strips leading and trailing white space chars from a string'}
 - {sig: 'strip_both_white_atom/2', desc: 'strips leading and trailing white space chars from a prolog atom'}
 - {sig: 'strip_tail_white/2', desc: 'strips trailing white space  from a string'}

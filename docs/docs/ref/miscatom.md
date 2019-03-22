@@ -2,12 +2,13 @@
 title: 'catenate/3'
 package: ALS Library
 group: Atoms
-module: builtins
 predicates:
 - {sig: 'cat_together_seplines/2', desc: 'convert list of atoms to single atom with eoln separating atom entries'}
 - {sig: 'cat_together_spaced/2', desc: 'convert list of atoms to single atom with space separating atom entries'}
-- {sig: 'catenate/2', desc: 'catenates a list of atoms '}
-- {sig: 'catenate/3', desc: 'catenates two atoms to produce a third'}
+- {sig: 'catenate', args: {
+    2: 'catenates a list of atoms',
+    3: 'catenates two atoms to produce a third'
+  }}
 - {sig: 'prefix_dir/3', desc: 'prefix Dir to each (atomic) item on List'}
 - {sig: 'prefix_to/3', desc: 'catenate Atom to the front of each element on a List of atoms'}
 - {sig: 'strip_prefix/3', desc: 'strip a fixed-length prefix from a list of atoms'}
