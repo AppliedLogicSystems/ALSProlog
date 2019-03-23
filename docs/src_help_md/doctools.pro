@@ -11,22 +11,30 @@
  |
  * ==================================================================== */
 
-src_folder_md_files('./md_help').
+	% Assuming we're' running in ./src_help_md
+src_folder_md_files( '../docs/ref' ).
 
 packages([core_prolog, alsdev, library, c_intf]).
+
+default_package(core_prolog).
 
 	% Readable texts for the packages:
 pack_readable(core_prolog, 'Core Prolog').
 pack_readable(alsdev, 'ALSDev').
-pack_readable(alslib, 'ALS Library').
+pack_readable(als_library, 'ALS Library').
 pack_readable(c_intf, 'C Interface').
 
 	% Sub-Groups of the packages:
+	%     pack_kid(<subgroup>, <package>).
 pack_kid(control, core_prolog).
 pack_kid(prolog_database, core_prolog).
 pack_kid(terms, core_prolog).
 pack_kid(input_output, core_prolog).
 pack_kid(file_system, core_prolog).
+
+pack_kid(lists, als_library).
+pack_kid(strings, als_library).
+pack_kid(web, als_library).
 
 pack_kid(development_environment, alsdev).
 pack_kid(gui_library, alsdev).
@@ -36,8 +44,10 @@ pack_kid(tcltk_interface, alsdev).
 	%% will probably grow:
 pack_kid(c_intf, c_intf).
 
-%future:
-%pack_kid(..., alslib).
+default_group(core_prolog, 'Terms').
+default_group(alsdev, 'Development Env.').
+default_group(als_library, 'Lists').
+default_group(c_intf, 'C Data').
 
 	% Readable texts for the package subgroups:
 	% Core Prolog
@@ -58,270 +68,25 @@ group_display(tcltk_interface, 'TclTk Interface') :-!.
 group_display(c_data, 'C Data') :-!.
 
 	% ALS Library
-group_display(G, G).
-
-	/* ------------------------------------------------------ *
-	 |	    toc_from_docsdb
-	 |
-	 |	Writes the tables of contents in alshelp/:
-	 |	    toc_core_prolog.html
-	 |	    toc_alsdev.html
-	 |	    toc_alslib
-	 |	    toc_c_intf
-	 |	These are driven by prolog "databases":
-	 |	    docsdb_core_prolog.pro
-	 |	    docsdb_alsdev.pro
-	 |	    docsdb_alslib.pro
-	 |	    docsdb_c_intf.pro
-	 |	These live in ~ALSProlog/docs/src_help_md, which
-	 |	is the same folder containing doctools.pro.
-	 * ------------------------------------------------------ */
-
-	% Process a single package (convenience):
-td:- toc_from_docsdb.
-tdcore :- tocs_from_docsdbs([core_prolog]).
-tdalsdev :- tocs_from_docsdbs([alsdev]).
-tdc_int :- tocs_from_docsdbs([c_intf]).
-
-	% Process all the packages:
-toc_from_docsdb
-        :-
-        packages(Packages),
-        tocs_from_docsdbs(Packages).
-
-tocs_from_docsdbs([]).
-tocs_from_docsdbs([Package | Packages])
-        :-
-        catenate(['./docsdb_', Package, '.pro'], DBFile),
-        (not(exists_file(DBFile)) -> true
-                ;
-                open(DBFile, read, S),
-                read(S, PackageData),
-                close(S),
-                write_toc(Package, PackageData)
-        ),
-        tocs_from_docsdbs(Packages).
-
-/* --------------------------------------------------------------- *
-        write_toc(PackageName, PackageData)
-
-        Write out the table of contents (toc) for PackageName,
-	using PackageData obtained from docsdb_<package>.pro
- * --------------------------------------------------------------- */
-
-	% Paths to locations of alshelp/ when running in src_help_md:
-toc_locn('./alshelp'). 		% running in src_help_md
-%md_toc_locn('../ref-manual').	% running in src_help_md
-
-	%% depending on the location of toc_<Pack>.pro:
-toc2mdSrcDir('').    		%% for src_help_md/alshelp
-%md_toc2mdSrcDir('../src_help_md/md_help/').    %% for ref-manual/alshelp
-
-		%% packages([core_prolog, alsdev, library, c_intf]).
-write_toc(PackageName, []) :-!.
-
-/*
-write_toc(PackageName, PackageData)
-        :-
-	PackageName == core_prolog,
-	!,
-	write_toc_core_prolog(PackageData).
-*/
-
-write_toc(PackageName, PackageData)
-        :-
-		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:
-        catenate(['toc_', PackageName, '.html'], TocFile),
-        toc_locn(TocFolder),
-        join_path([TocFolder, TocFile], TgtTocFile),
-	toc2mdSrcDir(Toc2SrcMdDir),		 %% for src_help_md/alshelp
-	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir).
-
-/*
-		%% write the toc file as file ~docs/ref-manual/md_toc_<PackAbbrev>.html:
-        catenate(['md_toc_', PackageName, '.html'], MDTocFile),
-        md_toc_locn(MDTocFolder),
-        join_path([MDTocFolder, MDTocFile], TgtMDTocFile),
-	md_toc2mdSrcDir(MDToc2SrcDir), 
-	write_out_toc(PackageData, TgtMDTocFile, MDToc2SrcDir).
-*/
-
-/*
-write_toc_core_prolog(PackageData)
+group_display(G, GD)
 	:-
-	PackageName = core_prolog,
+	atom_codes(G, GCodes),
+	GCodes = [C0 | RestGCodes],
+	make_uc([C0], [UC0]),
+	UcGCodes = [UC0 | RestGCodes],
+	atom_codes(GD, UcGCodes).
 
-        toc_locn(TocFolder),
-	toc2mdSrcDir(Toc2SrcMdDir),		 %% for src_help_md/alshelp
-        catenate(['toc_', PackageName, '.html'], TocFile),
-        join_path([TocFolder, TocFile], TgtTocFile),
-	write_out_toc(PackageData, TgtTocFile, Toc2SrcMdDir).
-*/
-
-write_out_toc(PackageData, TgtTocFile, ToSrcDir)
-	:-
-%OS = user_output,
-        open(TgtTocFile, write, OS),
-        write_toc_header(OS),
-        sort(PackageData, SortedPackageData),
-	last_toc_phase( SortedPackageData, ToSrcDir, OS),
-	close(OS).
-
-last_toc_phase( SortedPackageData, ToSrcDir, OS)
-	:-
-        breakout_groups(SortedPackageData, BrokenOutGroups, FinalBrokenOutGroups),
-        write_pdata(BrokenOutGroups, ToSrcDir, OS),
-        printf(OS, '</BODY>\n</HTML>\n', []).
-        close(OS).
-
-write_toc_header(S)
-        :-
-        printf(S,'<HTML>\n',[]),
-        printf(S,'<HEAD>\n',[]),
-        printf(S,'<STYLE>\n',[]),
-        printf(S,'.idxTitle{\n',[]),
-        printf(S,'font-size:1.2em;font-weight:bold;margin-bottom:0.5em;\n',[]),
-        printf(S,'}\n',[]),
-        printf(S,'.eentry {\n',[]),
-        printf(S,'margin-top:-16px;\n',[]),
-        printf(S,'margin-bottom:0px;\n',[]),
-        printf(S,'margin-left:0.6em;\n',[]),
-        printf(S,'}\n',[]),
-        printf(S,'.hentry {\n',[]),
-        printf(S,'font-size:1.1em;font-weight:bold;margin-left:1em;margin-top:0em;\n',[]),
-        printf(S,'}\n',[]),
-        printf(S,'.astyl { text-decoration: none; }\n',[]),
-        printf(S,'</STYLE>\n',[]),
-        printf(S,'</HEAD>\n',[]),
-        printf(S,'<BODY>\n',[]).
-
-breakout_groups([], FinalBrokenOutGroups, FinalBrokenOutGroups)
-        :-
-        FinalBrokenOutGroups = [].
-breakout_groups(SortedPackageData, [GX | BrokenOutGroups], FinalBrokenOutGroups)
-        :-
-        SortedPackageData = [xpge(G, PA, FName, PlainPred, Preds) | _],
-        brkout_grp(SortedPackageData, G, GX, TailSortedPackageData),
-        breakout_groups(TailSortedPackageData, BrokenOutGroups, FinalBrokenOutGroups).
-
-brkout_grp(SortedPackageData, G, G-XGrp, TailSortedPackageData)
-        :-
-        accum_grp(SortedPackageData, G, GroupEntries, TailSortedPackageData),
-        expand_grp(GroupEntries, Expanded),
-        sort(Expanded, SortedExpanded),
-        XGrp = SortedExpanded.
-
-accum_grp([], Group, [], []).
-
-accum_grp([xpge(Group, PA, FName, PlainPred, Preds) | InterSortedPackageData],
-          Group,
-          [xpge(Group, PA, FName, PlainPred, Preds) | TailGroupEntries],  TailSortedPackageData)
-        :-!,
-        accum_grp(InterSortedPackageData, Group, TailGroupEntries, TailSortedPackageData).
-
-accum_grp([xpge(NextGroup, PA, FName, PlainPred, Preds) | InterSortedPackageData],
-           Group, [],
-           [xpge(NextGroup, PA, FName, PlainPred, Preds) | InterSortedPackageData]).
-
-expand_grp([], []).
-
-expand_grp([xpge(Group, PA, FName, PlainPred, PredsWithDescs) | GroupEntries], Expanded)
-        :-
-        make_pa_descs(PredsWithDescs, FName, PADescs),
-        append(PADescs, NextExpanded, Expanded),
-        expand_grp(GroupEntries, NextExpanded).
-
-make_pa_descs([], _, []).
-
-make_pa_descs([p(PA, DescList) | PredsWithDescs], FName, [PA-DescAtom-FName | PADescs])
-        :-
-        (atom(DescList) ->
-                DescAtom = DescList
-                ;
-                desc_atom(DescList, DescAtom)
-        ),
-        make_pa_descs(PredsWithDescs, FName, PADescs).
-
-write_pdata([], _, OS).
-
-write_pdata([Group-GData | BrokenOutGroups], Toc2SrcMdDir, OS)
-        :-
-        group_display(Group, GroupDisp),
-        printf(OS, '<div class="hentry">%t</div><br>\n', [GroupDisp]),
-	collapse_PAs(GData, CollapseGData),
-        write_group(CollapseGData, Toc2SrcMdDir, OS),
-        write_pdata(BrokenOutGroups, Toc2SrcMdDir, OS).
-
-	%% in ref-manual/md_toc____: '../src_help_md/md_help/'
-write_group([], _, OS).
-write_group([PA-IX-FName| GData], Toc2SrcMdDir, OS)
-        :-
-        printf(OS,
-            '<div class="eentry"><a class="astyl" target="content" href="%t%t.html" ix="%t -- %t">%t</a></div><br>\n',
-            [Toc2SrcMdDir,FName,PA,IX,PA]),
-        write_group(GData, Toc2SrcMdDir, OS).
-
-collapse_PAs([], []).
-			%% PA-DescAtom-FName
-collapse_PAs([PA-DA-FN | GData], [PCCPA-IX-FN | CollapseGData])
-	:-
-	getPandA(PA, P, A),
-	CPA = [A | TailCPA],
-	collapse_from(GData, P, [DA], TailCPA, IX, TailGData),
-	getPAL(CPA, CCPA),
-	bufwrite(X, P/CCPA),
-	atom_codes(PCCPA, X),
-	collapse_PAs(TailGData, CollapseGData).
-
-getPandA(PA, P, A)
-	:-
-	atomread(PA, PPAA, [syntax_errors(quiet)]),
-	!,
-	(PPAA = P/A ; P = PPAA, A=0).
-
-getPandA(PA, P, A)
-	:-
-	atom(PA),
-	sub_atom(PA, Bef, 1, _, '/'), 
-	sub_atom(PA, 0, Bef, AA, P), 
-	C is Bef + 1, 
-	sub_atom(PA, C, _, 0, Natom),
-	atomread(Natom, A),
-	!.
-getPandA(P, P, 0)
-        :-
-        atom(P),
-	!.
-
-getPandA(P/A, P, A) :-!.
-
-getPAL([A], A) :-!.
-getPAL(L, L).
-
-collapse_from([], P, DA_List, [], IX, [])
-	:-
-	reverse(DA_List, RDAL),
-	catenate(RDAL, IX).
-collapse_from([PA2-DA2-FN2 | TGData2], P, DA_List, TailCPA, IX, TailGData)
-	:-
-		%% Check whether the predicate (sans arity) in PA is == P:
-	getPandA(PA2, P, A2),
-	!,
-	TailCPA = [A2 | TailCPA2],
-	collapse_from(TGData2, P, [DA2, '; ' | DA_List], TailCPA2, IX, TailGData).
-
-collapse_from(GData, P, DA_List, TailCPA, IX, TailGData)
-	:-
-	reverse(DA_List, RDAL),
-	catenate(RDAL, IX),
-	TailCPA=[],
-	TailGData = GData.
+default_module(core_prolog, builtins).
+default_module(alsdev, alsdev).
+default_module(als_library, builtins).
+default_module(c_intf, builtins).
 
 	/* -------------------------------------------------------------------- *
 	 |		new_page(Path)
 	 |
-	 |		Creates the framework for a new alshelp page,
-	 |		by making a skeletal *.md page in folder md_help/
+	 |	Creates the framework for a new alshelp page,
+	 |	by making a skeletal *.md page in folder given by
+	 |		target_md_files('../docs/ref').
 	 |
 	 |	Path is a path to a file containing the following term:
 	 |
@@ -355,9 +120,13 @@ mknnp :- open('./nnp.np', write, OS),
 	printf(OS,  '  ).\n', []),
 	close(OS).
   
-%% Example:
+%% Examples:
 tt :- 
 	Path = 'np_for_curl.np',
+	new_page(Path).
+
+tdf :- 
+	Path = 'np_for_filepath.np',
 	new_page(Path).
 
 	%% alspro doctools.pro -g do_np -p <path to xx.np>
@@ -372,7 +141,6 @@ do_np :-
 exit_np(NPPath, IssueInfo)
 	:-
 	printf(user_output, '=======================\n',[]),
-%	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n\t%t\n', [NPPath, IssueInfo]),
 	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n\n', [NPPath]),
 
 	printf(user_output, '+++++++++++++++++++++++\n',[]),
@@ -400,8 +168,7 @@ do_new_page(Path)
 	open(Path, read, IS),
 	read(IS, NewPageTerm),
 	close(IS),
-	check_and_go(NewPageTerm),
-	do_new_idx_tm(NewPageTerm).
+	check_and_go(NewPageTerm).
 
 check_and_go(np(Package, Group, Title, FileName, Module, PAsWithDescs))
 	:-
@@ -491,22 +258,103 @@ yaml(Title, Package, Group, Module, Preds, OS)
         :-
         printf(OS, '---\n', []),
         printf(OS, 'title: \'%t\'\n', [Title]),
-	(Package == '' -> true;
-		printf(OS, 'package: %t\n', [Package])
-	),
-	(Group == '' -> true;
-		printf(OS, 'group: %t\n', [Group])
-	),
-        printf(OS, 'module: %t\n', [Module]),
+	yaml_package(Package, OS),
+	yaml_group(Group, Package, OS),
+	yaml_module(Package, Group, Module, OS),
         printf(OS, 'predicates:\n', []),
         yaml_preds(Preds, OS),
         printf(OS, '---\n', []).
 
+yaml_package('', OS) :-!.
+yaml_package(Package, OS) 
+	:-
+	default_package(Package),
+	!.
+yaml_package(Package, OS) 
+	:-
+	pack_readable(Package, ReadablePackage),
+	printf(OS, 'package: %t\n', [ReadablePackage]).
+
+yaml_group('', Package, OS) :-!.
+yaml_group(Group, Package, OS)
+	:-
+	default_group(Package, Group),
+	!.
+yaml_group(Group, Package, OS)
+	:-
+	group_display(Group, ReadableGroup),
+	printf(OS, 'group: %t\n', [ReadableGroup]).
+
+yaml_module(Package, Group, Module, OS)
+	:-
+	default_module(Package, Module), !.
+yaml_module(Package, Group, Module, OS)
+	:-
+        printf(OS, 'module: %t\n', [Module]).
+
+/*
 yaml_preds([], _).
 yaml_preds([p(PA,DescAtom) | Preds], OS)
         :-
         printf(OS, '- {sig: \'%t\', desc: \'%t\'}\n', [PA,DescAtom]),
         yaml_preds(Preds, OS).
+*/
+yaml_preds(Preds, OS)
+	:-
+	compact_preds(Preds, CompactedPreds),
+	print_yaml_preds(CompactedPreds, OS).
+
+compact_preds([], []).
+compact_preds(Preds, [MPPAs | RestCompactedPreds])
+	:-
+	Preds = [p(PA,DescAtom) | _],
+	getPandA(PA, P, A),
+	xp(Preds, P, PAs, RestPreds),
+	mkmp(PAs, P, MPPAs),
+	compact_preds(RestPreds, RestCompactedPreds).
+	
+mkmp([p(PA,DA)], _, p(PA,DA)) :-!.
+mkmp(PAsList, P, mp(P, PAsList)).
+
+xp([], P, [], []).
+xp([p(PA,DescAtom) | TailPreds], P, [p(P/A,DescAtom) | RestPAs], RestPreds)
+	:-
+	getPandA(PA, P, A),
+	!,
+	xp(TailPreds, P, RestPAs, RestPreds).
+xp([p(PAX,DAX) | TailPreds], P, PAs, [p(PAX,DAX) | RestPreds])
+	:-
+	xp(TailPreds, P, PAs, RestPreds).
+
+print_yaml_preds([], _).
+print_yaml_preds([p(PA,DescAtom) | CompactedPreds], OS)
+	:-!,
+        printf(OS, '- {sig: \'%t\', desc: \'%t\'}\n', [PA,DescAtom]),
+	print_yaml_preds(CompactedPreds, OS).
+
+print_yaml_preds([mp(P, PAL) | CompactedPreds], OS)
+	:-
+	sort(PAL, SortedPAL),
+	do_print_mp(SortedPAL, P, OS),
+	print_yaml_preds(CompactedPreds, OS).
+	
+do_print_mp(PAL, P, OS)
+	:-
+	printf(OS, '- {sig: \'%t\', args: {\n', [P]),
+	print_mp_args(PAL, OS),
+	printf(OS, '  }}\n', []).
+
+print_mp_args([], OS).
+print_mp_args([p(P/A, D)], OS)
+	:-!,
+	strip_both_white_atom(D, StrippedD),
+	printf(OS, '    %t: \'%t\'\n', [A, StrippedD]).
+print_mp_args([p(P/A, D) | PAL], OS)
+	:-
+	strip_both_white_atom(D, StrippedD),
+	printf(OS, '    %t: \'%t\',\n', [A, StrippedD]),
+	print_mp_args(PAL, OS).
+	
 
 short_descs([], OS).
 short_descs([p(PA, DescAtom) | StrippedPreds], OS)
@@ -534,6 +382,31 @@ do_descs_skels( [p(PA,DescAtom) | Preds], OS)
 	:-
 	printf(OS, '\n**`%t`**  \n\n', [PA]),
 	do_descs_skels(Preds, OS).
+
+getPandA(PA, P, A)
+	:-
+	atomread(PA, PPAA, [syntax_errors(quiet)]),
+	!,
+	(PPAA = P/A ; P = PPAA, A=0).
+
+getPandA(PA, P, A)
+	:-
+	atom(PA),
+	sub_atom(PA, Bef, 1, _, '/'), 
+	sub_atom(PA, 0, Bef, AA, P), 
+	C is Bef + 1, 
+	sub_atom(PA, C, _, 0, Natom),
+	atomread(Natom, A),
+	!.
+getPandA(P, P, 0)
+        :-
+        atom(P),
+	!.
+
+getPandA(P/A, P, A) :-!.
+
+getPAL([A], A) :-!.
+getPAL(L, L).
 
 finish_skeleton(OS)
 	:-
@@ -681,93 +554,782 @@ xtr_plain_title(Title, PlainPred)
 	close(IS),
 	PA = PlainPred/_.
 
-	/* -------------------------------------------------------------------- *
-	 |		idx_page(Path)
-	 |
-	 |	Path is as described above for new_page(Path).
-	 |	ASSUMES that the np(...) at Path has been processed by 
-	 |	new_page(Path) to produce a page in ~/md_help.
-	 |	(The skeletal page may or may not have been fleshed out, and
-	 |	 the corresponding *.html may or may not have been produced
-	 |	 using pandoc or Jekyll.)
-	 |
-	 |	idx_page(Path) reads the np(...) term out of the file at Path,
-	 |	and does three things:
-	 |	A.  It reads the list from docsdb_<Package>.pro, adds
-	 |	    an appropriate entry for the np term at the beginning of the
-         |          list, and sorts the list;
-	 |	B.  Rewrites docsdb_<Package>.pro using the sorted list from step A.
-	 |	C.  Uses the sorted list to rewrite a new file 
-	 |		toc_<Package>.html 
-	 |	    in folder alshelp/.
-	 * -------------------------------------------------------------------- */
-ii :- 
-	Path = 'np_for_curl.np',
-	idx_page(Path).
 
-ij :-
-	Path = 'calloc23.np',
-	idx_page(Path).
+/* ====================================================================== *
+ |			libwork.pro
+ |		Copyright (c) 2018-2019 Applied Logic Systems, Inc.
+ |		Group: Library Maintenance
+ |		DocTitle: libsetup/0
+ |      
+ |              -- Install and document ALS Library files
+ |      
+ |	Works from <PathToLib>/<libfile>.pro, and generates
+ |		   <PathToLib>/<libfile>.alb
+ |	    together with 
+ |		   <PathToMDFiles>/<libfile>.md
+ |
+ |	Usually <PathToMDFiles> = <PathToALSPrologTree>/docs/docs/ref/
+ |
+ |	Issue: Work out paths and code extension so that a regular
+ |	installation can add a library file.
+ |
+ |	Can be started from the command line in ~docs/src_help_md, 
+ |	as for example:
+ |
+ |		alspro libwork.pro -g libsetup -p listutl1
+ |                  or
+ |		alspro libwork.pro -g libsetup -p listutl1 listutl2 listutl3
+ |
+ |	By default, libsetup/0 will NOT overwrite the target *.md file.
+ |	If the command line switch -ow is present, then it WILL overwrite
+ |	the target *.md file.
+ |
+ |	Note: Depends on doctools.pro
+ * ====================================================================== */
 
-idx_page(Path)
+export fileprocsetup/0.
+
+	%% Assumes this is being run in ~docs/src_help_md:
+mdFolderPath('../docs/ref').
+
+check_get_file_path(Block, File, FilePath, BlockPath)
 	:-
-	(exists_file(Path) ->
-		do_new_idx(Path)
-		;
-		printf('Path %t does not exist - exiting.\n', [Path]),
-		abort
+	block_path(Block, BlockPath),
+	file_extension(FileName, File, pro),
+	path_elements(FilePath, [BlockPath, FileName]),
+	exists_file(FilePath).
+
+	%% In source tree:
+block_path(library, '../../core/alsp_src/library').
+block_path(builtins, '../../core/alsp_src/builtins').
+
+	%% Convenience during development:
+tlu1 :- doc_lib_file(listutl1).
+tlu3 :- doc_lib_file(listutl3).
+tlu4 :- doc_lib_file(listutl4).
+ts :- 
+	catch(
+		doc_lib_file(strings,true),
+		libissue(LibFile, IssueInfo),
+		libissue(LibFile, IssueInfo)
 	).
 
-do_new_idx(Path)
-	:-
-	open(Path, read, IS),
-	read(IS, NewPageTerm),
-	close(IS),
-	do_new_idx_tm(NewPageTerm).
-
-do_new_idx_tm(NewPageTerm)
-	:-
-trace,
-	NewPageTerm = np(Package, Group, Title, FileName, Module, PAsWithDescs),
-	    % All necessary checks made when new_page(Path) ran:
-	rewrite_idx(Package, Group, Title, FileName, Module, PAsWithDescs).
-
-rewrite_idx(Package, Group, Title, FileName, Module, PAsWithDescs)
-	:-
-		%% pack_readable(c_intf, 'C Interface').
-	(pack_readable(PackAbbrev, Package) -> true;
-		pack_readable(Package, _), PackAbbrev = Package ),
-	catenate(['./docsdb_', PackAbbrev, '.pro'], PkgFile),
-	(exists_file(PkgFile) -> true ; 
-		open(PkgFile, write, OOS), printf(OOS, '[].\n', []), close(OOS)
-	),
-%	do_rew_idx(Pkgfile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs, TocFolder).
-	do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs).
+in_docs_src :-
+	get_cwd(CWD),
+	split_path(CWD, CWDElements),
+	reverse(CWDElements, RCWDElements),
+	src_help_md_path_rev(RSHMP),
+	init_seg_list(RSHMP, RCWDElements).
 	
-	/* -------------------------------------------------------------------- *
-	 * -------------------------------------------------------------------- */
+src_help_md_path_rev([src_help_md,docs,ALSProlog]).
 
-do_rew_idx(PkgFile, PackAbbrev, Group, Title, FileName, Module, PAsWithDescs)
+init_seg_list([], _) :-!.
+init_seg_list([A | LeftTail], [A | RightTail])
+	:-!,
+	init_seg_list(LeftTail, RightTail).
+
+
+
+fileprocsetup(Block)
 	:-
-		%% Need to include Module in the docsdb; but all entries need to be converted:
-%	do_docsdb(PkgFile, Group, Title, FileName, Module, PAsWithDescs, SortedNewList),
-	do_docsdb(PkgFile, Group, Title, FileName, PAsWithDescs, SortedNewList),
-
-		%% write the toc file as file src_help_md/alshelp/toc_<PackAbbrev>.html:
-        toc_locn(TocFolder),
-	toc2mdSrcDir(Toc2SrcMdDir),
-	write_toc_file(TocFolder, PackAbbrev, '', SortedNewList, Toc2SrcMdDir).
-
-write_toc_file(TocFolder, PackAbbrev, TocFilePrefix, SortedNewList, Toc2SrcMdDir)
+	member(Block, [library,builtins]),
+	!,
+	cont_fileprocsetup(Block).
+fileprocsetup(Block)
 	:-
-        catenate([TocFilePrefix, 'toc_', PackAbbrev, '.html'], TocFile),
-        join_path([TocFolder, TocFile], TgtTocFile),
-        open(TgtTocFile, write, OS),
-        write_toc_header(OS),
-	last_toc_phase( SortedNewList, Toc2SrcMdDir, OS),
+	printf('Unknown block: %t.  Should be library or builtins\n', [Block]).
+
+cont_fileprocsetup(Block).
+
+
+
+
+
+/*!---------------------------------------------------------------------
+ |	libsetup/0
+ |	libsetup
+ |
+ |	- command line access to library file mainentance
+ |
+ |	Reads the command_line, detects whether the -ow switch is
+ |	present, and invokes processing on the list of files obtained.
+ *!--------------------------------------------------------------------*/
+fileprocsetup 
+	:-
+	in_docs_src,
+	!,
+	command_line(CommandLine),
+	check_for_block(CommandLine, Block, CL2),
+	check_for_overwrite(CL2, Overwrite, FilesList),
+	sort(FilesList, SortedFilesList),
+	catch(
+		do_file_setup(SortedFilesList, Block, Overwrite),
+		libissue(File, IssueInfo),
+		exit_libsetup(Block, File, IssueInfo)
+	),
+	halt.
+
+fileprocsetup 
+	:-
+	printf('Wrong location. Must be running in source tree at ALSProlog/docs/src_help_md\n', []).
+	
+
+check_for_block(CommandLine, library, CL2)
+	:-
+	member('-lib', CommandLine),
+	remove_all(CommandLine, '-lib', CL2 ).
+
+check_for_block(CommandLine, builtins, CL2)
+	:-
+	member('-blt', CommandLine),
+	remove_all(CommandLine, '-blt', CL2 ).
+
+check_for_overwrite(CL2, true, FilesList)
+	:-
+	member('-ow', CL2),
+	!,
+	remove_all(CL2, '-ow', FilesList).
+check_for_overwrite(CL2, false, CL2).
+
+
+
+exit_libsetup(Block, File, IssueInfo)
+	:-
+	printf(user_output, '=======================\n',[]),
+	printf(user_output, 'Issue while processing %t: %t:\n%t\n\n', [Block, File, IssueInfo]),
+
+	printf(user_output, '+++++++++++++++++++++++\n',[]),
+	printf(user_output, 'Exiting from doctools.pro/Block=%t setup due to problems in file %t\n',[BLock,File]),
+	halt.
+
+libissue(LibFile, IssueInfo)
+	:-
+	printf('Errors in library file %t.pro:\n%t\n', [LibFile, IssueInfo]).
+
+%%%--- move to library:
+
+remove_all([], _, []).
+
+remove_all([Tgt | RestList], Tgt, TailList)
+	:-!,
+	remove_all(RestList, Tgt, TailList).
+
+remove_all([Item | RestList], Tgt, [Item | TailList])
+	:-
+	remove_all(RestList, Tgt, TailList).
+
+remove_all2([], _, []).
+
+remove_all2([Tgt, Val | RestList], Tgt, Val, TailList)
+	:-!,
+	remove_all2(RestList, Tgt, Val, TailList).
+
+remove_all2([Item | RestList], Tgt, Val, [Item | TailList])
+	:-
+	remove_all2(RestList, Tgt, Val, TailList).
+%%%---
+
+do_file_setup([], _, _).
+do_file_setup([File | FilesList], Block, Overwrite)
+	:-
+	printf('Processing %t file %t\n', [Block,File]),
+	doc_one_file(File, Block, Overwrite),
+	printf('%t file %t processed\n==================================\n\n', [Block,File]),
+	do_file_setup(FilesList, Block, Overwrite).
+
+/*!---------------------------------------------------------------------
+ |	doc_lib_file/2
+ |	doc_lib_file(LibFile, Overwrite)
+ |	doc_lib_file(+, +)
+ |
+ |	-- Workhorse for library maintenance on a single library file
+ |
+ |	Given the name (without extension) of a library file residing
+ |	in the library area, constructs the path P to the file and
+ |	reads all the lines in the file.  This file should be in the
+ |	format specified by the file "lib_skeleton.txt" in the library
+ |	area.  Then:
+ |	A) Extracts Group and DocTitle from the head comment;
+ |	B) Gets the Module;
+ |	C) Gets the list EX of exported P/As;
+ |	D) Assembles the contents CC of all of the lib-documenting comments
+ |	   (comments with initial * followed by !);
+ |	E) Extracts (and sorts) the list LPA of P/As obtained from CC;
+ |	F) Checks for problems:
+ |	   i) Mismatch between EX and LPA; 
+ |	   ii) Checks that DocTitle is in both EX and LPA
+ |	   If there is a mismatch, or ii) fails, throws a message and halts;
+ |	G) Writes <LibFile>.alb in the library area ( next to <LibFile>.pro )
+ |	H) If src_help_md/md_help/<LibFile>.md exists, then:
+ |		1) If Overwrite==true, writes a new version of src_help_md/md_help/<LibFile>.md;
+ |		2) If Overwrite\=true, skips this step
+ |	I) If src_help_md/md_help/<LibFile>.md does not exist, then
+ |	   writes a (new) version.
+ *!--------------------------------------------------------------------*/
+doc_one_file(File, Block, Overwrite)
+	:-
+	check_get_file_path(Block, File, FilePath, FolderPath),
+	grab_lines(FilePath, LLs),
+	headComment(LLs, HeadComment, HeadLinesTail),
+	getGroupAndTitle(HeadComment, Group, DocTitle),
+
+	getModule(HeadLinesTail, Module, AfterModLinesTail),
+	crossWhiteLines(AfterModLinesTail, StartExportLines),
+	getExports(StartExportLines, Exports, AfterExportLines),
+
+	crossWhiteLines(AfterExportLines, NonWhiteLsAfterExports),
+	findPredComments(NonWhiteLsAfterExports, CommentsList, PostBef, FinalTail),
+
+	extr_doc(CommentsList, DocList),
+	pullPAs(DocList, PAsList),
+	issues_check(DocTitle, Exports, PAsList, LibFile),
+
+	sort(PAsList, SortedPAsList),
+
+	(Block == library ->
+		write_alb(File, Module, SortedPAsList, FolderPath)
+		;
+		true
+	),
+	write_md(File, Module, DocList, DocTitle, Group, Overwrite).
+
+	%Move to library
+all_to_atoms([], []).
+all_to_atoms([E | Exports], [AtomizedE | AtomizedExports])
+	:-
+	bufwrite(SE, E), 
+	atom_codes(AtomizedE, SE),
+	all_to_atoms(Exports, AtomizedExports).
+
+
+	%Move to library
+insert_item_items([], _, []).
+insert_item_items([Item], InsAtm, [Item])
+        :-!.
+insert_item_items([Item | RestIn_List], InsAtm, [Item, InsAtm | RestOut_List])
+        :-
+        insert_item_items(RestIn_List, InsAtm, RestOut_List).
+
+
+issues_check(DocTitle, Exports, PAsList, LibFile)
+	:-
+	ErrMsgs0 = [],
+	all_to_atoms(Exports, AtomizedExports),
+
+	list_diffs(AtomizedExports,PAsList,Exports_Not_PAsList,PAsList_NotExports),
+	(PAsList_NotExports \= [] ->
+		insert_item_items(PAsList_NotExports, '\n\t', PAL0),
+		append(PAL0, ['\n'], PAL1),
+		catenate(['----\nDocumented P/A''s not exported:\n\t' | PAL1], M_PA)
+		;
+		M_PA = ''
+	),
+	(Exports_Not_PAsList \= [] ->
+		insert_item_items(Exports_Not_PAsList, '\n\t', EXP0),
+		append(EXP0, ['\n'], EXP1),
+		catenate(['----\nExported P/A''s not documented:\n\t' | EXP1], M_XP)
+		;
+		M_XP = ''
+	),
+	(not(member(DocTitle, AtomizedExports)) ->
+		(not(member(DocTitle, PAsList)) ->
+			catenate(['----\nDocTitle = ', DocTitle, ' neither exported nor documented\n'], M_DT)
+			;
+			catenate(['----\nDocTitle = ', DocTitle, ' not exported but is documented\n'], M_DT)
+		)
+		;
+		% member(DocTitle, AtomizedExports) true
+		(not(member(DocTitle, PAsList)) ->
+			catenate(['----\nDocTitle = ', DocTitle, ' exported but not documented\n'], M_DT)
+			;
+			M_DT = ''
+		)
+	),
+	catenate([M_PA, M_XP, M_DT], EMsg),
+	(EMsg =='' ->
+		write('No errors'),nl
+		;
+		throw(libissue(LibFile,  EMsg) )
+	).
+
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+headComment([L | LLs], HeadComment, LinesTail)
+	:-
+	blank_line(L),
+	!,
+	headComment(LLs, HeadComment, LinesTail).
+headComment([L | LLs], [L | HeadComment], LinesTail)
+	:-
+	atom_codes(L, LCodes),
+	head_comment_top(LCodes),
+	headCommentRest(LLs, HeadComment, LinesTail).
+
+
+
+headCommentRest([L | LLs], [L | HeadComment], LinesTail)
+	:-
+	atom_codes(L, LCodes),
+	comment_interior(LCodes),
+	!,
+	headCommentRest(LLs, HeadComment, LinesTail).
+headCommentRest([L | LLs], [L | HeadComment], LLs)
+	:-
+	atom_codes(L, LCodes),
+	head_comment_bottom(LCodes).
+	
+comment_interior([0' , 0'| | LCodes]).
+
+head_comment_bottom([0' , 0'* | LCodes])
+	:-
+	h_c_b_tail(LCodes).
+
+h_c_b_tail(LCodes)
+	:-
+	cross_equals(LCodes, Tail),
+	Tail = [0'*, 0'/].
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+blank_line('') :-!.
+blank_line(L)
+	:-
+	atom_codes(L, LCodes),
+	all_white(LCodes),
+	!.
+
+all_white([]).
+all_white([0'  | LCodes])
+	:-
+	all_white(LCodes).
+	% tab:
+all_white([0'	 | LCodes])
+	:-
+	all_white(LCodes).
+
+head_comment_top([0'/, 0'* | L])
+	:-
+	cross_equals(L, End),
+	(End ==[] -> true ; End == [0'*]).
+	
+all_equals([]).
+all_equals([0'= | L])
+	:-
+	all_equals(L).
+cross_equals([0'= | LCodes], Tail)
+	:-
+	cross_equals(LCodes, Tail).
+
+cross_equals(Codes, Codes).
+
+getModule([ModLine | LinesTail], Module, LinesTail)
+	:-
+	atomread(ModLine, module(Module)).
+
+crossWhiteLines([], []).
+crossWhiteLines([L | Ls], NonWhiteLs)
+	:-
+	blank_line(L),
+	!,
+	crossWhiteLines(Ls, NonWhiteLs).
+crossWhiteLines(NonWhiteLs, NonWhiteLs).
+
+clean_white(Line, Result)
+	:-
+	strip_front(Line, CodesF),
+	strip_white_tail(CodesF, Result).
+
+strip_front(Line, CodesF)
+	:-
+	atom_codes(Line, LCodes),
+	s_f(LCodes, CodesF).
+
+s_f([0'  | LCodes], CodesF)
+	:-!,
+	s_f(LCodes, CodesF).
+		% tab:
+s_f([0'	 | LCodes], CodesF)
+	:-!,
+	s_f(LCodes, CodesF).
+s_f([0'| | LCodes], CodesF)
+	:-!,
+	s_f(LCodes, CodesF).
+s_f(LCodes, LCodes).
+
+strip_white_tail(Codes, Result)
+	:-
+	reverse(Codes, RCodes),
+	s_f(RCodes,  ZCodes),
+	reverse(ZCodes, ResCodes),
+	atom_codes(Result, ResCodes).
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+getExports([L | ExportLines], [Exp | Exports], AfterExportLines)
+	:-
+	atomread(L, export(Exp)),
+	!,
+	getExports(ExportLines, Exports, AfterExportLines).
+getExports(AfterExportLines, [], AfterExportLines).
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+findPredComments([], [], [], []).
+
+findPredComments(Lines, [lcmt(Comment) | CommentsList], [b(BeforeTopLines) | RBTL], FinalTail)
+	:-
+	findNextComment(Lines, Comment, BeforeTopLines, InterLinesTail),
+	!,
+	findPredComments(InterLinesTail, CommentsList, RBTL, FinalTail).
+
+findPredComments(Lines, [], [b(PLines)], Lines)
+	:-
+	peel_endmod(Lines, PLines).
+	
+findNextComment(Ls, [CmtTopLine | CommentLs], BeforeTopLines, InterLinesTail)
+	:-	
+	crossWhiteLines(Ls, NonWhiteLs),
+	findCommentTop(Ls, CmtTopLine, BeforeTopLines, AfterTopTail),
+	!,
+	cmtRest(AfterTopTail, CommentLs, InterLinesTail).
+
+	%% findCommentTop crosses whatever it sees until it hits a comment top;
+	%% it accumulates what it crosses in BeforeTopLines.
+
+findCommentTop([], _, _, _)
+	:-!,
+	fail.
+
+findCommentTop([L | Ls], CmtTopLine, BeforeTopLines, AfterTopTail)
+	:-
+	sub_atom(L, 0, 4, _, '/*!-'),
+	!,
+	CmtTopLine = L,
+	BeforeTopLines = [],
+	AfterTopTail = Ls.
+
+findCommentTop([L | Ls], CmtTopLine, [L | BeforeTopLines], AfterTopTail)
+	:-
+	findCommentTop(Ls, CmtTopLine, BeforeTopLines, AfterTopTail).
+
+cmtRest([], [], []).
+cmtRest([L | Lines], [L | CommentLs], LinesTail)
+	:-
+	sub_atom(L, 0, 2, _, ' |'),
+	!,
+	cmtRest(Lines, CommentLs, LinesTail).
+cmtRest([L | LinesTail], [L | CommentLs], LinesTail)
+	:-
+	sub_atom(L, 0, 4, _, ' *!-'),
+	!.
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+peel_endmod([Line | Lines], Lines)
+	:-
+	sub_atom(Line, 0, 7, _, 'endmod.'),
+	!.
+peel_endmod([L | Lines], [L | PLines])
+	:-
+	peel_endmod(Lines, PLines).
+
+
+extr_doc([], []).
+extr_doc([lcmt(C) | CommentsList], [D | DocList])
+	:-
+	C = [TopLine | RestLs],
+	xtr_doc(RestLs, D),
+	extr_doc(CommentsList, DocList).
+
+%xtr_doc([L1, L2 | Ls], d(PA, Form, Summary, Desc))
+xtr_doc([L1, L2 | Ls], d(PA, Form, Summary, Desc, Examples))
+	:-
+	clean_PA_entry(L1, PA),
+	clean_white(L2, Form),
+	getSummary(Ls, Summary, RestLs),
+	crossWhiteLines(RestLs, StartDescLines),
+	getDesc(StartDescLines, Desc, ExampleLines),
+	getExamples(ExampleLines, Examples).
+
+clean_PA_entry(L1, PA)
+	:-
+	clean_white(L1, CL1),
+		% Now check that there is no trailing period:
+	atom_codes(CL1, Codes),
+	reverse(Codes, RCodes),
+		% clean white space off the end:
+	s_f(RCodes,  QCodes),
+	(QCodes = [0'. | UCodes] ->
+		ZCodes = UCodes ; ZCodes = QCodes),
+	reverse(ZCodes, PACodes),
+	atom_codes(PA, PACodes).
+	
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+	
+getSummary([SL | RestLs], Summary, RestLs)
+	:-
+		% Does SL start with ' |' ?
+	sub_atom(SL, 0, 2, _, ' |'),
+		% Yes, get the full tail of SL following the initial ' |':
+	sub_atom(SL, 2, _, 0, SLX),
+		% convert to codes & strip off initial blanks, tabs, and '|'s:
+	strip_front(SLX, CodesSLX),
+		% Extract the summary from the trailing codes, if it exists:
+		% Note that the summary line must have a dash:
+	xtr_summary(CodesSLX, Summary),
+	!.
+
+getSummary([L | Ls], Summary, RestLs)
+	:-
+	getSummary(Ls, Summary, RestLs).
+
+	% Trailing codes CodesSLX start with a dash ('-'):
+xtr_summary([0'- | TailCodesSLX], Summary)
+	:-!,
+		% Strip any more leading whitespace following the '-':
+	s_f(TailCodesSLX, FinalCodesSLX),
+	atom_codes(Summary, FinalCodesSLX).
+
+getDesc(Ls, Desc, ExampleLines)
+	:-
+	getDesc0(Ls, InitDesc, ExampleLines),
+	adj_desc_lines(InitDesc, Desc).
+
+getDesc0([L | _], [], [])
+	:-
+	sub_atom(L, 0, 4, _, ' *!-'),
+	!.
+getDesc0([L | ExampleLines], [], ExampleLines)
+	:-
+	sub_atom(L, 0, 11, _, ' | Examples'),
+	!.
+getDesc0([L | ExampleLines], [], ExampleLines)
+	:-
+	sub_atom(L, 0, 10, _, ' |Examples'),
+	!.
+getDesc0([L | Ls], RR, ExampleLines)
+	:-
+	clean_white(L, R),
+	(R == '' -> RR = Desc ; RR = [R | Desc]),
+	getDesc0(Ls, Desc, ExampleLines).
+
+adj_desc_lines([], []).
+adj_desc_lines([Line | _], [])
+	:-
+	sub_atom(Line, 0, 4, _, ' *!-'),
+	!.
+adj_desc_lines([Line | Desc], [AdjLine | AdjDesc])
+	:-
+	strip_front(Line, CodesF),
+	reverse(CodesF, RCodesF),
+	two_blank_end(RCodesF, 0, B2EndRCodesF),
+	reverse(B2EndRCodesF, B2ECodesF),
+	atom_codes(AdjLine, B2ECodesF),
+	adj_desc_lines(Desc, AdjDesc).
+	
+two_blank_end(RCodes, 2, RCodes)
+	:-!.
+
+	% blank space:
+two_blank_end([0'  | RCodesIn], N, [0' | RCodesOut])
+	:-!,
+	M is N+1,
+	two_blank_end(RCodesIn, M, RCodesOut).
+
+	% non-blank space; because of clause 1, N<2.
+two_blank_end([Cd | RCodesIn], N, [0' | RCodesOut])
+	:-!,
+	M is N+1,
+	two_blank_end([Cd | RCodesIn], M, RCodesOut).
+
+getExamples([], []).
+getExamples(ExampleLines, AdjExamples)
+	:-
+	adj_desc_lines(ExampleLines, AdjExamples).
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+getGroupAndTitle([L, L0 | HeadCommentLs], Group, DocTitle)
+	:-
+	sub_atom(L, 0, 2, _, ' |'),
+	sub_atom(L, 2, _, 0, GLine),
+	strip_front(GLine, CodesF),
+	append("Group: ", GLTail, CodesF),
+	!,
+	s_f(GLTail, CodesG),
+	strip_white_tail(CodesG, Group),
+	sub_atom(L0, 2, _, 0, TLine),
+	strip_front(TLine, CodesT),
+	append("DocTitle: ", TTail, CodesT),
+	strip_white_tail(TTail, DocTitle).
+
+getGroupAndTitle([L | HeadCommentLs], Group, DocTitle)
+	:-
+	getGroupAndTitle(HeadCommentLs, Group, DocTitle).
+	
+	
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+write_alb(LibFile, Module, PAsList, FolderPath)
+	:-
+	file_extension(AlbFullName, LibFile, alb),
+	join_path([FolderPath, AlbFullName], Alb_path),
+		%% *.alb has no hand-entered info that is different
+		%% from what is generated here, so it is ok
+		%% to overwrite it:
+	AlbTerm = libactivate(Module, [library, LibFile], PAsList, []),
+
+	open(Alb_path, write, OS),
+	printf(OS, '%t.\n', [AlbTerm]),
+	close(OS),
+	open(Alb_path, read, IS),
+		%% we're looking to see if there are syntax errors:
+	read_term(IS, ABT, []),
+	close(IS).
+
+pullPAs([], []).
+%pullPAs([d(PA, Form, Summary, Desc) | DocList], [PA | PAsList])
+pullPAs([d(PA, Form, Summary, Desc, Examps) | DocList], [PA | PAsList])
+	:-
+	pullPAs(DocList, PAsList).
+
+makePAsDs([], []).
+makePAsDs([ d(PA, Form, Summary, Desc, Examps) | DocList],  [p(PA, Summary) | PAsDescs])
+%makePAsDs([ d(PA, Form, Summary, Desc) | DocList],  [p(PA, Summary) | PAsDescs])
+	:-
+	makePAsDs(DocList, PAsDescs).
+
+getPandA(PA, P, A)
+        :-
+        atomread(PA, PPAA, [syntax_errors(quiet)]),
+        !,
+        (PPAA = P/A ; P = PPAA, A=0).
+
+getPandA(PA, P, A)
+        :-
+        atom(PA),
+        sub_atom(PA, Bef, 1, _, '/'),
+        sub_atom(PA, 0, Bef, AA, P),
+        C is Bef + 1,
+        sub_atom(PA, C, _, 0, Natom),
+        atomread(Natom, A),
+        !.
+getPandA(P, P, 0)
+        :-
+        atom(P),
+        !.
+
+getPandA(P/A, P, A) :-!.
+
+/*---------------------------------------------------------------------
+ *--------------------------------------------------------------------*/
+
+%write_md(LibFile, Module, DocList, DocTitle, Group, Md_path, Overwrite)
+write_md(LibFile, Module, DocList, DocTitle, Group, Overwrite)
+	:-
+	mdFolderPath(MDFolderPath),
+	file_extension(MdFullName, LibFile, md),
+	join_path([MDFolderPath, MdFullName], Md_path),
+		%% We can be entering EXAMPLES into <libfile>.md,
+		%% so for now, refuse to overwrite it;
+		%% ISSUE: Arrange for an additional commandline
+		%% switch which will allow an overwrite.
+	(Overwrite==true ->
+		open(Md_path, write, OS)
+		;
+		(exists_file(Md_path) ->
+			OS = user_output,
+			printf(OS, 'File: %t already exists;\nRefusing to overwrite.\n',[Md_path]),
+			printf(OS, 'Displaying generated MD file on console:\n\n', [])
+			;
+			open(Md_path, write, OS)
+		)
+	),
+	sort(DocList, SortedDocList),
+	assemblePreds(SortedDocList, Preds, Forms, Descs, Examps),
+
+		%%%%---- From doctools.pro:
+%	yaml(DocTitle, 'ALS Library', Group, Module, Preds, OS),
+	yaml(DocTitle, als_library, Group, Module, Preds, OS),
+	printf(OS, '## FORMS\n\n', []),
+	writeFoms(Forms, OS),
+	printf(OS, '## DESCRIPTION\n', []),
+	writeDescriptions(Descs, OS),
+	printf(OS, '\n## EXAMPLES\n\n', []),
+	outExamps(Examps, OS),
 	close(OS).
 
-	/* -------------------------------------------------------------------- *
-	 * -------------------------------------------------------------------- */
+assemblePreds([], [], [], [], []).
+assemblePreds([d(PA, Form, Summary, Desc, Examps) | DocList], 
+	      [p(PA,DescAtom) | Preds], 
+	      [Form | Forms], 
+	      [FullDesc | Descs], 
+	      [x(PA,Examps) | RestExamps])
+	:-
+	(atom(Summary) -> DescAtom = Summary ;
+		insert_spaces(Summary, SpacedSummary),
+		catenate(SpacedSummary, DescAtom)
+	),
+	(Desc == [] ->
+		SD = Summary,
+		Desc0 = [SD]
+		;
+		Desc0 = Desc
+	),
+	mdDesc(PA, Desc0, FullDesc),
+	assemblePreds(DocList, Preds, Forms, Descs, RestExamps).
 
+mdDesc(PA, [Desc1 | RestDesc], [DL1 | RestFullDesc])
+	:-
+	sprintf(atom(DL1), '\n**`%t`** %t\n', [PA, Desc1]),
+	mdDescFin(RestDesc, RestFullDesc).
+
+mdDescFin([], []).
+mdDescFin([RDL | RestDesc], [RFDL | RestFullDesc])
+	:-
+	sprintf(atom(RFDL), '    %t\n', [RDL]),
+	mdDescFin(RestDesc, RestFullDesc).
+
+writeFoms([], _).
+writeFoms([Form | Forms], OS)
+	:-
+	printf(OS, '`%t`\n\n', [Form]),
+	writeFoms(Forms, OS).
+
+writeDescriptions([], OS).
+writeDescriptions([Desc | Descs], OS)
+	:-
+	outDesc(Desc, OS),
+	writeDescriptions(Descs, OS).
+outDesc([], OS).
+outDesc([DL | Desc], OS)
+	:-
+	write(OS, DL),
+	outDesc(Desc, OS).
+
+outExamps([], OS).
+outExamps([x(PA, XLs) | Examps], OS)
+	:-
+	(XLs \= [] ->
+		printf(OS, '**`%t`**\n```\n', [PA]),
+		outXLs(XLs, OS),
+		printf(OS, '```\n\n', [])
+		;
+		true),
+	outExamps(Examps, OS).
+
+outXLs([], OS).
+outXLs([L | XLs], OS)
+	:-
+	printf(OS, '%t\n', [L]),
+	outXLs(XLs, OS).
 

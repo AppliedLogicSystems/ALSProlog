@@ -4,7 +4,7 @@
 <li>
 <strong>{{package | escape}}</strong>
 
-{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" %}
+{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
 
 <ul>
 {%- for g in groups %}

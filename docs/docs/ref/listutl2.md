@@ -1,6 +1,6 @@
 ---
 title: 'nth_tail/4'
-package: alslib
+package: ALS Library
 group: Lists
 module: builtins
 predicates:

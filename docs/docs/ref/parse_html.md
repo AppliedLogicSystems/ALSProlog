@@ -1,6 +1,6 @@
 ---
 title: 'grab_pxml/2'
-package: alslib
+package: ALS Library
 group: Web
 module: pxml
 predicates:

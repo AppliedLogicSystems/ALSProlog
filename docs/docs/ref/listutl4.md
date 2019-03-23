@@ -1,6 +1,6 @@
 ---
 title: 'split_ll_by_blank/3'
-package: alslib
+package: ALS Library
 group: Lists
 module: builtins
 predicates:

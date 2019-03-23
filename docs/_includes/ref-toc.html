@@ -2,7 +2,7 @@
 
 <h2 id="{{package | slugify}}">{{package | escape}}</h2>
 
-{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" %}
+{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group"  | sort: "name" %}
 
 {%- for g in groups %}
 

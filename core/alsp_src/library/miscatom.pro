@@ -1,7 +1,7 @@
 /*========================================================================*
  |			miscatom.pro
  |	Copyright (c) 1995-2019 Applied Logic Systems, Inc.
- |		Group: Terms
+ |		Group: Atoms
  |		DocTitle: catenate/3
  |		-- Various atom utilities
  *========================================================================*/
@@ -26,6 +26,10 @@ export prefix_to/3.
  |
  |	If Atom1 and Atom2 are atoms, then Atom3 is that atom whose
  |	characters consist of those of Atom1 followed by Atom2.
+ |
+ | Examples
+ |	?- catenate(abc, def, X).
+ |	X=abcdef
  *!--------------------------------------------------------------------*/
 catenate(Atom1, Atom2, Atom3)
 	:-
@@ -44,6 +48,10 @@ catenate(Atom1, Atom2, Atom3)
  |	If ListOfAtoms is a list of atoms, then Result is that atom
  |	whose characters consist of the characters of the atoms on
  |	ListOfAtoms, in order.
+ |
+ | Examples
+ |	?- catenate([abc, def, ghty], Result).
+ |	Result == abcdefghty
  *!--------------------------------------------------------------------*/
 catenate([], '').
 catenate(ListOfAtoms, Result)
@@ -69,6 +77,12 @@ list2strings([Atom | ListOfAtoms], [AtomString | ListOfAtomStrings])
  |	the same length as list InAtoms), then OutNames is a list of atoms
  |	whose nth element is the truncation of the nth element of InAtoms
  |	to be at most length K, where K is the nth element of Sizes.
+ |
+ | Examples
+ |	?- InAtoms = ['Abcd', gh768, bkdjfng, fr4], Sizes = [2,3,4,5],
+ |	?_ trim_atoms(InAtoms, Sizes, Results).
+ |		% note that the truncation of gh768 is an atom:
+ |	Results == [cd,'68',fng,'']
  *!--------------------------------------------------------------------*/
 trim_atoms([],[],[]).
 trim_atoms([InAtom | RestInAtoms],[TruncSize | RestSizes],[OutAtom | RestOutAtoms])
@@ -92,7 +106,18 @@ trim_atoms([InAtom | RestInAtoms],[TruncSize | RestSizes],[OutAtom | RestOutAtom
  |	end-of-line character(s) [\n for Linux,MacOS and \r\n for Windows]
  |	between each pair of atoms, and concatentating the result to
  |	obtain a single atom.
- *-----------------------------------------------------------------------*/
+ |
+ | Examples
+ |	?- List = [a,b,c,d], als_system(SystemList),
+ |	?_ dmember(os = OS, SystemList), dmember(os_variation = OSVar, SystemList),
+ |	?_ ((OS = mswin32 ; OSVar = cygwin32) ->
+ | 	?_	TgtResult = 'a\r\nb\r\nc\r\nd\r'
+ | 	?_	;
+ | 	?_	TgtResult = 'a\nb\nc\nd\n'
+ |	?_ ),
+ |	?_ cat_together_seplines(List, Result).
+ |	Result == TgtResult
+ *!-----------------------------------------------------------------------*/
 cat_together_seplines(List, Result)
 	:-
 	als_system(SystemList),
@@ -116,7 +141,11 @@ cat_together_seplines(List, Result)
  |	If List is a list of atoms, then Result is obtained by interspersing
  |	a blank space between each pair of atoms, and concatentating the 
  |	result to obtain a single atom.
- *-----------------------------------------------------------------------*/
+ |
+ | Examples
+ |	?- List = [a,b,c,d], cat_together_spaced(List, Result).
+ |	Result == 'a b c d '
+ *!-----------------------------------------------------------------------*/
 cat_together_spaced(List, Result)
 	:-
 	insert_item_in_list(List, ' ', L2),
@@ -132,6 +161,11 @@ cat_together_spaced(List, Result)
  |	If List is a list of atoms, and Atom is also an atom, then
  |	XList will be that list made up by concatenating Atom to the
  |	beginning of every atom on List.
+ |
+ | Examples
+ |	?- List = [a1,b2,c3], Atom = 'Zip_',
+ |	?_ prefix_to(List, Atom, XList).
+ |	XList == ['Zip_a1','Zip_b2','Zip_c3']
  *!-----------------------------------------------------------------------*/
 prefix_to([], _, []).
 prefix_to([Item | List], Atom, [XItem | XList])
@@ -151,7 +185,12 @@ prefix_to([Item | List], Atom, [XItem | XList])
  |	XList is that list obtained from list by combining Dir 
  |	successively with each element of List to create a path
  |	terminating in that List element.
- *-----------------------------------------------------------------------*/
+ |
+ | Examples
+ |	?- List = [foo, file3, bar], Dir = zipper,
+ |	?_ prefix_dir(List, Dir, XList).
+ |	XList == ['zipper/foo','zipper/file3','zipper/bar']
+ *!----------------------------------------------------------------------*/
 prefix_dir([], _, []).
 prefix_dir([Item | RestList], Dir, [XItem | RestXList])
 	:-
@@ -169,6 +208,11 @@ prefix_dir([Item | RestList], Dir, [XItem | RestXList])
  |	of the prefix to strip), and Result is that list
  |	of atoms which is obtained by obtained by removing the initial
  |	NN characters of each element of List.
+ |
+ | Examples
+ |	?- List = [abcd, foobar, pop, f, zeroes], NN = 3,
+ |	?_ strip_prefix(List, NN, Result).
+ |	Result == [d,bar,'','',oes]
  *!--------------------------------------------------------------------*/
 strip_prefix([], _, []).
 strip_prefix([Item | RestList], NN, [Stripped | RestResult])
