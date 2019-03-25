@@ -32,9 +32,9 @@ test_cat_together_seplines :-
         dmember(os = OS, SystemList),
         dmember(os_variation = OSVar, SystemList),
         ((OS = mswin32 ; OSVar = cygwin32) ->
-                TgtResult = 'a\r\nb\r\nc\r\nd\r'
+                TgtResult = 'a\r\nb\r\nc\r\nd'
                 ;
-                TgtResult = 'a\nb\nc\nd\n'
+                TgtResult = 'a\nb\nc\nd'
         ),
         cat_together_seplines(List, Result),
         Result == TgtResult.
@@ -45,7 +45,7 @@ test_cat_together_seplines :-
 test_cat_together_spaced :-
         List = [a,b,c,d],
         cat_together_spaced(List, Result),
-        Result == 'a b c d '.
+        Result == 'a b c d'.
 test_cat_together_spaced :-
         printf(user, 'cat_together_spaced test failed\n', []).
 

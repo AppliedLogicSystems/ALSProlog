@@ -18,25 +18,32 @@ export prefix_to/3.
 
 
 /*!---------------------------------------------------------------------
- |	catenate/3
- |	catenate(Atom1, Atom2, Atom3)
- |	catenate(+, +, -)
+ |      catenate/3
+ |      catenate(Atom1, Item2, Atom3)
+ |      catenate(+, +, -)
  |
- | 	- catenates two atoms to produce a third
+ |      - catenates two atoms, or an atom and number, to produce a third atom
  |
- |	If Atom1 and Atom2 are atoms, then Atom3 is that atom whose
- |	characters consist of those of Atom1 followed by Atom2.
+ |      If Atom1 is an atom, and Item2 is an atom or an integer, then Atom3 
+ |	is that atom whose characters consist of those of Atom1 followed 
+ |	by those of Item2.
  |
  | Examples
  |	?- catenate(abc, def, X).
  |	X=abcdef
+ |	?- catenate(abc, 49, X).
+ |	X=abc49
  *!--------------------------------------------------------------------*/
-catenate(Atom1, Atom2, Atom3)
-	:-
-	atom_codes(Atom1, A1Cs),
-	atom_codes(Atom2, A2Cs),
-	append(A1Cs, A2Cs, A3Cs),
-	atom_codes(Atom3, A3Cs).
+catenate(Atom1, Item2, Atom3)
+        :-
+        atom_codes(Atom1, A1Cs),
+	(integer(Item2) ->
+		number_codes(Item2, A2Cs)
+		;
+        	atom_codes(Item2, A2Cs)
+	),
+        append(A1Cs, A2Cs, A3Cs),
+        atom_codes(Atom3, A3Cs).
 
 /*!---------------------------------------------------------------------
  |	catenate/2
