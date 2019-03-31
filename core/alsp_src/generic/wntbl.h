@@ -43,7 +43,7 @@
  *=======================================================================*/
 
 #ifdef Portable
-#define NTBL_HEADERSIZE         (36/sizeof(Code))
+#define NTBL_HEADERSIZE         ((7*sizeof(Code)+4*sizeof(short))/sizeof(Code))
 #define NTBL_OVERFLOWSIZE       1
 #define NTBL_CALLENTRYSIZE      1
 #define NTBL_EXECENTRYSIZE      1
