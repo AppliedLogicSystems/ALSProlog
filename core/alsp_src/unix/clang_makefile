@@ -1,4 +1,5 @@
-CC=clang -m32
+#CC=clang -m32
+CC=clang
 
 CFLAGS += -MMD -Weverything \
 -Wno-unused-parameter \
