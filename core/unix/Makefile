@@ -1,5 +1,5 @@
 export ARCH
-all test clean distclean superclean:
+all test docs testdocs clean distclean superclean:
 	case `uname -rs` in \
 	"SunOS 4"*) 	ARCH=sunos 	;; \
 	"SunOS 5"*) 	ARCH=solaris 	;; \

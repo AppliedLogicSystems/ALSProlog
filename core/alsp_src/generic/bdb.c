@@ -201,6 +201,7 @@ doassert(which, mod, rule, reconsult_flag)
     if (rule == NIL_VAL)
 		return 0;
 
+// Note: wintcode.h:extern	unsigned long w_reconstamp;
     if (reconsult_flag) {
 		old_reconstamp = w_reconstamp;
 		w_reconstamp = 0;

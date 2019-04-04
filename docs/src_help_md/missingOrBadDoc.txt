@@ -1,0 +1,25 @@
+
+	[doc missing -- defined in generic/bparser.c]
+atom_length/2
+atom_concat/3
+
+The Development Env. > Tools page contains the following, which needs to be handled:
+
+    Selecting **Debugger** provides access to the GUI Debugger; this will be described     in detail in [Chapter 18(_[Using,the,ALS,IDE,Debugger]_)](href = start.htm).
+
+Also, there is a Visual Tcl button on the alsdev menu that does nothing: Find out ....
+
+Also, add info about Cref; Also: when Cref is clicked, it is loaded, but there is a syntax error.
+
+atendofstream01.md is a skeleton -- needs to be fleshed out.
+
+Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to builtins, also add to alssystem.md.
+
+Determine whether the following Note from catch/3 is still true:
+catch/3 leaves a choice point....
+
+calloc23.md needs both EXAMPLES and ERRORS
+ccreate3.md needs both EXAMPLES and ERRORS
+
+commandline1.md: ?-builtins:command_line(X). still returns X=[_A,zip].  Could only find 2 discussions labelled
+-P switch k->c (7/27/18) and c->k (7/28/18); thought there had been more. 

@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl4.pro
- |	Copyright (c) 1996 Applied Logic Systems, Inc.
- |
- |		Miscellaneous list predicates
+ |	Copyright (c) 1996-2019 Applied Logic Systems, Inc.
+ |		Group: Lists
+ |		DocTitle: split_ll_by_blank/3
+ |		-- Miscellaneous list predicates
  *=====================================================================*/
 module builtins.
 
@@ -16,12 +17,11 @@ export split_ll_by_blank/3.
  |
  |	- splits a list of atoms according to an initial subatom
  |
- |	If Lines is a list of atoms (or UIAs), and if SplitInitSeg is
- |	an atom, then, if there is any element of Lines with SplitInitSeg
- |	at its initial segment, then:
+ |	If Lines is a list of atoms (or UIAs), and if SplitInitSeg is an atom, 
+ |	then, if there is any element of Lines with SplitInitSeg at its initial segment, 
+ |	then:
  |	-	SplitterLine is the first such line;
- |	-	Head is the initial sublist of Lines up to but not 
- |		including SplitterLine;
+ |	-	Head is the initial sublist of Lines up to but not including SplitterLine;
  |	-	Tail is the sublist of Lines following SplitterLine
  |	If there is no such line, then:
  |	-	SplitterLine = ''
@@ -47,10 +47,9 @@ split_ll_at_start([Line | Lines], Init, [Line | Head], Tail, Splitter)
  |
  |	- splits a list of atoms by the first null atom
  |
- |	If Lines is a list of atoms (or UIAs), then, if '' belongs to 
- |	Lines, then:
- |	-	Head is the initial sublist of Lines up to the first 
- |		occurrence of '';
+ |	If Lines is a list of atoms (or UIAs), then, if '' belongs to Lines, 
+ |	then:
+ |	-	Head is the initial sublist of Lines up to the first occurrence of '';
  |	-	Tail is the sublist of Lines following Head
  |	If there is no such line, then:
  |	-	Head = Lines

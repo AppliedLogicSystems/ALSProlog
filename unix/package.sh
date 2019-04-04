@@ -44,10 +44,7 @@ cp -p $SRC/README.txt $DST/share/doc/als-prolog
 cp -p $SRC/LICENSE.txt $DST/share/doc/als-prolog
 cp -p $SRC/als-prolog-manual.pdf $DST/share/doc/als-prolog
 cp -p $SRC/als-ref-manual.pdf $DST/share/doc/als-prolog
-cp -p $SRC/als_help.html $DST/share/doc/als-prolog
-cp -p $SRC/package_nav.html $DST/share/doc/als-prolog
-cp -p $SRC/alshelp.css $DST/share/doc/als-prolog
-cp -rp $SRC/alshelp $DST/share/doc/als-prolog
+cp -p $SRC/docs $DST/share/doc/als-prolog
 cp -rp $SRC/examples $DST/share/doc/als-prolog
 
 VERSION=$(../version)

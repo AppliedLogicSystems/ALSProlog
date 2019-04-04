@@ -1,6 +1,6 @@
 /*=============================================================*
  |		blt_shl.pro
- |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |	Copyright (c) 1986-2019 Applied Logic Systems, Inc.
  |
  |	The actual environmental shell; both the tty
  |	version, and the underlying portion of the 
@@ -175,16 +175,16 @@ setup_debugger_stubs
 
 make_clinfo( CLInfo, DefaultShellCall, Verbosity)
 	:-
-	CLInfo = clinfo(true,				/* -g: goal to run */
-					Verbosity,			/* -v/-q: verbosity */
-					[],					/* files to consult */
-					ImageName,
-					default,			/* -nwd: debugger to set up */
-					[],					/* -s init search list */
-					DefaultShellCall,	/* shell/or not */
-					[], 				/* Command-line asserts */
-					true				/* Load .alspro: true = do it */
-					). 				
+	CLInfo = clinfo(true,			/* -g: goal to run */
+				Verbosity,	/* -v (false) /-q (true): verbosity */
+				[],		/* files to consult */
+				ImageName,
+				default,	/* -nwd: debugger to set up */
+				[],		/* -s init search list */
+				DefaultShellCall, /* shell/or not */
+				[], 		/* Command-line asserts */
+				true		/* Load .alspro: true = do it */
+			). 				
 
 
 /*---------------------------------------
@@ -306,7 +306,7 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-2018 Applied Logic Systems, Inc.\n\n',[]),
+	printf(OutS,'   Copyright (c) 1987-2019 Applied Logic Systems, Inc.\n\n',[]),
 	flush_output(OutS).
 
 system_name(L, Name)

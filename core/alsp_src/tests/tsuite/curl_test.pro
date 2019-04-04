@@ -70,7 +70,7 @@ test_http :-
 	http(get, 'http://localhost:8888/abc', [ result=abc ]),
 	http(get, 'http://localhost:8888/abc', [ result='abc' ]),
 	not http(get, 'http://localhost:8888/abc', [ result=xyz ]),
-	(http(get, 'http://localhost:8888/abc', [ result=R ]), R == abc),
+	(http(get, 'http://localhost:8888/abc', [ result(R) ]), R == abc),
 	http(get, 'http://localhost:8888/?REQUEST_METHOD', [ result='GET' ]),
 
 	%% test option variations

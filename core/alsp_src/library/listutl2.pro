@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl2.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Various positional list predicates
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
+ |		Group: Lists
+ |		DocTitle: nth_tail/4
+ |		-- Various positional list predicates
  *=====================================================================*/
 module builtins.
 
@@ -30,8 +31,8 @@ export nonmember/2.
  |	- deletes the Nth element of a list
  |
  |	If N is a non-negative integer and List is a list, then Remainder
- |	is the result of deleting the Nth element of List; this predicate
- |	numbers the list beginning with 1.
+ |	is the result of deleting the Nth element of List. 
+ |	This predicate numbers the list beginning with 1.
  *!--------------------------------------------------------------------*/
 deleteNth(1, [_ | Remainder], Remainder) :-!.
 deleteNth(N, [Item | Tail], [Item | TailRemainder]) :-
@@ -47,7 +48,7 @@ deleteNth(N, [Item | Tail], [Item | TailRemainder]) :-
  |
  |	If N is a non-negative integer, List is list, and NewItem is any
  |	non-var object, destructively changes the Nth element of List to become
- |	NewItem; this predicate numbers the list beginning with 0.
+ |	NewItem. This predicate numbers the list beginning with 0.
  *!--------------------------------------------------------------------*/
 change_nth(0, List, NewItem)
 	:-!,
@@ -65,9 +66,9 @@ change_nth(N, [_ | List], NewItem)
  |	- non-destructively changes the Nth element of a list
  |
  |	If N is a non-negative integer, List is list, and NewItem is any
- |	non-var object, NewList is the result of non-destrctively changing 
- |	the Nth element of List to become |	NewItem; 
- |	this predicate numbers the list beginning with 0.
+ |	non-var object, NewList is the result of non-destructively changing 
+ |	the Nth element of List to become NewItem. 
+ |	This predicate numbers the list beginning with 0.
  *!--------------------------------------------------------------------*/
 subst_nth(0, [_ | List], NewItem, [NewItem | List]) :-!.
 subst_nth(N, [Skip | List], NewItem, [Skip | NewList])
@@ -117,7 +118,7 @@ at_most_n([X | T], N, [X | R])
  |
  |	If List is a list and Item is any object, Tail is the portion
  |	of List extending from the leftmost occurrence of Item in List
- |	to the end of List; fails if Item does not belong to List.
+ |	to the end of List. Fails if Item does not belong to List.
  *!--------------------------------------------------------------------*/
 get_list_tail(List, Item, List)
 	:-
@@ -133,8 +134,8 @@ get_list_tail([_ | RestList], Item, Tail)
  |
  |	- extracts a sublist from a list
  |
- |	If List is an arbitrary list, Result is the sublist of length Length
- |	beginning at position Start in List.
+ |	If List is an arbitrary list, Result is the sublist of 
+ |	length Length, beginning at position Start in List.
  *!--------------------------------------------------------------------*/
 sublist(List,0,Length,Result) 
 	:- !,
@@ -170,14 +171,15 @@ last([_|Tail],Item)
 	last(Tail, Item).
 
 /*!---------------------------------------------------------------------
- |	delete_1st/3.
+ |	delete_1st/3
  |	delete_1st(List, Item, Result)
  |	delete_1st(+, +, -)
  |
  |	- deletes the left-most entry of Item in List
  |
  |	If Item occurs on List, deletes the left-most entry of Item on
- |	List, returning in Result; fails if Item is not on List.
+ |	List, returning in Result the tail of List beginning at that entry.
+ |	Fails if Item is not on List.
  *!--------------------------------------------------------------------*/
 
 delete_1st([Item | Result], Item, Result)

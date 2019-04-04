@@ -281,7 +281,7 @@ directory(Pattern, FileType, List)
 	:-
 	atom(Pattern), 
 	path_directory_tail(Pattern, InitPath, FilePattern),
-	(InitPath = '', !; must_exists_file(InitPath)),
+	(InitPath = '', !; must_exist_file(InitPath)),
 	!,
 	(InitPath = '' -> Path = '.' ; Path = InitPath),
 	getDirEntries(Path, FilePattern, FirstResult),

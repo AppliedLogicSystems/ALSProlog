@@ -52,7 +52,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bcurl.c bdb.c \
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
    blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
    blt_atom.pro  blt_is.pro    blt_sys.pro   fsdos.pro     sio.pro \
-   blt_brk.pro   blt_lib.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
+   blt_brk.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
    blt_cslt.pro  blt_misc.pro  builtins.pro  fsunix.pro    sio_rt.pro \
    blt_ctl.pro   blt_msg.pro   comp_d10.pro  fswin32.pro   sio_wt.pro \
    blt_db.pro    blt_pckg.pro  cutils.pro    xconsult.pro \
@@ -115,7 +115,7 @@ TEST_DIR = $(SOURCE_DIR)/tests
 
 test: testrun
 
-testrun : curl_test command_line_test iso_test_suite test_suite
+testrun : curl_test test_app_image command_line_test iso_test_suite test_suite 
 
 curl_test: alspro
 	$(TEST_DIR)/tsuite/curl_test.sh ./alspro
@@ -125,6 +125,9 @@ command_line_test: alspro
 
 test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
+
+test_app_image: alspro
+	$(TEST_DIR)/tsuite/test_app_image.sh
 
 iso_test_suite: alspro
 	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
@@ -181,14 +184,13 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 
 #	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
 
-
 clean :
 	rm -f *.o rm *.d
 
 distclean: superclean
 
 superclean : clean
-	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS)
+	rm -fr alsdir examples alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS) app_image*
 	rm -rf $(SOURCE_DIR)/tests/iso_test_suite/*.tmp $(SOURCE_DIR)/tests/iso_test_suite/*.out *.log *.out foo* *.tmp
 
 -include *.d

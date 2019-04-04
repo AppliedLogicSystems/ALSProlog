@@ -1,0 +1,4 @@
+libactivate(pxml,[library,pxml_utils],
+    [write_pxml_to_html_list/3, write_pxml_to_html/3],
+    []).
+

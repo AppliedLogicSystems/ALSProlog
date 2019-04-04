@@ -1,6 +1,6 @@
 /*=======================================================================*
  |			bcurl.c
- |		Copyright (c) 2018 Applied Logic Systems, Inc.
+ |		Copyright (c) 2018-2019 Applied Logic Systems, Inc.
  |
  |		-- "Direct to curl" prolog interface
  |

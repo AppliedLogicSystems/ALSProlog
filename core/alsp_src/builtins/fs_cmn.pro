@@ -41,7 +41,7 @@ export must_exist_file/1.
  |	date(Date)
  |	date(-)
  |
- |	 -	gets the current local date
+ |	 - gets the current local date
  |
  |	Unifies the input with the current date which is represented
  |	by a term of the form ??/??/??.  The exact pattern (e.g.,
@@ -72,8 +72,8 @@ time(HH:MM:SS)
  |	datetime(Date, Time)
  |	datetime(-, -)
  |
- |	 -	gets the current local date and time from the same 
- |		call to the OS clock
+ |	 - gets the current local date and time from the same 
+ |	   call to the OS clock
  |
  |	Unifies the input with the current date which is represented
  |	by a term of the form ??/??/??.  The exact pattern (e.g.,
@@ -90,8 +90,8 @@ datetime(Date, HH:MM:SS)
  |	gm_datetime(Date, Time)
  |	gm_datetime(-, -)
  |
- |	 -	gets the current Greenwich UTC date and time from the same 
- |		call to the OS clock
+ |	 - gets the current Greenwich UTC date and time from the same 
+ |	   call to the OS clock
  |
  |	Formats as for datetime/2
  *!--------------------------------------------------------------*/
@@ -118,6 +118,12 @@ date_less(YY0/MM0/DD0, YY1/MM1/DD1)
 			(MM0 < MM1,!; (MM0 = MM1, DD0 < DD1)))).
 
 /*!--------------------------------------------------------------
+ |	set_date_pattern/1
+ |	set_date_pattern(Pattern)
+ |	set_date_pattern(+)
+ |
+ |	- sets the date pattern (= AA/BB/CC)
+ |
  *!--------------------------------------------------------------*/
 set_date_pattern(AA/BB/CC)
 	:-
@@ -148,6 +154,11 @@ insert_comma_chars([C | RestCs], [C, 0', | RestICs])
 date_pattern(YY,MM,DD,YY/MM/DD).
 
 /*!--------------------------------------------------------------
+ |	valid_date/1
+ |	valid_date(Date)
+ |	valid_date(+)
+ |
+ |	- determines whether a date (pattern) is a valid date
  *!--------------------------------------------------------------*/
 valid_date(YY-MM-DD)
 	:-
@@ -203,7 +214,7 @@ time_less(HH0:MM0:SS0, HH1:MM1:SS1)
 
 /*!--------------------------------------------------------------
  |	datetime_less/2
- |	datetime_less(Time0, Time1)
+ |	datetime_less(DateTime0, DateTime1)
  |	datetime_less(+,+)
  |
  |	 - tests two terms representing datetime for ordering
@@ -254,7 +265,9 @@ strip_last([H | PathList], [H | ParPathList])
  |
  |	- change the current working directory
  |
- |	Changes the current working directory being used by the program
+ |	If NewDir is a (quoted) atom representing an existing
+ |	path in the filesystem, this predicates changes the 
+ |	current working directory being used by the program
  |	to become NewDir (which must be an atom). Under DOS, this won't 
  |	change the drive.
  *!--------------------------------------------------------------*/
@@ -272,8 +285,9 @@ change_cwd(Path)
  |
  |	- returns the current working directory
  |
- |	Returns the current working directory being used by the program
- |	as a quoted atom.  Under DOS, the drive is included.
+ |	Obtains the current working directory being used by the program
+ |	as a quoted atom, and unifies it with Path. 
+ | 	Under DOS or Windows, the drive is included.
  *!--------------------------------------------------------------*/
 get_cwd(Path)
 	:-
@@ -289,8 +303,8 @@ get_cwd(Path)
  |
  |	- removes a file from the current working directory
  |
- |	If FileName is an atom (possibly quoted) naming a file in
- |	the current working directory, removes that file.
+ |	If FileName is a (quoted) atom naming a file in the 
+ |	current working directory, removes that file.
  *!--------------------------------------------------------------*/
 
 remove_file(FileName)
@@ -301,9 +315,11 @@ remove_file(FileName)
 	system_error([unlink(FileName)]).
 
 /*!--------------------------------------------------------------
-  |	filename_equal/2
-  |	filename_equal(Name1, Name2)
-  |	filename_equal(+, +)
+ |	filename_equal/2
+ |	filename_equal(Name1, Name2)
+ |	filename_equal(+, +)
+ | 
+ |	- OS portable check for equality of file names 
  *!--------------------------------------------------------------*/
 filename_equal(Name1, Name2)
 	:-
@@ -334,6 +350,19 @@ mod_lc_eq_chrs(C1, C2)
 	C2 is C1 - 32, 
 	!.
 
+/*!--------------------------------------------------------------
+ | 	getDirEntries/3
+ | 	getDirEntries(Path, FilePattern, FilesList)
+ | 	getDirEntries(+, +, -)
+ |
+ |	- returns a list of files in a directory matching a pattern
+ |
+ |	If Path is a (quoted) atom representing a path to a
+ |	folder (directory) in the file system, and if FilePattern
+ |	is a pattern (possibly using *), then FilesList is the
+ |	list of all files in folder Path (possibly including subfolders)
+ |	which match FilePattern.
+ *!--------------------------------------------------------------*/
 getDirEntries(Path, FilePattern, FirstResult)
 	:-
 	'$getDirEntries'(Path, FilePattern, FirstResult), !.
@@ -341,9 +370,21 @@ getDirEntries(Path, FilePattern, FirstResult)
 	:-
 	system_error([getDirEntries(Path, FilePattern, FirstResult)]).
 
-must_exists_file(File)
+/*!--------------------------------------------------------------
+ |	must_exist_file/1
+ |	must_exist_file(FileName)
+ |	must_exist_file(+)
+ |
+ |	- raises a system_error if exists_file fails
+ |
+ |	If FileName is a (quoted) atom representing a possible entry
+ |	in the file system, calls exists_file/1 to determine if 
+ |	FileName exists.  If File does not exist, raises a system 
+ |	error (while exists_file/1 simply fails).
+ *!--------------------------------------------------------------*/
+must_exist_file(File)
 	:- exists_file(File), !.
-must_exists_file(File)
+must_exist_file(File)
 	:-
 	system_error([must_exist_file(File)]).
 
