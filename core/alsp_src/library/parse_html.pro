@@ -45,13 +45,13 @@ grab_pxml(Path, PXML)
  |
  |	Calls grab_html_tokens/2 to read the list L of HTML tokens out 
  |	of FilePath, and then parses L into a (single !doctype) PXML term,
- |	where it accumulates tags of component terms in MTags, with
- |	the tagged terms accumulated in (lists) on MTagVals.
+ |	where it accumulates tags of component terms in TagVals, with
+ |	the tagged terms accumulated in (lists) on TagVals.
  *!--------------------------------------------------------------------*/
-grab_pxml_with_tagged(Path, PXML,  TVals)
+grab_pxml_with_tagged(FilePath, PXML,  TagVals)
     :-
-    grab_html_tokens(Path, Tokens),
-    parse_html_toks_to_pxml_vals(Tokens, PXML, TVals).
+    grab_html_tokens(FilePath, Tokens),
+    parse_html_toks_to_pxml_vals(Tokens, PXML, TagVals).
 
 /*!---------------------------------------------------------------------
  |	grab_pxml_with_paths/5
@@ -62,25 +62,24 @@ grab_pxml_with_tagged(Path, PXML,  TVals)
  |
  |	Calls grab_html_tokens/2 to read the list L of HTML tokens out 
  |	of FilePath, and then parses L into a (single !doctype) PXML term,
- |	where it accumulates tags of component terms in MTags, with
- |	the tagged terms accumulated in (lists) on TagVals, and
- |	also accumulates pairs (Stack, Term) on Paths, where:
+ |	the the tagged terms (eqns)  accumulated in (lists) on TagVals, 
+ |	and also accumulates pairs (Stack, Term) on Paths, where:
  |	1) TgtTags is a list of HTML tags, 
- |	2) Stack is list [Tg1, Tg1 | ...] of HTML terms representing
+ |	2) Stack is list [Tg1, Tg2 | ...] of HTML terms representing
  |	   the reversed parser stack with Tg1 belonging to TgtTags, and
  |	3) Term was parsed out as Tg1 was popped from Stack.
  *!--------------------------------------------------------------------*/
-grab_pxml_with_paths(Path, PXML,  TVals, TgtTags, Paths)
+grab_pxml_with_paths(Path, PXML,  TagVals, TgtTags, Paths)
     :-
     abolish(stack_tgt,1),
     assert(stack_tgt(TgtTags)),
     grab_html_tokens(Path, Tokens),
-    parse_html_toks_to_pxml_vals(Tokens, PXML, TVals),
-    xtr_paths(TVals, TgtTags, Paths).
+    parse_html_toks_to_pxml_vals(Tokens, PXML, TagVals),
+    xtr_paths(TagVals, TgtTags, Paths).
 
 	%% Extract the paths+values corresponding to TgtTags:
 xtr_paths([], TgtTags, []).
-xtr_paths([Tag=TagVal | TVals], TgtTags, PathsOut)
+xtr_paths([Tag=TagVal | TagVals], TgtTags, PathsOut)
 	:-
 	((TgtTags==all;member(Tag, TgtTags)) ->
 		arg(1, TagVal, TTV),
@@ -90,28 +89,22 @@ xtr_paths([Tag=TagVal | TVals], TgtTags, PathsOut)
 		;
 		PathsOut = NextPaths
 	),
-	xtr_paths(TVals, TgtTags, NextPaths).
+	xtr_paths(TagVals, TgtTags, NextPaths).
 
 /*!------------------------------------------------------------------------------
  |	parse_html_toks_to_pxml_vals/3
- |	parse_html_toks_to_pxml_vals(Tokens, PXML, TVals)
- |	parse_html_toks_to_pxml_vals(+, PXML, +, [], TVals)
+ |	parse_html_toks_to_pxml_vals(Tokens, PXML, TagVals)
+ |	parse_html_toks_to_pxml_vals(+, -, -)
  |	
  |	- parse a list of HTML-tokens
  |
- |	
+ |	Calls parse_html_toks_to_pxml/5, ignoring the Stack arguments.
  *!--------------------------------------------------------------------*/
-parse_html_toks_to_pxml_vals(Tokens, PXML, TVals)
+parse_html_toks_to_pxml_vals(Tokens, PXML, TagVals)
 	:-
     	TagsValsDList = (TagsVals,TagsVals),
 	parse_html_toks_to_pxml(Tokens, PXML, [], [], TagsValsDList),
-	arg(1, TagsValsDList, TVals).
-
-parse_html_toks_to_pxml_vals(Tokens, PXML, StackIn, [], TVals)
-	:-
-    	TagsValsDList = (TagsVals,TagsVals),
-	parse_html_toks_to_pxml(Tokens, PXML, StackIn, [], TagsValsDList),
-	arg(1, TagsValsDList, TVals).
+	arg(1, TagsValsDList, TagVals).
 
 /*!------------------------------------------------------------------------------
  |	parse_html_toks_to_pxml/5
@@ -121,7 +114,7 @@ parse_html_toks_to_pxml_vals(Tokens, PXML, StackIn, [], TVals)
  |  	- parse a list of HTML-tokens
  |
  |	The workhorse. Parses a list of HTML-tokens, as produced by 
- |	read_tokens/5 in html_tokens.pro, into a collection of Prolog Terms 
+ |	read_tokens/5 in html_tokens.pro, into a list of Prolog Terms 
  |	consituting a PXML representation of the source.  
  |	The pair (StackIn, StackOut) implements the parser stack.
  |
@@ -129,17 +122,8 @@ parse_html_toks_to_pxml_vals(Tokens, PXML, StackIn, [], TVals)
  |
  |		TagsValsDList
  |
- |	provides a means of capturing components of the PXML output.
- |	----
- |	MTags is a list of non-comment tags.  Often, MTags = [body].
- |	MTagVals is the list of corresponding PXML terms found, if any.
- |	So if MTags = [body, table], we might have MTagVals = [body=Body], 
- | 	if there were no table, and 
- |		MTagVals = [body=Body, table=[list of PXML table terms] ]
- |	if there was more than one table.
- |	----
- |	If (MTags, MTagVals) was to be big, it could be carried as
- |	ani AVL tree.  But moderate examples will probably be typical.
+ |	provides a means of capturing components of the PXML output. ( See the
+ |	comment for handle_tag/6 for a description of TagsValsDList. )
  *!-----------------------------------------------------------------------------*/
 parse_html_toks_to_pxml([], [], Stack, Stack, TagsValsDList)
 	:-!,
@@ -223,7 +207,8 @@ read_pxml_term(['<', InTag | Tokens], Term, RestTokens,
 	read_to_close_html(InterTokens, SubTerms, Tag, RestTokens, StackInterA, StackInterB,
 				TagsValsDListIn, TagsValsDListInter),
 
-	Term  =.. [Tag, Features, SubTerms],
+	adj_sub_nums(SubTerms, AdjSubTerms),
+	Term  =.. [Tag, Features, AdjSubTerms],
 	do_pop_tag(StackInterB, Tag, StackOut),
 
 	(stack_tgt(TgtList) -> true ; TgtList = []),
@@ -239,6 +224,36 @@ read_pxml_term(Tokens, List, ['<' | RestTokens],
 	read_pxml_terms_to(Tokens, '<', ParentTag, List, RestTokens,
 				StackIn, StackOut,
 				TagsValsDListIn, TagsValsDListOut).
+
+	% check for SubTerms like [30, ',', 235]; needs to be ['30,235']
+adj_sub_nums([SubTerms], [Clunked])
+	:-
+	SubTerms = [N | RestST],
+	RestST \= [],
+	number(N),
+	!,
+	stringify(SubTerms, STStrs),
+	append(STStrs, ResultStrs),
+	atom_codes(Clunked, ResultStrs).
+adj_sub_nums(SubTerms, SubTerms).
+
+stringify([], []).
+stringify([N | Terms], [NStr | Strs])
+	:-
+	number(N),
+	!,
+	number_codes(N, NStr),
+	stringify(Terms, Strs).
+stringify([A | Terms], [AStr | Strs])
+	:-
+	atom(A),
+	!,
+	atom_codes(A, AStr),
+	stringify(Terms, Strs).
+stringify([T | Terms], [TStr | Strs])
+	:-
+	term_codes(T, TStr),
+	stringify(Terms, Strs).
 
 /*---------------------------------------------------------------------
  *--------------------------------------------------------------------*/
@@ -453,7 +468,7 @@ read_pxml_comment([Token | Tokens], [Token | Features], RestTokens)
 /*!---------------------------------------------------------------------
  |	unary_tag/1
  |	unary_tag(T)
- |	unary_tag(+)
+ |	unary_tag(+/-)
  |
  |	- specifies syntactic roles tags
  |
@@ -631,6 +646,23 @@ consume_tokens_to_q2([Item | Tokens], [Item | Head], InterTokens)
 
 	- enter (Tag,Term) and Stack on TagsValsDListIn
 
+	TagsValsDList[In] is a difference list whose elements are
+	equations Ei, where V is a variable:
+
+	    ([E0, E1, ...,En | V], V)
+
+	The Ei are equations whose left side is a tag Ti and whose
+	right side is itself a difference list:
+
+	    Ti = ([J0, J1,...,Jm | Wi], Wi)
+
+	where Wi is a variable, and the Jk are 
+	a) if Ti belongs to TgtList, then each of the
+	   Jk will be of the form p(Term, Stack) where Term has tag
+	   Ti and Stack is the state of the stack at the time
+	   Term was parsed, or
+	b) Ti is not on TgtList, and Jk is a term with tag Ti
+	   (Stack is not preserved in this case)
  *--------------------------------------------------------------------*/
 
 handle_tag(Tag, Term, TgtList, Stack, TagsValsDListIn, TagsValsDListOut)
@@ -681,98 +713,6 @@ close_branches([_=BDL | RestB])
 	BT = [],
 	close_branches(RestB).
 
-/*---------------------------------------------------------------------
-	xtrctl/3
-	xtrctl(Tags, Tag, OTags)
-	xtrctl(+, +, -)
-
-	- extract Tag from the list Tags, leaving OTags
- *--------------------------------------------------------------------*/
-xtrctl([], _, _)
-	:-!,
-	fail.
-
-	%% assumes unique occurrences of Tag(s) in the arg#1 list:
-xtrctl([Tag | Tags], Tag, Tags)
-	:-!.
-
-xtrctl([OTag | Tags], Tag, [OTag | OTags])
-	:-
-	xtrctl(Tags, Tag, OTags).
-
-do_handle_eqn( MTagVals, Tag, InterMTagVals)
-    	:-
-	xtrct_eqn(MTagVals, Tag, Tag=InitTagVals, TmpMTagVals), 
-	!,
-	InterMTagVals = [Tag=[Term | InitTagVals] | TmpMTagVals].
-
-do_handle_eqn( MTagVals, Tag, InterMTagVals)
-    	:-
-	InterMTagVals = [Tag=[Term] | MTagVals].
-
-% Tests for xtrctl:
-
-tx1 :-
-	Tags = [table, body, head],
-write(Tags),nl,
-	xtrctl(Tags, body, OTags1),
-write(OTags1),nl,
-	xtrctl(OTags1, table, OTags2),
-write(OTags2),nl.
-
-tx2 :-
-	Tags = [table, body, head],
-write(Tags),nl,
-write('Try extract ''form'':'),nl,
-	xtrctl(Tags, form, OTags1).
-
-
-xtrct_eqn([], _, _, _)
-	:-!,
-	fail.
-
-xtrct_eqn([Tag=Val | Eqns], Tag, Tag=Val, Eqns)
-	:-!.
-
-xtrct_eqn([OTag=OVal | Eqns], Tag, Result, [OTag=OVal | OEqns])
-	:-
-	xtrct_eqn(Eqns, Tag, Result, OEqns).
-
-
-/*
-handle_tag(Tag, Term, MTags, InterMTags, MTagVals, InterMTagVals)
-	:-
-	xtrctl(MTags, Tag, InterMTags),
-	!,
-	do_handle_eqn( MTagVals, Tag, InterMTagVals).  
-
-handle_tag(_, _, MTags, MTags, MTagVals, MTagVals).
-
-do_handle_eqn( MTagVals, Tag, InterMTagVals)
-    	:-
-	xtrct_eqn(MTagVals, Tag, Tag=InitTagVals, TmpMTagVals), 
-	!,
-	InterMTagVals = [Tag=[Term | InitTagVals] | TmpMTagVals].
-
-do_handle_eqn( MTagVals, Tag, InterMTagVals)
-    	:-
-	InterMTagVals = [Tag=[Term] | MTagVals].
-*/
-
-% Tests
-
-txy1 :-
-	Eqns = [table=[tblTop,bot], body=[bod], head=[hh]],
-	xtrct_eqn(Eqns, body, Result1, OEqns1),
-write(Result1), write('  '), write(OEqns1),nl,
-	xtrct_eqn(OEqns1, table, Result2, OEqns2),
-write(Result2), write('  '), write(OEqns2),nl.
-
-txy2 :-
-	Eqns = [table=[tblTop,bot], body=[bod], head=[hh]],
-	xtrct_eqn(Eqns, form, Result1, OEqns1).
-	
-
 /*=====================================================================
 	stack push/pop/etc utilties
  *====================================================================*/
@@ -784,35 +724,17 @@ txy2 :-
 
 do_push_tag(StackIn, Tag, [Tag | StackIn])
 	:-
-/*
-	(Tag == '/' -> PrintTail = '     <<<<<<<+++++++++' ; PrintTail=''), 
-	printf('r_p_t >>>>-push tag=%t%t\n', [Tag,PrintTail]),
-*/
-%	view_stack([Tag | StackIn]),
 	push_tag_db(Tag), 
-%	view_stack_db,
 	true.
 
 do_pop_tag([Tag | StackIn], Tag, StackIn)
 	:-
 	pop_tag_db(ThisTag), 
-/*
-	(ThisTag \= Tag -> 
-		printf('r_p_t: <<<< ERROR:ArgStack %t \= DbStack %t\n',[Tag, ThisTag])
-		;
-		printf('r_p_t: <<<< popped=%t \n',[Tag])
-	),
-*/
-%	view_stack(StackIn),
-%	view_stack_db,
 	true.
 
 do_peek_tag(Stack, Tag)
 	:-
 	Stack = [Tag | _],
-%	printf('   +++ peek: %t  ', [Tag]),
-%	view_stack(Stack),
-%	view_stack_db,
 	true.
 
 /*---------------------------------------------------------------------
@@ -855,7 +777,6 @@ peek_tag(Stack, Tag, Stack)
 
 vws(Stack) :-
 	view_stack(Stack).
-%	vdb.
 
 view_stack(Stack)
 	:-

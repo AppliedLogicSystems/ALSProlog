@@ -406,7 +406,12 @@ next_token(0'&, S, T, NxtC)
 next_token(C1, S, T,NxtC)
 	:-
 	read_to_terminator(S, Cs, NxtC),
-	name(T, [C1 | Cs]).
+%	name(T, [C1 | Cs]).
+	(C1 == 0'0 ->
+		atom_codes(T, [C1 | Cs])
+		;
+		name(T, [C1 | Cs])
+	).
 
 /*---------------------------------------------------------------------
  |	
