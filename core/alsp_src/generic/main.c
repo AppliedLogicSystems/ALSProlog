@@ -662,7 +662,7 @@ autoload(f)
     status = obpres_load(fext);
     if (status != 1) status = load_file(fext, 0); 
 #else
-    status = load_file(fext, 0);  
+    status = load_file(fext, SUPPRESS_OBP);
 #endif
     if (!status) {
 /*

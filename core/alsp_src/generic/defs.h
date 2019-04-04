@@ -415,6 +415,7 @@ extern	void	f_icode		PARAMS(( int, long, long, long, long ));
 extern	int	obp_open	PARAMS(( char * ));
 extern	void	obp_close	PARAMS(( void ));
 extern	int	f_load		PARAMS(( CONST char * ));
+enum load_file_options { RECONSULT = 1 << 0, SUPPRESS_OBP = 1 << 1};
 extern	int	load_file	PARAMS(( char *, int ));
 #ifdef MacOS
 extern	int	obpres_load	PARAMS((const char *fname));
