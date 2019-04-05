@@ -111,6 +111,7 @@ const char *version[2] = {
 #endif
 
 static char versionNum[] = VERSION_STRING;	/* from version.h */
+static char versionYear[] = VERSION_YEAR;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
@@ -123,7 +124,7 @@ static	void	abolish_predicate PARAMS(( const char *, const char *, int ));
 static	void	assert_sys_searchdir PARAMS(( char * ));
 static	void	assert_als_system PARAMS((const char *, const char *,
 					  const char *, const char *,
-					  const char *));
+					  const char *, const char *));
 static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
 
 
@@ -431,7 +432,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 
 #ifndef KERNAL
     assert_als_system(OSStr, MinorOSStr, ProcStr,
-		      SysManufacturer, versionNum);
+		      SysManufacturer, versionNum, versionYear);
 
     /*-------------------------------------------*
      | Set up conditional configuration controls:
@@ -616,8 +617,8 @@ assert_atom_in_module(mod_name,atom_name)
  |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
-assert_als_system(os, os_var, proc, man, ver)
-    const char *os, *os_var, *proc, *man, *ver;
+assert_als_system(os, os_var, proc, man, ver, year)
+    const char *os, *os_var, *proc, *man, *ver, *year;
 {
     char  command[2048];
 
@@ -625,12 +626,13 @@ assert_als_system(os, os_var, proc, man, ver)
 		return;
 
     sprintf(command,
-	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s']),_,0)",
+	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',prologYear='%s']),_,0)",
 	    os,
 	    os_var,
 	    proc,
 	    man,
-	    ver);
+	    ver,
+	    year);
     if (!exec_query_from_buf(command)) {
 		fatal_error(FE_ASSERT_SYS, 0);
     	}

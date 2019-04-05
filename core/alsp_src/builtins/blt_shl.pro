@@ -296,6 +296,7 @@ print_banner(OutS,L)
 	system_name(L, Name),
 	dmember(os_variation = OSVar, L),
 	dmember(prologVersion = Version, L),
+	dmember(prologYear = Year, L),
 	current_prolog_flag(windows_system, WinsName),
 	name(WinsName, [InC | WNCs]),
 	UInC is InC - 32,
@@ -306,7 +307,7 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-2019 Applied Logic Systems, Inc.\n\n',[]),
+	printf(OutS,'   Copyright (c) 1987-%s Applied Logic Systems, Inc.\n\n',[Year]),
 	flush_output(OutS).
 
 system_name(L, Name)
