@@ -10,3 +10,4 @@ version
 
 # Use export substitution to burn version info into source tarballs
 version export-subst
+LICENSE.txt export-subst
