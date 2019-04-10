@@ -2,8 +2,14 @@
 title: 'spy/[0,1]'
 module: debugger
 predicates:
-- {sig: 'spy', args: {0: 'enable spy points', 1: 'sets a spy point'}}
-- {sig: 'nospy', args: {0: 'removes all spy points', 1: 'removes a spy point'}}
+- {sig: 'spy', args: {
+    0: 'enable spy points',
+    1: 'sets a spy point'
+   }}
+- {sig: 'nospy', args: {
+    0: 'removes all spy points',
+    1: 'removes a spy point'
+   }}
 ---
 
 ## FORMS

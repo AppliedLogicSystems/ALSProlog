@@ -2,7 +2,10 @@
 title: 'listing/0'
 group: Prolog Database
 predicates:
-- {sig: 'listing', args: { 0: 'Prints all clauses', 1: 'Prints clauses matching the specified template'}}
+- {sig: 'listing', args: {
+    0: 'Prints all clauses',
+    1: 'Prints clauses matching the specified template'
+   }}
 ---
 
 ## FORMS
