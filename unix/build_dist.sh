@@ -62,7 +62,7 @@ for E in $EXAMPLE_SET ; do
 	cp -pr "$EXAMPLES/$E" "$DISTDIR/examples"
 done
 
-cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
+../format-subst "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
