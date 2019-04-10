@@ -9,6 +9,7 @@
 #define _str(s) #s
 
 #define VERSION_STRING _xstr(VERSION)
+#define VERSION_YEAR   _xstr(YEAR)
 
 /* 
 Win32 File Flag choices:
