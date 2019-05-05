@@ -91,6 +91,9 @@ test_info(library_strings_test, strings_test, user, test_strings_lib,
 test_info(library_miscatom_test, miscatom_test, user, test_miscatom_lib,
 	'test of miscellaneous atom-related predicates').
 
+test_info(library_arithx1_test, arithx1_tests, user, test_arithx1,
+	'test of miscellaneous arithmetic predicates').
+
 test_info(testeoln, testeoln, user, test,
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').
