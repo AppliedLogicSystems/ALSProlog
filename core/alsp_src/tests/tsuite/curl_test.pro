@@ -7,6 +7,8 @@ tsuite/echo/serve
 
 */
 
+:- [test].
+
 test :- test([
 	test_sio_url,
 	test_http,
@@ -16,28 +18,6 @@ test :- test([
 	
 	true
 ]).
-
-test(List) :-
-	test(List, Result),
-	Result.
-	
-test([], true) :- !.
-test([], fail).
-test([true | Tail], Result) :- !, test(Tail, Result).
-test([Goal | Tail], Result) :-
-	(atom(Goal) -> printf('>>>> BEGIN %t <<<<\n', [Goal]) ; true ),
-	(
-		copy_term(Goal, RGoal),
-		catch(RGoal, Error, (write('Uncaught Error: '), write(Error), nl, fail)),
-		write('\033[32m  OK: ')
-		;
-		Result=fail,
-		write('\033[31mFAIL: ')
-	),
-	write_term(Goal, [quoted(true), line_length(180)]
-	),
-	write('\033[0m'), nl,
-	!, test(Tail, Result).
 
 test_sio_url :- 
 	test([
