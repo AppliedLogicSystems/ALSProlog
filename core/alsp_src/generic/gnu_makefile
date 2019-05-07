@@ -124,7 +124,7 @@ command_line_test: alspro
 	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 
 test_suite: alspro
-	./alspro -s $(TEST_DIR) -giac -b autotest.pro atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
+	./alspro -no_obp -s $(TEST_DIR) -b autotest.pro atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
 
 test_app_image: alspro
 	$(TEST_DIR)/tsuite/test_app_image.sh
