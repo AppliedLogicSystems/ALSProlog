@@ -55,9 +55,9 @@ test_prefix_to :-
 test_prefix_dir :-
 	sys_env(OS,_,_),
         (OS = mswin32 ->
-        	YList == ['zipper\foo','zipper\file3','zipper\bar']
+        	YList = ['zipper\foo','zipper\file3','zipper\bar']
 		;
-        	YList == ['zipper/foo','zipper/file3','zipper/bar']
+        	YList = ['zipper/foo','zipper/file3','zipper/bar']
 	),
         List = [foo, file3, bar],
         Dir = zipper,
