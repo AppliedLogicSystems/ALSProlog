@@ -1,8 +1,9 @@
 /*=====================================================================
  | 			mscioout.pro		
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |
- |		Various I/O utilities: output 
+ |		Group: Input Output
+ |		DocTitle: write_lines/1
+ |		-- Various I/O utilities: output 
  *====================================================================*/
 module builtins.
 
