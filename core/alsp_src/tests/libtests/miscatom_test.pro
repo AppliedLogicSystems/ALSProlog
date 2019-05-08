@@ -5,6 +5,11 @@ test_miscatom_lib
         test_catenate3,
         test_catenate2,
         test_trim_atoms,
+	test_cat_together_seplines,
+	test_cat_together_spaced,
+	test_prefix_to,
+	test_prefix_dir,
+	test_strip_prefix,
         true
         ]).
 
