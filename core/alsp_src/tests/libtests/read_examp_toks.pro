@@ -1,4 +1,4 @@
-
+:-[test].
 read_toks
 	:-
 	sys_env(OS,_,_),
@@ -11,8 +11,10 @@ read_toks
 		Path1 = '../../alsp_src/tests/libtests/example.com',
 		Path2 = '../../alsp_src/tests/libtests/sample_awstats.html'
 	),
-	do_read_toks(OS, Path1, NTks1),
-	do_read_toks(OS, Path2, NTks2).
+	test([
+	    do_read_toks(OS, Path1, NTks1),
+	    do_read_toks(OS, Path2, NTks2) 
+	]).
 
 do_read_toks(OS, Path, NTks)
 	:-
