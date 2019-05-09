@@ -5,6 +5,11 @@ test_miscatom_lib
         test_catenate3,
         test_catenate2,
         test_trim_atoms,
+	test_cat_together_seplines,
+	test_cat_together_spaced,
+	test_prefix_to,
+	test_prefix_dir,
+	test_strip_prefix,
         true
         ]).
 
@@ -48,10 +53,16 @@ test_prefix_to :-
         XList == ['Zip_a1','Zip_b2','Zip_c3'].
 
 test_prefix_dir :-
+	sys_env(OS,_,_),
+        (OS = mswin32 ->
+        	YList = ['zipper\\foo','zipper\\file3','zipper\\bar']
+		;
+        	YList = ['zipper/foo','zipper/file3','zipper/bar']
+	),
         List = [foo, file3, bar],
         Dir = zipper,
         prefix_dir(List, Dir, XList),
-        XList == ['zipper/foo','zipper/file3','zipper/bar'].
+        XList == YList.
 
 test_strip_prefix :-
         List = [abcd, foobar, pop, f, zeroes],
