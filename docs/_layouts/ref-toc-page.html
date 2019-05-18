@@ -1,0 +1,26 @@
+---
+layout: default
+---
+
+<nav>
+<a href="../">Docs</a>
+&gt; {{ page.title | escape }}
+</nav>
+
+<h1>{{ page.title | escape }}</h1>
+
+{%- include head-ug-rm.html -%}
+
+<div class="outerbox">
+
+{%- include sidebar.html -%}
+
+<div class="refcorecontent">
+
+{{ content }}
+
+</div>
+</div>
+
+  <script type="text/javascript" src="/assets/jquery-3.3.1.slim.js"></script>
+  <script type="text/javascript" src="/assets/searchhelp.js"></script>

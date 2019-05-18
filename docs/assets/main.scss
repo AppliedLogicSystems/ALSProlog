@@ -18,3 +18,44 @@ pre, code, .highlighter-rouge .highlight { background-color: #f8f8f8; }
 
 // Avoid wrapping of email address
 .contact-list .u-email { font-size: 95%; }
+
+.page-content { 
+	padding:20px;
+}
+.refpage-content { 
+	padding:20px;
+}
+
+
+.post-content { 
+	padding:20px;
+}
+
+.outerbox { 
+	border:2px solid white;
+	display: flex;
+}
+
+
+.sidebar {
+	border:2px solid black;
+	width: 20%;
+}
+
+.corecontent {
+	border:2px solid black;
+	width: 80%;
+	padding-left:20px;
+}
+.refcorecontent {
+	border:1px solid black;
+	width: 80%;
+	padding-left:10px;
+}
+
+.mysearch {
+	width:100%;
+	font-size:16px;
+	border: 1px solid red;
+	background-color:pink;
+}

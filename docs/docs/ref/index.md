@@ -1,6 +1,6 @@
 ---
 title: Reference Manual
-layout: toc-page
+layout: ref-toc-page
 reference: false
 regenerate: true
 ---
