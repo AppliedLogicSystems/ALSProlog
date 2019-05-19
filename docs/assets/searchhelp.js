@@ -9,9 +9,24 @@ $(function() {
 	})
 });
 
-$(function() {
-    $("#core_p_trigger").click(function() {
-	alert("toc_core_prolog.html");
-    )};
 
+$(function() {
+   $("#core_p_trigger").click(function() {
+	$( "#sb_toc" ).load( "toc_core_prolog.html" );
+   });
 });
+
+/*
+$(function() {
+   $("#core_p_trigger").click(
+	$("#sb_toc").load( "toc_core_prolog.html" ));
+});
+*/
+
+/*
+$(function() {
+   $("#core_p_trigger").click(function() {
+	alert("toc_core_prolog.html");
+   });
+});
+*/
