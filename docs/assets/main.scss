@@ -53,9 +53,20 @@ pre, code, .highlighter-rouge .highlight { background-color: #f8f8f8; }
 	padding-left:10px;
 }
 
-.mysearch {
+#mysearch {
 	width:100%;
-	font-size:16px;
+	font-size:18px;
 	border: 1px solid red;
 	background-color:pink;
+}
+
+.cmn_pack {
+	border:1px solid black;
+	margin-top:2px;
+	width:90%;
+	background-color:white;
+}
+
+.active_pack {
+	background-color:LightBlue;
 }

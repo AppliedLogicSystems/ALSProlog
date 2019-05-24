@@ -1,32 +1,56 @@
 
 $(function() {
-	$('#mysearch').on('search', function() {
-    var needle = $(this).val();
+    $('#mysearch').on('search', function() {
+        var needle = $(this).val();
   	$('.eentry').hide().filter(function (i, e) {
-      if (needle == '') return true;
-      return  $(e).find('a[title*="'+ needle +'"]').length;
-    }).show();
-	})
+            if (needle == '') return true;
+            return  $(e).find('a[title*="'+ needle +'"]').length;
+        }).show();
+    })
 });
 
 
 $(function() {
-   $("#core_p_trigger").click(function() {
+    $("#core_p_trigger").click(function() {
+        $("#alsdev_trigger").css("background-color", "white");
+        $("#alslib_trigger").css("background-color", "white");
+        $("#c_intf_trigger").css("background-color", "white");
 	$( "#sb_toc" ).load( "toc_core_prolog.html" );
+	$("#core_p_trigger").css("background-color", "LightBlue");
    });
 });
 
-/*
-$(function() {
-   $("#core_p_trigger").click(
-	$("#sb_toc").load( "toc_core_prolog.html" ));
-});
-*/
+	// Doesn't fire:
+$( "#core_p_trigger" ).trigger( "click" );
 
-/*
+
 $(function() {
-   $("#core_p_trigger").click(function() {
-	alert("toc_core_prolog.html");
+    $("#alsdev_trigger").click(function() {
+        $("#core_p_trigger").css("background-color", "white");
+        $("#alslib_trigger").css("background-color", "white");
+        $("#c_intf_trigger").css("background-color", "white");
+	$( "#sb_toc" ).load( "toc_alsdev.html" );
+	$("#alsdev_trigger").css("background-color", "LightBlue");
    });
 });
-*/
+
+$(function() {
+   $("#alslib_trigger").click(function() {
+        $("#core_p_trigger").css("background-color", "white");
+        $("#alsdev_trigger").css("background-color", "white");
+        $("#c_intf_trigger").css("background-color", "white");
+	$( "#sb_toc" ).load( "toc_alslib.html" );
+	$("#alslib_trigger").css("background-color", "LightBlue");
+   });
+});
+
+$(function() {
+   $("#c_intf_trigger").click(function() {
+        $("#core_p_trigger").css("background-color", "white");
+        $("#alsdev_trigger").css("background-color", "white");
+        $("#alslib_trigger").css("background-color", "white");
+	$( "#sb_toc" ).load( "toc_c_intf.html" );
+	$("#c_intf_trigger").css("background-color", "LightBlue");
+   });
+});
+
