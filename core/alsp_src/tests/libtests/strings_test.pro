@@ -1,8 +1,8 @@
+:-[test].
 
-% strings: 
-%ts :- test_strings_lib.
 test_strings_lib
 	:-
+	test([
 	test_asplit,
 	test_head0,
 	test_head,
@@ -26,7 +26,8 @@ test_strings_lib
 	test_read_to_blank,
 	test_char_in,
 	test_replace_char_string,
-	test_replace_char_atom.
+	test_replace_char_atom,
+	true]).
 
 test_asplit :-
 	Atom = abcdefg,

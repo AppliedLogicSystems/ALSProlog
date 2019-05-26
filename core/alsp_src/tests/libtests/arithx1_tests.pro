@@ -1,9 +1,7 @@
-
-
-
-ta :- test_arithx1.
+:- [test].
 
 test_arithx1 :-
+	test([
 	test_max,
 	test_min,
 	test_maximum,
@@ -13,8 +11,8 @@ test_arithx1 :-
 	test_sum_squares,
 	test_sum_square_diffs,
 	test_max_vector,
-	test_min_vector.
-
+	test_min_vector,
+	true]).
 
 test_max :-
 	max(3,92,M1),
