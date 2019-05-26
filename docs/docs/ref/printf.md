@@ -19,7 +19,7 @@ printf(Format, ArgList)
 
 printf(Steam_or_Alias, Format, ArgList)
 
-printf_opt(Format, ArgList, Options)
+printf_opt(Format, ArgList, WriteOptions)
 
 printf(Stream_or_Alias, Format, ArgList, WriteOptions)
 ```
@@ -54,13 +54,13 @@ hello world
 
 yes.
 
-?- printf('Letters:%c%c%c\n', [a,b,c]).
-Letters:abc
+?- printf('Letters: %c%c%c\n', [a,b,c]).
+Letters: abc
 
 yes.
 
-?- printf('Contents:%t, Amount:%d\n', [pocket(keys,wallet,watch),3]).
-Contents:pocket(keys,wallet,watch),Amount:3
+?- printf('Contents: %t, Amount: %d\n', [pocket(keys,wallet,watch), 3]).
+Contents: pocket(keys,wallet,watch), Amount: 3
 
 yes.
 ```
@@ -68,7 +68,7 @@ yes.
 
 - `nl/0` {%- comment %} TODO: missing {% endcomment %}
 - [`put/1`](put.html)
-- [`write/0`](write.html)
+- [`write/[1,2]`](write.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
 - Unix/C Reference Manuals: printf(3S)
