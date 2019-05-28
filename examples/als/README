@@ -16,4 +16,4 @@ mission.pro     -- a solution to the missionaries and cannibals problem
 nim.pro         -- a simple two player game
 nrev.pro        -- the standard LIPS benchmark
 queens.pro      -- placing queens on a chessboard
-rcx.pro		-- ascii table formatter example
+rows_cols_examples.pro	-- ascii table formatter example

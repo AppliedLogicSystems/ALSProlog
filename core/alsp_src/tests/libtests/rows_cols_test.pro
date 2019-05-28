@@ -12,9 +12,9 @@ test_cols :-
 	test_var_columns_file_uh,
 	test_fxd_columns_file, 
 	test_fxd_columns_file_uh,
-	remove_file('silly.txt'),
 	true
 	]),
+	remove_file('silly.txt'),
 	abolish(silly_list/1).
 
 test_var_columns_file :-
@@ -28,11 +28,7 @@ test_var_columns_file :-
 	SillyColLines = [L1,L2,L3],
 	'$strlen'(L1, L1Len),
 	T1Len == L1Len,
-	T1 == L1,
-	!.
-test_var_columns_file :-
-	printf(user, 'test_var_columns_file test failed\n', []).
-
+	T1 == L1.
 
 test_var_columns_file_uh :-
 	silly_list(ListOfRows),
@@ -52,13 +48,7 @@ test_var_columns_file_uh :-
 	'$strlen'(TH, THLen),
 	'$strlen'(LUH, LUHLen),
 	THLen == LUHLen,
-	TH == LUH,
-	!.
-
-test_var_columns_file_uh :-
-	printf(user, 'test_var_columns_file_uh test failed\n', []).
-
-
+	TH == LUH.
 
 test_fxd_columns_file :-
 	silly_list(ListOfRows),
@@ -71,11 +61,7 @@ test_fxd_columns_file :-
 	SillyColLines = [L1,L2,L3],
 	'$strlen'(L1, L1Len),
 	T1Len == L1Len,
-	T1 == L1,
-	!.
-test_fxd_columns_file :-
-	printf(user, 'test_fxd_columns_file test failed\n', []).
-
+	T1 == L1.
 
 test_fxd_columns_file_uh :-
 	silly_list(ListOfRows),
@@ -95,9 +81,5 @@ test_fxd_columns_file_uh :-
 	'$strlen'(TH, THLen),
 	'$strlen'(LUH, LUHLen),
 	THLen == LUHLen,
-	TH == LUH,
-	!.
-
-test_fxd_columns_file_uh :-
-	printf(user, 'test_fxd_columns_file_uh test failed\n', []).
+	TH == LUH.
 

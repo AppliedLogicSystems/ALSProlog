@@ -31,7 +31,11 @@ export columns/3.
  |      rectangular array of the terms appearing in the
  |	Rows to user_output. The array is split into columns of minimal 
  |	size to contain the appropriate terms, with one character  wide 
- |	blank separators
+ |	blank separators.
+ |	If any row R is surrounded by u(R, 0'C), where C is any single
+ |	character, then the output of row R is followed (below) by a line
+ |	of the character C.  Surrounding R by u(R) is equivalent to
+ |	surrounding it by u(R, 0'=).
  |
  | Examples:
  |
@@ -62,6 +66,49 @@ export columns/3.
  |	___    _____     _                         _     
  |	yrtbv  h8t       x                         yacc  
  |	34     f(4,5,6)  some_silly(55,yurht,123)  thru  	
+ |	
+ |	?- listing(city_table).
+ |	
+ |	% user:city_table/1
+ |	city_table(
+ |	    [[city,location,population],
+ |		[New York,loc(23,35),20.1],
+ |	        [Tokyo,loc(23,45),15.3],
+ |		[Paris,loc(167,132),9.4] ]).
+ |	
+ |	?- listing(cities).
+ |	% user:cities/0
+ |	cities :- city_table(_A), columns(_A).
+ |	
+ |	?- cities.
+ |	city      location      population  
+ |	New York  loc(23,35)    20.1        
+ |	Tokyo     loc(23,45)    15.3        
+ |	Paris     loc(167,132)  9.4       
+ |	
+ |	?- listing(city_town_table).
+ |	% user:city_town_table/1
+ |	city_town_table(
+ |	    [u([City,Location,Population]),
+ |		[Tokyo,loc(35,139),9.3],
+ |	        [New York,loc(40,74),8.6],
+ |		u([Paris,loc(48,24),2.1],0'_),
+ |		[Silver City,loc(32,108),0.01],
+ |	        [Faro,loc(62,133),0.000344] ]).
+ |	
+ |	?- listing(cities_towns).
+ |	% user:cities_towns/0
+ |	cities_towns :- city_town_table(_A), columns(_A).
+ |	
+ |	?- cities_towns.
+ |	City         Location     Population  
+ |	====         ========     ==========  
+ |	Tokyo        loc(35,139)  9.3         
+ |	New York     loc(40,74)   8.6         
+ |	Paris        loc(48,24)   2.1         
+ |	_____        __________   ____        
+ |	Silver City  loc(32,108)  0.000344    
+ |	Faro         loc(62,133)  0.01        
  *!--------------------------------------------------------------------*/
 columns(ListOfRows)
 	:-
@@ -89,6 +136,7 @@ columns(ListOfRows)
  |	Note: if arg(2) is passed a list of integers(ColWidths), then
  |      	columns(ListOfRows, ColsWidths user_output)
  |	is invoked.
+ |	Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.
  *!--------------------------------------------------------------------*/
 columns(ListOfRows, ColsWidths)
 	:-
@@ -122,6 +170,7 @@ columns(ListOfRows, OutputStream)
  |	the corresponding integer of ColWidths, with one character-wide 
  |	blank separators.  Terms in Rows which are of size > the 
  |	corresponding integer of ColWidths are trucated.
+ |	Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.
  |
  | Examples:
  |
@@ -156,6 +205,10 @@ columns(ListOfRows, ColWidths, OutputStream)
 	/* ========= Variable column size support ========= */
 
 mk_rows_atoms([], NumCols, [], [], []).
+mk_rows_atoms([u(Row) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths)
+	:-!,
+	mk_rows_atoms([u(Row,0'=) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths).
+
 mk_rows_atoms([u(Row,Code) | RowsTail], NumCols, [RowAtoms, UAtoms | RowsAtomsTail], 
 	 	[RowItemsLen, RowItemsLen | RowsItemLensTail], 
 		[RowMinColWidths, RowItemsLen | RowsMinColsWidthsTail])
@@ -183,28 +236,11 @@ atoms_for_row([Item | RowTail], CurNumCols, RowNumCols, [ItemAtom | RowAtomsTail
 	NextNumCols is CurNumCols + 1,
 	atoms_for_row(RowTail, NextNumCols, RowNumCols, RowAtomsTail, RowItemsLen, RowMinColWidths).
 
-atom_for_cols(Item, Item, ItemLen, MinColWidth)
-	:-
-	atom(Item),
-	!,
-	'$strlen'(Item, ItemLen),
-	MinColWidth is ItemLen + 1.
-
 atom_for_cols(Item, ItemAtom, ItemLen, MinColWidth)
 	:-
-	number(Item),
-	!,
-	number_codes(Item, ItemCodes),
+	bufwrite(ItemCodes, Item),
 	atom_codes(ItemAtom, ItemCodes),
-	'$strlen'(ItemAtom, ItemLen),
-	MinColWidth is ItemLen + 1.
-
-	%% general term:
-atom_for_cols(Item, ItemAtom, ItemLen, MinColWidth)
-	:-
-	term_codes(Item, ItemCodes),
-	atom_codes(ItemAtom, ItemCodes),
-	'$strlen'(ItemAtom, ItemLen),
+	atom_length(ItemAtom, ItemLen),
 	MinColWidth is ItemLen + 1.
 
 final_cols_widths(ListOfMinColsWidthsLists, ColsWidths)
@@ -217,23 +253,6 @@ fcw([RowMinColsWidths | TailListOfMinColsWidthsLists], CumRowMinCols, ColsWidths
 	:-
 	max_vector(RowMinColsWidths, CumRowMinCols, InterColsWidths),
 	fcw(TailListOfMinColsWidthsLists, InterColsWidths, ColsWidths).
-
-%%%%%%
-	%% Being added to library/arithx1
-max_vector([], [], []).
-max_vector([Left | LeftTail], [Right | RightTail], [Max | ResultTail])
-	:-
-	max(Left, Right, Max),
-	max_vector(LeftTail, RightTail, ResultTail).
-
-
-atoms_for_row([], RowNumCols, RowNumCols, [], [], []).
-atoms_for_row([Item | RowTail], CurNumCols, RowNumCols, [ItemAtom | RowAtomsTail], 
-		[ItemLen | RowItemsLen], [MinColWidth | RowMinColWidths])
-	:-
-	atom_for_cols(Item, ItemAtom, ItemLen, MinColWidth),
-	NextNumCols is CurNumCols + 1,
-	atoms_for_row(RowTail, NextNumCols, RowNumCols, RowAtomsTail, RowItemsLen, RowMinColWidths).
 
 mk_u_atoms([], _, []).
 mk_u_atoms([ItemLen | RowItemsLen], Code, [UAtom | UAtoms])
@@ -301,23 +320,7 @@ fixed_atoms_for_row([Item | RowTail], [ColWidth | ColWidthsTail], CurNumCols, Ro
 
 fixed_atom_for_cols(Item, ItemAtom, ColWidth, ItemPad)
 	:-
-	atom(Item),
-	!,
-	atom_codes(Item, ItemCodes),
-	complete_item_atom_pad(ItemCodes, ColWidth, ItemAtom, ItemPad).
-
-fixed_atom_for_cols(Item, ItemAtom, ColWidth, ItemPad)
-	:-
-	number(Item),
-	!,
-	number_codes(Item, ItemCodes),
-	complete_item_atom_pad(ItemCodes, ColWidth, ItemAtom, ItemPad).
-
-
-	%% general term:
-fixed_atom_for_cols(Item, ItemAtom, ColWidth, ItemPad)
-	:-
-	term_codes(Item, ItemCodes),
+	bufwrite(ItemCodes, Item),
 	complete_item_atom_pad(ItemCodes, ColWidth, ItemAtom, ItemPad).
 
 
@@ -381,187 +384,3 @@ col_fixed_output(ItemAtom, ItemPad, ColWidth, CurPos, NextPos, S)
 	
 endmod.
 
-/* =================== Samples ===================== */
-/* === Not exported. Invoke with builtins:<call> === */
-
-/*
-%% Rows data:
-
-best_books( [
-['Book',	'Author',	'Original language',	'First published',	'Approximate sales',	'Genre'],
-['The Lord of the Rings',	'J. R. R. Tolkien',	'English',	'1954-1955',	'150 million',	'fantasy'],
-['The Little Prince',	'Antoine de Saint-Exupery',	'French',	'1943',	'140 million',	'fiction'],
-['Harry Potter and the Philosopher\'s Stone',	'J. K. Rowling',	'English',	'1997',	'120 million',	'fantasy'],
-['And Then There Were None',	'Agatha Christie',	'English',	'1939',	'100 million',	'mystery'],
-['The Hobbit',	'J. R. R. Tolkien',	'English',	'1937',	'100 million',	'fantasy'],
-['Dream of the Red Chamber',	'Cao Xueqin',	'Chinese',	'1791',	'100 million',	'family saga']
-] ).
-
-silly_list( [
-	[abc, rjtir, x, y],
-	[yrtbv, h8t, x, yacc],
-	[34, f(4,5,6), some_silly(55,yurht, 123), thru]
-	] ).
-
-%% Sample routines:
-
-%% Minimal column routines:
-
-bb0 :-
-	best_books(BookList),
-	columns(BookList).
-
-bb0f :-
-	best_books(BookList),
-	open('books.txt', write, S),
-	columns(BookList, S),
-	close(S).
-
-bb0h2 :-
-	best_books(BookList),
-	BookList = [Header | Rest],
-	columns([u(Header,0'=) | Rest]).
-bb0h3 :-
-	best_books(BookList),
-	BookList = [Header | Rest],
-	columns([u(Header,0'+) | Rest]).
-
-t1 :- 
-	silly_list(ListOfRows),
-	columns(ListOfRows).
-
-t1h1 :- 
-	silly_list(ListOfRows),
-	ListOfRows = [Header | Rest],
-	columns([u(Header,0'+) | Rest]).
-
-t1h2 :- 
-	silly_list(ListOfRows),
-	ListOfRows = [Header | Rest],
-	columns([u(Header,0'_) | Rest]).
-
-t1f :-
-	silly_list(ListOfRows),
-	open('silly.txt', write, S),
-	columns(ListOfRows, S),
-	close(S).
-
-%% Fixed columns:
-
-bb1f :-
-	best_books(BookList),
-	open('books_fx.txt', write, S),
-	columns(BookList, [20, 20, 20, 10, 10, 10], S),
-	close(S).
-
-bb2 :-
-	best_books(BookList),
-	columns(BookList, [20, 20, 20, 10, 10, 10]).
-
-t2 :- 
-	silly_list(ListOfRows),
-	write('1234567890123456789012345678901234567890'),nl, 
-	columns(ListOfRows, [5,5,5,5]).
-
-t2h :-
-	silly_list(ListOfRows),
-	write('1234567890123456789012345678901234567890'),nl, 
-	columns([u([apple,orange,banana,kiwi],0'=) | ListOfRows], [5,5,5,5]).
-
-
-t :- t1, t1h1, bb0, bb2, bb0h2, t2, t2h.
-
-
-
-test_cols :-
-	test_var_columns_file,
-	test_var_columns_file_uh,
-	test_fxd_columns_file, 
-	test_fxd_columns_file_uh,
-	remove_file('silly.txt').
-
-test_var_columns_file :-
-	silly_list(ListOfRows),
-	open('silly.txt', write, S),
-	columns(ListOfRows, S),
-	close(S),
-	grab_lines('silly.txt', SillyColLines),
-	T1 = 'abc    rjtir     x                         y     ',
-	'$strlen'(T1, T1Len),
-	SillyColLines = [L1,L2,L3],
-	'$strlen'(L1, L1Len),
-	T1Len == L1Len,
-	T1 == L1,
-	!.
-test_var_columns_file :-
-	printf(user, 'test_var_columns_file test failed\n', []).
-
-
-test_var_columns_file_uh :-
-	silly_list(ListOfRows),
-	ListOfRows = [Header | Rest],
-	open('silly.txt', write, S),
-	columns([u(Header,0'+) | Rest], S),
-	close(S),
-	grab_lines('silly.txt', SillyColLines),
-
-	T1 = 'abc    rjtir     x                         y     ',
-	'$strlen'(T1, T1Len),
-	SillyColLines = [L1,LUH,L2,L3],
-	'$strlen'(L1, L1Len),
-	T1Len == L1Len,
-	T1 == L1,
-	TH = '+++    +++++     +                         +     ',
-	'$strlen'(TH, THLen),
-	'$strlen'(LUH, LUHLen),
-	THLen == LUHLen,
-	TH == LUH,
-	!.
-
-test_var_columns_file_uh :-
-	printf(user, 'test_var_columns_file_uh test failed\n', []).
-
-
-
-test_fxd_columns_file :-
-	silly_list(ListOfRows),
-	open('silly.txt', write, S),
-	columns(ListOfRows, [5,5,5,5], S),
-	close(S),
-	grab_lines('silly.txt', SillyColLines),
-	T1 = 'abc   rjtir x     y     ',
-	'$strlen'(T1, T1Len),
-	SillyColLines = [L1,L2,L3],
-	'$strlen'(L1, L1Len),
-	T1Len == L1Len,
-	T1 == L1,
-	!.
-test_fxd_columns_file :-
-	printf(user, 'test_fxd_columns_file test failed\n', []).
-
-
-test_fxd_columns_file_uh :-
-	silly_list(ListOfRows),
-	ListOfRows = [Header | Rest],
-	open('silly.txt', write, S),
-	columns([u(Header,0'+) | Rest], [5,5,5,5], S),
-	close(S),
-	grab_lines('silly.txt', SillyColLines),
-
-	T1 = 'abc   rjtir x     y     ',
-	'$strlen'(T1, T1Len),
-	SillyColLines = [L1,LUH,L2,L3],
-	'$strlen'(L1, L1Len),
-	T1Len == L1Len,
-	T1 == L1,
-	TH = '+++++ +++++ +++++ +++++ ',
-	'$strlen'(TH, THLen),
-	'$strlen'(LUH, LUHLen),
-	THLen == LUHLen,
-	TH == LUH,
-	!.
-
-test_fxd_columns_file_uh :-
-	printf(user, 'test_fxd_columns_file_uh test failed\n', []).
-
-*/

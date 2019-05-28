@@ -25,6 +25,10 @@ predicates:
     Rows to user_output. The array is split into columns of minimal  
     size to contain the appropriate terms, with one character  wide  
     blank separators  
+    If any row R is surrounded by u(R, 0'<C>), where <C> is a single  
+    character, then the output of row R is followed (below) by a line  
+    of the character <C>.  Surrounding R by u(R) is equivalent to  
+    surrounding it by u(R, 0'=).  
 
 **`columns/2`** If ListOfRows is a list of lists of terms (Rows), and  
     if all of the Rows are of the same length, outputs a  
@@ -35,6 +39,7 @@ predicates:
     Note: if arg(2) is passed a list of integers(ColWidths), then  
     columns(ListOfRows, ColsWidths user_output)  
     is invoked.  
+    Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.  
 
 **`columns/3`** If ListOfRows is a list of lists of terms (Rows), and  
     if all of the Rows are of the same length, and if ColWidths  
@@ -45,6 +50,7 @@ predicates:
     the corresponding integer of ColWidths, with one character-wide  
     blank separators.  Terms in Rows which are of size > the  
     corresponding integer of ColWidths are trucated.  
+    Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.  
 
 ## EXAMPLES
 
@@ -78,6 +84,25 @@ abc    rjtir     x                         y
 ___    _____     _                         _     
 yrtbv  h8t       x                         yacc  
 34     f(4,5,6)  some_silly(55,yurht,123)  thru  	
+
+?- listing(city_table).
+
+% user:city_table/1
+city_table(
+[[city,location,population],
+[New York,loc(23,35),20.1],
+[Tokyo,loc(23,45),15.3],
+[Paris,loc(167,132),9.4] ]).
+
+?- listing(cities).
+% user:cities/0
+cities :- city_table(_A), columns(_A).
+
+?- cities.
+city      location      population  
+New York  loc(23,35)    20.1        
+Tokyo     loc(23,45)    15.3        
+Paris     loc(167,132)  9.4       
 ```
 
 **`columns/3`**
