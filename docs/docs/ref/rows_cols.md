@@ -24,10 +24,10 @@ predicates:
     rectangular array of the terms appearing in the  
     Rows to user_output. The array is split into columns of minimal  
     size to contain the appropriate terms, with one character  wide  
-    blank separators  
-    If any row R is surrounded by u(R, 0'<C>), where <C> is a single  
+    blank separators.  
+    If any row R is surrounded by u(R, 0'C), where C is any single  
     character, then the output of row R is followed (below) by a line  
-    of the character <C>.  Surrounding R by u(R) is equivalent to  
+    of the character C.  Surrounding R by u(R) is equivalent to  
     surrounding it by u(R, 0'=).  
 
 **`columns/2`** If ListOfRows is a list of lists of terms (Rows), and  
@@ -103,6 +103,30 @@ city      location      population
 New York  loc(23,35)    20.1        
 Tokyo     loc(23,45)    15.3        
 Paris     loc(167,132)  9.4       
+
+?- listing(city_town_table).
+% user:city_town_table/1
+city_town_table(
+[u([City,Location,Population]),
+[Tokyo,loc(35,139),9.3],
+[New York,loc(40,74),8.6],
+u([Paris,loc(48,24),2.1],0'_),
+[Silver City,loc(32,108),0.01],
+[Faro,loc(62,133),0.000344] ]).
+
+?- listing(cities_towns).
+% user:cities_towns/0
+cities_towns :- city_town_table(_A), columns(_A).
+
+?- cities_towns.
+City         Location     Population  
+====         ========     ==========  
+Tokyo        loc(35,139)  9.3         
+New York     loc(40,74)   8.6         
+Paris        loc(48,24)   2.1         
+_____        __________   ____        
+Silver City  loc(32,108)  0.000344    
+Faro         loc(62,133)  0.01        
 ```
 
 **`columns/3`**
