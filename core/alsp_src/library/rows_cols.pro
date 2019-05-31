@@ -31,7 +31,7 @@ export columns/3.
  |      rectangular array of the terms appearing in the
  |	Rows to user_output. The array is split into columns of minimal 
  |	size to contain the appropriate terms, with one character  wide 
- |	blank separators.
+ |	blank separators.<br>
  |	If any row R is surrounded by u(R, 0'C), where C is any single
  |	character, then the output of row R is followed (below) by a line
  |	of the character C.  Surrounding R by u(R) is equivalent to
@@ -132,10 +132,10 @@ columns(ListOfRows)
  |      rectangular array of the terms appearing in the
  |	Rows to OutputStream. The array is split into columns of minimal 
  |	size to contain the appropriate terms, with one character  wide 
- |	blank separators.
- |	Note: if arg(2) is passed a list of integers(ColWidths), then
+ |	blank separators.<br>
+ |	Note: if arg(2) is passed a list of integers(ColWidths), then<br>
  |      	columns(ListOfRows, ColsWidths user_output)
- |	is invoked.
+ |	is invoked.<br>
  |	Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.
  *!--------------------------------------------------------------------*/
 columns(ListOfRows, ColsWidths)
@@ -169,7 +169,7 @@ columns(ListOfRows, OutputStream)
  |	OutputStream. The array is split into columns of the size of
  |	the corresponding integer of ColWidths, with one character-wide 
  |	blank separators.  Terms in Rows which are of size > the 
- |	corresponding integer of ColWidths are trucated.
+ |	corresponding integer of ColWidths are trucated.<br>
  |	Surrounding rows by u(R,0'<C>) and u(R) is just as for columns/1.
  |
  | Examples:
