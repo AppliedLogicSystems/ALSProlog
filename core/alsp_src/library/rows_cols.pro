@@ -283,10 +283,6 @@ pads_for_row([ItemLen | RowItemsLensTail], [ColWidth | ColsWidthsTail], [ItemPad
 	),
 	pads_for_row(RowItemsLensTail, ColsWidthsTail, RowPadsTail).
 
-
-%put_code(S, 0'|).
-
-
 	/* ========= Fixed column size support ========= */
 
 fixed_mk_rows_atoms([], _, NumCols, [], []).
