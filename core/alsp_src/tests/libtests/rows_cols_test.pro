@@ -24,9 +24,9 @@ test_var_columns_file :-
 	close(S),
 	grab_lines('silly.txt', SillyColLines),
 	T1 = 'abc    rjtir     x                         y     ',
-	'$strlen'(T1, T1Len),
+	atom_length(T1, T1Len),
 	SillyColLines = [L1,L2,L3],
-	'$strlen'(L1, L1Len),
+	atom_length(L1, L1Len),
 	T1Len == L1Len,
 	T1 == L1.
 
@@ -39,14 +39,14 @@ test_var_columns_file_uh :-
 	grab_lines('silly.txt', SillyColLines),
 
 	T1 = 'abc    rjtir     x                         y     ',
-	'$strlen'(T1, T1Len),
+	atom_length(T1, T1Len),
 	SillyColLines = [L1,LUH,L2,L3],
-	'$strlen'(L1, L1Len),
+	atom_length(L1, L1Len),
 	T1Len == L1Len,
 	T1 == L1,
 	TH = '+++    +++++     +                         +     ',
-	'$strlen'(TH, THLen),
-	'$strlen'(LUH, LUHLen),
+	atom_length(TH, THLen),
+	atom_length(LUH, LUHLen),
 	THLen == LUHLen,
 	TH == LUH.
 
@@ -57,9 +57,9 @@ test_fxd_columns_file :-
 	close(S),
 	grab_lines('silly.txt', SillyColLines),
 	T1 = 'abc   rjtir x     y     ',
-	'$strlen'(T1, T1Len),
+	atom_length(T1, T1Len),
 	SillyColLines = [L1,L2,L3],
-	'$strlen'(L1, L1Len),
+	atom_length(L1, L1Len),
 	T1Len == L1Len,
 	T1 == L1.
 
@@ -72,14 +72,14 @@ test_fxd_columns_file_uh :-
 	grab_lines('silly.txt', SillyColLines),
 
 	T1 = 'abc   rjtir x     y     ',
-	'$strlen'(T1, T1Len),
+	atom_length(T1, T1Len),
 	SillyColLines = [L1,LUH,L2,L3],
-	'$strlen'(L1, L1Len),
+	atom_length(L1, L1Len),
 	T1Len == L1Len,
 	T1 == L1,
 	TH = '+++++ +++++ +++++ +++++ ',
-	'$strlen'(TH, THLen),
-	'$strlen'(LUH, LUHLen),
+	atom_length(TH, THLen),
+	atom_length(LUH, LUHLen),
 	THLen == LUHLen,
 	TH == LUH.
 
