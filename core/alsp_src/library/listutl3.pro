@@ -164,13 +164,13 @@ encode_list([Item | Items], [CurCode | RestCodes], [CurCode-Item | CodedItems])
  |
  |	OrderedTags and DefArgs are lists of the same length.
  |	The output ArgsList will be the same length as OrderedTags.
- |	ArgSpecs is a list of equations of the form
- |		Tag = Value
+ |	ArgSpecs is a list of equations of the form<br>
+ |		Tag = Value<br>
  |	where each of the Tags in such an equation must be on the list
  |	OrderedTags (but not all OrderedTags elements must occur on ArgSpecs);
  |	in fact, ArgSpecs can be empty.  The elements X of ArgsList are defined
- |	as follows:  if X corresponds to Tag on OrderedTags, then: 
- |	if Tag=Val occurs on ArgSpecs, X is Val; 
+ |	as follows:  if X corresponds to Tag on OrderedTags, then:<br>
+ |	if Tag=Val occurs on ArgSpecs, X is Val;<br> 
  |	otherwise, X is the element of DefArgs corresponding to Tag.
  *!--------------------------------------------------------------------*/
 
@@ -193,14 +193,14 @@ struct_lookup_subst([Tag | OrderedTags], [DefVal | DefArgs],
  |
  |  - looks up an equation on a list, with a default
  |
- |  PList is a list of equations of the form
+ |  PList is a list of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
- |  check_default(PList, Tag, Default, Value) succeeds if:
- |  i)	 Tag=Value belongs to PList; or,
- |  ii)	 if Default is of the form Value^DC and call(DC) succeeds, or
- |  iii) if Default=Value
+ |  check_default(PList, Tag, Default, Value) succeeds if:<br>
+ |  i)	 Tag=Value belongs to PList; or,<br>
+ |  ii)	 if Default is of the form Value^DC and call(DC) succeeds, or<br>
+ |  iii) if Default=Value<br>
  |  iv)  in cases ii,iii) it is assumed that there is at
  |       most one equation on PList with left side Tag
  *!-----------------------------------------------------*/
@@ -219,16 +219,16 @@ check_default(PList, Tag, Default, Default).
  |
  |  - looks up a tagged equation on a List, and deletes it
  |
- |  PList is a list of equations of the form
+ |  PList is a list of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |  check_default_del(PList, Tag, Default, Value,ReducedPList) 
- |  succeeds if:
- |  i)	 Tag=Value does not belong to PList; or,
+ |  succeeds if:<br>
+ |  i)	 Tag=Value does not belong to PList; or,<br>
  |  ii)	 Tag=Value belongs to PList, and the difference
  |	 between PList and ReducedPList is the removal
- |	 of the Tag=Value equation.
+ |	 of the Tag=Value equation.<br>
  |  iii) it is assumed that there is at most one equation on 
  |       PList with left side Tag
  *!-----------------------------------------------------*/
@@ -247,9 +247,9 @@ check_default_del([OTag=OVal | RestPList],Tag,Default,Value,
  |
  |	- removes tagged equations from a list
  |
- |	EqnList is a list of equations of the form
+ |	EqnList is a list of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	and TagsToRemove is a list of atoms which are candidates
  |	to occur as tags in these equations.  ReducedEqnList is
@@ -273,24 +273,24 @@ remove_tagged([Tag=Value | PList], TagsToRemove, [Tag = Value | RedPList])
  |
  |	- recursively merges two tagged equation lists
  |
- |	LeftEqnList and RightEqnList are lists of equations of the form
+ |	LeftEqnList and RightEqnList are lists of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	MergedLists consists of all equations occurring in either
- |	LeftEqnList or RightEqnList, where if the equations
+ |	LeftEqnList or RightEqnList, where if the equations<br>
  |	
- |		Tag=LVal    and Tag = RVal
+ |		Tag=LVal    and Tag = RVal<br>
  |
  |	occur in LeftEqnList and RightEqnList, respectively, 
- |	MergedLists will contain the equation
+ |	MergedLists will contain the equation<br>
  |
- |		Tag = MVal
+ |		Tag = MVal<br>
  |
- |	where:
+ |	where:<br>
  |	a)	If both of LVal and RVal are lists, then MVal is obtained by
  |		recursively calling merge_plists(LVal, RVal, MVal), or if
- |		that fails, checking that they are identical;
+ |		that fails, checking that they are identical;<br>
  |	b)	Otherwise, MVal is LVal.
  *!-----------------------------------------------------*/
 merge_plists(Left, [], Left) :-!.
@@ -317,19 +317,19 @@ merge_plists([Tag=LVal | RestLeft], Right, [Tag=MergeVal | RestResult])
  |
  |	- recursively merges two tagged equation lists
  |
- |	LeftEqnList and RightEqnList are lists of equations of the form
+ |	LeftEqnList and RightEqnList are lists of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	MergedLists consists of all equations occurring in either
- |	LeftEqnList or RightEqnList, where if the equations
+ |	LeftEqnList or RightEqnList, where if the equations<br>
  |	
- |		Tag=LVal    and Tag = RVal
+ |		Tag=LVal    and Tag = RVal<br>
  |
  |	occur in LeftEqnList and RightEqnList, respectively, 
- |	MergedLists will contain the equation
+ |	MergedLists will contain the equation<br>
  |
- |		Tag = LVal
+ |		Tag = LVal<br>
  *!-----------------------------------------------------*/
 merge_tagged_lists(Left, [], Left) :-!.
 merge_tagged_lists([], Right, Right) :-!.
@@ -347,9 +347,9 @@ merge_tagged_lists([Tag=LVal | RestLeft], Right, [Tag=LVal | RestResult])
  |	- destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
- |	and NewValue is an arbitrary prolog term, then:
+ |	and NewValue is an arbitrary prolog term, then:<br>
  |	i)	If an equation Tag=OldVal occurs on PList,
- |		destructively alters that eqn to become Tag=NewValue;
+ |		destructively alters that eqn to become Tag=NewValue;<br>
  |	ii)	Has no effect otherwise.
  *!-----------------------------------------------------*/
 mangle_change_tagged([],_,_).
@@ -370,10 +370,10 @@ mangle_change_tagged([_ | WkngPList],Tag,NewValue)
  |	- NON-destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
- |	and NewValue is an arbitrary prolog term, then:
+ |	and NewValue is an arbitrary prolog term, then:<br>
  |	i)	If an equation Tag=OldVal occurs on PList,
  |		then NewPList is the result of altering that eqn 
- |		to become Tag=NewValue;
+ |		to become Tag=NewValue;<br>
  |	ii)	Otherwise, NewPList = OldPList.
  *!-----------------------------------------------------*/
 subst_tagged([],_,_, []).

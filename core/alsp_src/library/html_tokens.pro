@@ -20,7 +20,7 @@ export tokenize_file/2.
  |
  | 	- extracts all Tokens from the File
  |
- |	Opens a stream to File, and uses read_tokens/2 to read all
+ |	Opens a stream to File, and uses `read_tokens/2` to read all
  |	tokens found in File into the list Tokens.
  *!--------------------------------------------------------------------*/
 tokenize_file(File, Tokens)
@@ -36,7 +36,7 @@ tokenize_file(File, Tokens)
  |
  | 	- extracts all Tokens from the File
  |
- | 	Just like tokenize_file/2, but wraps read_tokens in unwind_protect
+ | 	Just like `tokenize_file/2`, but wraps read_tokens in unwind_protect
  *!--------------------------------------------------------------------*/
 grab_html_tokens(Path, HTMLPageTokens)
     :-
@@ -51,8 +51,8 @@ grab_html_tokens(Path, HTMLPageTokens)
  | 	- extracts all Tokens from a stream
  |
  | 	S is a read-stream to a potential source of tokens;
- |	Reads all tokens out of stream S into list Tokens by invoking 
- |	the workhorse read_tokens/5.
+ |	Reads all tokens out of stream S into list Tokens by invoking
+ |	the workhorse `read_tokens/5`.
  *!--------------------------------------------------------------------*/
 read_tokens(S, Tokens)
 	:-
@@ -72,17 +72,17 @@ read_tokens(S, Tokens)
  |   FlagOut = one of: normal, n1, comment
  |
  | Reads as many tokens as it can from S, returning them in Tokens,
- | 	with Tail = the (uninstantiated) tail of Tokens;  
- | if FlagIn = normal, begins reading in "normal" tokenizing mode;
+ | 	with Tail = the (uninstantiated) tail of Tokens;<br>
+ | if FlagIn = normal, begins reading in "normal" tokenizing mode;<br>
  | if FlagIn = comment, begins reading in mode appropriate for
- |    the interior of a comment;
+ |    the interior of a comment;<br>
  | if FlagIn = comment_eol, has encountered end of line while reading
- |    the interior of a comment;
+ |    the interior of a comment;<br>
  | if FlagIn = n1, an opening '<' has been read, which __might__
- |    be follwed by '--', starting a comment (or might not);
+ |    be follwed by '--', starting a comment (or might not);<br>
  | if FlagIn = href(T, Tokens), an opening 'T=' (T=href/src/alt) has been read, 
  |    so we must process the stream following in a manner appropriate 
- |    for the context 'href=...'
+ |    for the context 'href=...'<br>
  | FlagOut is the mode current when the last token is read.
  *----------------------------------------------------------------*/
 read_tokens(comment_eol, S, Tail, Tail, comment)
@@ -191,12 +191,12 @@ disp_read_string_char_list_xtnd(C, S, [C | StringChars], NxtC)
  |   FlagOut = one of: normal, n1, comment
  |
  | Reads as many tokens as it can from S, returning them in Tokens,
- | with Tail = the (uninstantiated) tail of Tokens;  
- | if FlagIn = normal, begins reading in "normal" tokenizing mode;
+ | with Tail = the (uninstantiated) tail of Tokens;<br>
+ | if FlagIn = normal, begins reading in "normal" tokenizing mode;<br>
  | if FlagIn = comment, begins reading in mode appropriate for
- |    the interior of a comment;
+ |    the interior of a comment;<br>
  | if FlagIn = n1, an opening '<' has been read, which __might__
- |    be follwed by '--', starting a comment (or might not);
+ |    be follwed by '--', starting a comment (or might not);<br>
  | FlagOut is the mode current when the last token is read.
  *----------------------------------------------------------------*/
 read_tokens(FlagIn, -1, S, Tail, Tail, FlagIn) :-!.

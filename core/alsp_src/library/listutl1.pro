@@ -158,8 +158,8 @@ intersect0([B | RestL], Accum, IntsectL)
  |
  |	If A and B are lists, returns the ordered union of A and B, consisting
  |	of all items occurring on either A or B, with all occurrences of items
- |	from A occurring before any items from B-A; equivalent to:
- |		append(A,B-A,AuB);
+ |	from A occurring before any items from B-A; equivalent to:<br>
+ |		append(A,B-A,AuB);<br>
  |	If both lists have the property that each element occurs no more 
  |	than once, then the union also has this property.
  *!--------------------------------------------------------------------*/
