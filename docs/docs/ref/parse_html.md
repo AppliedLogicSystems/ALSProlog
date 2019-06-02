@@ -33,15 +33,15 @@ predicates:
 
 ## DESCRIPTION
 
-**`grab_pxml/2`** Calls grab_html_tokens/2 to read the list L of HTML tokens out
+**`grab_pxml/2`** Calls `grab_html_tokens/2` to read the list L of HTML tokens out
     of Path, and then parses L into a (single !doctype) PXML term.
 
-**`grab_pxml_with_tagged/3`** Calls grab_html_tokens/2 to read the list L of HTML tokens out
+**`grab_pxml_with_tagged/3`** Calls `grab_html_tokens/2` to read the list L of HTML tokens out
     of FilePath, and then parses L into a (single !doctype) PXML term,
     where it accumulates tags of component terms in TagVals, with
     the tagged terms accumulated in (lists) on TagVals.
 
-**`grab_pxml_with_paths/5`** Calls grab_html_tokens/2 to read the list L of HTML tokens out
+**`grab_pxml_with_paths/5`** Calls `grab_html_tokens/2` to read the list L of HTML tokens out
     of FilePath, and then parses L into a (single !doctype) PXML term,
     the the tagged terms (eqns)  accumulated in (lists) on TagVals,
     and also accumulates pairs (Stack, Term) on Paths, where:<br>
@@ -53,13 +53,15 @@ predicates:
 **`parse_html_toks_to_pxml_vals/3`** Calls parse_html_toks_to_pxml/5, ignoring the Stack arguments.
 
 **`parse_html_toks_to_pxml/5`** The workhorse. Parses a list of HTML-tokens, as produced by
-    read_tokens/5 in html_tokens.pro, into a list of Prolog Terms
+    `read_tokens/5` in `html_tokens.pro`, into a list of Prolog Terms
     consituting a PXML representation of the source.
-    The pair (StackIn, StackOut) implements the parser stack.
+    The pair (StackIn, StackOut) implements the parser stack.<br>
     The difference list<br>
-    TagsValsDList<br>
+    <br>
+    &emsp; 		TagsValsDList<br>
+    <br>
     provides a means of capturing components of the PXML output. ( See the
-    comment for handle_tag/6 for a description of TagsValsDList. )
+    comment for `handle_tag/6` for a description of TagsValsDList. )
 
 **`read_pxml_term/7`** Reads the (largest) PXML term possible starting at the
     beginning of Tokens.
@@ -69,10 +71,10 @@ predicates:
 
 **`unary_tag/1`** Syntactic roles of tags:<br>
     Spec rules about optional tags:<br>
-    https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
+    &emsp;    https://html.spec.whatwg.org/multipage/syntax.html#optional-tags<br>
     See also:<br>
-    https://html.spec.whatwg.org/multipage/syntax.html<br>
-    https://html.spec.whatwg.org/multipage/parsing.html<br>
+    &emsp;    https://html.spec.whatwg.org/multipage/syntax.html<br>
+    &emsp;    https://html.spec.whatwg.org/multipage/parsing.html<br>
     unary_tag/1 is exported for use by pxml_utils.pro.
 
 ## EXAMPLES

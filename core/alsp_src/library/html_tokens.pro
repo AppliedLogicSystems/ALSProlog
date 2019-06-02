@@ -20,7 +20,7 @@ export tokenize_file/2.
  |
  | 	- extracts all Tokens from the File
  |
- |	Opens a stream to File, and uses read_tokens/2 to read all
+ |	Opens a stream to File, and uses `read_tokens/2` to read all
  |	tokens found in File into the list Tokens.
  *!--------------------------------------------------------------------*/
 tokenize_file(File, Tokens)
@@ -36,7 +36,7 @@ tokenize_file(File, Tokens)
  |
  | 	- extracts all Tokens from the File
  |
- | 	Just like tokenize_file/2, but wraps read_tokens in unwind_protect
+ | 	Just like `tokenize_file/2`, but wraps read_tokens in unwind_protect
  *!--------------------------------------------------------------------*/
 grab_html_tokens(Path, HTMLPageTokens)
     :-
@@ -51,8 +51,8 @@ grab_html_tokens(Path, HTMLPageTokens)
  | 	- extracts all Tokens from a stream
  |
  | 	S is a read-stream to a potential source of tokens;
- |	Reads all tokens out of stream S into list Tokens by invoking 
- |	the workhorse read_tokens/5.
+ |	Reads all tokens out of stream S into list Tokens by invoking
+ |	the workhorse `read_tokens/5`.
  *!--------------------------------------------------------------------*/
 read_tokens(S, Tokens)
 	:-
