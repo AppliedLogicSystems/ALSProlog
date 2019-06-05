@@ -193,13 +193,6 @@ If Size is less than or equal to the actual size of the given UIABuf, the call
 reduces the size of UIABuf by removing all but one of the trailing zeros (null
 bytes). 
 
-When Atom is a Prolog atom (symbol or UIA),
-
-    '$strlen(Atom,Size)'
-
-returns the length of the print name of that atom (thus not counting the terminating
-null byte).
-
 ## 7.4 Observations on Using UIAs
 
 As indicated by the rules presented in Section 7.2 (Interning UIAs), ALS Prolog
