@@ -1657,9 +1657,27 @@ printf/[...] accepts a format atom or string together with a list of arguments t
 possibly a stream to print to, and possibly options. The format atom or string contains characters to be printed as is, placeholder characters to control the formats of the arguments being printed,
 and backslash characters for special output characters. The figure below illustrates the general structure of the printf/2 predicate.
 
-![](images/PrintfFormatting.png)
+<figure>
+<svg version="1.1" baseProfile="full" width="100%" viewBox="0 0 616 100"
+    xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" orient="auto" markerWidth="2" markerHeight="4" refX="0.1" refY="2">
+      <!-- triangle pointing right (+x) -->
+      <path d='M0,0 V4 L2,2 Z' fill="black"/>
+    </marker>
+  </defs>
+  <g marker-end='url(#arrow)' stroke-width="3" stroke="black" fill="transparent">
+    <path d="M485 50 q -220 -70 -220 0"/>
+    <path d="M515 50 q -190 -70 -190 0"/>
+    <path d="M555 50 q -175 -70 -175 0"/>
+  </g>
+  <text x="308" y="72" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle">
+    printf("Solution: %t + %t = %t \n", [X, Y, Z])
+  </text>
+</svg>
+<figcaption>Figure. printf formatting</figcaption>
+</figure>
 
-Figure. printf formatting
 
 As a simple example, the following clause defines a predicate for adding two numbers and printing the result:
 ```
