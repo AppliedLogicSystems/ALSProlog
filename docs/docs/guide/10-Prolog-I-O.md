@@ -1752,46 +1752,6 @@ It is important that `Stream` above is the stream argument to `print/3` or `prin
 
 There are a number of printf examples on the page for [`printf/1-4`](../ref/printf.html) in the Reference Manual.
 
-DROP THIS:  
-printf/4 is effectively defined as follows:
-```
-If Format = [],
-    printf(Alias_or_stream, Format, ArgList, Options)
-succeeds; otherwise,
-    printf(Alias_or_stream, Format, ArgList, Options)
-holds provided that:
-If
-    Format = ["%t" | FormatTail] and ArgList = [T | ArgListTail],
-then
-    print_term(Alias_or_stream, T, Options) and
-    printf(Alias_or_stream, FormatTail,ArgListTail,Options)
-else if
-    Format = ["%p" | FormatTail] & ArgList = [T | ArgListTail],
-then if
-    T = S^PG & S=Alias_or_stream
-    then call(PG)
-    else if
-        T = [S,O]^PG & S=Alias_or_stream & O=Options
-        then call(PG)
-        else
-            call(T) and
-            printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-else if Format = ["%%" | FormatTail] ,
-then
-    output the character % to Alias_or_stream and
-    printf(Alias_or_stream,FormatTail,ArgListTail,Options),
-else if
-    Format = [Head | FormatTail] & Head is a C active format string
-    & ArgList = [T | ArgListTail],
-then
-    output T to Alias_or_stream in format Head in the manner of C printf,
-    & printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-else
-    Format = [C | FormatTail] &
-    put_char(Alias_or_stream, C) &
-    printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-```
-XXXXXXXXXXXXXX
 ```
 sprintf/3
 sprintf(Alias_or_stream,Format,ArgList)

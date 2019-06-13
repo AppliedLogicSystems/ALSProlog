@@ -73,7 +73,7 @@ The action of placeholders can be modified by *extent expressions*, which appear
 
 The actions of `%t` and `%p` are defined by the builtin ALS Prolog machinery.  The actions all other placeholders, include the effects of extent expressions are defined by passing them off to the underlying C machinery.
 
-Both `printf_opt(Format, ArgList, WriteOptions)` and `printf(Stream_or_Alias, Format, ArgList, WriteOptions)` allow one to apply *write options* (see [Write options](../guide/10-Prolog-I-O/#1072-write-options)).
+Both `printf_opt(Format, ArgList, WriteOptions)` and `printf(Stream_or_Alias, Format, ArgList, WriteOptions)` allow one to apply *write options* (see [Write options](../guide/10-Prolog-I-O.html#1072-Write-options)).
 
 
 
@@ -151,5 +151,5 @@ yes.
 - [`write/[1,2]`](write.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)
-- [Printf in the User Guide](../guide/10-Prolog-I-O/#1074-printf)
+- [Printf in the User Guide](../guide/10-Prolog-I-O.html#1074-printf)
 - Unix/C Reference Manuals: printf(3S)
