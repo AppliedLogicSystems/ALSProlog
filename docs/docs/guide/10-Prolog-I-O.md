@@ -1452,7 +1452,7 @@ depth_computation(Val) [default: Val = nonflat]
 line_end(Bool) [default: Bool = true]
     When Bool = true, nl(_) is normal; when Bool = false, line-breaks (new lines) are preceeded by a \ .
 ```
-### 10.7.3 Writing ouptut.
+### 10.7.3 Writing output.
 ```
 write_term/2
 write_term(Term, Options)
@@ -1629,7 +1629,12 @@ write_clauses(+, +, +)
 ```
 If Clauses is a list of terms (to be viewed as clauses), write_clauses/3 recursively applies write_clause/3 to the elements of Clauses.
 ### 10.7.4 Printf.
+The `printf` family of predicates are enhanced versions of the standard C library `printf` functionality.
+A call to `printf` outputs the list of data in `ArgList` (numbers, strings, terms, etc), formatted as text based on directives in the `Format` string/atom. In addition to supporting most of the standard C printf
+conversion-specifications, `printf` has extended Prolog specifiers for terms (%t) and print-procedures (%p).
+
 See also [`printf/1-4`](../ref/printf.html) in the Reference Manual.
+
 ``` 
 printf/1
 printf(Format)
@@ -1651,10 +1656,8 @@ printf/4
 printf(Alias_or_stream,Format,ArgList,Options)
 printf(+,+,+,+)
 ```
-The printf/[...] group of predicates provides a powerful formatted printing facility
-closely related to the corresponding facilities in the C programming language.
 printf/[...] accepts a format atom or string together with a list of arguments to print,
-possibly a stream to print to, and possibly options. The format atom or string contains characters to be printed as is, placeholder characters to control the formats of the arguments being printed,
+possibly a stream to print to, and possibly options. The format atom or string contains characters to be printed as is, argument placeholder characters to control the formats of the items being printed,
 and backslash characters for special output characters. The figure below illustrates the general structure of the printf/2 predicate.
 
 <figure>

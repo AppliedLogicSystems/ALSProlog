@@ -56,16 +56,26 @@ yes.
 
 `printf(Format, ArgList)` is equivalent to `printf(Stream_or_Alias, Format, ArgList)`, where `Stream_or_Alias` has been set to `user_output`.  `ArgList` is a list of prolog expressions which will be output as elements of the atom `Format` being output.  Conceptually, one scans `Format` from left-to-right, assembling the list of format expressions occurring in `Format`, and matching them against the corresponding prolog expression in `ArgList`.  The basic format characters are listed below, together with their effects on the matching prolog expressions in `ArgList`:
 
-`%t`&nbsp;&nbsp;print an arbitrary prolog term, as output by write/1;  
-`%d`&nbsp;&nbsp;print an integer number in decimal;  
-`%o`&nbsp;&nbsp;print an integer number in octal;  
-`%x`&nbsp;&nbsp;print an integer number in hexadecimal with lower case letters;  
-`%X`&nbsp;&nbsp;print an integer number in hexadecimal with upper case letters;  
-`%f`&nbsp;&nbsp;print a floating point number (printed in the form dddd.dddddd);  
-`%E`&nbsp;&nbsp;print a floating point number (printed in scientific notation: d.dddEddd);  
-`%g`&nbsp;&nbsp;print a floating point number (printed either as f or E, depending on value and precision);  
-`%c`&nbsp;&nbsp;print the individual character C corresponding to an integer 0'C;  
-`%s`&nbsp;&nbsp;print a prolog string or atom;  
+ALS Prolog placeholder character extensions:  
+
+| Char  | Action                                               |
+| ----- | ---------------------------------------------------- |
+| `%t`  | print an arbitrary prolog term, as output by write/1 |
+| `%p`  | execute a custom print action                        |
+
+Placeholder characters supported by ALS Prolog and C:
+
+| Char  | Action                                                                            |
+| ----- | --------------------------------------------------------------------------------- |
+| `%d`  | print an integer number in decimal;                                               |
+| `%o`  | print an integer number in octal;                                                 |
+| `%x`  | print an integer number in hexadecimal with lower case letters;                   |
+| `%X`  | print an integer number in hexadecimal with upper case letters;                   | 
+| `%f`  | print a floating point number (printed in the form dddd.dddddd);                  | 
+| `%E`  | print a floating point number (printed in scientific notation: d.dddEddd);        |
+| `%g`  | print a floating point number (same as f or E, depending on value and precision); |
+| `%c`  | print the individual character C corresponding to an integer 0'C;                 |
+| `%s`  | print a prolog string or atom;                                                    |
 
 Integer and floating point numbers are preceded by a minus sign if the number is negative.
 
