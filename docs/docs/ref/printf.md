@@ -145,7 +145,7 @@ yes.
 |               geeks|
 yes.
 
-?- current_output(Stream),printf(Stream, '%p ABC', [Stream^write(23 > anm)]).
+?- current_output(Stream),printf(Stream, '%p ABC', [Stream^write(Stream, 23 > anm)]).
 23>anm ABC
 Stream=stream_descriptor('\a',open,console,'standard output',
     [noinput|output],false,-2,0,0,0,0,true,0,wt_opts(78,400,flat),[],wait,
@@ -153,6 +153,13 @@ Stream=stream_descriptor('\a',open,console,'standard output',
 
 yes.
 
+?- printf('%p ABC', [Stream^write(Stream, 23 > anm)]).
+23>anm ABC
+Stream=stream_descriptor('\a',open,console,'standard output',
+    [noinput|output],false,-2,0,0,0,0,true,0,wt_opts(78,400,flat),[],wait,
+    text,eof_code,true,0) 
+
+yes.
 ```
 ## SEE ALSO
 
