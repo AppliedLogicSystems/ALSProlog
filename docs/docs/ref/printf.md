@@ -43,7 +43,7 @@ printf(Stream_or_Alias, Format, ArgList, WriteOptions)
 
 `\%` -- prints a percent sign
 
-Any format characters (to be listed below) appearing in `Format` will be output unchanged by `printf(Format)`.  And any format characters appearing in `Format` which do not correspond to an element of `ArgList` will be output unchanged by `printf(Format)`.  For example:
+Any format characters (to be listed below) appearing in `Format` will be output unchanged by `printf(Format)`.  And any format characters appearing in `Format` which do not correspond to an element of `ArgList` will be output unchanged by `printf(Format, ArgList)`, `printf/3`, `printf_opt/3`, and `printf/4`.  For example:
 ```
 ?- printf('%d %t').
 %d %t
@@ -85,18 +85,16 @@ The actions of `%t` and `%p` are defined by the builtin ALS Prolog machinery.  T
 
 Both `printf_opt(Format, ArgList, WriteOptions)` and `printf(Stream_or_Alias, Format, ArgList, WriteOptions)` allow one to apply *write options* (see [Write options](../guide/10-Prolog-I-O.html#1072-write-options)).
 
-
-
-
-
-
 Using printf is generally much easier than using the equivalent [`write/1`](write.html), [`put/1`](put.html), and `nl/0` predicates because the whole message you want to print out can be assembled and carried out by one call to `printf`.
+
+The `%p` placeholder allows one to request execution of a custom print action in the following sense. The element of `ArgList` corresponding to a `%p` placeholder should be of the form `Stream^PrintGoal` or `[Stream,Options]^PrintGoal`, where `Stream` is a variable occurring in `PrintGoal`.  When the traversal of `Format`/placeholders + ``ArgList``/Expressions reaches the `%p` placeholder, the `Stream` variable from the corresponding `Stream^PrintGoal` (or `[Stream,Options]^PrintGoal`) from `ArgList` is bound to the output stream being written to by `printf/[...]` and `PrintGoal` is executed.  As seen in the last three examples below, the effect may be to output a value at the `%p` placeholder point, or it may be to carry out a more complex computation yielding a complex output on `Stream`.
+
 
 ## EXAMPLES
 ```
 ?- printf('hello world').
 hello world
-yes.
+yes.  
 
 ?- printf("Hello World!\t Wake Up!\nRise And Shine!").
 Hello World!	 Wake Up!
@@ -105,12 +103,10 @@ yes.
 
 ?- printf('Letters: %c%c%c\n', [0'a,0'B,0'c]).
 Letters: aBc
-
 yes.
 
 ?- printf('Contents: %t, Number of items: %d\n', [pocket(keys,wallet,watch), 3]).
 Contents: pocket(keys,wallet,watch), Number of items: 3
-
 yes.
 
 ?- printf('%t', ['ABC']).
@@ -144,26 +140,46 @@ yes.
 ?- printf("|%20.5s|", [geeksforgeeks]).
 |               geeks|
 yes.
-
-?- current_output(Stream),printf(Stream, '%p ABC', [Stream^write(Stream, 23 > anm)]).
-23>anm ABC
-Stream=stream_descriptor('\a',open,console,'standard output',
-    [noinput|output],false,-2,0,0,0,0,true,0,wt_opts(78,400,flat),[],wait,
-    text,eof_code,true,0) 
-
+```
+In the following examples for `%p`, we omit the display of the bindings of free variables (including `S` and `Stream`) contained in the `ArgList` element corresponding to `%p`.
+```
+?- sprintf(X, 'Answer: %p', [S^(X is 6*7, write(S,X))]).
+X="Answer: 42" 
 yes.
 
-?- printf('%p ABC', [Stream^write(Stream, 23 > anm)]).
-23>anm ABC
-Stream=stream_descriptor('\a',open,console,'standard output',
-    [noinput|output],false,-2,0,0,0,0,true,0,wt_opts(78,400,flat),[],wait,
-    text,eof_code,true,0) 
-
+?- sprintf(X, 'Answer: %p', [S^(X is 6*7, write(S,X))]).
+X="Answer: 42" 
 yes.
+```
+The next example makes use of columns/1 from the library.
+```
+?- printf("Game Summary:\n%p(avg score)", [S^columns([[usa,3.4],[uk,2.8]], S)]).
+Game Summary:
+usa  3.4  
+uk   2.8  
+(avg score)
+yes.
+```
+For the next example, first load the following predicate code:  
+bar(S, 0).  
+bar(S, N) :- put(S, 0'#), NN is N-1, bar(S, NN).
+```
+?- printf('Rain: %p\nSnow: %p\n', [S^(user:bar(S,10)), S^(user:bar(S,3))]).
+Rain: ##########
+Snow: ###
+yes.
+
+?- printf('\nThe required funds are %p annually.\n',
+?_   [Stream^( Euros = 600000, USD is Euros/1.14, write(Stream, Euros-euros),
+?_   write(Stream, ' ($'),write(Stream,USD), put(Stream, 0')) )]).
+
+The required funds are 600000-euros ($526315.7895) annually.
+yes.
+
 ```
 ## SEE ALSO
 
-- `nl/0` {%- comment %} TODO: missing {% endcomment %}
+- [`nl/0`](write.html)
 - [`put/1`](put.html)
 - [`write/[1,2]`](write.html)
 
