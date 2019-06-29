@@ -146,10 +146,6 @@ In the following examples for `%p`, we omit the display of the bindings of free 
 ?- sprintf(X, 'Answer: %p', [S^(X is 6*7, write(S,X))]).
 X="Answer: 42" 
 yes.
-
-?- sprintf(X, 'Answer: %p', [S^(X is 6*7, write(S,X))]).
-X="Answer: 42" 
-yes.
 ```
 The next example makes use of columns/1 from the library.
 ```
