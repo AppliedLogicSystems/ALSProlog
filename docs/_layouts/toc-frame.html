@@ -18,7 +18,7 @@ margin: 0;
 </STYLE>
 </HEAD>
 <BODY>
-<input id="mysearch" type="search" placeholder="Search" incremental>
+<!-- <input id="mysearch" type="search" placeholder="Search" incremental>  -->
 
 <ul>
 {%- assign groups = site.pages | where: "reference", true | where: "package", page.package | group_by: "group" %}
