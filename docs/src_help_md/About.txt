@@ -47,6 +47,19 @@ How to add a new alshelp *.md page:
 	doctools.pro: idx_page(<xx.yy>)
     This enters <xx.yy> in the right toc index for its package.
 ---------------
+Getting tables of documented/undocumented builtins, and library files:
+1.  Execute exprtd_blts.sh 
+2.  The various tables are in ResultDir:
+Undocumented builtins predicates which are exported:
+	undocd_exported_by_pred.txt
+	undocd_exported_by_bi_file.txt
+Documented builtins predicates which are exported:
+	docd_blts_by_pred.txt           
+	docd_blts_by_bi_file.txt        
+	docd_blts_by_md_file.txt        
+Documented vs Undocumented vs Inactive Library files:
+	Library_Files_Status.txt        
+---------------
 How I've been working:
 1. Open 1 terminal window(B) in ~src_help_md, and one(A) in ~src_help_md/md_help.
 2. In B, execute: open als_help.html
