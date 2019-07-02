@@ -1,4 +1,4 @@
-Files in this folder:
+ in this folder:
 ====================
 
 About.txt     - this file
@@ -50,6 +50,33 @@ How to create doc for stylized builtins or library pages:
     This is true for both library (-lib) and builtins(-blt) files.
     Multiple files of the same type (-lib or -blt) can be processed at once, using:
 	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
+---------------
+How to create doc for stylized builtins or library pages:
+1.  See alsp_src/library/lib_skeleton.txt for a description of the stylization;
+    See alsp_src/library/listutl[1-4].pro for examples of stylized files (examples missing)
+    See alsp_src/library/miscatom.pro for an example of a stylized file with examples
+2.  To create doc for a stylized library file, execute:
+	alspro doctools.pro -g file_doc -b -p -lib <file>.pro [-ow]
+    To create doc for a stylized builtins file, execute:
+	alspro doctools.pro -g file_doc -b -p -blt <file>.pro [-ow]
+    If the -ow switch is present, the existing ~ref/<file>.md doc file will be overwritten;
+    If -ow is not present, the existing ~ref/<file>.md doc file will not be overwritten;
+    This is true for both library (-lib) and builtins(-blt) files.
+    Multiple files of the same type (-lib or -blt) can be processed at once, using:
+	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
+---------------
+Getting tables of documented/undocumented builtins, and library files:
+1.  Execute exprtd_blts.sh 
+2.  The various tables are in ResultDir:
+Undocumented builtins predicates which are exported:
+	undocd_exported_by_pred.txt
+	undocd_exported_by_bi_file.txt
+Documented builtins predicates which are exported:
+	docd_blts_by_pred.txt           
+	docd_blts_by_bi_file.txt        
+	docd_blts_by_md_file.txt        
+Documented vs Undocumented vs Inactive Library files:
+	Library_Files_Status.txt        
 ---------------
 Workflow:
 0. In terminal B, in the ALSProlog/docs dir, execute: make run
