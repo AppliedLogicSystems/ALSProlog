@@ -51,6 +51,20 @@ How to create doc for stylized builtins or library pages:
     Multiple files of the same type (-lib or -blt) can be processed at once, using:
 	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
 ---------------
+How to create doc for stylized builtins or library pages:
+1.  See alsp_src/library/lib_skeleton.txt for a description of the stylization;
+    See alsp_src/library/listutl[1-4].pro for examples of stylized files (examples missing)
+    See alsp_src/library/miscatom.pro for an example of a stylized file with examples
+2.  To create doc for a stylized library file, execute:
+	alspro doctools.pro -g file_doc -b -p -lib <file>.pro [-ow]
+    To create doc for a stylized builtins file, execute:
+	alspro doctools.pro -g file_doc -b -p -blt <file>.pro [-ow]
+    If the -ow switch is present, the existing ~ref/<file>.md doc file will be overwritten;
+    If -ow is not present, the existing ~ref/<file>.md doc file will not be overwritten;
+    This is true for both library (-lib) and builtins(-blt) files.
+    Multiple files of the same type (-lib or -blt) can be processed at once, using:
+	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
+---------------
 Getting tables of documented/undocumented builtins, and library files:
 1.  Execute exprtd_blts.sh 
 2.  The various tables are in ResultDir:
@@ -64,27 +78,9 @@ Documented builtins predicates which are exported:
 Documented vs Undocumented vs Inactive Library files:
 	Library_Files_Status.txt        
 ---------------
-How I've been working:
-1. Open 1 terminal window(B) in ~src_help_md, and one(A) in ~src_help_md/md_help.
-2. In B, execute: open als_help.html
-3. Select a ~src_help_md/md_help/<Work>.md file to examine and fixup;
-4. In A, I open <Work>.md in vi;
-5. In B, execute sing2html.sh <Work> (no .md extension); this applies pandoc and now
-	there will be a file ~src_help_md/alshelp/<Work>.html; 
-	You don't have to look in ~alshelp though; 
-	In the als_help.html window, select the right package at top, scroll the lower
-	left pane until you see <Work> and just click on it;
-6. Now I just cycle:
-	(From step 4): in vi, make a change to <Work>.md
-	(As in step 5): sing2html.sh <Work>
-	Click on <Work> in the left side of the als_help.html window
-	Etc. 
-7. When <Work> is completely fixed, I check if off in checklist.txt.
----------------
 Workflow:
 0. In terminal B, in the ALSProlog/docs dir, execute: make run
 1. In terminal A, either edit a file in ALSProlog/docs/docs/ref, or
 	generate a new *.md file in ALSProlog/docs/docs/ref using a command in doctools.pro.
 2. In browser, examine edited or new page from the 'make run' of jekyll.
 3. Cycle back to step 1
-

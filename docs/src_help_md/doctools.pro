@@ -1,20 +1,15 @@
 /*====================================================================*
  |				doctools.pro
  |              Copyright (c) 2018-2019 Applied Logic Systems, Inc.
- |		Group: Library Maintenance
+ |		Group: Maintenance
  |		DocTitle: file_doc/0
  |		-- Tools for library maintenance, and builtins,library documentation
  |
  |	Primary predicates:
- |	    file_doc/0 - command line access to library file mainentance
+ |	    file_doc/0 - command line access to library & builtins file mainentance
  |	    new_page(Path)  - creates skeletal new *.md page
  |
- |  Moribund, unused:
- |	    toc_from_docsdb - write out tables of contents
- |	    idx_page(Path)  - indexes (toc) a new *.md page
- |
  *====================================================================*/
-
 module builtins.
 
 export file_doc/0.
@@ -26,17 +21,24 @@ export new_page/1.
 export mknnp/0.
 
 /* ====================================================================== *
- |              -- Install and document ALS Library files
+ |
+ |              -- Install and document ALS Library and Builtins files
  |      
- |	Works from <PathToLib>/<libfile>.pro, and generates
+ |	For library files, works from <PathToLib>/<libfile>.pro, and generates
  |		   <PathToLib>/<libfile>.alb
  |	    together with 
  |		   <PathToMDFiles>/<libfile>.md
  |
- |	Usually <PathToMDFiles> = <PathToALSPrologTree>/docs/docs/ref/
+ |	For builtins files, works from <PathToBuiltins>/<bltfile>.pro, and generates
+ |		   <PathToMDFiles>/<bltfile>.md
+ |
+ |	Usually:
+ |		<PathToLib> = <PathToALSPrologTree>/core/alsp_src/library
+ |		<PathToBuiltins> = <PathToALSPrologTree>/core/alsp_src/builtins
+ |		<PathToMDFiles> = <PathToALSPrologTree>/docs/docs/ref/
  |
  |	Issue: Work out paths and code extension so that a regular
- |	installation can add a library file.
+ |	installation can add a library file to a local installation.
  |
  |	Can be started from the command line in ~docs/src_help_md, 
  |	as for example:
@@ -47,20 +49,18 @@ export mknnp/0.
  |
  |	By default, file_doc/0 will NOT overwrite the target *.md file.
  |	If the command line switch -ow is present (rightwards of the -p), 
- |	then it WILL overwrite the target *.md file.
+ |	then it WILL overwrite the corresponding target *.md files.
  |
- |		-- Document ALS builtins files
+ |	Documenting ALS builtins files:
  |
- |	Structure a builtins file, e.g., filepath.pro just like ALS
+ |	Structure a builtins file, e.g., filepath.pro, just like ALS
  |	library files.  Then executing
  |		alspro doctools.pro -g file_doc -p -blt filepath
  |	will produce the doc file filepath.md
  * ====================================================================== */
 
-
 	%% Default: assumes this is being run in ~docs/src_help_md:
 mdFolderPath('../docs/ref').
-%src_folder_md_files( '../docs/ref' ).
 src_folder_md_files( P ) :- mdFolderPath( P ).
 
 /*!---------------------------------------------------------------------
@@ -79,7 +79,8 @@ file_doc
 
 fd_except(Info)
 	:-
-	printf('file_doc error: %t\n', [Info]).
+	printf('file_doc error: %t ... Exiting.\n', [Info]),
+	halt.
 
 do_file_doc
 	:-
@@ -87,14 +88,12 @@ do_file_doc
 	pull_out_nullswitches(SwitchVals, Items, ReducedSwitchVals),
 %printf('SwitchVals=%t\nItems=%t\nReducedSwitchVals=%t\n',[SwitchVals,Items,ReducedSwitchVals]),
 	chkSrcTreeTop(ReducedSwitchVals, Src_Tree_Top),
-%do_doc:listing(als_tree_top/1),
+	printf('Using source tree top = %t\n', [Src_Tree_Top]),
 
 	check_for_blt_lib(ReducedSwitchVals, Switch, Block),
 	get_target_files(ReducedSwitchVals, Items, Switch, Block, FilesList),
-%printf('Sw=%t  Bl=%t  FL=%t\n', [Switch, Block, FilesList]),
 
 	check_for_overwrite(ReducedSwitchVals, Overwrite),
-%printf('ow=%t\n',[Overwrite]),
 	sort(FilesList, SortedFilesList),
 
 	catch(
@@ -109,15 +108,21 @@ chkSrcTreeTop(ReducedSwitchVals, Src_Tree_Top)
 	member(['-tt', Src_Tree_Top], ReducedSwitchVals),
 	!,
 	verify_STT(Src_Tree_Top),
-%printf('Src_Tree_Top=%t\n',[Src_Tree_Top]),
 	do_doc:assert(als_tree_top(Src_Tree_Top)).
 
 	%% Are we running default in ~docs/src_help_md in some tree?
 chkSrcTreeTop(_, Src_Tree_Top)
 	:-
 	in_docs_src(Src_Tree_Top),
-%printf('PS=%t\n', [Src_Tree_Top]),
-	do_doc:assert(als_tree_top(Src_Tree_Top)).
+	do_doc:assert(als_tree_top(Src_Tree_Top)),
+	!.
+
+	%% Can't find a tree top:
+chkSrcTreeTop(_, _)
+	:-
+	sprintf(MsgString, 'Can\'t find a source tree top.\nConsider using the switch -tt\n',[]),
+	atom_codes(MsgAtom, MsgString),
+	throw(fd_error(MsgAtom)).
 
 verify_STT(Src_Tree_Top)
 	:-
@@ -168,20 +173,34 @@ init_seg_list([A | LeftTail], [A | RightTail], ParentSegElts)
 
 check_for_blt_lib(ReducedSwitchVals, '-lib', library)
 	:-
-	dmember(['-lib'], ReducedSwitchVals).
+	dmember(['-lib'], ReducedSwitchVals),
+	!.
 
 check_for_blt_lib(ReducedSwitchVals, '-lib', library)
 	:-
-	dmember(['-lib', _], ReducedSwitchVals).
-
-
-check_for_blt_lib(ReducedSwitchVals, '-blt', builtins)
-	:-
-	dmember(['-blt'], ReducedSwitchVals).
+	dmember(['-lib', _], ReducedSwitchVals),
+	!.
 
 check_for_blt_lib(ReducedSwitchVals, '-blt', builtins)
 	:-
-	dmember(['-blt', _], ReducedSwitchVals).
+	dmember(['-blt'], ReducedSwitchVals),
+	!.
+
+check_for_blt_lib(ReducedSwitchVals, '-blt', builtins)
+	:-
+	dmember(['-blt', _], ReducedSwitchVals),
+	!.
+
+check_for_blt_lib(_, '-lib', library)
+	:-
+	printf('No -lib/-blt switch found. Using default: -lib/library.\n', []).
+
+get_target_files([], [], Switch, Block, Items)
+	:-!,
+	sprintf(InfoString, 'Can\'t find any target files to process. \n', []),
+	atom_codes(Info, InfoString),
+	throw(fd_error(Info)).
+
 
 get_target_files(ReducedSwitchVals, Items, Switch, Block, FilesList)
 	:-
@@ -193,8 +212,12 @@ get_target_files(ReducedSwitchVals, Items, Switch, Block, Items).
 check_for_overwrite(ReducedSwitchVals, true)
 	:-
 	member(['-ow'], ReducedSwitchVals),
-	!.
-check_for_overwrite(ReducedSwitchVals, false).
+	!,
+	printf('Overwriting permission switch (-ow) detected\n',[]).
+
+check_for_overwrite(ReducedSwitchVals, false)
+	:-
+	printf('Overwriting permission switch (-ow) NOT detected.\nExisting *.md files will not be overwritten.\n',[]).
 
 libissue(LibFile, IssueInfo)
 	:-
@@ -224,7 +247,7 @@ exit_libsetup(Block, File, IssueInfo)
 do_files_setup([], _, _).
 do_files_setup([File | FilesList], Block, Overwrite)
 	:-
-	printf('Processing %t file %t\n', [Block,File]),
+	printf('Start processing %t file %t\n', [Block,File]),
 	doc_one_file(File, Block, Overwrite),
 	printf('%t file %t processed\n==================================\n\n', [Block,File]),
 	do_files_setup(FilesList, Block, Overwrite).
@@ -305,27 +328,33 @@ block_path(Block, BlockPath)
 	
 	%% No extension:
 cont_file_path('', File, Block, BlockPath, FilePath)
-	:- !,
+	:-!,
 	file_extension(FileName, File, pro),
 	path_elements(FilePath, [BlockPath, FileName]),
-	(exists_file(FilePath) -> true ;
-	    printf('File %t does not exist.\n', [FilePath]) 
-	).
+	check_pro_file_exists(FilePath).
 
 	%% .pro extension:
 cont_file_path(pro, File, Block, BlockPath, FilePath)
 	:-!,
 	FileName = File,
 	path_elements(FilePath, [BlockPath, FileName]),
-	(exists_file(FilePath) -> true ;
-	    printf('File %t does not exist.\n', [FilePath]) 
-	).
+	check_pro_file_exists(FilePath).
 	
 cont_file_path(X, File, Block, BlockPath, FilePath)
 	:-
-	printf('Unknown file extension: %t\n', [X]),
-	!,
-	fail.
+	sprintf(MsgString, 'Unknown file extension: %t\n', [X]),
+	atom_codes(MsgAtom, MsgString),
+	throw(fd_error(MsgAtom)).
+
+check_pro_file_exists(FilePath)
+	:-
+	(exists_file(FilePath) ->
+		true
+		;
+		sprintf(MsgString, 'File %t does not exist.\n', [FilePath]),
+		atom_codes(MsgAtom, MsgString),
+		throw(fd_error(MsgAtom))
+	).
 
 %%%--- ---------------------------------move to library:
 
@@ -710,7 +739,8 @@ write_alb(PlainFile, Module, PAsList, FolderPath)
 	open(Alb_path, read, IS),
 		%% we're looking to see if there are syntax errors:
 	read_term(IS, ABT, []),
-	close(IS).
+	close(IS),
+	printf('Library alb file %t written.\n', [AlbFullName]).
 
 pullPAs([], []).
 pullPAs([d(PA, Form, Summary, Desc, Examps) | DocList], [PA | PAsList])
@@ -765,7 +795,8 @@ write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
 		(exists_file(Md_path) ->
 			OS = user_output,
 			printf(OS, 'File: %t already exists;\nRefusing to overwrite.\n',[Md_path]),
-			printf(OS, 'Displaying generated MD file on console:\n\n', [])
+			printf(OS, 'Displaying generated MD file on console:\n', []),
+			printf(OS, '========================================\n\n', [])
 			;
 			open(Md_path, write, OS)
 		)
@@ -779,7 +810,8 @@ write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
 	writeDescriptions(Descs, OS),
 	printf(OS, '\n## EXAMPLES\n\n', []),
 	outExamps(Examps, OS),
-	close(OS).
+	close(OS),
+	printf('Library doc file %t written.\n', [MdFullName]).
 
 assemblePreds([], [], [], [], []).
 assemblePreds([d(PA, Form, Summary, Desc, Examps) | DocList], 
@@ -1103,7 +1135,9 @@ short_descs([p(PA, DescAtom) | StrippedPreds], OS)
 */
 
 	/* -------------------------------------------------------------------- *
+	 |		new_page/1
 	 |		new_page(Path)
+	 |		new_page(+)
 	 |
 	 |	Creates the framework for a new alshelp page,
 	 |	by making a skeletal *.md page in the folder given by
@@ -1117,13 +1151,30 @@ short_descs([p(PA, DescAtom) | StrippedPreds], OS)
 	 |	    		[<List of <PAs with Descrips>>] ).
 	 |
 	 |	where:
-	 |	-  member(Package, PList) holds, where packages(PList) holds.
+	 |	-  member(Package, PList) holds, where packages(PList) holds (above).
 	 |	-  pack_kid(Group, Package) holds
 	 |	-  Title is of the form: P/A
-	 |	-  md_help/<FileName>.md is the intended skeletal target
+	 |	-  ../docs/ref/<FileName>.md is the intended skeletal target
 	 |	-  Module is where the predicates will be declared
 	 |	-  Each <PAs with Descrips> is of the form
 	 |		p(<quoted atom Q/R>, <atom which is a short description of Q/R>)
+	 |
+	 |	For example, here is np(...) seed for the curl help page 
+	 |	    (in: xamps_np/np_for_curl.np):
+	 |
+	 |	np(
+	 |	    core_prolog,     %Package
+	 |	    input_output,    %Group
+	 |	    'curl/[1,2,3]',  %Title
+	 |	    curl123,         %FileName
+	 |	    builtins,         %Module
+	 |	    		     % Preds With Descriptions:
+	 |	    [p('curl/1', 'Internet access via the curl package with URL, Options, Target in one list'),
+	 |	     p('curl/2', 'Internet access via the curl package with separate URL arg, combined Options, Target in one list'),
+	 |	     p('curl/3', 'Internet access via the curl package with separate URL, Options, Target args'),
+	 |	     p('http/3', 'REST-inspired user-level interface for curl')
+	 |	    ]
+	 |	  ).
 	 |
 	 |	new_page/1 can be invoked from the command line using:
 	 |
@@ -1146,11 +1197,11 @@ mknnp :- open('./nnp.np', write, OS),
 /*--------------------
 %% Examples:
 tt :- 
-	Path = 'np_for_curl.np',
+	Path = 'xamps_np/np_for_curl.np',
 	new_page(Path).
 
 tdf :- 
-	Path = 'np_for_filepath.np',
+	Path = 'xamps_np/np_for_filepath.np',
 	new_page(Path).
  --------------------*/
 
@@ -1162,7 +1213,9 @@ tdf :-
  |	- command line access to new skeletal md file generation
  |
  |	Reads the command_line and invokes processing on the list of 
- |	files obtained, using np_list/1.
+ |	files obtained, using np_list/1:
+ |
+ |	alspro doctools.pro -g do_np -p <path to xx1.np> <path to xx2.np> ...
  *!--------------------------------------------------------------------*/
 do_np :-
 	command_line(CommandLine),
@@ -1181,91 +1234,133 @@ np_list([NPPath | NPFiles])
 	new_page(NPPath),
 	np_list(NPFiles).
 
-exit_np(NPPath, IssueInfo)
+exit_np(IssueInfo, NPPath)
 	:-
 	printf(user_output, '=======================\n',[]),
-	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n\n', [NPPath]),
+	printf(user_output, 'Issue while trying to create  *.md file from: %t:\n', [NPPath]),
+	printf(user_output, '    %t\n', [IssueInfo]).
 
-	printf(user_output, '+++++++++++++++++++++++\n',[]),
-	printf(user_output, 'Exiting from doctools.pro/newpage due to problems with file %t\n',[NPPath]),
-	halt.
-	
+
 /*!---------------------------------------------------------------------
  *!--------------------------------------------------------------------*/
 new_page(Path)
 	:-
-	(exists_file(Path) ->
-		do_new_page(Path)
-		;
-		printf('Path %t does not exist - exiting.\n', [Path]),
-		abort
+	catch(do_new_page(Path),
+		npissue(IssueInfo, Path),
+		exit_np(IssueInfo, Path)
 	).
 
 do_new_page(Path)
 	:-
+	exists_file(Path),
+	!,
 	open(Path, read, IS),
 	read(IS, NewPageTerm),
 	close(IS),
-	check_and_go(NewPageTerm).
-
-check_and_go(np(Package, Group, Title, FileName, Module, PAsWithDescs))
+	check_and_go(NewPageTerm, Path).
+do_new_page(Path)
 	:-
-	check_package(Package),
-	check_group(Group, Package),
-	check_file(FileName),
-	check_PAsWithDs(PAsWithDescs),
+	sprintf(StringMsg, 'Path %t does not exist - skipping.\n', [Path]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+check_and_go(np(Package, Group, Title, FileName, Module, PAsWithDescs), Path)
+	:-
+	check_package(Package, Path),
+	check_group(Group, Package, Path),
+	check_file(FileName, Path),
+	check_PAsWithDs(PAsWithDescs, Path),
 	make_new_page(Package, Group, Title, FileName, Module, PAsWithDescs).
 
-check_package(Package)
+check_package(Package, Path)
 	:-
 	packages(PList), 
 	member(Package, PList),
 	!.
-check_package(Package)
+check_package(Package, Path)
 	:-
-	printf('Unknown package: %t\n', [Package]),
-	abort.
 
-check_group(Group, Package)
+	sprintf(StringMsg,'Unknown package: %t in %t -- skipping %t\n', [Package, Path, Path]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+check_group(Group, Package, Path)
 	:-
-	pack_kid(Group, Package).
+	pack_kid(Group, Package),
+	!.
 
-check_group(Group, Package)
+check_group(Group, Package, Path)
 	:-
-	printf('Bad Group: %t -- for package: %t\n', [Group,Package]),
-	abort.
+	sprintf(StringMsg,'Bad Group: %t -- for package %t in: %t -- skipping %t\n', [Group,Package,Path,Path]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
 
-check_file(FileName)
+check_file(FileName,Path)
 	:-
 	file_extension(MDFile, FileName, md),
-%	src_folder_md_files(MD_Src_Folder),
 	mdFolderPath(MD_Src_Folder),
         join_path([MD_Src_Folder, MDFile], TgtMDFile),
-	(exists_file(TgtMDFile) ->
-		printf('File already exists: %t\n', [TgtMDFile]),
-		abort
-		;
-		true
-	).
-		
-check_PAsWithDs([]).
-check_PAsWithDs([PAD | PAsWithDescs])
-	:-
-	check_pad(PAD),
-	!,
-	check_PAsWithDs(PAsWithDescs).
+	fin_check_file(TgtMDFile, Path).
 
-check_pad(p(QR, Desc))
+fin_check_file(TgtMDFile, Path)
+	:-
+	not(exists_file(TgtMDFile)),
+	!.
+
+fin_check_file(TgtMDFile,Path)
+	:-
+	sprintf(StringMsg, 'File already exists: %t -- skipping %t\n', [TgtMDFile, Path]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+check_PAsWithDs([], _).
+check_PAsWithDs([PAD | PAsWithDescs], Path)
+	:-
+	check_pad(PAD, Path),
+	!,
+	check_PAsWithDs(PAsWithDescs, Path).
+
+check_pad(p(QR, Desc), Path)
 	:-
 	atom(QR),
+	!,
 	open(atom(QR), read, IS),
 	read_term(IS, QRTerm, [attach_fullstop(true)]),
 	close(IS),
-	!,
+	cont_check_pad(QR, Desc, QRTerm, Path).
+
+check_pad(p(QR, Desc), Path)
+	:-
+	sprintf(StringMsg, 'In PAD=p(%t,...), %t must be atomic\n', [QR,QR]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+cont_check_pad(QR, Desc, QRTerm, Path)
+	:-
 	QRTerm = Q/R,
+	!,
+	fin_check_pad(QR, Q, R, Desc, Path).
+
+cont_check_pad(QR, Desc, QRTerm, Path)
+	:-
+	sprintf(StringMsg, 'In PAD=p(\'%t\',\'%t\'), %t must be an atom of the form Q/R,\n', [QR,Desc,QR]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+fin_check_pad(QR, Q, R, Desc, Path)
+	:-
 	atom(Q), 
 	(integer(R); integer_list(R) ),
-	atom(Desc).
+	atom(Desc),
+	!.
+
+fin_check_pad(QR, Q, R, Desc, Path)
+	:-
+	sprintf(StringMsg, 'In PAD=p(\'%t\',\'%t\'), %t must be an atom of the form %t/R,\n  where R is an integer or list of integers, and %t must be atomic\n', [QR,Desc,QR,Q,Desc]),
+	atom_codes(IssueInfo, StringMsg),
+	throw(npissue(IssueInfo, Path)).
+
+
 
 integer_list([]).
 integer_list([N | Tail])
@@ -1276,13 +1371,18 @@ integer_list([N | Tail])
 make_new_page(Package, Group, Title, FileName, Module, PAsWithDescs)
 	:-
 	file_extension(MDFile, FileName, md),
-%	src_folder_md_files(MD_Src_Folder),
 	mdFolderPath(MD_Src_Folder),
         join_path([MD_Src_Folder, MDFile], TgtMDFile),
 	open(TgtMDFile, write, OS),
 	sort(PAsWithDescs, SortedPAsWithDescs),
-	(write_out_new_page(Package, Group, Title, Module, SortedPAsWithDescs, OS) ->
-		close(OS) ; close(OS) ).
+	(write_out_new_page(Package, Group, Title, Module, SortedPAsWithDescs, OS) 
+		->
+		close(OS),
+		printf(user_output, '=======================\n',[]),
+		printf(user_output, 'File %t created.\n',[MDFile])
+		; 
+		close(OS) 
+	).
 
 	/*---------------------------------------------------------------------
 	 |		
@@ -1358,35 +1458,5 @@ finish_skeleton(OS)
         printf(OS, '- [Sterling 86, 9.2 ]\n',[]),
         printf(OS, '- [Bratko 86, 7.2 ]\n',[]),
         printf(OS, '- [Clocksin 81, 6.5 ]\n',[]).
-
-
-
-/*
-getPandA(PA, P, A)
-	:-
-	atomread(PA, PPAA, [syntax_errors(quiet)]),
-	!,
-	(PPAA = P/A ; P = PPAA, A=0).
-
-getPandA(PA, P, A)
-	:-
-	atom(PA),
-	sub_atom(PA, Bef, 1, _, '/'), 
-	sub_atom(PA, 0, Bef, AA, P), 
-	C is Bef + 1, 
-	sub_atom(PA, C, _, 0, Natom),
-	atomread(Natom, A),
-	!.
-getPandA(P, P, 0)
-        :-
-        atom(P),
-	!.
-
-getPandA(P/A, P, A) :-!.
-
-getPAL([A], A) :-!.
-getPAL(L, L).
-
-*/
 
 endmod.
