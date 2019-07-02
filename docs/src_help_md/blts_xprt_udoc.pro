@@ -39,7 +39,7 @@ cleanup_all :-
 	(exists_file('ResultDir/docd_blts_by_md_file.txt') 
 		-> remove_file('ResultDir/docd_blts_by_md_file.txt'); true),
 
-	(exists_file('ResultDir/hashtable_install_index.txt') 
+	(exists_file('TmpDir/hashtable_install_index.txt') 
 		->  remove_file('ResultDir/hashtable_install_index.txt'); true).
 
 
@@ -91,9 +91,9 @@ chk_blt_exps_docs
  |	Creates files:
  |		TmpDir/exps_blts.txt
  |		TmpDir/blt_exported_grep.txt
+ |		TmpDir/hashtable_install_index.txt
  |		ResultDir/undocd_exported.txt
  |		ResultDir/docd_blts.txt
- |		ResultDir/hashtable_install_index.txt
  *!--------------------------------------------------------------------*/
 blt_files_exports(BixGroups)
 	:-
@@ -162,6 +162,8 @@ blt_files_exports(BixGroups)
 	printf('     docd_blts_by_bi_file.txt\n',[]),
 	printf('     docd_blts_by_md_file.txt\n',[]),
 
+	(exists_file('TmpDir/hashtable_install_index.txt') 
+		->  remove_file('ResultDir/hashtable_install_index.txt'); true),
 	(exists_file('TmpDir/exps_blts.txt') -> remove_file('TmpDir/exps_blts.txt'); true),
 	(exists_file('TmpDir/blt_exported_grep.txt') 
 		-> remove_file('TmpDir/blt_exported_grep.txt'); true).
@@ -239,7 +241,7 @@ md_index(Md_Groups)
 		*/
 	proc_all_yml(Md_Groups),
 	!,
-	open('ResultDir/hashtable_install_index.txt', write, StrIDX),
+	open('TmpDir/hashtable_install_index.txt', write, StrIDX),
 	printf(StrIDX, 'PAs installed in hash table _mdf_index\n\n', []),
 	install_index(Md_Groups, StrIDX),
 	close(StrIDX).
