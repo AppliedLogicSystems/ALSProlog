@@ -8,7 +8,7 @@ else
   BUNDLE = bundle
 endif
 
-source = $(shell find . -type f -not -name Gemfile.lock -not -path './_site/*' -not -path './_local_site/*' -not -name .DS_Store)
+source = $(shell find . -not -name Gemfile.lock -not -path './_site*' -not -path './_local_site*' -not -name .DS_Store)
 
 ###########################################
 .PHONY : all site local run
