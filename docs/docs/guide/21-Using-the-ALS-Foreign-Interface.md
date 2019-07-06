@@ -1123,7 +1123,7 @@ any statically linked C predicates.
 
 ALS Prolog programs can be embedded as subprogram in larger controlling C programs. Typically this feature is used to enhance an existing C program with ruledriven intelligence provided by the embedded ALS Prolog code. This section discusses the manner in which such embedding is carried out, and provides a basic example.
 
-### 21.4.1 Overview of Embedding.
+### 21.4.1 Overview of Embedding
 
 ALS Prolog is shipped with an executable image, a dynamically linkable library and
 a statically linkable library. Broadly speaking, any linking of ALS Prolog and C
@@ -1160,7 +1160,7 @@ initilized C defined Prolog predicates can be initilized using the PI_INIT macro
 When this main is compiled it creates a simple Prolog shell program. This shell
 used standard input and output for communication.
 
-### 21.4.2 Embedding: Building the combined programs.
+### 21.4.2 Embedding: Building the combined programs
 
 So now suppose that we wish to embed a Prolog program know/2 into a C program
 named QA (Question and Answer). As a C program, QA will also have the main
@@ -1193,7 +1193,7 @@ with the PI_prolog_init function. Next it calls load_know (described in the next
 simple question and answer dialog with the user. Finally PI_shutdown is called to
 allow the ALS Prolog library to clean up.
 
-### 21.4.3 Calling into ALS Prolog.
+### 21.4.3 Calling into ALS Prolog
 
 Next we will see how the QA program can call on a Prolog predicate for information. The machinery and methods used are described in general form in {ADD LINKS}Section
 (Creating Symbols) , Section (Creating Structures) , and Section (Decomposing

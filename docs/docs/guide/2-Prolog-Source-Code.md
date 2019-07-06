@@ -285,7 +285,7 @@ where the command occurred. This facility is similar to the #include facility fo
 in C. A full description of all predicates for loading programs can be found on the
 builtins reference page for consult/1.
 
-## 2.3 Preprocessor Directives.
+## 2.3 Preprocessor Directives
 
 Assume that PFile is the name of a file being consulted into ALS Prolog. If <Filename> is the name of another valid Prolog source file, then the effect of the preprocessor directive
 
