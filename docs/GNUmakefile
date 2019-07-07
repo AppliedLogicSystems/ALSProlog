@@ -18,7 +18,8 @@ all : site local
 
 ## Run site for live development
 run : Gemfile.lock
-	$(BUNDLE) exec jekyll serve --incremental --livereload --open-url
+	# Note: index is deleted after serving to ensure site builds correctly
+	$(BUNDLE) exec jekyll serve --incremental --livereload --open-url ; rm -f _site/index.html
 
 ## Build site in _site
 site : _site/index.html
