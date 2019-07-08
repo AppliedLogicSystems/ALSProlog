@@ -6,7 +6,7 @@ predicates:
 
 ## FORMS
 ```
-' $findterm '(Functor, Arity, HeapPos, Term, NewHeapPos)
+'$findterm'(Functor, Arity, HeapPos, Term, NewHeapPos)
 ```
 ## DESCRIPTION
 

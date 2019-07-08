@@ -39,9 +39,9 @@ header_pages:
 
 ref_packages:
   - Core Prolog
+  - ALSDev
   - ALS Library
   - C Interface
-  - ALSDev
 
 defaults:
   -
