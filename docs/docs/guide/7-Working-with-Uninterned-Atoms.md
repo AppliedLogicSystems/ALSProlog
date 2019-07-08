@@ -193,27 +193,24 @@ If Size is less than or equal to the actual size of the given UIABuf, the call
 reduces the size of UIABuf by removing all but one of the trailing zeros (null
 bytes). 
 
-When Atom is a Prolog atom (symbol or UIA),
-
-    '$strlen(Atom,Size)'
-
-returns the length of the print name of that atom (thus not counting the terminating
-null byte).
-
 ## 7.4 Observations on Using UIAs
 
-As indicated by the rules presented in Section 7.2 (Interning UIAs) , ALS Prolog
+As indicated by the rules presented in Section 7.2 (Interning UIAs), ALS Prolog
 automatically handles much of the use of UIAs. The preceeding Section presented
 predicates for explicitly creating and manipulating UIAs. The routines for explicit
-manipuulation of UIAs allow one to treat the bytes making up the UIA as raw memory to be manipulated at a low level. Two areas where explicit manipulation of UIAs can be useful are:
+manipulation of UIAs allow one to treat the bytes making up the UIA as raw memory to be manipulated at a low level. Two areas where explicit manipulation of UIAs can be useful are:
+
 * Creating and manipulating data structures not supported by ALS Prolog.
 * Communicating with external programs.
+
 One example which in essence combines both uses is communication with external
 C programs, such as X Windows and Motif, which require both C strings and C
 structs as function arguments. An analysis of any such situation usually leads to
 the following observations:
+
 * Strings and structs which are created on the C side of the interface should
 usually stay there, and pointers to them be passed to the Prolog side.
+
 * Strings and structs which are created on the Prolog side and which are
 ephemeral in the sense that the C side will consume them when they are initially passed, and no further reference will be made to them from the C side,
 can be created as UIAs. Note that if after control returns to Prolog, a garbage collection will sooner or later take place. In all likelihood, the UIA object will either pass out of existence, or at least move its location on the
@@ -221,6 +218,7 @@ heap, so that if C 'holds on' to the pointer it was passed, this pointer will no
 longer be valid. Thus, one only wants to pass UIAs to C when they are
 ephemeral in the sense above: C will not hold on to a pointer to the UIA
 after control returns to Prolog.
+
 * When non-ephemeral objects are to be created under Prolog control, it is
 best to create these in 'C space' by calling malloc. This can be done either
 by creating a specific C-defined Prolog predicate which carries out the

@@ -316,7 +316,6 @@ static struct blt_struct {
 	BLT("$uia_pokel", 3, pbi_uia_pokel, "_pbi_uia_pokel"),
 	BLT("$uia_poked", 3, pbi_uia_poked, "_pbi_uia_poked"),
 	BLT("$uia_pokes", 3, pbi_uia_pokes, "_pbi_uia_pokes"),
-	BLT("$strlen", 2, pbi_strlen, "_pbi_strlen"),
 	BLT("$atom_concat", 3, pbi_atom_concat, "_pbi_atom_concat"),
 
 #ifndef PURE_ANSI

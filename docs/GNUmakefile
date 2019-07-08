@@ -8,7 +8,9 @@ else
   BUNDLE = bundle
 endif
 
-source = $(shell find . -type f -not -name Gemfile.lock -not -path './_site/*' -not -path './_local_site/*' -not -name .DS_Store)
+source = $(shell find . -not -name Gemfile.lock -not -path './_site*' -not -path './_local_site*' -not -name .DS_Store)
+
+local_config = --config _config.yml,_local_config.yml
 
 ###########################################
 .PHONY : all site local run
@@ -18,7 +20,8 @@ all : site local
 
 ## Run site for live development
 run : Gemfile.lock
-	$(BUNDLE) exec jekyll serve --incremental --livereload --open-url
+	# Note: index is deleted after serving to ensure site builds correctly
+	$(BUNDLE) exec jekyll serve --incremental --livereload --open-url ; rm -f _site/index.html
 
 ## Build site in _site
 site : _site/index.html
@@ -34,7 +37,7 @@ _site/index.html : Gemfile.lock $(source)
 	$(BUNDLE) exec jekyll build
 
 _local_site/index.html : Gemfile.lock $(source)
-	$(BUNDLE) exec jekyll build --config _config.yml,_local_config.yml
+	$(BUNDLE) exec jekyll build $(local_config)
 	./_build_local_docs.sh
 
 ###########################################
@@ -45,6 +48,7 @@ test : test-site test-local
 
 ## Test site
 test-site : site
+	$(BUNDLE) exec jekyll doctor
 	$(BUNDLE) exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
@@ -52,6 +56,7 @@ test-site : site
 
 ## Test local docs
 test-local : local
+	$(BUNDLE) exec jekyll doctor $(local_config)
 	$(BUNDLE) exec htmlproofer \
 	--directory-index-file noindex.html \
 	--check-html --disable-external --empty-alt-ignore \
@@ -68,7 +73,9 @@ test-unused :
 
 ## Clean all generated files
 clean:
-	rm -rf Gemfile.lock _site _local_site .jekyll-metadata
+	$(BUNDLE) exec jekyll clean
+	$(BUNDLE) exec jekyll clean $(local_config)
+	rm -rf Gemfile.lock
 
 ## Display this help
 help:

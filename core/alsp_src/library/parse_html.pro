@@ -27,7 +27,7 @@ export unary_tag/1.
  |	
  |	- reads the pxml term found in file Path
  |
- |	Calls grab_html_tokens/2 to read the list L of HTML tokens out 
+ |	Calls `grab_html_tokens/2` to read the list L of HTML tokens out 
  |	of Path, and then parses L into a (single !doctype) PXML term.
  *!--------------------------------------------------------------------*/
 grab_pxml(Path, PXML)
@@ -43,7 +43,7 @@ grab_pxml(Path, PXML)
  |	
  |	- read PXML term in FilePath, including tagged components 
  |
- |	Calls grab_html_tokens/2 to read the list L of HTML tokens out 
+ |	Calls `grab_html_tokens/2` to read the list L of HTML tokens out 
  |	of FilePath, and then parses L into a (single !doctype) PXML term,
  |	where it accumulates tags of component terms in TagVals, with
  |	the tagged terms accumulated in (lists) on TagVals.
@@ -60,13 +60,13 @@ grab_pxml_with_tagged(FilePath, PXML,  TagVals)
  |	
  |	- read PXML term in FilePath, tagged component tags and paths
  |
- |	Calls grab_html_tokens/2 to read the list L of HTML tokens out 
+ |	Calls `grab_html_tokens/2` to read the list L of HTML tokens out 
  |	of FilePath, and then parses L into a (single !doctype) PXML term,
  |	the the tagged terms (eqns)  accumulated in (lists) on TagVals, 
- |	and also accumulates pairs (Stack, Term) on Paths, where:
- |	1) TgtTags is a list of HTML tags, 
+ |	and also accumulates pairs (Stack, Term) on Paths, where:<br>
+ |	1) TgtTags is a list of HTML tags,<br>
  |	2) Stack is list [Tg1, Tg2 | ...] of HTML terms representing
- |	   the reversed parser stack with Tg1 belonging to TgtTags, and
+ |	   the reversed parser stack with Tg1 belonging to TgtTags, and<br>
  |	3) Term was parsed out as Tg1 was popped from Stack.
  *!--------------------------------------------------------------------*/
 grab_pxml_with_paths(Path, PXML,  TagVals, TgtTags, Paths)
@@ -114,16 +114,15 @@ parse_html_toks_to_pxml_vals(Tokens, PXML, TagVals)
  |  	- parse a list of HTML-tokens
  |
  |	The workhorse. Parses a list of HTML-tokens, as produced by 
- |	read_tokens/5 in html_tokens.pro, into a list of Prolog Terms 
+ |	`read_tokens/5` in `html_tokens.pro`, into a list of Prolog Terms 
  |	consituting a PXML representation of the source.  
- |	The pair (StackIn, StackOut) implements the parser stack.
- |
- |	The difference list
- |
- |		TagsValsDList
- |
+ |	The pair (StackIn, StackOut) implements the parser stack.<br>
+ |	The difference list<br>
+ |	<br>
+ |	&emsp; 		TagsValsDList<br>
+ |	<br>
  |	provides a means of capturing components of the PXML output. ( See the
- |	comment for handle_tag/6 for a description of TagsValsDList. )
+ |	comment for `handle_tag/6` for a description of TagsValsDList. )
  *!-----------------------------------------------------------------------------*/
 parse_html_toks_to_pxml([], [], Stack, Stack, TagsValsDList)
 	:-!,
@@ -472,12 +471,12 @@ read_pxml_comment([Token | Tokens], [Token | Features], RestTokens)
  |
  |	- specifies syntactic roles tags
  |
- |	Syntactic roles of tags:
- |	Spec rules about optional tags:
- |	    https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
- |	See also:
- |	    https://html.spec.whatwg.org/multipage/syntax.html
- |	    https://html.spec.whatwg.org/multipage/parsing.html
+ |	Syntactic roles of tags:<br>
+ |	Spec rules about optional tags:<br>
+ |	&emsp;    https://html.spec.whatwg.org/multipage/syntax.html#optional-tags<br>
+ |	See also:<br>
+ |	&emsp;    https://html.spec.whatwg.org/multipage/syntax.html<br>
+ |	&emsp;    https://html.spec.whatwg.org/multipage/parsing.html<br>
  |	unary_tag/1 is exported for use by pxml_utils.pro.
  *!--------------------------------------------------------------------*/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

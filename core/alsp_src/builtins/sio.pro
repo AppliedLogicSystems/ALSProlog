@@ -1676,7 +1676,7 @@ open_atom_stream(Atom,read,Options,Stream) :-
 	initialize_stream(atom,atom(Atom),Options,Stream),
 	set_stream_extra(Stream,Atom),
 	set_stream_addl1(Stream,0),
-	'$strlen'(Atom,ALen),
+	atom_length(Atom,ALen),
 	set_stream_addl2(Stream,ALen),
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),

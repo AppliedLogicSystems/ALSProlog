@@ -27,6 +27,7 @@ liquid:
   strict_variables  : false
 
 exclude:
+  - AboutDocs.txt
   - CNAME
   - Gemfile
   - Gemfile.lock

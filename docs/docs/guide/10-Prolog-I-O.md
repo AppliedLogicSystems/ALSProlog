@@ -1452,7 +1452,7 @@ depth_computation(Val) [default: Val = nonflat]
 line_end(Bool) [default: Bool = true]
     When Bool = true, nl(_) is normal; when Bool = false, line-breaks (new lines) are preceeded by a \ .
 ```
-
+### 10.7.3 Writing output.
 ```
 write_term/2
 write_term(Term, Options)
@@ -1628,7 +1628,14 @@ write_clauses(Alias_or_stream, Clauses, Options)
 write_clauses(+, +, +)
 ```
 If Clauses is a list of terms (to be viewed as clauses), write_clauses/3 recursively applies write_clause/3 to the elements of Clauses.
-```
+### 10.7.4 Printf.
+The `printf` family of predicates are enhanced versions of the standard C library `printf` functionality.
+A call to `printf` outputs the list of data in `ArgList` (numbers, strings, terms, etc), formatted as text based on directives in the `Format` string/atom. In addition to supporting most of the standard C printf
+conversion-specifications, `printf` has extended Prolog specifiers for terms (%t) and print-procedures (%p).
+
+See also [`printf/1-4`](../ref/printf.html) in the Reference Manual.
+
+``` 
 printf/1
 printf(Format)
 printf(+)
@@ -1649,15 +1656,31 @@ printf/4
 printf(Alias_or_stream,Format,ArgList,Options)
 printf(+,+,+,+)
 ```
-The printf/[...] group of predicates provides a powerful formatted printing facility
-closely related to the corresponding facilities in the C programming language.
-printf/[...] accepts a format string together with a list of arguments to print,
-possibly a stream to print to, and possibly options. The format string contains characters to be printed, characters to control the formats of the items being printed,
-and argument placeholders. The figure below illustrates the general structure of the printf predicate.
+printf/[...] accepts a format atom or string together with a list of arguments to print,
+possibly a stream to print to, and possibly options. The format atom or string contains characters to be printed as is, argument placeholder characters to control the formats of the items being printed,
+and backslash characters for special output characters. The figure below illustrates the general structure of the printf/2 predicate.
 
-![](images/PrintfFormatting.png)
+<figure>
+<svg version="1.1" baseProfile="full" width="100%" viewBox="0 0 616 100"
+    xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" orient="auto" markerWidth="2" markerHeight="4" refX="0.1" refY="2">
+      <!-- triangle pointing right (+x) -->
+      <path d='M0,0 V4 L2,2 Z' fill="black"/>
+    </marker>
+  </defs>
+  <g marker-end='url(#arrow)' stroke-width="3" stroke="black" fill="transparent">
+    <path d="M485 50 q -220 -70 -220 0"/>
+    <path d="M515 50 q -190 -70 -190 0"/>
+    <path d="M555 50 q -175 -70 -175 0"/>
+  </g>
+  <text x="308" y="72" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle">
+    printf("Solution: %t + %t = %t \n", [X, Y, Z])
+  </text>
+</svg>
+<figcaption>Figure. printf formatting</figcaption>
+</figure>
 
-Figure. printf formatting
 
 As a simple example, the following clause defines a predicate for adding two numbers and printing the result:
 ```
@@ -1670,7 +1693,10 @@ argument list, and print it as a Prolog term. The \n at the end of the format st
 causes a newline character to be printed. The following shows the result of calling
 add/2:
 ```
-add( 7, 8 ) ==> Solution: 7 + 8 = 15
+?- add(7, 8).
+Solution: 7 + 8 = 15.
+
+yes.
 ```
 The same effect could have been obtained without printf/2. It is instructive to see how it is done:
 ```
@@ -1683,10 +1709,11 @@ add(X,Y)
        write(Z),
        nl.
 ```
-The second version of the predicate is longer and somewhat harder to read. If no
-arguments must be supplied to printf (i.e., the string contains no placeholder
-characters), the unary version, printf/1, can be used.
-The fundamental formatted output predicate is printf/4. The first four predicates above are convenience predicates and can be defined as follows:
+The second version of add/2 is longer and somewhat harder to read. If no
+arguments need be supplied to printf (i.e., the format atom or string contains no placeholder
+characters), the unary version, printf/1, can be used.  
+
+The fundamental formatted output predicate is printf/4. The first four predicates above are convenience predicates and can be defined in terms of `printf/4` as follows:
 ```
 printf(Format)
     :- current_output(Stream),
@@ -1703,10 +1730,9 @@ printf_opt(Format,ArgList,Options)
 printf(Alias_or_stream,Format,ArgList)
     :- printf(Alias_or_stream,Format,ArgList,[]).
 ```
-printf/4 is closely related to the C language printf function. Roughly, the formats supported by printf/4 are the same as those allowed by the C language
-printf, with the inclusion of several additional combinations, in particular, '%t',
-which indicates that the corresponding Prolog term should be output at that point.
-And where one would call the C language function in the form
+`printf/1-4` are closely related to the C language printf function. Roughly, the placeholder formats supported by `printf/1-4` are the same as those allowed by the C language
+printf, with the inclusion of several additional prolog-oriented placeholders, 
+in particular, '%t', described below.  Where one would call the C language function in the form
 
     printf(Format, A1, A2, ..., An),
 
@@ -1714,27 +1740,24 @@ one calls the Prolog printf/2 in the form
 
     printf(Format, [A1,A2,...,An]).
 
-More precisely, formats are specified as follows. An extent expression consist of
+In concept, in executing `printf(Format,ArgList)`, the `Format` atom is scanned from left to right to assemble the list of occurrences of placeholders, and that list is matched against the `ArgList`.  The printing of each element of `ArgList` is controlled by the corresponding placeholder.
+
+Format placeholders are specified as follows. An *extent expression* consists of
 either a sequence of digits, or of two sequences of digits separated by a period(.);
 in addition, an extent expression may be prefixed with a minus sign (-). If K is an
-extent expression, an active format element is one of the following expressions:
-```
-%t
-%p
-%K s
-%K d
-%Ke %Kf %Kg
-```
-The last five elements in this list are also called C format elements. A printf format
-is a single-quoted string, ie., an atom. (Using double quoted strings for formats is accepted for bacwards compatibility; however, it is much more wasteful of storage.) Any
-printf format contains zero or more active format elements, together with other text (possibly none).
-The behavior of printf/[..] for the format elements %Ks, %Kd, %Ke, %Kf, and
-%Kg is completely in accord with the C printf, since in these cases, the argument
-(appropriately converted) is simply passed to the C printf. As noted above, for %t,
-the argument is printed on the output stream as a Prolog term. Finally, the format
-allows the programmer to take control of the formatting process as follows. Suppose that the format is %p, 
-that Stream is the stream argument to printf/4, and
-that PArg is the argument corresponding to %p. Then the action of printf/4 is determined by:
+extent expression, a format placeholder is an expression of the form `%KZ`, where Z is one of the placeholder letters other than `t` or `p`.
+The behavior of printf/[..] for the format elements %KZ is completely in accord with the C printf, since in these cases, the arguments (format placeholder and `ArgList` element, appropriately converted) are simply passed to the C printf for execution.
+
+Note that a printf `Format`  can be a (single-quoted) atom, or a prolog.string (e.g. "abc...").
+Using prolog double-quoted strings consumes more storage than (single-quoted) atoms.
+
+The following are useful pages concerning C printf: [printf, Format Specifiers, Format Conversions and Formatted Output](https://c.camden.rutgers.edu/c_resources/printf.html),  [Format specifiers in C](https://www.geeksforgeeks.org/format-specifiers-in-c/),  [printf format string](https://en.wikipedia.org/wiki/Printf_format_string).  
+
+As noted above, for %t, the corresponding element of `ArgList` is printed on the output stream as a Prolog term, such as would be output by write/1.
+
+Finally, the format `%p` allows the programmer to take control of the formatting process as follows.
+Suppose that the format placeholder is %p, that `Stream` is the stream argument to `print/3` or `printf/4`, and
+that `PArg` is the `ArgList` element corresponding to %p. Then the action of printf/4 is determined by the following:
 ```
 (PArg = Stream^PrintGoal0 ->
         call(PrintGoal0)
@@ -1746,44 +1769,10 @@ that PArg is the argument corresponding to %p. Then the action of printf/4 is de
         )
 ).
 ```
-printf/4 is effectively defined as follows:
-```
-If Format = [],
-    printf(Alias_or_stream, Format, ArgList, Options)
-succeeds; otherwise,
-    printf(Alias_or_stream, Format, ArgList, Options)
-holds provided that:
-If
-    Format = ["%t" | FormatTail] and ArgList = [T | ArgListTail],
-then
-    print_term(Alias_or_stream, T, Options) and
-    printf(Alias_or_stream, FormatTail,ArgListTail,Options)
-else if
-    Format = ["%p" | FormatTail] & ArgList = [T | ArgListTail],
-then if
-    T = S^PG & S=Alias_or_stream
-    then call(PG)
-    else if
-        T = [S,O]^PG & S=Alias_or_stream & O=Options
-        then call(PG)
-        else
-            call(T) and
-            printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-else if Format = ["%%" | FormatTail] ,
-then
-    output the character % to Alias_or_stream and
-    printf(Alias_or_stream,FormatTail,ArgListTail,Options),
-else if
-    Format = [Head | FormatTail] & Head is a C active format string
-    & ArgList = [T | ArgListTail],
-then
-    output T to Alias_or_stream in format Head in the manner of C printf,
-    & printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-else
-    Format = [C | FormatTail] &
-    put_char(Alias_or_stream, C) &
-    printf(Alias_or_stream,FormatTail,ArgListTail,Options)
-```
+It is important that `Stream` above is the stream argument to `print/3` or `printf/4`.
+
+There are a number of printf examples on the page for [`printf/1-4`](../ref/printf.html) in the Reference Manual.
+
 ```
 sprintf/3
 sprintf(Alias_or_stream,Format,ArgList)
@@ -1976,9 +1965,9 @@ provides REST-inspired transfer services.  At present, the following RESTVerbs a
 
 The available Options depend on the RESTVerb.
 
-First, a comment about implementation.  At the bottom of the plumbing, the so-called <a href="https://curl.haxx.se/libcurl/c/libcurl-easy.html">“Easy interface”</a> of the <a href="https://curl.haxx.se/libcurl/">Curl library</a> is used to build the implementation.  In this approach, everything about a call http(RESTVerb, URL, Options) is converted into a single list of Easy-oriented Curl option equations, and that list is then passed to a C program built over the CURL Easy interface API.
+First, a comment about implementation.  At the bottom of the plumbing, the so-called [“Easy interface”](https://curl.haxx.se/libcurl/c/libcurl-easy.html) of the [Curl library](https://curl.haxx.se/libcurl/) is used to build the implementation.  In this approach, everything about a call http(RESTVerb, URL, Options) is converted into a single list of Easy-oriented Curl option equations, and that list is then passed to a C program built over the CURL Easy interface API.
 
-For all equations on the list passed to the C program, the left side of every equation is first converted to uppercase.  With the exception of the special equation tags 'RESULT', 'RESULTFILE', and 'UPLOADDATA' (see below), the left side L of every equation L=R passed to the C plumbing is prefixed with either 'CURLOPT_' or 'CURLINFO_'.  The result of this prefixing must be either an <a href=“https://curl.haxx.se/libcurl/c/curl_easy_setopt.html”>easy option</a> (cf. an <a href=“https://curl.haxx.se/libcurl/c/easy_setopt_options.html”>alphabetical listing</a>) or an <a href=“https://curl.haxx.se/libcurl/c/easy_getinfo_options.html”>info option</a>.
+For all equations on the list passed to the C program, the left side of every equation is first converted to uppercase.  With the exception of the special equation tags 'RESULT', 'RESULTFILE', and 'UPLOADDATA' (see below), the left side L of every equation L=R passed to the C plumbing is prefixed with either 'CURLOPT_' or 'CURLINFO_'.  The result of this prefixing must be either an [easy option](https://curl.haxx.se/libcurl/c/curl_easy_setopt.html) (cf. an [alphabetical listing](https://curl.haxx.se/libcurl/c/easy_setopt_options.html)) or an [info option](https://curl.haxx.se/libcurl/c/easy_getinfo_options.html).
 
 Several simple transformations are applied to the elements of the list:
 
