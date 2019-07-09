@@ -10,7 +10,7 @@
 The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
 
-## 12.1 Overview of the ALS Library Mechanism and Tools.
+## 12.1 Overview of the ALS Library Mechanism and Tools
 
 Normally, the units making up the library are various sized (small to large) files
 containing code defining certain useful predicates, or defining whole subsystems of

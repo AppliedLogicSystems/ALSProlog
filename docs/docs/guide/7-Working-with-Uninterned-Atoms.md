@@ -141,7 +141,7 @@ $uia_peekb/3 binds Value to the byte at position Offset. $uia_peeks/3 binds Extr
 Offset and extending to the end of the buffer. $uia_peeks/4 binds Extract to a UIA consisting of the characters beginning at position Offset and extending to position End where End = Offset + Size. If End would occur
 beyond the end of the buffer, Extract simply extends to the end of the buffer.
 
-### 7.3.4 An Example.
+### 7.3.4 An Example
 
 The following example procedure illustrates how to create a buffer and fill it with
 the name of a given atom with using $uia_pokes/3.
