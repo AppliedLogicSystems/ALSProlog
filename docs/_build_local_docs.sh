@@ -21,12 +21,11 @@ else
 fi
 
 # Strip /docs/ from links
-"${SED[@]}" 's/href="\/docs\//href="\//g' *.html */*.html
-"${SED[@]}" 's/src="\/docs\//src="\//g' *.html */*.html
+"${SED[@]}" 's/href="\/docs\//href="\//g ; s/src="\/docs\//src="\//g' *.html */*.html
 
 # Make absolute links relative
-"${SED[@]}" 's/href="\//href=".\//g' *.html
-"${SED[@]}" 's/href="\//href="..\//g' */*.html
+"${SED[@]}" 's/href="\//href=".\//g ; s/src="\//src=".\//g' *.html
+"${SED[@]}" 's/href="\//href="..\//g ; s/src="\//src="..\//g' */*.html
 
 # Fix relative index links
 "${SED[@]}" 's/href="\(.[^"]*\)\/"/href="\1\/index.html"/g' *.html */*.html
