@@ -59,6 +59,7 @@ test-local : local
 	$(BUNDLE) exec jekyll doctor $(local_config)
 	$(BUNDLE) exec htmlproofer \
 	--directory-index-file noindex.html \
+	--url-swap '^/:noabsolute' \
 	--check-html --disable-external --empty-alt-ignore \
 	_local_site
 
