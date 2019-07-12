@@ -5,6 +5,7 @@ module: sio
 predicates:
 - {sig: 'stream_property/2', desc: 'retrieve streams and their properties'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#streamproperty)
 
 ## FORMS
 

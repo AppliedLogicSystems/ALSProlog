@@ -1,8 +1,9 @@
 ---
-title: '\!/0'
+title: '!/0'
 predicates:
-- {sig: '\!/0', desc: '(cut) removes choice points'}
+- {sig: '!/0', desc: '(cut) removes choice points'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#cut)
 
 ## FORMS
 ```

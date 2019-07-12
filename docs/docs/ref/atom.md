@@ -8,6 +8,11 @@ predicates:
 - {sig: 'integer/1', desc: 'the term is an integer'}
 - {sig: 'number/1', desc: 'the term is an integer or a floating point'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#number)
+
+
+
+
 
 ## FORMS
 ```

@@ -1,0 +1,138 @@
+cut.md (!/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#cut)
+
+comma.md (,/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#and)
+
+arrow.md (->/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#ifthen)
+
+semicolon.md (;/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#or)
+
+univ.md (=../2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#univ)
+
+unify.md (=/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#unify)
+
+not.md (\+/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#notprovable)
+
+arg.md (arg/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+
+assert.md (asserta/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#asserta)
+
+assert.md (assertz/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#assertz)
+
+at_end_of_stream.md (at_end_of_stream/0)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#streamproperty)
+
+at_end_of_stream.md (at_end_of_stream/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#streamproperty)
+
+atom.md (atom/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#atom)
+
+atom_chars.md (atom_chars/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#atomchars)
+
+atom_chars.md (atom_codes/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#atomcodes)
+
+atom.md (atomic/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#atomic)
+
+setof.md (bagof/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#bagof)
+
+call.md (call/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#call)
+
+catch.md (catch/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#catch)
+
+char_code.md (char_code/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#charcode)
+
+clause.md (clause/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#clause)
+
+close.md (close/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#close)
+
+close.md (close/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#close)
+
+copy_term.md (copy_term/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#copyterm)
+
+current_input.md (current_input/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#currentinput)
+
+current_op.md (current_op/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#operators)
+
+current_input.md (current_output/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#currentoutput)
+
+fail.md (fail/0)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#fail)
+
+setof.md (findall/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#findall)
+
+atom.md (float/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#float)
+
+functor.md (functor/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#functor)
+
+get_char.md (get_char/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#getchar)
+
+get_char.md (get_char/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#getchar)
+
+get_code.md (get_code/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#getcode)
+
+get_code.md (get_code/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#getcode)
+
+halt.md (halt/0)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#halt)
+
+atom.md (integer/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#integer)
+
+var.md (nonvar/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#nonvar)
+
+atom.md (number/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#number)
+
+number_chars.md (number_chars/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#numberchars)
+
+number_chars.md (number_codes/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#numbercodes)
+
+op.md (op/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#operators)
+
+open.md (open/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#open)
+
+open.md (open/4)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#open)
+
+peek_code.md (peek_code/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#peekcode)
+
+peek_code.md (peek_code/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#peekcode)
+
+put_char.md (put_char/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#putchar)
+
+put_char.md (put_char/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#putchar)
+
+put_code.md (put_code/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#putchar)
+
+put_code.md (put_code/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#putchar)
+
+read.md (read/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#readterm)
+
+read.md (read/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#readterm)
+
+read.md (read_term/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#readterm)
+
+read.md (read_term/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#readterm)
+
+repeat.md (repeat/0)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#repeat)
+
+retract.md (retract/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#retract)
+
+set_input.md (set_input/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setinput)
+
+set_input.md (set_output/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setoutput)
+
+set_stream_position.md (set_stream_position/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setstreamposition)
+
+setof.md (setof/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setof)
+
+stream_property.md (stream_property/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#streamproperty)
+
+sub_atom.md (sub_atom/5)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#subatom)
+
+catch.md (throw/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#catch)
+
+true.md (true/0)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#true)
+
+var.md (var/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#var)
+
+write.md (write/1)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#write_term)
+
+write.md (write/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#write_term)
+
+write.md (write_term/2)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#write_term)
+
+write.md (write_term/3)	[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#write_term)
+

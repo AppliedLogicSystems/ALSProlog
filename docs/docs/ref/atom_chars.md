@@ -5,6 +5,8 @@ predicates:
 - {sig: 'atom_chars/2', desc: 'convert between atoms and the list of characters representing the atom'}
 - {sig: 'atom_codes/2', desc: 'convert between atoms and the list of character codes representing the atom'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#atomcodes)
+
 
 ## FORMS
 ```

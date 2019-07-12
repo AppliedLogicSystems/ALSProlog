@@ -5,6 +5,7 @@ module: sio
 predicates:
 - {sig: 'set_stream_position/2', desc: 'seek to a new position in a stream'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setstreamposition)
 
 ## FORMS
 

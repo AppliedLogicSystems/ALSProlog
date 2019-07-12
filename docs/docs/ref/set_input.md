@@ -6,6 +6,8 @@ predicates:
 - {sig: 'set_input/1', desc: 'set current input stream'}
 - {sig: 'set_output/1', desc: 'set current output stream'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#setoutput)
+
 
 ## FORMS
 

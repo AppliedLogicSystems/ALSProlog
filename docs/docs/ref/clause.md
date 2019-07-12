@@ -8,6 +8,7 @@ predicates:
   }}
 - {sig: 'instance/2', desc: 'retrieve a clause from the database reference'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#clause)
 
 ## FORMS
 ```

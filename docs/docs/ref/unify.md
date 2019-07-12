@@ -5,6 +5,7 @@ predicates:
 - {sig: '=/2', desc: 'unify two terms'}
 - {sig: '\=/2', desc: 'test if two items are non-unifiable'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#unify)
 
 ## FORMS
 

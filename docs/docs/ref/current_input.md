@@ -6,6 +6,8 @@ predicates:
 - {sig: 'current_input/1', desc: 'retrieve current input stream'}
 - {sig: 'current_output/1', desc: 'retrieve current output stream'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#currentoutput)
+
 
 ## FORMS
 ```

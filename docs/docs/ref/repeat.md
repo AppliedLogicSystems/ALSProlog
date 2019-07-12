@@ -3,6 +3,7 @@ title: 'repeat/0'
 predicates:
 - {sig: 'repeat/0', desc: 'always succeed upon backtracking'}
 ---
+[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#repeat)
 
 ## FORMS
 ```
