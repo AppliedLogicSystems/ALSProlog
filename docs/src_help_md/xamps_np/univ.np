@@ -1,0 +1,10 @@
+np(
+   core_prolog,  %Package
+   terms,  %Group
+   '=..(univ)',  %Title
+   univ,  %FileName
+   builtins,  %Module
+     % Preds With Descriptions:
+   [p('=..'/2, 'composes/decomposes structures from/to components')
+   ]
+  ).
