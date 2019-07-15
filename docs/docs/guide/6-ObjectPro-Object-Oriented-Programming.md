@@ -529,7 +529,7 @@ yes.
 
 ## 6.6 Combining ObjectPro with Global Variables
 
-It is often convenient to combine the use of global variables (see [Chapter 8](https://github.com/AppliedLogicSystems/ALSProlog/wiki/8-Global-Variables%2C-Destructive-Update-%26-Hash-Tables)) with ObjectPro objects. In fact, the ALS Prolog shells for alspro and alsdev use this extensively.  Unlike using assertions to the prolog database, placing an object (e.g., the state of a shell) in a global variable preserves any uninstantiated variables contained in the object.
+It is often convenient to combine the use of global variables (see [Chapter 8](8-Global-Variables,-Destructive-Update-&-Hash-Tables.html)) with ObjectPro objects. In fact, the ALS Prolog shells for alspro and alsdev use this extensively.  Unlike using assertions to the prolog database, placing an object (e.g., the state of a shell) in a global variable preserves any uninstantiated variables contained in the object.
 
 Below is a modified version of the simple 'stack' example, changed to make use of a global variable which holds the stack object (the code is in the distribution in  examples/objectpro/oopex_stack_global.pro):
 ```
