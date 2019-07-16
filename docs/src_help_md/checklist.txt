@@ -1,8 +1,0 @@
-    Checklist for correction/improvement of *.md ref files
-====================================================================
-commandline1.md:  ______	<< unfinished
-rexec2.md:  ______		<< buggy: Issue #134
-
--------------- Newly added (skeletons)
-
-getcwd1.md:  ______

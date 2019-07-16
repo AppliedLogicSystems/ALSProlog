@@ -65,3 +65,6 @@ B. For the ProcedureType table, it should be explained that:
  
 * ----------------------------------
 
+commandline1.md:  ______	<< unfinished
+rexec2.md:  ______		<< buggy: Issue #134
+getcwd1.md:  ______
