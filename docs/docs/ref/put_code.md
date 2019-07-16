@@ -8,7 +8,11 @@ predicates:
     2: 'output a character code to a specific output stream'
   }}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#putchar)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#putchar)
+
+
+
+
 
 
 ## FORMS

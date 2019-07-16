@@ -4,7 +4,9 @@ group: Terms
 predicates:
 - {sig: 'functor/3', desc: 'builds structures and retrieves information about them'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#functor)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#functor)
+
+
 
 ## FORMS
 ```

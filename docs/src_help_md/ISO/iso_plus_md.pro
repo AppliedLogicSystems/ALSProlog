@@ -1,9 +1,19 @@
+/* Warning: sublists for some of the following PA's were inserted by hand:
+*/
 md_iso([[',/2',builtins,'C_def','ISO','#and','comma.md',''],
     ['->/2',builtins,'C_def','ISO','#ifthen','arrow.md',''],
     [';/2',builtins,'C_def','ISO','#or','semicolon.md',''],
     ['=../2',builtins,'P_def','ISO','#univ','univ.md','blt_term.pro'],
     ['=/2',builtins,'C_def','ISO','#unify','unify.md',''],
+    ['\=/2',builtins,'C_def','ISO','#termcomp','unify.md',''],
     ['\\+/1',builtins,'C_def','ISO','#notprovable','not.md',''],
+    ['==/2',builtins,'C_def','ISO','#termcomp','identity.md',''],
+    ['\==/2',builtins,'C_def','ISO','#termcomp','identity.md',''],
+    ['@=</2',builtins,'P_def','ISO','#termcomp','canonorder.md',''],
+    ['@>=/2',builtins,'P_def','ISO','#termcomp','canonorder.md',''],
+    ['@</2',builtins,'P_def','ISO','#termcomp','canonorder.md',''],
+    ['@>/2',builtins,'P_def','ISO','#termcomp','canonorder.md',''],
+
     ['arg/3',builtins,'C_def','ISO','#arg','arg.md',''],
     ['asserta/1',builtins,'C_def','ISO','#asserta','assert.md',''],
     ['assertz/1',builtins,'C_def','ISO','#assertz','assert.md',''],

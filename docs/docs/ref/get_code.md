@@ -8,7 +8,11 @@ predicates:
     2: 'read character code from a specific stream'
   }}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#getcode)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#getcode)
+
+
+
+
 
 
 ## FORMS

@@ -4,7 +4,9 @@ group: Terms
 predicates:
 - {sig: 'arg/3', desc: 'access the arguments of a structured term'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#arg)
+
+
 
 ## FORMS
 ```

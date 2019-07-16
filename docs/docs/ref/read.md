@@ -12,7 +12,15 @@ predicates:
     3: 'read term from specified stream with options'
   }}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#readterm)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#readterm)
+
+
+
+
+
+
+
+
 
 
 

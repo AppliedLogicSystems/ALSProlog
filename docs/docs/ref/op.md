@@ -4,7 +4,9 @@ module: sio
 predicates:
 - {sig: 'op/3', desc: 'define operator associativity and precedence'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#operators)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#operators)
+
+
 
 ## FORMS
 ```

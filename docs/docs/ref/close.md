@@ -8,7 +8,11 @@ predicates:
      2: 'close an open stream with options'
    }}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#close)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#close)
+
+
+
+
 
 
 ## FORMS

@@ -4,7 +4,9 @@ group: Terms
 predicates:
 - {sig: '=../2', desc: 'composes/decomposes structures from/to components'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#univ)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#univ)
+
+
 
 
 

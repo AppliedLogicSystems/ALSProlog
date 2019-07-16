@@ -8,7 +8,9 @@ predicates:
   }}
 - {sig: 'erase/1', desc: 'removes a clause from the database'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#retract)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#retract)
+
+
 
 ## FORMS
 ```

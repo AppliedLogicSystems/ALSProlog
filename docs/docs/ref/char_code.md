@@ -4,7 +4,9 @@ group: Terms
 predicates:
 - {sig: 'char_code/2', desc: 'convert between characters and codes'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#charcode)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#charcode)
+
+
 
 ## FORMS
 ```

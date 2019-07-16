@@ -3,7 +3,9 @@ title: ',/2 (comma)'
 predicates:
 - {sig: ',/2', desc: 'conjunction of two goals'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#and)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#and)
+
+
 
 ## FORMS
 ```

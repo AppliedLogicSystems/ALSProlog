@@ -127,6 +127,13 @@ Documented builtins predicates which are exported:
 Documented vs Undocumented vs Inactive Library files:
 	Library_Files_Status.txt        
 ---------------
+Concerning insert_iso.pro, make_inserts.pro, iso_inserts.txt
+-- make_inserts.pro creates a file (iso_inserts.txt) of "ISO links" to be added to the files in ~/docs/docs/ref/ which correspond to ISO standard predicates.  The lines of this file look like this:
+        arg.md (arg/3)  [ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+where the predicate in question is arg/3, ~/docs/docs/ref/arg.md is the file in which to insert the link, and the links look like this:
+        [ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+-- insert_iso.pro creates these links on the fly and automatically inserts them into the appropriate *.md file; the link is inserted immediately following the top YAML data; the modified ~/docs/docs/ref/*.md are the files in which these ISO links were added.
+---------------
 Workflow for updating documentation:
 0. In terminal B, in the ALSProlog/docs dir, execute: make run
 1. In terminal A, either edit a file in ALSProlog/docs/docs/ref, or
@@ -134,5 +141,4 @@ Workflow for updating documentation:
 2. In a browser, examine edited or new page from the 'make run' of jekyll (#0) {jekyll 
 	auto-updates when any of the ~/docs/docs/* pages are updated.
 3. Cycle back to step 1
----------------
 ---------------

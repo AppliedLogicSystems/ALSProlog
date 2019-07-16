@@ -3,7 +3,9 @@ title: 'halt/0'
 predicates:
 - {sig: 'halt/0', desc: 'exit ALS Prolog'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#halt)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#halt)
+
+
 
 ## FORMS
 ```

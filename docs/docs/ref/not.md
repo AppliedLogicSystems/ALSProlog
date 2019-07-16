@@ -4,7 +4,9 @@ predicates:
 - {sig: 'not/1', desc: 'tests whether a goal fails'}
 - {sig: '\+/1', desc: 'tests whether a goal fails'}
 ---
-[ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#notprovable)
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#notprovable)
+
+
 
 ## FORMS
 ```
