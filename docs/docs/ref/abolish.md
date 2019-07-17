@@ -7,6 +7,7 @@ predicates:
     3: 'remove a procedure from the database'
   }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#abolish)
 
 ## FORMS
 

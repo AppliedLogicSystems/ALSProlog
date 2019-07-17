@@ -4,6 +4,9 @@ group: Terms
 predicates:
 - {sig: 'sub_atom/5', desc: 'dissect an atom'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#subatom)
+
+
 
 ## FORMS
 

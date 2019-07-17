@@ -12,6 +12,18 @@ predicates:
     3: 'read term from specified stream with options'
   }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#readterm)
+
+
+
+
+
+
+
+
+
+
+
 
 ## FORMS
 ```

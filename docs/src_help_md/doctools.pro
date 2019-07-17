@@ -1329,6 +1329,10 @@ check_pad(p(QR, Desc), Path)
 	close(IS),
 	cont_check_pad(QR, Desc, QRTerm, Path).
 
+check_pad(p(Q/R, Desc), Path)
+	:-
+	fin_check_pad(QR, Q, R, Desc, Path).
+
 check_pad(p(QR, Desc), Path)
 	:-
 	sprintf(StringMsg, 'In PAD=p(%t,...), %t must be atomic\n', [QR,QR]),

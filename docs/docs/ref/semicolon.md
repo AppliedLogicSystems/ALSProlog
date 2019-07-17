@@ -3,6 +3,9 @@ title: ';/2 (semi-colon)'
 predicates:
 - {sig: ';/2', desc: 'disjunction of two goals'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#or)
+
+
 
 ## FORMS
 

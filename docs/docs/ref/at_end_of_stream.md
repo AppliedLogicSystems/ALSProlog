@@ -8,6 +8,14 @@ predicates:
      1: 'test for end of a specific input stream'
    }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#streamproperty)
+
+
+
+
+
+
+
 
 ## FORMS
 ```

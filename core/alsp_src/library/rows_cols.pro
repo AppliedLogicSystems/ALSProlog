@@ -208,8 +208,19 @@ mk_rows_atoms([], NumCols, [], [], []).
 mk_rows_atoms([u(Row) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths)
 	:-!,
 	mk_rows_atoms([u(Row,0'=) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths).
+mk_rows_atoms([pu(Row) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths)
+	:-!,
+	mk_rows_atoms([pu(Row,0'=) | RowsTail], NumCols, RowsAtoms, RowsItems, RowsMinColWidths).
 
 mk_rows_atoms([u(Row,Code) | RowsTail], NumCols, [RowAtoms, UAtoms | RowsAtomsTail], 
+	 	[RowItemsLen, RowItemsLen | RowsItemLensTail], 
+		[RowMinColWidths, RowItemsLen | RowsMinColsWidthsTail])
+	:-!,
+	mk_rows_atoms([Row | RowsTail], NumCols, [RowAtoms | RowsAtomsTail], 
+	 		[RowItemsLen | RowsItemLensTail], [RowMinColWidths | RowsMinColsWidthsTail]),
+	mk_u_atoms(RowItemsLen, Code, UAtoms).
+
+mk_rows_atoms([pu(Row,Code) | RowsTail], NumCols, [p(RowAtoms), UAtoms | RowsAtomsTail], 
 	 	[RowItemsLen, RowItemsLen | RowsItemLensTail], 
 		[RowMinColWidths, RowItemsLen | RowsMinColsWidthsTail])
 	:-!,
@@ -358,6 +369,14 @@ fixed_mk_u_atoms([ItemLen | RowItemsLen], Code, [UAtom | UAtoms])
 
 
 output_fixed_rows([], _, [], _).
+output_fixed_rows([p(RowAtoms) | RowsAtomsTail], ColsWidths, [RowPads | RowsPadsTail], S)
+	:-
+	nl(S),
+	output_fixed_cols(RowAtoms, RowPads, ColsWidths, 1, S), 
+	nl(S),
+	!,
+	output_fixed_rows(RowsAtomsTail, ColsWidths, RowsPadsTail, S).
+
 output_fixed_rows([RowAtoms | RowsAtomsTail], ColsWidths, [RowPads | RowsPadsTail], S)
 	:-
 	output_fixed_cols(RowAtoms, RowPads, ColsWidths, 1, S), 

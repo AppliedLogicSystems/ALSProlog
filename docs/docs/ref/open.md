@@ -8,6 +8,12 @@ predicates:
     4: 'open a stream with options'
    }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#open)
+
+
+
+
+
 
 ## FORMS
 ```

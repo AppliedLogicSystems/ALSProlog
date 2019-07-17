@@ -5,14 +5,15 @@
  |	  /ALSProlog/docs/docs/ref/___.md file
  *================================================================*/
 
-py :- proc_all_yml(Md_Groups).
+py :- proc_all_yml(Md_Groups, MdInfoByPreds, GPLTail).
 
-proc_all_yml(Md_Groups)
+proc_all_yml(Md_Groups, MdInfoByPreds, GPLTail)
 	:-
 		%% In blts_xprt_udoc.pro:
 	ref_path(RefPath),
 	files(RefPath, '*.md', MD_FilesList),
-	proc_all_yml_files(MD_FilesList, RefPath, Md_Groups).
+	proc_all_yml_files(MD_FilesList, RefPath, Md_Groups),
+	list_md_by_pred(Md_Groups, MdInfoByPreds, GPLTail).
 
 proc_all_yml_files([], _, []).
 proc_all_yml_files([MD_File | MD_FilesList], MD_Path, Md_GroupsNext)
@@ -241,7 +242,50 @@ create_mpl(NL, InitPN, MPL)
 	MPL = p(PA, Desc).
 
 
+
+	%% Group = g(MD_File, PredBlocks, TagsVals).
+	%% lmbp(Md_Groups, MdInfoByPreds, MdInfoByPredsTail).
 	
+list_md_by_pred([], GPLTail, GPLTail).
+list_md_by_pred([Group | Md_GroupsTail], GroupPredList, FinalGPLTail)
+	:-
+	expnd_mdg(Group, GroupPredList, NextGPLTail),
+	list_md_by_pred(Md_GroupsTail, NextGPLTail, FinalGPLTail).
+
+expnd_mdg(g(MD_File, PredBlocks, TagsVals), GroupPredList, NextGPLTail)
+	:-
+/*
+%nl,write(MD_File=PredBlocks),nl,
+nl,write(MD_File),nl,
+(MD_File == 'assert.md' -> trace ; true),
+*/
+	expnd_mdg_predblks(PredBlocks, MD_File, TagsVals, GroupPredList, NextGPLTail).
+
+expnd_mdg_predblks([], MD_File, TagsVals, Tail, Tail).
+expnd_mdg_predblks([Item | PredBlocksList], MD_File, TagsVals, GroupPredList, FinalGPLTail)
+	:-
+	xpnd_pred_item(Item, MD_File, TagsVals, GroupPredList, NextGPLTail),
+	expnd_mdg_predblks(PredBlocksList, MD_File, TagsVals, NextGPLTail, FinalGPLTail).
+
+
+xpnd_pred_item([], MD_File, TagsVals, Tail, Tail).
+
+xpnd_pred_item(p(PA,Desc), MD_File, TagsVals, [p(PA,Desc,MD_File,TagsVals) | NextGPLTail], NextGPLTail).
+
+xpnd_pred_item(mp(ItemList), MD_File, TagsVals, GroupPredList, NextGPLTail)
+	:-!,
+%write(mp(MD_File)>ItemList),nl,
+	xpnd_pred_item(ItemList, MD_File, TagsVals, GroupPredList, NextGPLTail).
+
+xpnd_pred_item([Item | ItemList], MD_File, TagsVals, GroupPredList, FinalGPLTail)
+	:-
+%write(MD_File > ItemList),nl,
+	xpnd_pred_item(Item, MD_File, TagsVals, GroupPredList, InterGPLTail),
+	xpnd_pred_item(ItemList, MD_File, TagsVals, InterGPLTail, FinalGPLTail).
+
+
+
+
 
 
 

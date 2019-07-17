@@ -15,6 +15,14 @@ predicates:
     2: 'adds a clause to the end of a procedure, returning a DB Ref'
   }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#assertz)
+
+
+
+
+
+
+
 
 ## FORMS
 ```

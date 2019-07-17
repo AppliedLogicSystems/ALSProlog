@@ -3,6 +3,9 @@ title: 'fail/0'
 predicates:
 - {sig: 'fail/0', desc: 'always fails'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#fail)
+
+
 
 ## FORMS
 ```

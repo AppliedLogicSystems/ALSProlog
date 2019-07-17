@@ -6,8 +6,6 @@
  |              -- Determines doc'd, undoc'd, and inactive lib files
  *=====================================================================*/
 
-%lib_path('../ALSProlog/core/alsp_src/library/').
-%ref_path('../ALSProlog/docs/docs/ref/').
 lib_path('../../core/alsp_src/library/').
 ref_path('../docs/ref/').
 
