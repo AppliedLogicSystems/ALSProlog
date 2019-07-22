@@ -39,7 +39,7 @@ The integer values coding the procedure types (`ProcType`) are:
 |Builtin (C or other foreign language)        |   1 |
 |Imported (from another module)       |   2 |
 |Undefined (entry exists, but no clauses entered)      |   3 |
-|LibBreak (like Undefined, but loads a library predicate)     |   4 | 
+|LibBreak (like Undefined, but dynamically loads a library predicate)     |   4 | 
 |Unknown |   -1|
 
 The principal use of Undefined is for indicating module_closure entries in all modules other than the actual defining module of the predicate.  A LibBreak entry contains information on how to dynamically load a library predicate M:P/A. After loading, that nametable entry will look just like any other Prolog-defined nametable entry.
