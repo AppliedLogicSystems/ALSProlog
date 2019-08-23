@@ -1,36 +1,2388 @@
 <div class="sidebar" >
 
-<B style="margin-left:2.6em;">ALS Packages</B>
-<DIV style="margin-left:12px; margin-top:-0.3em;" >
-<!--
-    <A TARGET="toc" HREF="toc_core_prolog.html">Core Prolog</A><BR> 
-    <A TARGET="toc" HREF="toc_alsdev.html">ALSDev</A><BR>
-    <A TARGET="toc" HREF="toc_alslib.html">ALS Library</A><BR>
-    <A TARGET="toc" HREF="toc_c_intf.html">ALS C-Interf</A><BR>  
--->
-    	<!-- "toc_core_prolog.html" -->
-    <div id="core_p_trigger" class="cmn_pack">Core Prolog</div>
+  <style>
 
-    	<!-- "toc_alsdev.html" -->
-    <div id ="alsdev_trigger" class="cmn_pack">ALSDev</div>
+/* Styles for Tabs on Side */
+#tab-side-container { background: #fff; border: solid 1px; height: 44em; background-color:white; width:100%;}
+#tab-side-container ul { height: 80px; list-style: none; margin: 0; padding: 0; padding-left:3px; background: #fff; border-style:none;}
+#tab-side-container ul li { width: 98%; margin: 0; padding: 0; padding-left:3px; text-align: left; border-style:none; border-bottom:solid black 1px;}
+#tab-side-container ul li a { display: block; outline: none; }
+#tab-side-container ul li.selected-tab { background-color:LightBlue; position: relative; left: 1px; border-style: solid; border:solid green 2px; }
+#tab-side-container ul li:first-child.selected-tab { border-top: none; background-color:LightBlue; border:solid green 2px;}
+#tab-side-container ul li a.selected-tab { font-weight: bold; text-decoration: none; background-color:LightBlue; border:solid green 2px;}
+#tab-side-container .panel-container { background: white; padding-top: 5px; padding-left: 0px; }
 
-    	<!-- "toc_alslib.html" -->
-    <div id="alslib_trigger" class="cmn_pack">ALS Library</div>
+/*
+#tab-side-container ul li a { display: block; padding: 15px 0; outline: none; }
+#tab-side-container ul li a:hover { text-decoration: underline; }
+#tab-side-container ul li.selected-tab { background-color:LightBlue; position: relative; left: 1px; border-style: solid; border-width: 1px 0; }
+#tab-side-container ul li:first-child.selected-tab { border-top: none; background-color:LightBlue;}
+#tab-side-container ul li a.selected-tab { font-weight: bold; text-decoration: none; background-color:LightBlue;}
+*/
 
-    	<!--"toc_c_intf.html" -->
-    <div id="c_intf_trigger" class="cmn_pack">ALS C-Interf</div>
+#panel-container .hentry { font-size:1.0em;font-weight:bold;margin-left:1em;margin-top:0em; }
+#panel-container .eentry { margin-top:0px; margin-bottom:0px; margin-left:0.6em; border-style:none;}
+#panel-container .tocsubtab { width:98%; border-style:none; border-bottom:solid black 1px; padding-left:3px; }
 
-</DIV>
+#panel-container .unit_top {border-top:solid black 1px; margin-top:1.0em; margin-bottom:-1em; }
+#panel-container .toc_top {margin-top:1.7em; border-top:solid black 1px;}
 
-<!-- <input class="mysearch" type="search" placeholder="Search" incremental > -->
+  </style>
 
-<hr style="width:100%; height:2px; background-color:black;">
+<script type="text/javascript">
+    $(document).ready( function() {
+      $('#tab-side-container').easytabs();
+    });
+</script>
 
-<!-- <div id="sb_toc" style="background-color:LightGoldenRodYellow"> -->
-<div id="sb_toc" style="background-color:white">
-</div>
+
+<div id="tab-side-container">
+    <div style="width:100%; text-align:center; font-weight: bold;">ALS Packages</div>
+    <ul>
+	<li><a href="#side-tab1">Core Prolog</a></li>
+	<li><a href="#side-tab2">ALSDev</a></li>
+	<li><a href="#side-tab3">ALS Library</a></li>
+	<li><a href="#side-tab4">ALS C-Interf</a></li>
+    </ul>
+
+    <div id="panel-container" class='panel-container'>
+	<div id="side-tab1" class="unit_top">
+		<div style="text-align:center; font-weight: bold; margin-top:0.8em;">Core Prolog TOC </div>
+		<ul style="height:100px">
+		    <li id = "control_btn" class = "tocsubtab">Control </li>
+		    <li id = "inpoutp_btn" class = "tocsubtab">Input Output </li>
+		    <li id = "terms_btn" class = "tocsubtab">Terms </li>
+		    <li id = "prodb_btn" class = "tocsubtab">Prolog Database </li>
+		    <li id = "uias_btn" class = "tocsubtab" >UIAs</li> 
+		</ul>
+	<div id="core_toc" class="toc_top">
+	<ul id="core_toc_ul" style="height:37em;  overflow-y:scroll; overflow-x:hidden;">
+	    <div id="control" class="hentry">Control</div>
+                <li class="eentry">
+                        <a class="astyl" target="content" href="/docs/ref/cut.html"
+                        title="!/0 -- (cut) removes choice points">
+                        !/0
+                </a>
+                </li>
+                <li class="eentry">
+                        <a class="astyl" target="content" href="/docs/ref/procinfo.html"
+                        title="$exported_proc/3 -- checks whether the given procedure is exported">
+                        $exported_proc/3
+                </a>
+                </li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procinfo.html"
+			title="$procinfo/5 -- retrieves information about the given procedure">
+			$procinfo/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procinfo.html"
+			title="$resolve_module/4 -- finds the module which exports the given procedure">
+			$resolve_module/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procinfo.html"
+			title="$resolve_module/4 -- finds the module which exports the given procedure">
+			$resolve_module/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/comma.html"
+			title=",/2 -- conjunction of two goals">
+			,/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arrow.html"
+			title="->/2 -- if-then, and if-then-else">
+			->/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/colon.html"
+			title=":/2 -- calls a goal in the specified module">
+			:/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/semicolon.html"
+			title=";/2 -- disjunction of two goals">
+			;/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title="</2 -- The left expression is less than the right expression">
+			</2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title="=:=/2 -- The left and right expressions are equal">
+			=:=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title="=</2 -- The left expression is less than or equal to the right">
+			=</2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title="=\=/2 -- The left and right expressions are not equal">
+			=\=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title=">/2 -- The left expression is greater than the right expression">
+			>/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/lessthan.html"
+			title=">=/2 -- The left expression is greater than or equal to the right">
+			>=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/not.html"
+			title="\+/1 -- tests whether a goal fails">
+			\+/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/abolish.html"
+			title="abolish -- remove a procedure from the database; remove a procedure from the database; remove a procedure from the database">
+			abolish/[1,2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/abort.html"
+			title="abort/0 -- return execution immediately to the Prolog shell">
+			abort/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procedures.html"
+			title="all_ntbl_entries/4 -- retrieves all name table entries">
+			all_ntbl_entries/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procedures.html"
+			title="all_procedures/4 -- retrieves all Prolog- or C-defined procedures">
+			all_procedures/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/als_system.html"
+			title="als_system/1 -- Provides system environmental information.">
+			als_system/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setof.html"
+			title="b_findall/4 -- bound list of solutions for a goal, not sorted">
+			b_findall/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setof.html"
+			title="bagof/3 -- all solutions for a goal, not sorted">
+			bagof/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/call.html"
+			title="call/1 -- calls a goal">
+			call/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/forcePrologInterrupt.html"
+			title="callWithDelayedInterrupt/[1,2] -- call goal, setting delayed interrupt">
+			callWithDelayedInterrupt/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="canon_path/2 -- canonicalizes a path name">
+			canon_path/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/catch.html"
+			title="catch/3 -- execute a goal, specifying an exception handler">
+			catch/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="change_cwd/1 -- change the current working directory">
+			change_cwd/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/command_line.html"
+			title="command_line/1 -- provides access to the prolog system start-up command line">
+			command_line/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/compiletime.html"
+			title="compiletime/0 -- Runs goals only at compile time">
+			compiletime/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/curmod.html"
+			title="curmod/1 -- get the current module">
+			curmod/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/current_op.html"
+			title="current_op/3 -- retrieve current operator definitions">
+			current_op/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/current_prolog_flag.html"
+			title="current_prolog_flag/2 -- retrieve value(s) of prolog flag(s)">
+			current_prolog_flag/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/exists_file.html"
+			title="exists_file/1 -- tests whether a file exists">
+			exists_file/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/fail.html"
+			title="fail/0 -- always fails">
+			fail/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="filename_equal/2 -- OS portable check for equality of file names">
+			filename_equal/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setof.html"
+			title="findall/3 -- all solutions for a goal, not sorted">
+			findall/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/forcePrologInterrupt.html"
+			title="forcePrologInterrupt/0 -- force interrupt on next call">
+			forcePrologInterrupt/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/make_gv.html"
+			title="free_gv/1 -- release store associated with a named global variable">
+			free_gv/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/gc.html"
+			title="gc/0 -- invokes the garbage compactor">
+			gc/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="getDirEntries/3 -- returns the file in a directory which matches a pattern">
+			getDirEntries/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setPrologInterrupt.html"
+			title="getPrologInterrupt/1 -- determine the type of a Prolog interrupt">
+			getPrologInterrupt/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="get_cwd/1 -- returns the current working directory">
+			get_cwd/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/getenv.html"
+			title="getenv/2 -- gets the value of the given os environment variable">
+			getenv/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/halt.html"
+			title="halt/0 -- exit ALS Prolog">
+			halt/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/is.html"
+			title="is/2 -- evaluates an arithmetic expression">
+			is/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/leash.html"
+			title="leash/1 -- set which ports are leashed for the debugger">
+			leash/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/make_gv.html"
+			title="make_det_gv/1 -- create named global variable and access methods which preserve instantiations of structures">
+			make_det_gv/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/make_gv.html"
+			title="make_gv/1 -- create named global variable and access methods">
+			make_gv/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/curmod.html"
+			title="modules/2 -- get the use list of a module">
+			modules/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="must_exist_file/1 -- raises a system_error if exists_file fails">
+			must_exist_file/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/spy.html"
+			title="nospy -- removes all spy points; removes a spy point">
+			nospy/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/not.html"
+			title="not/1 -- tests whether a goal fails">
+			not/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/trace.html"
+			title="notrace/0 -- turn off tracing">
+			notrace/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/op.html"
+			title="op/3 -- define operator associativity and precedence">
+			op/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/procedures.html"
+			title="procedures/4 -- retrieves all Prolog-defined procedures">
+			procedures/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_cwd.html"
+			title="remove_file/1 -- removes a file from the current working directory">
+			remove_file/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/repeat.html"
+			title="repeat/0 -- always succeed upon backtracking">
+			repeat/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/rexec.html"
+			title="rexec/2 -- Execute an operating system command remotely, or possibly locally.">
+			rexec/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/save_image.html"
+			title="save_image/2 -- package an application">
+			save_image/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setPrologInterrupt.html"
+			title="setPrologInterrupt/1 -- establish the type of a Prolog interrupt">
+			setPrologInterrupt/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/current_prolog_flag.html"
+			title="set_prolog_flag/2 -- set value of a Prolog flag">
+			set_prolog_flag/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setof.html"
+			title="setof/3 -- all unique solutions for a goal, sorted">
+			setof/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/spy.html"
+			title="spy -- enable spy points; sets a spy point">
+			spy/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/statistics.html"
+			title="statistics/0 -- display memory allocation information">
+			statistics/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/statistics.html"
+			title="statistics/2 -- display runtime statistics">
+			statistics/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/als_system.html"
+			title="sys_env/3 -- Provides brief system environmental information.">
+			sys_env/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/system.html"
+			title="system/1 -- Executes the specified OS shell command">
+			system/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/catch.html"
+			title="throw/1 -- give control to an exception handler">
+			throw/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/trace.html"
+			title="trace -- turn on tracing; trace the execution of a goal">
+			trace/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/true.html"
+			title="true/0 -- always succeeds">
+			true/0
+		</a>
+		</li>
+
+	    <div id="inpoutp" class="hentry">Input Output</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/access.html"
+			title="$access/2 -- determine accessability of a file">
+			$access/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/at_end_of_stream.html"
+			title="at_end_of_stream -- test for end of the curent input stream; test for end of a specific input stream">
+			at_end_of_stream/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/buf_read.html"
+			title="bufread -- runs the Prolog parser on a string of text; similiar to bufread/2, allowing read options">
+			bufread/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sprintf.html"
+			title="bufwrite/2 -- formatted write to strings">
+			bufwrite/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sprintf.html"
+			title="bufwriteq/2 -- formatted write to strings with quoting">
+			bufwriteq/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/chdir.html"
+			title="chdir/1 -- changes the current directory to the specified directory">
+			chdir/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/close.html"
+			title="close -- close an open stream; close an open stream with options">
+			close/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/consult.html"
+			title="consult -- load a Prolog file; load a Prolog file, with options">
+			consult/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/consult.html"
+			title="consultq/1 -- load a Prolog file, without messages">
+			consultq/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/curl.html"
+			title="curl -- Access to the internet via the curl package with URL, Options, Target in one list; Access to the internet via the curl package with separate URL arg, combined Options, Target in one list; Access to the internet via the curl package with separate URL, Options, Target args">
+			curl/[1,2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/current_input.html"
+			title="current_input/1 -- retrieve current input stream">
+			current_input/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/current_input.html"
+			title="current_output/1 -- retrieve current output stream">
+			current_output/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="date/1 -- gets the local date">
+			date/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="date_less/2 -- compares two dates">
+			date_less/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="date_pattern/4 -- describes the pattern term for date display">
+			date_pattern/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="datetime/2 -- gets the local system date and time">
+			datetime/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="datetime_less/2 -- compares two datetimes">
+			datetime_less/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="display/1 -- write term to current output stream in canonical form">
+			display/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/flush_input.html"
+			title="flush_input/1 -- discard buffer contents of stream">
+			flush_input/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/flush_output.html"
+			title="flush_output -- flush current output stream; flush specific output stream">
+			flush_output/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get.html"
+			title="get/1 -- read the next printable character">
+			get/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get.html"
+			title="get0/1 -- read the next character">
+			get0/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_char.html"
+			title="get_char -- read a character from current input stream; read character from a specific stream">
+			get_char/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/get_code.html"
+			title="get_code -- read a character code from current input stream; read character code from a specific stream">
+			get_code/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="gm_datetime/2 -- gets the Greenwich mean time(UTC)">
+			gm_datetime/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/curl.html"
+			title="http/3 -- REST-inspired user-level interface for curl">
+			http/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="nl -- output a newline to the current output stream; output a newline to a specified output stream">
+			nl/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/buf_read.html"
+			title="old_bufread/2 -- similiar to bufread/2, giving additional information on variables">
+			old_bufread/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/open.html"
+			title="open -- open a stream; open a stream with options">
+			open/[3,4]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/peek_char.html"
+			title="peek_char/[1,2] -- obtain char from stream">
+			peek_char/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/peek_code.html"
+			title="peek_code -- obtain char code from stream; obtain char from stream">
+			peek_code/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/poll.html"
+			title="poll/2 -- Determine whether I/O is possible">
+			poll/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/printf.html"
+			title="printf -- print out a string to the current output; print out a string with arguments; print out a string with a format and arguments; print out string with format, arguments, options">
+			printf/[1,2,3,4]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/printf.html"
+			title="printf_opt/3 -- print out string with format, arguments, options">
+			printf_opt/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put.html"
+			title="put/1 -- write out a character">
+			put/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put_atom.html"
+			title="put_atom -- output an atom to the current output stream; output an atom to a specific output stream">
+			put_atom/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put_char.html"
+			title="put_char -- output a character to the current output stream; output a character to a specific output stream">
+			put_char/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put_code.html"
+			title="put_code -- output a character code to the current output stream; output a character code to a specific output stream">
+			put_code/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put_string.html"
+			title="put_string -- output a string to the current output stream; output a string to a specific output stream">
+			put_string/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/read.html"
+			title="read -- read a term from the current input stream; read a term from specified stream">
+			read/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/read.html"
+			title="read_term -- read term from current input with options; read term from specified stream with options">
+			read_term/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/consult.html"
+			title="reconsult/1 -- load a Prolog file, updating the prolog database">
+			reconsult/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/see.html"
+			title="see/1 -- sets the current input stream">
+			see/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/see.html"
+			title="seeing/1 -- returns the name of the current input stream">
+			seeing/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/see.html"
+			title="seen/0 -- closes the current input stream">
+			seen/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="set_date_pattern/1 -- changes the pattern term for date display">
+			set_date_pattern/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_line_length.html"
+			title="set_depth_computation/2 -- set method of computing term depth">
+			set_depth_computation/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_input.html"
+			title="set_input/1 -- set current input stream">
+			set_input/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_line_length.html"
+			title="set_line_length/2 -- set length of line for output stream">
+			set_line_length/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_line_length.html"
+			title="set_max_depth/2 -- set maximum depth that terms will be written to">
+			set_max_depth/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_input.html"
+			title="set_output/1 -- set current output stream">
+			set_output/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/set_stream_position.html"
+			title="set_stream_position/2 -- seek to a new position in a stream">
+			set_stream_position/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/skip.html"
+			title="skip/1 -- discard all input characters until specified character">
+			skip/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sprintf.html"
+			title="sprintf/3 -- formatted write to atoms and strings">
+			sprintf/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/stream_position.html"
+			title="stream_position/[2,3] -- reposition a stream">
+			stream_position/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/stream_property.html"
+			title="stream_property/2 -- retrieve streams and their properties">
+			stream_property/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/put.html"
+			title="tab/1 -- prints out a specified number of spaces">
+			tab/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tell.html"
+			title="tell/1 -- sets the standard output stream">
+			tell/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tell.html"
+			title="telling/1 -- returns the name of the standard output stream">
+			telling/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="time/1 -- gets the local system time">
+			time/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="time_less/2 -- compares two times">
+			time_less/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tell.html"
+			title="told/0 -- closes the standard output stream">
+			told/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/ttyflush.html"
+			title="ttyflush/0 -- forces all buffered output to the screen">
+			ttyflush/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/datetime.html"
+			title="valid_date/[1,3] -- determines if a date pattern represents a valid date">
+			valid_date/[1,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="write -- write term to current output stream; write term to specified stream">
+			write/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="write_canonical -- write term to current output stream in canonical form(no operators); write term to specified stream in canonical form">
+			write_canonical/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="write_term -- write term to current output stream with options; write term to specified output stream with options">
+			write_term/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/write.html"
+			title="writeq -- write term to current output stream so that it may be read back in; write term to specified stream so that it may be read back in">
+			writeq/[1,2]
+		</a>
+		</li>
+
+	    <div id="terms" class="hentry">Terms</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/univ.html"
+			title="=../2 -- composes/decomposes structures from/to components">
+			=../2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/unify.html"
+			title="=/2 -- unify two terms">
+			=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/identity.html"
+			title="==/2 -- terms are identical">
+			==/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/canonorder.html"
+			title="@</2 -- The left argument is before the right argument">
+			@</2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/canonorder.html"
+			title="@=</2 -- The left argument is not after the right argument">
+			@=</2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/canonorder.html"
+			title="@>/2 -- The left argument is after the right argument">
+			@>/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/canonorder.html"
+			title="@>=/2 -- The left argument is not before the right argument">
+			@>=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/unify.html"
+			title="\=/2 -- test if two items are non-unifiable">
+			\=/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/identity.html"
+			title="\==/2 -- terms are not identical">
+			\==/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/append.html"
+			title="append/3 -- append two lists">
+			append/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arg.html"
+			title="arg/3 -- access the arguments of a structured term">
+			arg/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom.html"
+			title="atom/1 -- the term is an atom">
+			atom/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom_chars.html"
+			title="atom_chars/2 -- convert between atoms and the list of characters representing the atom">
+			atom_chars/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom_chars.html"
+			title="atom_codes/2 -- convert between atoms and the list of character codes representing the atom">
+			atom_codes/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom.html"
+			title="atomic/1 -- the term is an atom or a number">
+			atomic/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/char_code.html"
+			title="char_code/2 -- convert between characters and codes">
+			char_code/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/compare.html"
+			title="compare/3 -- compares two terms in the standard order">
+			compare/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/copy_term.html"
+			title="copy_term/2 -- make copy of a term">
+			copy_term/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/append.html"
+			title="dappend/3 -- append two lists">
+			dappend/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/member.html"
+			title="dmember/2 -- list membership">
+			dmember/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/reverse.html"
+			title="dreverse/2 -- determinate list reversal">
+			dreverse/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom.html"
+			title="float/1 -- the term is a floating point number">
+			float/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/functor.html"
+			title="functor/3 -- builds structures and retrieves information about them">
+			functor/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/gensym.html"
+			title="gensym/2 -- generates families of unique symbolsr">
+			gensym/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom.html"
+			title="integer/1 -- the term is an integer">
+			integer/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sort.html"
+			title="keysort/2 -- sorts a list of Key-Data pairs">
+			keysort/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/length.html"
+			title="length/2 -- count the number of elements in a list">
+			length/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/make_hash_table.html"
+			title="make_hash_table/1 -- create a hash table and access predicates">
+			make_hash_table/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/mangle.html"
+			title="mangle/3 -- destructively modify a structure">
+			mangle/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/member.html"
+			title="member/2 -- list membership">
+			member/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/name.html"
+			title="name/2 -- converts strings to atoms and atoms to strings">
+			name/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atom.html"
+			title="number/1 -- the term is an integer or a floating point">
+			number/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/number_chars.html"
+			title="number_chars/2 -- convert between a number and the list of characters which represent the number">
+			number_chars/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/number_chars.html"
+			title="number_codes/2 -- convert between a number and the list of character codes which represent the number">
+			number_codes/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/recorda.html"
+			title="recorda/3 -- records item in internal term database">
+			recorda/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/recorda.html"
+			title="recorded/3 -- retrieves item from internal term database">
+			recorded/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/recorda.html"
+			title="recordz/3 -- records item in internal term database">
+			recordz/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/reverse.html"
+			title="reverse/2 -- list reversal">
+			reverse/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sort.html"
+			title="sort/2 -- sorts a list of terms">
+			sort/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/sub_atom.html"
+			title="sub_atom/5 -- dissect an atom">
+			sub_atom/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/term_chars.html"
+			title="term_chars/2 -- convert between a term and the list of characters which represent the term">
+			term_chars/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/term_chars.html"
+			title="term_codes/2 -- convert between a term and the list of character codes which represent the term">
+			term_codes/2
+		</a>
+		</li>
+
+	    <div id="prodb" class="hentry">Prolog Database</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/assert.html"
+			title="assert -- adds a clause to a procedure; adds a clause to a procedure, returning a DB Ref">
+			assert/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/assert.html"
+			title="asserta -- adds a clause to the beginning of a procedure; adds a clause to the beginning of a procedure, returning a DB Ref">
+			asserta/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/assert.html"
+			title="assertz -- adds a clause to the end of a procedure; adds a clause to the end of a procedure, returning a DB Ref">
+			assertz/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/clause.html"
+			title="clause -- retrieve a clause; retrieve a clause with a database reference">
+			clause/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/dynamic.html"
+			title="dynamic/1 -- declare a procedure to be dynamic">
+			dynamic/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/retract.html"
+			title="erase/1 -- removes a clause from the database">
+			erase/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/clause.html"
+			title="instance/2 -- retrieve a clause from the database reference">
+			instance/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listing.html"
+			title="listing -- Prints all clauses; Prints clauses matching the specified template">
+			listing/[0,1]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/module_closure.html"
+			title="module_closure -- creates a module closure; creates a module closure for the specified procedure">
+			module_closure/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/var.html"
+			title="nonvar/1 -- the variable is instantiated">
+			nonvar/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/retract.html"
+			title="retract -- removes a clause from the database; removes a clause specified by a database reference">
+			retract/[1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/var.html"
+			title="var/1 -- the variable is unbound">
+			var/1
+		</a>
+		</li>
+
+	    <div id="uias" class="hentry">UIAs</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_alloc/2 -- allocates a UIA of specified length">
+			$uia_alloc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_clip/2 -- clip the given UIA">
+			$uia_clip/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peek/4 -- returns the specified region of a UIA">
+			$uia_peek/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peekb/3 -- returns the specified byte of a UIA">
+			$uia_peekb/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peekd/3 -- returns the specified double of a UIA">
+			$uia_peekd/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peekl/3 -- returns the specified long word of a UIA">
+			$uia_peekl/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peeks/3 -- returns the specified substring of a UIA">
+			$uia_peeks/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peeks/4 -- returns the specified substring of a UIA">
+			$uia_peeks/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_peekw/3 -- returns the specified word of a UIA">
+			$uia_peekw/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_poke/4 -- modifies the specified region of a UIA">
+			$uia_poke/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_pokeb/3 -- modifies the specified byte of a UIA">
+			$uia_pokeb/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_poked/3 -- modifies the specified double of a UIA">
+			$uia_poked/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_pokel/3 -- modifies the specified long word of a UIA">
+			$uia_pokel/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_pokes/3 -- modifies the specified substring of a UIA">
+			$uia_pokes/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_pokew/3 -- modifies the specified word of a UIA">
+			$uia_pokew/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/uia_alloc.html"
+			title="$uia_size/2 -- obtains the actual size of a UIA">
+			$uia_size/2
+		</a>
+		</li>
+	</ul>
+	</div>
+	</div> <!-- div id="side-tab1" -->
 
 
+	<div id="side-tab2" class="unit_top">
+		<div style="text-align:center; font-weight: bold;">ALSDev TOC </div>
+		<ul style="height:100px;">
+		    <li id = "devenv_btn" class = "tocsubtab">Development Env. </li>
+		    <li id = "guilib_btn" class = "tocsubtab">Gui Library </li>
+		    <li id = "proobjs_btn" class = "tocsubtab">Prolog Objects </li>
+		    <li id = "tcltki_btn" class = "tocsubtab">TckTk Interface </li>
+		</ul>
+	<div id="devenv_toc" class="toc_top">
+	<ul id="devenv_toc_ul" style = "margin-top: -1.2em; height:37em;  overflow-y:scroll; overflow-x:hidden;">
+	    <div id="devenv" class="hentry">Development Env.</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Edit_Menu.html"
+			title="Edit Menu -- Select actions while editing a file">
+			Edit Menu
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/File_Menu.html"
+			title="File Menu -- Select a file for editing">
+			File Menu
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Find_dialog.html"
+			title="Find Dialog -- Search and replace in edit windows">
+			Find Dialog
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Listener_Window.html"
+			title="Listener Window -- Primary interaction window">
+			Listener Window
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Preferences_Dialog.html"
+			title="Preferences Dialog -- Set various IDE preferences">
+			Preferences Dialog
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Prolog_Menu.html"
+			title="Prolog Menu -- Manage prolog projects and settings">
+			Prolog Menu
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Prolog_Projects_Menu.html"
+			title="Prolog Projects Menu -- Manage prolog projects and settings">
+			Prolog Projects Menu
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/Tools_Menu.html"
+			title="Tools Menu -- Invoke various useful tools">
+			Tools Menu
+		</a>
+		</li>
 
-</div>
+	    <div id="guilib" class="hentry">Gui Library</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/extendmainmenubar.html"
+			title="add_to_main_menu_entry/2 -- add an item to a menu entry">
+			add_to_main_menu_entry/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/atomic_input_dialog.html"
+			title="atomic_input_dialog/[2,3,4] -- input atoms and numbers">
+			atomic_input_dialog/[2,3,4]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/display_image.html"
+			title="create_image/[2,3] -- create an image from a GIF file">
+			create_image/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/display_image.html"
+			title="display_image/[1,3] -- display an image">
+			display_image/[1,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/extendmainmenubar.html"
+			title="extend_cascade/3 -- extend a menu cascade">
+			extend_cascade/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/extendmainmenubar.html"
+			title="extend_main_menubar/2 -- add entries to the main menubar">
+			extend_main_menubar/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/file_select_dialog.html"
+			title="file_select_dialog/ [1,2,3] -- select a file">
+			file_select_dialog/ [1,2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/info_dialog.html"
+			title="info_dialog/ [1,2,3] -- present an information dialog">
+			info_dialog/ [1,2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/init_tk_alslib.html"
+			title="init_tk_alslib/[0,1,2] -- initialize GUI library, creating Tcl interpreter">
+			init_tk_alslib/[0,1,2]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/extendmainmenubar.html"
+			title="menu_entries_list/[2,3] -- obtain menu entries">
+			menu_entries_list/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/extendmainmenubar.html"
+			title="path_to_menu_entry/[2,3,4] -- obtain path to a menu entry">
+			path_to_menu_entry/[2,3,4]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/popup_select_items.html"
+			title="popup_select_items/ [2,3,4] -- present popup selection list">
+			popup_select_items/ [2,3,4]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/yes_no_dialog.html"
+			title="yes_no_dialog/[2,3,4,6] -- present a yes/no dialog">
+			yes_no_dialog/[2,3,4,6]
+		</a>
+		</li>
+
+	    <div id="proobjs" class="hentry">Prolog Objects</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setObjStruct.html"
+			title="accessObjStruct/3 -- access the value of a slot in an object">
+			accessObjStruct/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/create_object.html"
+			title="create_object/2 -- create an object">
+			create_object/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/defStruct.html"
+			title="defStruct/2 -- specify an abstract data type">
+			defStruct/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/defineClass.html"
+			title="defineClass/1 -- specify an ObjectPro class">
+			defineClass/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/send.html"
+			title="send/2 -- send a message to an object">
+			send/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/setObjStruct.html"
+			title="setObjStruct/3 -- set the value of a slot in an object">
+			setObjStruct/3
+		</a>
+		</li>
+
+	    <div id="tcltki" class="hentry">TclTk Interface</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/prolog.html"
+			title="prolog -- call a prolog term from Tcl">
+			prolog
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_call.html"
+			title="tcl_call/3 -- execute Tcl script">
+			tcl_call/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_coerce_number.html"
+			title="tcl_coerce_atom/3 -- convert Tcl entity to Prolog atom">
+			tcl_coerce_atom/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_coerce_number.html"
+			title="tcl_coerce_list/3 -- convert Tcl entity to Prolog list">
+			tcl_coerce_list/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_coerce_number.html"
+			title="tcl_coerce_number/3 -- convert Tcl entity to Prolog number">
+			tcl_coerce_number/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_delete.html"
+			title="tcl_delete/1 -- delete a Tcl interpreter">
+			tcl_delete/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_delete.html"
+			title="tcl_delete_all/0 -- delete all Tcl interpreters">
+			tcl_delete_all/0
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_call.html"
+			title="tcl_eval/3 -- evaluate Tcl script">
+			tcl_eval/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_new.html"
+			title="tcl_new/1 -- create a Tcl interpreter">
+			tcl_new/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/tcl_new.html"
+			title="tk_new/1 -- create a Tcl interpreter initialized for Tk">
+			tk_new/1
+		</a>
+		</li>
+	</ul>
+	</div>
+	</div> <!-- div id="side-tab2" -->
+
+
+	<div id="side-tab3" class="unit_top">
+		<div style="text-align:center; font-weight: bold;">ALS Library TOC </div>
+		<ul style="height:100px;">
+		    <li id="arith_btn" class = "tocsubtab" >Arithmetic </li>
+		    <li id="web_btn" class = "tocsubtab">Web </li>
+		    <li id="lists_btn" class = "tocsubtab">Lists </li>
+		    <li id="atoms_btn" class = "tocsubtab">Atoms </li>
+		    <li id="format_btn" class = "tocsubtab">Formatting </li>
+		    <li id="strings_btn" class = "tocsubtab">Strings </li>
+		</ul>
+	    <div id="alslib_toc" class="toc_top" style="margin-top:2.95em;">
+	    <ul id="alslib_toc_ul" style = "margin-top: 1em; height:37em;  overflow-y:scroll; overflow-x:hidden;">
+	    <div id="arith" class="hentry">Arithmetic</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="max/3 -- Returns the maximum of results of evaluating two arithmetic Exprs">
+			max/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="max_vector/3 -- Returns the result of iteratively taking the max of Left,Right">
+			max_vector/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="maximum/2 -- Returns the maximum of the evaluations of the expressions on ExprList">
+			maximum/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="min/3 -- Returns the minimum of results of evaluating two arithmetic Exprs">
+			min/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="min_vector/3 -- Returns the result of iteratively taking the min of Left,Right">
+			min_vector/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="minimum/2 -- Returns the minimum of the evaluations of the expressions on ExprList">
+			minimum/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="prodlist/2 -- Returns the product of the evaluations of the numbers on ExprList">
+			prodlist/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="sum_square_diffs/3 -- Returns the sum of squares of differences of XList,YList">
+			sum_square_diffs/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="sum_squares/2 -- Returns the sum of the squares of the evaluations of the numbers on ExprList">
+			sum_squares/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/arithx1.html"
+			title="sumlist/2 -- Returns the sum of the evaluations of the numbers on ExprList">
+			sumlist/2
+		</a>
+		</li>
+
+	    <div id="web" class="hentry">Web</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/html_tokens.html"
+			title="grab_html_tokens/2 -- extracts all Tokens from the File">
+			grab_html_tokens/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="grab_pxml/2 -- reads the pxml term found in file Path">
+			grab_pxml/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="grab_pxml_with_paths/5 -- read PXML term in FilePath, tagged component tags and paths">
+			grab_pxml_with_paths/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="grab_pxml_with_tagged/3 -- read PXML term in FilePath, including tagged components ">
+			grab_pxml_with_tagged/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="parse_html_toks_to_pxml/5 -- parse a list of HTML-tokens">
+			parse_html_toks_to_pxml/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="parse_html_toks_to_pxml_vals/3 -- parse a list of HTML-tokens">
+			parse_html_toks_to_pxml_vals/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="read_pxml_comment/3 -- read an HTML comment into PXML">
+			read_pxml_comment/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="read_pxml_term/7 -- - read a PXML term out of Tokens">
+			read_pxml_term/7
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/html_tokens.html"
+			title="read_tokens/2 -- extracts all Tokens from a stream">
+			read_tokens/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/html_tokens.html"
+			title="tokenize_file/2 -- extracts all Tokens from the File">
+			tokenize_file/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/parse_html.html"
+			title="unary_tag/1 -- specifies syntactic roles tags">
+			unary_tag/1
+		</a>
+		</li>
+
+	    <div id="lists" class="hentry">Lists</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="append/2 -- appends a list of lists together">
+			append/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="at_most_n/3 -- returns initial segment of list of length =< N">
+			at_most_n/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="change_nth/3 -- destructively changes the Nth element of a list">
+			change_nth/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="check_default/4 -- looks up an equation on a list, with a default">
+			check_default/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="check_default_del/5 -- looks up a tagged equation on a List, and deletes it">
+			check_default_del/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="deleteNth/3 -- deletes the Nth element of a list">
+			deleteNth/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="delete_1st/3 -- deletes the left-most entry of Item in List">
+			delete_1st/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="encode_list/3 -- encodes the elements of a list with provided codes">
+			encode_list/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="flatten/2 -- flattens a nested list">
+			flatten/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="get_list_tail/3 -- returns the tail of a list determined by an element">
+			get_list_tail/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="init_seg_list/2 -- determines if one list is an initial segment of another">
+			init_seg_list/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="insert_item_in_list/3 -- interleaves an arbitrary term  between elements of a list">
+			insert_item_in_list/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="insert_spaces/2 -- interleaves a quoted blank between elements of a list">
+			insert_spaces/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="int_diff/4 -- returns the intersection and one difference of two lists">
+			int_diff/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="intersect -- returns the intersection of a list of lists; returns the intersection of two lists">
+			intersect/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="is_length/2 -- invertible length predicate">
+			is_length/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="last/2 -- returns last element of a list">
+			last/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="list_diff/3 -- returns the ordered difference of two lists">
+			list_diff/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="list_diffs/4 -- returns both ordered differences of two lists">
+			list_diffs/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="mangle_change_tagged/3 -- destructively changes the value of a tagged eqn">
+			mangle_change_tagged/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="merge_in_list/3 -- merges two list together">
+			merge_in_list/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="merge_plists/3 -- recursively merges two tagged equation lists">
+			merge_plists/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="merge_tagged_lists/3 -- recursively merges two tagged equation lists">
+			merge_tagged_lists/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="n_of/3 -- creates a list of N copies of an item	">
+			n_of/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="nobind_member/2 -- tests list membership without binding any variables">
+			nobind_member/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="nonmember/2 -- tests for the failure of membership">
+			nonmember/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="nth_tail/4 -- returns the nth head and tail of a list">
+			nth_tail/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="number_list -- creates a numbered list from a source list; numbers the elements of a list">
+			number_list/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="remove_tagged/3 -- removes tagged equations from a list">
+			remove_tagged/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="sorted_merge -- returns the sorted union of a list of lists; returns the sorted union of two lists">
+			sorted_merge/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl4.html"
+			title="split_ll_at_start/5 -- splits a list of atoms according to an initial subatom">
+			split_ll_at_start/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl4.html"
+			title="split_ll_by_blank/3 -- splits a list of atoms by the first null atom">
+			split_ll_by_blank/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="struct_lookup_subst/4 -- performs substs for structs package constructors">
+			struct_lookup_subst/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="sublist/4 -- extracts a sublist from a list">
+			sublist/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="subset/2 -- determines if one list is a subset of another">
+			subset/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl2.html"
+			title="subst_nth/4 -- non-destructively changes the Nth element of a list">
+			subst_nth/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl3.html"
+			title="subst_tagged/4 -- NON-destructively changes the value of a tagged eqn">
+			subst_tagged/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="symmetric_diff/3 -- returns the symmetric difference of two lists">
+			symmetric_diff/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/listutl1.html"
+			title="union/3 -- returns the ordered union of two lists">
+			union/3
+		</a>
+		</li>
+
+	    <div id="atoms" class="hentry">Atoms</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="cat_together_seplines/2 -- convert list of atoms to single atom with eoln separating atom entries">
+			cat_together_seplines/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="cat_together_spaced/2 -- convert list of atoms to single atom with space separating atom entries">
+			cat_together_spaced/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="catenate -- catenates a list of atoms; catenates two atoms, or an atom and number, to produce a third atom">
+			catenate/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="prefix_dir/3 -- prefix Dir to each (atomic) item on List">
+			prefix_dir/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="prefix_to/3 -- catenate Atom to the front of each element on a List of atoms">
+			prefix_to/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="strip_prefix/3 -- strip a fixed-length prefix from a list of atoms">
+			strip_prefix/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/miscatom.html"
+			title="trim_atoms/3 -- truncates a list of atoms">
+			trim_atoms/3
+		</a>
+		</li>
+
+	    <div id="format" class="hentry">Formatting</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/rows_cols.html"
+			title="columns -- Output ListOfRows as a minimal columnar array of terms; Like columns/1, outputting to a given stream; Output ListOfRows as a columnized rectangular array of terms">
+			columns/[1,2,3]
+		</a>
+		</li>
+
+	    <div id="strings" class="hentry">Strings</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="asplit/4 -- divides an atom as determined by a character">
+			asplit/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="asplit00/4 -- divides a list of character codes as det. by a list of char codes">
+			asplit00/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="atomic_to_uia/2 -- create a UIA corresponding to an atomic item">
+			atomic_to_uia/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="change_case_sym/2 -- converts the case of characters in a symbol, based on the first">
+			change_case_sym/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="char_in/3 -- Locates the position of a character in an atom.">
+			char_in/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="cnvrt_to_UIA/2 -- create a UIA corresponding to an arbitrary term">
+			cnvrt_to_UIA/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="convert_to_uc/2 -- converts all items in a list of terms to uppercase">
+			convert_to_uc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="head/4 -- splits an list into segments determined by a character code">
+			head/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="head0/4 -- splits a character code list into segments determined by a code">
+			head0/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="make_lc/2 -- converts a Prolog string to all lowercase character (codes)">
+			make_lc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="make_lc_sym/2 -- converts an atom or UIA to all lowercase characters">
+			make_lc_sym/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="make_uc/2 -- converts a Prolog string to all uppercase character (codes)">
+			make_uc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="make_uc_sym/2 -- converts an atom or UIA to all uppercase characters">
+			make_uc_sym/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="read_to/5 -- splits a string according to one of several possible chars">
+			read_to/5
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="read_to_blank/3 -- splits a string around the leftmost occurrence of blank">
+			read_to_blank/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="replace_char_atom/4 -- Replace occurrences of a char in an atom by another char">
+			replace_char_atom/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="replace_char_string/4 -- Replace occurrences of a char in a string by another char">
+			replace_char_string/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="same_uc/2 -- Term1,Term2 unify after converting all characters to upper case">
+			same_uc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="string_to_sized_uia/3 -- creates a UIA containg chars corresponding to a string">
+			string_to_sized_uia/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="string_to_uia -- creates a UIA corresponding to an arbitrary string; insert list of char (codes) into a UIA">
+			string_to_uia/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="strip_both_white/2 -- strips leading and trailing white space chars from a string">
+			strip_both_white/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="strip_both_white_atom/2 -- strips leading and trailing white space chars from a prolog atom">
+			strip_both_white_atom/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="strip_tail_white/2 -- strips trailing white space  from a string">
+			strip_tail_white/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="strip_white/2 -- strips leading white space from a string">
+			strip_white/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/strings.html"
+			title="truncate/3 -- creates a UIA truncating the input expression">
+			truncate/3
+		</a>
+		</li>
+	</ul>
+	</div>
+	</div> <!-- div id="side-tab3" -->
+
+
+	<div id="side-tab4" class="unit_top">
+		<div style="text-align:center; font-weight: bold;">ALS C-Interf TOC </div>
+		<ul style="height:100px;">
+		    <li id="cdata_btn" class="tocsubtab">C Data</li>
+		</ul>
+	    <div id="cintf_toc" class="toc_top">
+	    <ul id="cintf_toc_ul" style = "margin-top: -5em;  height:37em;  overflow-y:scroll; overflow-x:hidden;">
+	    <div id="cdata" class="hentry">C Data</div>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_malloc.html"
+			title="$c_examine/2 -- Examines the contents of a C data area or a UIA">
+			$c_examine/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_malloc.html"
+			title="$c_free/1 -- Frees a C data area">
+			$c_free/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_malloc.html"
+			title="$c_malloc/2 -- Allocates a C data area using the system malloc call">
+			$c_malloc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_malloc.html"
+			title="$c_set/2 -- Modifies the contents of a C data area or a UIA">
+			$c_set/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_alloc/2 -- allocate a UIA that can hold C data">
+			c_alloc/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_alloc_abs/2 -- allocate a C-malloced data area">
+			c_alloc_abs/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_allocn/3 -- allocate a UIA to hold Num items">
+			c_allocn/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_allocn_abs/3 -- allocated a C-malloced area to hold Num items">
+			c_allocn_abs/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_call/3 -- calls a C function">
+			c_call/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_const/2 -- get the value of a C defined constant">
+			c_const/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_create/3 -- equivalent to c_alloc/2 plus c_set/3">
+			c_create/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_create_abs/3 -- equivalent to c_alloc_abs/2 plus c_set/3">
+			c_create_abs/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_create_arglist/[2,3] -- create an initialized ARGLIST structure for X Toolkit">
+			c_create_arglist/[2,3]
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_createn/4 -- allocate and initialize an array of data values in a UIA">
+			c_createn/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_createn_abs/4 -- allocate and initialize an array of data values in a C area">
+			c_createn_abs/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examine/3 -- multiply examine a UIA or C data area">
+			c_examine/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examine/3 -- examine a UIA or C data area">
+			c_examine/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examine_raw/4 -- extract raw chars from a UIA or C data area">
+			c_examine_raw/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examine_str/4 -- extract chars from a UIA or C data area">
+			c_examine_str/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examinen/4 -- multiply examine a component of an array">
+			c_examinen/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_examinen/4 -- examine a component of an array">
+			c_examinen/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_free/1 -- applied to UIA does nothing (freeing handled by gc)">
+			c_free/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_free_abs/1 -- mfree the C area pointed by Ptr.">
+			c_free_abs/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_create.html"
+			title="c_free_arglist/1 -- perform c_free_abs on each item of PtrList">
+			c_free_arglist/1
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_rconst/2 -- get the value of a C defined runtime constant">
+			c_rconst/2
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_set/3 -- multiply modify a UIA or C data area">
+			c_set/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_set/3 -- modify a UIA or C data area">
+			c_set/3
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_set_raw/4 -- writes chars from a UIA into a UIA or C data area">
+			c_set_raw/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_set_str/4 -- insert C string in a UIA or C data area">
+			c_set_str/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_setn/4 -- multiply perform c_set/3 on a component of an array">
+			c_setn/4
+		</a>
+		</li>
+		<li class="eentry">
+			<a class="astyl" target="content" href="/docs/ref/c_alloc.html"
+			title="c_setn/4 -- perform c_set/3 on a component of an array">
+			c_setn/4
+		</a>
+		</li>
+	</ul>
+	</div>
+	</div> <!-- div id="side-tab4" -->
+
+    </div>
+
+<script>
+$( "#control_btn" ).click(function() { $("#core_toc_ul").scrollTo("#control") });
+$( "#inpoutp_btn" ).click(function() { $("#core_toc_ul").scrollTo("#inpoutp") });
+$( "#terms_btn" ).click(function() { $("#core_toc_ul").scrollTo("#terms") });
+$( "#prodb_btn" ).click(function() { $("#core_toc_ul").scrollTo("#prodb") });
+$( "#uias_btn" ).click(function() { $("#core_toc_ul").scrollTo("#uias") });
+</script>
+
+<script>
+$( "#devenv_btn" ).click(function() { $("#devenv_toc_ul").scrollTo("#devenv") });
+$( "#guilib_btn" ).click(function() { $("#devenv_toc_ul").scrollTo("#guilib") });
+$( "#proobjs_btn" ).click(function() { $("#devenv_toc_ul").scrollTo("#proobjs") });
+$( "#tcltki_btn" ).click(function() { $("#devenv_toc_ul").scrollTo("#tcltki") });
+</script>
+
+<script>
+$( "#arith_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#arith") });
+$( "#web_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#web") });
+$( "#lists_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#lists") });
+$( "#atoms_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#atoms") });
+$( "#format_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#format") });
+$( "#strings_btn" ).click(function() { $("#alslib_toc_ul").scrollTo("#strings") });
+</script>
+
+<script>
+$( "#cdata_btn" ).click(function() { $("#cintf_toc_ul").scrollTo("#cdata") });
+</script>
+</div> 	  <!-- panel-container -->
+
+</div>    <!-- sidebar -->
 
