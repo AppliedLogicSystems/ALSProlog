@@ -1751,7 +1751,7 @@ The behavior of printf/[..] for the format elements %KZ is completely in accord 
 Note that a printf `Format`  can be a (single-quoted) atom, or a prolog.string (e.g. "abc...").
 Using prolog double-quoted strings consumes more storage than (single-quoted) atoms.
 
-The following are useful pages concerning C printf: [printf, Format Specifiers, Format Conversions and Formatted Output](https://c.camden.rutgers.edu/c_resources/printf.html),  [Format specifiers in C](https://www.geeksforgeeks.org/format-specifiers-in-c/),  [printf format string](https://en.wikipedia.org/wiki/Printf_format_string).  
+The following are useful pages concerning C printf: [Format specifiers in C](https://www.geeksforgeeks.org/format-specifiers-in-c/),  [printf format string](https://en.wikipedia.org/wiki/Printf_format_string).
 
 As noted above, for %t, the corresponding element of `ArgList` is printed on the output stream as a Prolog term, such as would be output by write/1.
 
