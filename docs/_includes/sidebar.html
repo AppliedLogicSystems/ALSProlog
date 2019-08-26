@@ -1,13 +1,12 @@
 <nav>
 
-{%- assign groups = site.pages | where: "reference", true | where: "package", page.package | group_by: "group" %}
+{%- assign grouppages = site.pages | where: "reference", true | where: "group", page.group %}
 
-{%- assign g = groups | where: "name", page.group | first %}
-Group Sidbar: {{g.name | escape}}
+Group Sidbar: {{page.group | escape}}
 <ul>
 
 	{%- assign predicates = "" | split: "" %}
-	{%- for r in g.items %}
+	{%- for r in grouppages %}
 		{% for p in r.predicates %}
 			{% assign predicates = predicates | push: p %}
 		{% endfor %}
@@ -16,7 +15,7 @@ Group Sidbar: {{g.name | escape}}
 	{%- assign sorted_preds = predicates | sort: "sig" %}
 
 	{%- for p in sorted_preds %}
-		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+		{%- assign ppage = grouppages | where_exp: "item", "item.predicates contains p" | first %}
 		<li>
 		{% if ppage.url == page.url %}<strong>{% endif %}
 		<a href="{{ppage.url}}">
