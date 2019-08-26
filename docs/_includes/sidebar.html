@@ -1,19 +1,9 @@
 <nav>
-Sidebar
 
-<ul>
-{%- for package in site.ref_packages %}
+{%- assign groups = site.pages | where: "reference", true | where: "package", page.package | group_by: "group" %}
 
-<li><details {% if package == page.package %}open{% endif %}>
-<summary>{{package | escape}}</summary>
-
-{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
-
-<ul>
-{%- for g in groups %}
-
-<li><details {% if g.name == page.group %}open{% endif %}>
-<summary>{{g.name | escape}}</summary>
+{%- assign g = groups | where: "name", page.group | first %}
+Group Sidbar: {{g.name | escape}}
 <ul>
 
 	{%- assign predicates = "" | split: "" %}
@@ -28,18 +18,13 @@ Sidebar
 	{%- for p in sorted_preds %}
 		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
 		<li>
+		{% if ppage.url == page.url %}<strong>{% endif %}
 		<a href="{{ppage.url}}">
 			{{ p.sig }}
 			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
 		</a>
+		{% if ppage.url == page.url %}</strong>{% endif %}
 		</li>
 	{%- endfor %}
-</ul>
-</details>
-{%- endfor %}
-</ul>
-</details>
-{%- endfor %}
-
 </ul>
 </nav>
