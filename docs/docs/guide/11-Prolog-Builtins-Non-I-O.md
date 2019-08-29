@@ -436,7 +436,8 @@ getPrologInterrupt/1
 The predicates provide access to the ALS Prolog interrupt mechanism. See Chapter 9.3 (Interrupts).
 
 ## 11.8 Arithmetic
-See is/2 in the Reference Manual.
+
+See [`is/2`](../ref/is.html) in the Reference Manual.
 
 ## 11.9 Program and System Management
 ```

@@ -56,7 +56,7 @@ colwrite([Item | Items], [NextColPos | RestColStarts], CurPos, Stream)
     CurPos < NextColPos,
     !,
 	(atom(Item) -> 
-		'$strlen'(Item, ItemLen)
+		atom_length(Item, ItemLen)
 		;
 		name(Item,ICs),length(ICs,ItemLen)
 	),

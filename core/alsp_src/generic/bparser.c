@@ -851,26 +851,6 @@ pbi_uia_size()
 	FAIL;
 }
 
-
-int
-pbi_strlen()
-{				/* $strlen(Symbol,Size) */
-    PWord v1, v2;
-    int   t1, t2;
-    UCHAR *str;
-
-    w_get_An(&v1, &t1, 1);
-    w_get_An(&v2, &t2, 2);
-
-    if (!getstring(&str, v1, t1))
-	FAIL;
-
-    if (w_unify(v2, t2, (PWord) strlen((char *)str), WTP_INTEGER))
-	SUCCEED;
-    else
-	FAIL;
-}
-
 int
 get_number(v, t, val)
     PWord v;

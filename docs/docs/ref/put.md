@@ -17,12 +17,12 @@ tab(N)
 
 If `Char` is bound to an integer within the range 0 -- 255, `put/1` will write out the character whose ASCII code is `Char` to the current output stream.
 
-`tab/1` will write out `N` space characters(ASCII 32) to the standard output stream.
+`tab/1` will write out `N` space characters (ASCII 32) to the standard output stream.
 
 
 ## EXAMPLES
 
-```
+```text
 ?- put(0'(),tab(15),put(0')).
 (               )
 ```

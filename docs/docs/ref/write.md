@@ -5,6 +5,9 @@ module: sio
 predicates:
 - {sig: 'write', args:
     {1: 'write term to current output stream', 2: 'write term to specified stream'}}
+- {sig: 'nl', args:
+    {0: 'output a newline to the current output stream', 
+     1: 'output a newline to a specified output stream'}}
 - {sig: 'writeq',args: {
     1: 'write term to current output stream so that it may be read back in',
     2: 'write term to specified stream so that it may be read back in'
@@ -19,6 +22,18 @@ predicates:
   }}
 - {sig: 'display/1', desc: 'write term to current output stream in canonical form'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#write_term)
+
+
+
+
+
+
+
+
+
+
+
 
 ## FORMS
 
@@ -26,6 +41,10 @@ predicates:
 write(Term)
 
 write(Stream_or_Alias, Term)
+
+nl
+
+nl(Stream_or_Alias)
 
 writeq(Term)
 
@@ -44,29 +63,33 @@ display(Term)
 
 ## DESCRIPTION
 
-These predicates will output the term bound to `Term` to a stream. The format of the term is controlled by which variant is called or by an option given to `write_term`. None of these procedures output a fullstop after the term written.
+These predicates will output the term bound to `Term` to a stream. The format of the term is controlled by which variant is called or by an option given to `write_term`. None of these procedures output a fullstop or newline after the term written unless the term is a single-quoted atom containing a fullstop or a backslash newline: `\n` placed appropriately.
 
 `write/1` behaves as if `write/2` were called with the current output stream as the `Stream_or_Alias` argument.
 
 `write/2` behaves as if `write_term/3` were called with `Options` bound to
 
-`[quoted(false), numbervars(true), lettervars(false), line_length(1024)]`
+&nbsp;&nbsp;`[quoted(false), numbervars(true), lettervars(false), line_length(1024)]`
 
-In addition, the default line length is ignored and set to a large number, causing the output of long terms to not be pretty printed. Variables are printed as underscore followed by some number.
+In addition, the default line length is ignored and is temporarily set to a large number, causing the output of long terms to not be pretty printed. Variables are printed as underscore followed by some number.
+
+`nl/0` behaves as if `nl/1` were called with the current output stream as the `Stream_or_Alias` argument.
+
+`nl/1` outputs a newline character to the `Stream_or_Alias` argument.
 
 `writeq/1` behaves as if `writeq/2` were called with the current output stream as the `Stream_or_Alias` argument.
 
 `writeq/2` behaves as if `write_term/3` were called with `Options` bound to
 
-`[quoted(true), numbervars(true), lettervars(true) ]`
+&nbsp;&nbsp;`[quoted(true), numbervars(true), lettervars(true) ]`
 
-The line length is set to the default line length for the stream which is being output to. Variables are printed as an underscore followed by a capital letter. writeq is useful for outputting a term whichmight be later subject to a read from Prolog.
+For a call to `writeq/2`, the line length is set to the default line length for the stream which is being output to. Variables are printed as an underscore followed by a capital letter. `writeq` is useful for outputting a term which might be later subject to a read from Prolog.
 
 `write_canonical/1` behaves as if `write_canonical/2` were called with the current output stream bound to the `Stream_or_Alias` argument.
 
 `write_canonical/2` behaves as if `write_term/3` were called with `Options` bound to
 
-`[quoted(true), ignore_ops(true), lettervars(true) ]`
+&nbsp;&nbsp;`[quoted(true), ignore_ops(true), lettervars(true) ]`
 
 This is the same behavior supplied by the DEC-10 compatiblity predicate `display/1`. `write_canonical` is useful in situations where it is desirable to output a term in a format which may subsequently read in without regard to operator definitions. Such terms are not particularly pleasing to look at, however.
 
@@ -78,9 +101,9 @@ The options mandated by the draft standard are :
 
 `quoted(Bool)` -- `Bool` is true or false. When `Bool` is true, atoms and functors are written out in such a manner so that `read/[1, 2]` may be used to read them back in; when `Bool` is false indicates that symbols should be written out without any special quoting; control characters embedded in an atom will be written out as is.
 
-`ignore_ops(Bool)` -- `Bool` may be true or false. When `Bool` is true, compound terms are output in functional notation.
+`ignore_ops(Bool)` -- `Bool` may be true or false. When `Bool` is true, compound terms are output in prefix functional notation.
 
-`numbervars(Bool)` -- When `Bool` is true, a term of the form `' $VAR '(N)`, where `N` is a non-negative integer, will be output as a variable name consisting of a capital letter possibly followed by an integer. The capital letter is the (i + 1) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N div 26 The integer j is omitted if it is zero.
+`numbervars(Bool)` -- When `Bool` is true, a term of the form `' $VAR'(N)`, where `N` is a non-negative integer, will be output as a variable name consisting of a capital letter possibly followed by an integer. The capital letter is the (i + 1) th letter of the alphabet, and the integer is j, where i = N mod 26 and j = N div 26 The integer j is omitted if it is zero.
 
 Other options not mandated by the draft standard but supported by ALS Prolog are :
 
@@ -88,9 +111,9 @@ Other options not mandated by the draft standard but supported by ALS Prolog are
 
 `maxdepth(N, Atom1, Atom2)` -- `N` is the maximum depth to print to. `Atom1` is the atom to output when this depth has been reached. `Atom2` is the atom to output when this depth has been reached at the tail of a list.
 
-`maxdepth(N)` -- same as `maxdepth(N, *, ...)`
+`maxdepth(N)` -- same as `maxdepth(N, '*', '...')`
 
-`depth_computation(Val)` -- `Val` may be either flat or nonflat. This indicates the method of depth computation. If `Val` is bound to flat, all arguments of a term or list will be treated as being at the same depth. If `Val` is nonflat, then each subsequent argument in a term (or each subsequent element of a list) will be considered to be at a depth one greater than the preceding structure argument (or list element).
+`depth_computation(Val)` -- `Val` may be either `flat` or `nonflat`. This indicates the method of depth computation. If `Val` is bound to `flat`, all arguments of a term or list will be treated as being at the same depth. If `Val` is `nonflat`, then each subsequent argument in a term (or each subsequent element of a list) will be considered to be at a depth one greater than the preceding structure argument (or list element).
 
 `line_length(N)` -- `N` is the length in characters of the output line. The pretty printer will attempt to break lines before they exceed the given line length.
 
@@ -101,14 +124,22 @@ Other options not mandated by the draft standard but supported by ALS Prolog are
 ## EXAMPLES
 
 ```
-?- X='Hello\tthere',
-?-_write(X),nl,
-?-_writeq(X),nl,
-?-_write_canonical(X),nl.
-Hellothere
+?- X='Hello\tthere', write(X),nl, writeq(X),nl, write_canonical(X),nl.
+Hello	there
 'Hello\tthere'
 'Hello\tthere'
-X='Hello\tthere'
+
+X='Hello\tthere' 
+yes.
+
+?- X='Hello\tthere\nJohn', write(X),nl, writeq(X),nl, write_canonical(X),nl.
+Hello	there
+John
+'Hello\tthere\nJohn'
+'Hello\tthere\nJohn'
+
+X='Hello\tthere\nJohn' 
+yes.
 
 ?- T=[3+4,'$VAR'(26)*X-'Y'],
 ?-_write(T),nl,
@@ -192,7 +223,6 @@ T=[a(b(c(d))),a(b(c(d))),a(b(c(d))),a(b(c(d)))]
 - [`read/[1,2]`](read.html)
 - [`open/4`](open.html)
 - [`close/1`](close.html)
-- `nl/[0,1]` {%- comment %} TODO: missing {% endcomment %}
 - [`put_char/[1,2]`](put_char.html)
 - [`put_code/[1,2]`](put_code.html)
 - [`set_line_length/2`](set_line_length.html)

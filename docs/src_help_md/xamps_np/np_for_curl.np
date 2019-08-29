@@ -1,0 +1,13 @@
+np(
+   core_prolog,  %Package
+   input_output,  %Group
+   'curl/[1,2,3]',  %Title
+   curl123,  %FileName
+   builtins,	%Module
+   % Preds With Descriptions:
+   [p('curl/1', 'Internet access via the curl package with URL, Options, Target in one list'),
+    p('curl/2', 'Internet access via the curl package with separate URL arg, combined Options, Target in one list'),
+    p('curl/3', 'Internet access via the curl package with separate URL, Options, Target args'),
+    p('http/3', 'REST-inspired user-level interface for curl')
+   ]
+  ).

@@ -49,7 +49,7 @@ yes.
 X = travel_now.
 ```
 
-## 8.2 The Primitive Global Variable Mechanism.
+## 8.2 The Primitive Global Variable Mechanism
 
 The underlying or primitive global variable mechanism is best described in terms
 of a simple implementation point of view. Global variables are value cells with the

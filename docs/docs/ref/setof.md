@@ -6,6 +6,15 @@ predicates:
 - {sig: 'findall/3', desc: 'all solutions for a goal, not sorted'}
 - {sig: 'b_findall/4', desc: 'bound list of solutions for a goal, not sorted'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#setof)
+
+
+
+
+
+
+
+
 
 ## FORMS
 

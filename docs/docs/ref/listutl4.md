@@ -2,7 +2,6 @@
 title: 'split_ll_by_blank/3'
 package: ALS Library
 group: Lists
-module: builtins
 predicates:
 - {sig: 'split_ll_at_start/5', desc: 'splits a list of atoms according to an initial subatom'}
 - {sig: 'split_ll_by_blank/3', desc: 'splits a list of atoms by the first null atom'}
@@ -15,26 +14,24 @@ predicates:
 
 ## DESCRIPTION
 
-**`split_ll_at_start/5`** If Lines is a list of atoms (or UIAs), and if SplitInitSeg is an atom,  
-    then, if there is any element of Lines with SplitInitSeg at its initial segment,  
-    then:  
-    -	SplitterLine is the first such line;  
-    -	Head is the initial sublist of Lines up to but not including SplitterLine;  
-    -	Tail is the sublist of Lines following SplitterLine  
-    If there is no such line, then:  
-    -	SplitterLine = ''  
-    -	Head = Lines  
-    -	Tail = []  
+**`split_ll_at_start/5`** If Lines is a list of atoms (or UIAs), and if SplitInitSeg is an atom,
+    then, if there is any element of Lines with SplitInitSeg at its initial segment,
+    then:<br>
+    SplitterLine is the first such line;<br>
+    Head is the initial sublist of Lines up to but not including SplitterLine;<br>
+    Tail is the sublist of Lines following SplitterLine<br>
+    If there is no such line, then:<br>
+    SplitterLine = ''<br>
+    Head = Lines<br>
+    Tail = []
 
-**`split_ll_by_blank/3`** If Lines is a list of atoms (or UIAs), then, if '' belongs to Lines,  
-    then:  
-    -	Head is the initial sublist of Lines up to the first occurrence of '';  
-    -	Tail is the sublist of Lines following Head  
-    If there is no such line, then:  
-    -	Head = Lines  
-    -	Tail = []  
+**`split_ll_by_blank/3`** If Lines is a list of atoms (or UIAs), then, if '' belongs to Lines,
+    then:<br>
+    Head is the initial sublist of Lines up to the first occurrence of '';<br>
+    Tail is the sublist of Lines following Head<br>
+    If there is no such line, then:<br>
+    Head = Lines<br>
+    Tail = []
 
-{% comment %}
 ## EXAMPLES
-{% endcomment %}
 

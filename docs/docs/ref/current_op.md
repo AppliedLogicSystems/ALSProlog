@@ -4,6 +4,9 @@ module: sio
 predicates:
 - {sig: 'current_op/3', desc: 'retrieve current operator definitions'}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#operators)
+
+
 
 ## FORMS
 ```

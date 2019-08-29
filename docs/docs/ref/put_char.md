@@ -8,6 +8,12 @@ predicates:
     2: 'output a character to a specific output stream'
   }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#putchar)
+
+
+
+
+
 
 ## FORMS
 ```
@@ -64,6 +70,6 @@ yes.
 - [`open/4`](open.html)
 - [`close/1`](close.html)
 - [`char_code/2`](char_code.html)
-- `nl/1` {%- comment %} TODO: missing {% endcomment %}
+- [`nl/1`](write.html)
 
 - [User Guide (Prolog I/O)](../guide/10-Prolog-I-O.html)

@@ -321,7 +321,6 @@ extern	int	pbi_uia_pokew	PARAMS(( void ));
 extern	int	pbi_uia_pokel	PARAMS(( void ));
 extern	int	pbi_uia_poked	PARAMS(( void ));
 extern	int	pbi_uia_pokes	PARAMS(( void ));
-extern	int	pbi_strlen	PARAMS(( void ));
 extern	int	pbi_atom_concat	PARAMS(( void ));
 
 /* bsio.c */

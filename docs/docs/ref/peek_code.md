@@ -8,6 +8,12 @@ predicates:
     2: 'obtain char from stream'
    }}
 ---
+[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#peekcode)
+
+
+
+
+
 
 ## FORMS
 ```

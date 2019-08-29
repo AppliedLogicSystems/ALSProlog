@@ -10,7 +10,7 @@
 The ALS library includes a growing collection of routines designed to make it easy
 to utilize various GUI constructs easly from ALS Prolog.
 
-## 19.1 Initializing the GUI library.
+## 19.1 Initializing the GUI library
 In order to make use of these routines, one must first initialize the library. This is
 accomplished with the predicate init_tk_alslib/0. This initializes a Tcl/
 Tk interpreter named tcli (see the next Chapter), and sources (loads) the associated Tcl/Tk code into that interpreter. This call is really defined as
@@ -23,8 +23,8 @@ Interp.
 All of the calls in the library are organized in a similar style: there is a default version which references the default interpreter tcli, and there is a general version
 allowing one to use the same functionality with any other interpreter.
 
-## 19.2 Dialogs.
-### 19.2.1 Information dialogs.
+## 19.2 Dialogs
+### 19.2.1 Information dialogs
 ```
 info_dialog(Msg) :info_dialog(Msg, 'Info').
 info_dialog(Msg, Title) :info_dialog(tcli, Msg, Title).
@@ -37,7 +37,7 @@ produces the following information dialog:
 
 ![](images/info_dialog_box.gif)
 
-### 19.2.2 Yes-no dialogs.
+### 19.2.2 Yes-no dialogs
 #### yes_no_dialog(Interp, Msg, Title, YesLabel, NoLabel, Answer)
 ```
 yes_no_dialog(Msg, Answer)
@@ -69,7 +69,7 @@ Clicking “OK” yields
 while clicking “Cancel” yeilds
     Answer = Cancel.
 
-## 19.3 Choices from lists.
+## 19.3 Choices from lists
 ```
 popup_select_items(SourceList, ChoiceList)
 popup_select_items(SourceList, Options, ChoiceList)
@@ -127,7 +127,7 @@ extends the selection to include all the
 ele ments between the anchor and the
 element under the mouse, inclusive.
 
-## 19.4 Inputting atoms (answering questions).
+## 19.4 Inputting atoms (answering questions)
 
 #### atomic_input_dialog(Interp, Msg, Title, Atom)
 ```
@@ -175,7 +175,7 @@ would produce
 
 ![](images/file-sel-2.gif)
 
-## 19.6 Displaying Images.
+## 19.6 Displaying Images
 
 These routines provide simple access from ALS Prolog to the image routines of Tk.
 They will be extended. The current versions support gif images, but the routines
@@ -205,7 +205,7 @@ produces
 ![](images/pow_wow_dancer.gif)
 
 
-## 19.7 Adding to the ALS IDE main menubar.
+## 19.7 Adding to the ALS IDE main menubar
 
 Simple additions to the main menubar are often useful. The general call to accomplish this is:
     extend_main_menubar(Label, MenuEntriesList)

@@ -18,7 +18,6 @@ predicates:
 - {sig: '$uia_peeks/4', desc: 'returns the specified substring of a UIA'}
 - {sig: '$uia_peek/4', desc: 'returns the specified region of a UIA'}
 - {sig: '$uia_poke/4', desc: 'modifies the specified region of a UIA'}
-- {sig: '$strlen/2', desc: 'returns the length of the specified symbol'}
 ---
 
 ## FORMS
@@ -48,8 +47,6 @@ predicates:
 
 '$uia_peek'(UIABuf, Offset, Size, Value)
 '$uia_poke'(UIABuf, Offset, Size, Value)
-
-'$strlen'(Symbol, Size)
 ```
 
 ## DESCRIPTION
@@ -69,8 +66,6 @@ Like `'$uia_pokeb'/3`, `'$uia_pokes'/3` views the buffer as a vector of bytes wi
 Provided that `Offset` and `Size` define a proper region within the given `UIABuf` (i.e., not including the final byte of `UIABuf`), `'$uia_poke'(UIABuf, Offset, Size, Value)` modifies the indicated region by copying characters from the given UIA (or symbol) `Value`. The size of the atom or UIA `Value` must be greater than or equal to `Size`. The region copied from `Value` is defined by offset 0 and `Size`.
 
 Provided that `Offset` and `Size` define a proper region within the given `UIABuf` (i.e., not including the final byte of `UIABuf`), `'$uia_peek'(UIABuf, Offset, Size, Value)` extracts the indicated region from `UIABuf`, returning it as a new UIA `Value`.
-
-When `Symbol` is a Prolog symbol (atom or UIA), `'$strlen'(Symbol, Size)` returns the length of the print name of that symbol (thus not counting the terminating null byte).
 
 
 ## EXAMPLES

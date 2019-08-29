@@ -258,10 +258,10 @@ same_uc(Term1, Term2)
  |
  | 	- converts the case of characters in a symbol, based on the first
  |
- |	Changes the case of characters in a symbol InSym as follows:
- |	a) If the first character of InSym is lowercase, applies make_uc
- |	   to change all characters of InSym to uppercase;
- |	b) If the first character of InSym is uppercase, applies make_lc
+ |	Changes the case of characters in a symbol InSym as follows:<br>
+ |	a) If the first character of InSym is lowercase, applies make_uc 
+ |	   to change all characters of InSym to uppercase;<br>
+ |	b) If the first character of InSym is uppercase, applies make_lc 
  |	   to change all characters of InSym to lowercase.
  *!--------------------------------------------------------------------*/
 change_case_sym(InSym, OutSym)
@@ -323,10 +323,10 @@ string_to_uia([Char | Chars], CurPos, UIA)
  | 	- creates a UIA containg chars corresponding to a string
  |
  |	If Size is an integer, and if Chars is a list of character codes, 
- |	then:
+ |	then:<br>
  |	a) if Size >= length(Chars), allocates a (new) UIA and 
- |	   copies Chars into UIA starting at position 0.
- |	b) if Size < length(Chars), fails.
+ |	   copies Chars into UIA starting at position 0.<br>
+ |	b) if Size < length(Chars), fails.  
  *!--------------------------------------------------------------------*/
 string_to_sized_uia(Size, Chars, UIA)
    :-
@@ -449,7 +449,7 @@ strip_both_white(String, Result)
 	dreverse(RResult, Result).
 
 /*!---------------------------------------------------------------------
- |	strip_both_white_atom/2.
+ |	strip_both_white_atom/2
  |	strip_both_white_atom(Atom, ResultAtom)
  |	strip_both_white_atom(+, -)
  |
@@ -471,14 +471,14 @@ strip_both_white_atom(Atom, ResultAtom)
  |
  |	-splits a string according to one of several possible chars
  |
- |	If:
- |	-Chars is a prolog string;
- |	-Stoppers is a list of codes of chars
- |		and if intersect(Chars,Stoppers) \= [], 
- |	Then:
- |		Stopper is the element of Stopper with leftmost occurrence in Chars,
- |		Head is the portion of Chars to the left of the occurrence of Stopper,
- |	and
+ |	If:<br>
+ |	Chars is a prolog string;<br>
+ |	Stoppers is a list of codes of chars
+ |		and if intersect(Chars,Stoppers) \= [],<br>
+ |	Then:<br>
+ |		Stopper is the element of Stopper with leftmost occurrence in Chars,<br>
+ |		Head is the portion of Chars to the left of the occurrence of Stopper,<br>
+ |	and<br>
  |		Tail is the portion of Chars to the right of the occurrence of Stopper.
  *!----------------------------------------------------------------------------*/
 read_to([], _, [], [],-1).
@@ -499,12 +499,12 @@ read_to([C | Chars], Stoppers, [C | Head], Tail,Stopper)
  |
  |	- splits a string around the leftmost occurrence of blank
  |
- |	If:
- |	-Chars is a prolog string containing at least one blank,
- |	Then:
- |		Head is the portion of Chars to the left of the first occurrence
- |			 of a blank, and
- |		Tail is the portion of Chars to the right of the first occurrence 
+ |	If:<br>
+ |	Chars is a prolog string containing at least one blank,<br>
+ |	Then:<br>
+ |	Head is the portion of Chars to the left of the first occurrence
+ |		 of a blank, and<br>
+ |	Tail is the portion of Chars to the right of the first occurrence 
  |		of a blank
  *!--------------------------------------------------------------------*/
 
@@ -524,9 +524,9 @@ read_to_blank([C | Chars], [C | Head], Tail)
  |
  |	- Locates the position of a character in an atom.
  |
- |	If Atom is an atom, and Char is a quoted character, then:
- |	a) If Char occurs in atom, then Pos is the position of the
- |	   leftmost occurrence of Char, counting from 1.
+ |	If Atom is an atom, and Char is a quoted character, then:<br>
+ |	a) If Char occurs in atom, then Pos is the position of the 
+ |	   leftmost occurrence of Char, counting from 1.<br>
  |	b) Fails if Char does not occur in Atom.
  *!--------------------------------------------------------------------*/
 

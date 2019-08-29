@@ -39,7 +39,6 @@ do_check_html_parsing(OS, Path, NnPXML, NnTagsVals, Fnc, TgtTags, NnPaths)
 check_grab_pxml(Path, NnPXML)
 	:-
 	grab_pxml(Path, PXML),
-%printf(user, 'grab_pxml OK on %t\n',[Path]), flush_output,
 	length(PXML, LenPXML),
 	LenPXML == NnPXML,
 	PXML = [_, T2 | _],

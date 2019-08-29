@@ -302,7 +302,7 @@ get_params(ARCH,OS,Vers,Srcdir)
 	
 read_to(Tag,MFS,Line)
 	:-
-	'$strlen'(Tag,TagLen),
+	atom_length(Tag,TagLen),
 	read_to(Tag,TagLen,MFS,Line).
 
 read_to(Tag,TagLen,MFS,Line)
