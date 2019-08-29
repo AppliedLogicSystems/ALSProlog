@@ -31,3 +31,4 @@
 #undef OLDCONSULT
 
 #define FREEZE	1
+//#define DEBUGSYS	1

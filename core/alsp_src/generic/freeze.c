@@ -44,6 +44,18 @@ int pbi_kill_freeze		PARAMS(( void ));
  |	returns DelayTerm = the constructed delay term on the heap
  *---------------------------------------------------------------*/
 
+//#define DEBUGFREEZE          1
+/* #define BigStruct	1 */
+
+#ifndef BigStruct
+#define w_get_argaddr(addr,s,argn,arity)  (addr = (PWord *)s + argn)
+
+#else  /* BigStruct */
+#define w_get_argaddr(addr,s,argn,arity)  \
+        {if (arity < ESCAPE_ARITY) addr = (PWord *)s + argn; else addr=(PWord *)s+(argn+1);}
+
+#endif /* BigStruct */
+
 int
 pbi_delay()
 {
@@ -280,8 +292,14 @@ pbi_clct_tr()
 	{
 		printf("%x-[%x]", (int)CurT,(int)*CurT);
 			/* Delay term not allowed to be resettable: */
+
+printf("\nv = %x\n", (*(((PWord *)*CurT)-1)) );
+/*MFUNCTOR_TOKID(*(((PWord *)v)-1))
+TK_DELAY */
+
 		if (CHK_DELAY(*CurT))
 		{
+printf("CHK_DELAY - %x YES\n", *CurT);
 			DrT = deref_2((PWord)*CurT);
 			printf("Delay VAR! <%x | %x> ",(int)(**CurT),(int)deref_2((PWord)*CurT));
 			Forw1 = (PWord *)DrT + 1;
@@ -303,7 +321,10 @@ pbi_clct_tr()
 		/*		break;    */
 		}
 		else
+		{
+printf("CHK_DELAY - %x NO\n", *CurT);
 			printf("\n");
+		}
 	}
 #else  /* no-DEBUGFREEZE */
 #ifdef TRAILVALS
@@ -516,6 +537,15 @@ pbi_cptx()
 	SUCCEED;
 }
 
+int
+pbi_cptz()
+{
+	printf("Tr_b=\t%p\nB=\t%p\nTR=\t%p\nH=\t%p\nHB=\t%p\nH_b=\t%p\n",
+			wm_trailbase,wm_B,wm_TR,
+			wm_H,wm_HB,wm_heapbase);
+	SUCCEED;
+}
+
 	/*-------------------------------------------------*
 	 | Display an individiual heap entity
 	 *-------------------------------------------------*/
@@ -546,8 +576,11 @@ disp_heap_item(CurT)
 			if (FID < tok_table_size() )
 			{
 				FSt = (char *)toktable[FID].tkname;
-				fprintf(stdout,"(%p)-fctr=tokid(%d) %s/%d\n",STRADDR,
-								(int)FID,FSt,(int)MFUNCTOR_ARITY(*STRADDR));
+
+				fprintf(stdout,"(%p)-fctr=tokid(%d) %s/%d  >> %s\n",
+					STRADDR, (int)FID,  FSt,(int)MFUNCTOR_ARITY(*STRADDR),
+					FSt
+					);
 			}
 			else
 				fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",FID,MFUNCTOR_ARITY(*CurT));
@@ -647,6 +680,8 @@ disp_heap()
     if (t1 != WTP_INTEGER || t2 != WTP_INTEGER)
 		FAIL;
 
+printf("wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1, (int)v2, (int)wm_heapbase);
+
 		/* If v1,v2 > 0, need:  wm_H >= v1 >= v2 >=  wm_heapbase */
 	if (v1 == 0)
 		start = (int)wm_H;
@@ -668,7 +703,7 @@ disp_heap()
 	else
 		stop = v2;
 
-printf("Heap display: %x --> %x\n",start,stop);
+printf("Heap display: start = %x --> stop = %x\n",start,stop);
 
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
@@ -692,6 +727,239 @@ disp_item()
 
     SUCCEED;
 }
+
+
+
+
+
+
+
+/*========================================================================*
+                               DEBUGGING FUNCTIONS_xxxx
+ *========================================================================*/
+
+int	pbi_walk_cps	PARAMS(( void ));
+void	x_disp_heap_item	PARAMS(( PWord * ));
+int	pbi_x_swp_tr		PARAMS(( void ));
+int	x_disp_heap 		PARAMS(( void ));
+
+
+
+
+void
+x_disp_heap_item(CurT)
+  PWord *CurT;
+{
+  PWord Tagg, CTagg, *STRADDR;
+  int FID;
+  char *FSt;
+
+    	Tagg =  MTP_TAG( *CurT );
+		fprintf(stdout,"%lx - (%lx)[%d]", (long)CurT,(long)*CurT,(int)Tagg);
+    	switch (Tagg) {
+		case MTP_UNBOUND:
+			CTagg = M_VARVAL(*CurT);
+			if (CTagg == (PWord)CurT)
+				fprintf(stdout,"unbound\n");
+			else
+				fprintf(stdout,"Ref->%x\n",(int)CTagg);
+			break;
+		case MTP_STRUCT:
+			fprintf(stdout,"structure:");
+
+			STRADDR = MSTRUCTADDR(*CurT);
+			FID = MFUNCTOR_TOKID(*STRADDR);
+			if (FID < tok_table_size() )
+			{
+				FSt = (char *)toktable[FID].tkname;
+
+				fprintf(stdout,"(%p)-fctr=tokid(%d) %s/%d  >> %s\n",
+					STRADDR, (int)FID,  FSt,(int)MFUNCTOR_ARITY(*STRADDR),
+					FSt
+					);
+			}
+			else
+				fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",FID,MFUNCTOR_ARITY(*CurT));
+			break;
+		case MTP_LIST:
+			fprintf(stdout,"list\n");
+			break;
+		case MTP_CONST:
+		{
+			CTagg = (int)MTP_CONSTTAG( (*CurT ) );
+			fprintf(stdout,"constant: (%d)",(int)CTagg);
+			switch (CTagg) {
+			case MTP_INT:
+				fprintf(stdout,"-integer=%d\n",(int)MINTEGER(*CurT));
+				break;
+			case MTP_SYM:
+				if (MSYMBOL((*CurT)) < tok_table_size() )
+					fprintf(stdout,"-symbol=%ld/%s\n",MSYMBOL((*CurT)),
+							TOKNAME(MSYMBOL((*CurT))));
+				else
+					fprintf(stdout,"-weird sym(as fctr:%x/%x)\n",
+							(int)MFUNCTOR_TOKID(*CurT),(int)MFUNCTOR_ARITY(*CurT));
+				break;
+			case MTP_FENCE:
+				fprintf(stdout,"-fence\n");
+				break;
+			case MTP_UIA:
+				fprintf(stdout,"-uia\n");
+				break;
+			default:
+				fprintf(stdout,"-unknown constant\n");
+			}
+		}
+			break;
+		default:
+			fprintf(stdout,"unknown quantity: %d\n",(int)Tagg);
+		}
+		fflush(stdout);
+}
+
+	/*-------------------------------------------------*
+	 | Sweep the trail/cp stack, from top to first choice point,
+	 | displaying each entry and the item it references
+	 *-------------------------------------------------*/
+
+int
+pbi_x_swp_tr(void)
+{
+	PWord **CurT, *Back1, BStop, TrS;
+
+	BStop = (PWord) wm_B;
+	TrS = (PWord) wm_TR;
+	fprintf(stdout,"----sweep trail:wm_TR=%lx -> BStop (=B) =%lx\n",(long)TrS,(long)BStop);
+
+#ifdef TRAILVALS
+/*	for (CurT = (PWord **)wm_TR+1; CurT < (PWord **)BStop; CurT += 2)  */
+	for (CurT = (PWord **)BStop-1; CurT >= (PWord **)wm_TR; CurT -= 2)
+#else
+	for (CurT = (PWord **)wm_TR; CurT < (PWord **)BStop; CurT += 1)
+#endif
+	{
+		fprintf(stdout,"%lx->", (long)CurT);
+		disp_heap_item(*CurT);
+		Back1 = (*CurT)-1;
+		if ((MFUNCTOR_TOKID(*Back1) == TK_DELAY) &&(MFUNCTOR_ARITY(*Back1) == 4)) {
+			fprintf(stdout,"Delay VAR!");
+			fprintf(stdout,"         ");
+			disp_heap_item(Back1);
+		}
+#ifdef TRAILVALS
+		fprintf(stdout,"  +>%lx[%lx]->", (long)(CurT-1),(long)(1 & (long)(CurT-1)) );
+		disp_heap_item((PWord *)(CurT-1));  
+#else
+#endif
+	}
+	fprintf(stdout,"----trail sweep stopped at CurT=%lx\n", (long)CurT);
+	fflush(stdout);
+	SUCCEED;
+}
+
+
+
+	/*-------------------------------------------------*
+	 | Sweep the heap from newest backwards,
+	 | displaying entries
+	 *-------------------------------------------------*/
+
+int
+x_disp_heap()
+{
+    PWord v1,v2;
+    int   t1,t2,start,stop;
+	PWord *CurA;
+
+    w_get_An(&v1, &t1, 1);
+    w_get_An(&v2, &t2, 2);
+    if (t1 != WTP_INTEGER || t2 != WTP_INTEGER)
+		FAIL;
+
+printf("display_heap: wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1, (int)v2, (int)wm_heapbase);
+
+		/* If v1,v2 > 0, need:  wm_H >= v1 >= v2 >=  wm_heapbase */
+	if (v1 == 0)
+		start = (int)wm_H;
+	else if (wm_H < (PWord *)v1  || v1 < 0)
+		FAIL;
+	else 
+		start = (int)v1;
+
+	if (v2 == 0) 
+		stop = (int)wm_heapbase+1;
+	else if (v2 < 0)
+	{
+		stop = start + (int)v2;
+		if (stop < (int)wm_heapbase)
+			FAIL;
+	}
+	else if ( (v1 < v2) || (((PWord *)v2) < wm_heapbase) )
+		FAIL;
+	else
+		stop = v2;
+
+printf("====== Heap display_x: start = %x --> stop = %x\n",start,stop);
+
+
+	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
+		x_disp_heap_item(CurA);   
+
+	SUCCEED;
+}
+
+
+/*
+int disp_item	PARAMS((void));
+
+int
+disp_item()
+{
+    PWord v1;
+    int   t1;
+
+    w_get_An(&v1, &t1, 1);
+
+	printf("item= %lx t= %d\n",v1,t1);
+
+    SUCCEED;
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #endif /* FREEZE */

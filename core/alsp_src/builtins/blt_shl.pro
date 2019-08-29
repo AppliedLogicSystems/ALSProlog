@@ -45,6 +45,7 @@ start_shell(DefaultShellCall)
 
 start_shell0(DefaultShellCall)
 	:-
+%cptx,
 	init_als_shl_mgr,
 	make_clinfo(CLInfo, DefaultShellCall, false),	% verbosity = verbose
 	get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,alsshell,CLInfo),
