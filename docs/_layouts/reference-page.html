@@ -10,6 +10,9 @@ layout: default
 {% if jekyll.environment == "production" %}{% include edit-source.html %}{% endif %}
 </nav>
 
+<div class="doc-wrapper">
+<div class="doc-main">
+
 <h1>{{ page.title | escape }}</h1>
 <h3>Module: {{ page.module | escape }}</h3>
 
@@ -26,3 +29,22 @@ layout: default
 </p>
 
 {{ content }}
+
+</div>
+
+<aside class="doc-sidebar">
+<h2>Sidebar</h2>
+<nav>
+<ul>
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+<li>Dummy Item
+</ul>
+</nav>
+</aside>
+</div>
