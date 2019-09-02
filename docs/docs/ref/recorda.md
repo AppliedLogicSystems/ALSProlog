@@ -24,8 +24,8 @@ recorded(Key, Term, Ref)
 ## EXAMPLES
 ```
 ?- recordz(sing,slowly,_),
-?_ recorda(sing,sweetly,_),
-?_ recorda(sing(along),loudly,_).
+   recorda(sing,sweetly,_),
+   recorda(sing(along),loudly,_).
 
 
 yes.

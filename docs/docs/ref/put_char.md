@@ -26,7 +26,7 @@ put_char(Stream_or_Alias, Char)
 ## EXAMPLES
 ```
 ?- put_char('\t'),put_char(h),put_char(o),
-?_ put_char(w),put_char(d),put_char(y),nl.
+   put_char(w),put_char(d),put_char(y),nl.
 	howdy
 
 yes.
