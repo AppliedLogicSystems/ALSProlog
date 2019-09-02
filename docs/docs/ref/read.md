@@ -90,7 +90,7 @@ yes.
 
 ```
 ?- open(atom('[X,2,3]'),read,S),
-?_ read_term(S,Term,[attach_fullstop(true)]), close(S).
+   read_term(S,Term,[attach_fullstop(true)]), close(S).
 
 S=stream_descriptor('\002',closed,atom,atom('[X,2,3]'),[input|nooutput],
     false,42,'[X,2,3]',7,7,0,true,0,wt_opts(78,400,flat),[],wait,text,

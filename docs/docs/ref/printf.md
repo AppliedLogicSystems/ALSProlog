@@ -113,7 +113,7 @@ yes.
 ABC
 yes.
 
-?-  printf_opt('%t', ['ABC'], [quoted(true)]).
+?- printf_opt('%t', ['ABC'], [quoted(true)]).
 'ABC'
 yes.
 
@@ -166,8 +166,8 @@ Snow: ###
 yes.
 
 ?- printf('\nThe required funds are %p annually.\n',
-?_   [Stream^( Euros = 600000, USD is Euros/1.14, write(Stream, Euros-euros),
-?_   write(Stream, ' ($'),write(Stream,USD), put(Stream, 0')) )]).
+     [Stream^( Euros = 600000, USD is Euros/1.14, write(Stream, Euros-euros),
+     write(Stream, ' ($'),write(Stream,USD), put(Stream, 0')) )]).
 
 The required funds are 600000-euros ($526315.7895) annually.
 yes.

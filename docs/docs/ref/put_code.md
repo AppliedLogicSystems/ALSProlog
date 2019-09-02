@@ -26,7 +26,7 @@ put_code(Stream_or_Alias, Code)
 ## EXAMPLES
 ```
 ?- put_code(0'\t),put_code(0'h),put_code(0'o),put_code(0'w),
-?_ put_code(0'd),put_code(0'y),put_code(0'\n).
+   put_code(0'd),put_code(0'y),put_code(0'\n).
 	howdy
 
 yes.
