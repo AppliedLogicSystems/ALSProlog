@@ -17,7 +17,7 @@ Discards all choice points made since the parent goal started execution, includi
 ```
 Condition = (Things, !, MoreThings)
 
-Condition -&gt; TrueGoal; FalseGoal
+Condition -> TrueGoal; FalseGoal
 
 call(Condition)
 ```
@@ -84,7 +84,7 @@ will be equivalent to
 
 &nbsp;&nbsp;&nbsp;&nbsp;`cool(peewee) :- !, fail.`
 
-The next example shows the transparency of - &gt; with respect to cut.
+The next example shows the transparency of -> with respect to cut.
 
 ```
 ?- listing.
@@ -114,7 +114,7 @@ the `'!'` after `X = peewee` cuts the choicepoint for `cool/1`. The condition su
 
 yes.
 ```
-succeeds because the '!' is never reached in the condition of -&gt;. The -&gt; fails because there is no else subgoal. This causes the next clause for `cool/1` to be executed. This clause always succeeds, therefore `daffyduck` is considered cool.
+succeeds because the '!' is never reached in the condition of ->. The -> fails because there is no else subgoal. This causes the next clause for `cool/1` to be executed. This clause always succeeds, therefore `daffyduck` is considered cool.
 
 
 ## SEE ALSO
