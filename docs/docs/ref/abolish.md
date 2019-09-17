@@ -25,7 +25,7 @@ If the module `M` does not exist, then both M:abolish(Name/Arity) and M:abolish(
 
 If module `M` does exist, but predicate `Name/Arity` does not exist in `M`, then all three calls 
 ```
-	M:abolish(Name/Arity),  M:abolish(Name, Arity), abolish(M, Name, Arity) 
+M:abolish(Name/Arity),  M:abolish(Name, Arity), abolish(M, Name, Arity) 
 ```
 succeed, even though there are no clauses in module `M` to be removed.
 
