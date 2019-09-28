@@ -1,4 +1,7 @@
 source "https://rubygems.org"
 
+# Force use of Faraday 0.15 until 0.16 is fixed
+gem "faraday", "0.15.4"
+
 gem "github-pages", group: :jekyll_plugins
 gem "html-proofer"
