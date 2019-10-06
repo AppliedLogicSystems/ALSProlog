@@ -26,8 +26,8 @@ int	pbi_is_delay_var	PARAMS(( void ));
 int	update_chpt_slots	PARAMS(( PWord ));
 int	pbi_clct_tr		PARAMS(( void ));
 int	pbi_unset_2nd		PARAMS(( void ));
-int pbi_del_tm_for		PARAMS(( void ));
-PWord	deref_2		PARAMS(( PWord ));
+int 	pbi_del_tm_for		PARAMS(( void ));
+PWord	deref_2			PARAMS(( PWord ));
 
 int pbi_kill_freeze		PARAMS(( void ));
 
@@ -80,18 +80,17 @@ if (debug_system[FRZDELAY]) {
     w_get_An(&m, &mt, 2);
     w_get_An(&g, &gt, 3);
     w_get_An(&rdt, &rdtt, 4);
+
 #ifdef DEBUGFREEZE
 printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 					(long)(((PWord *) *dv) - wm_heapbase));
 #endif
-	
 #ifdef DEBUGSYS
 if (debug_system[FRZDELAY]) {
 printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 					(long)(((PWord *) *dv) - wm_heapbase));
 }
 #endif
-
 
 /*
 #ifdef	BigStruct
@@ -192,7 +191,6 @@ printf("exit delay---wm_H=%x--real_dv=%x[_%lu]--*incom=%x -----\n",
 					(int)*dv
 					);
 #endif
-
 #ifdef DEBUGSYS
 if (debug_system[FRZDELAY]) {
 	printf("exit delay---wm_H=%x--real_dv=%x[_%lu]-------\n", 
@@ -248,9 +246,6 @@ int pbi_kill_freeze()
 	SUCCEED;
 }
 
-
-
-
 PWord
 deref_2(w)
     register PWord w;
@@ -293,13 +288,11 @@ pbi_clct_tr()
 		printf("%x-[%x]", (int)CurT,(int)*CurT);
 			/* Delay term not allowed to be resettable: */
 
-printf("\nv = %x\n", (*(((PWord *)*CurT)-1)) );
-/*MFUNCTOR_TOKID(*(((PWord *)v)-1))
-TK_DELAY */
+%printf("\nv = %x\n", (*(((PWord *)*CurT)-1)) );
 
 		if (CHK_DELAY(*CurT))
 		{
-printf("CHK_DELAY - %x YES\n", *CurT);
+%printf("CHK_DELAY - %x YES\n", *CurT);
 			DrT = deref_2((PWord)*CurT);
 			printf("Delay VAR! <%x | %x> ",(int)(**CurT),(int)deref_2((PWord)*CurT));
 			Forw1 = (PWord *)DrT + 1;
@@ -318,11 +311,10 @@ printf("CHK_DELAY - %x YES\n", *CurT);
 				}
 			else
 				printf(" - InActive\n");
-		/*		break;    */
 		}
 		else
 		{
-printf("CHK_DELAY - %x NO\n", *CurT);
+%printf("CHK_DELAY - %x NO\n", *CurT);
 			printf("\n");
 		}
 	}
@@ -449,20 +441,18 @@ printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
 	w_rungoal(mod, goal, goal_t);
 }
 
-
-
 /*========================================================================*
                                DEBUGGING FUNCTIONS
  *========================================================================*/
 
-int	pbi_walk_cps	PARAMS(( void ));
-void	disp_heap_item	PARAMS(( PWord * ));
+int	pbi_walk_cps		PARAMS(( void ));
+void	disp_heap_item		PARAMS(( PWord * ));
 int	pbi_swp_tr		PARAMS(( void ));
 int	disp_heap 		PARAMS(( void ));
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
-     | oldest, printing out the choice points;
+	 | oldest, printing out the choice points;
 	 *-------------------------------------------------*/
 
 int
@@ -728,23 +718,14 @@ disp_item()
     SUCCEED;
 }
 
-
-
-
-
-
-
 /*========================================================================*
                                DEBUGGING FUNCTIONS_xxxx
  *========================================================================*/
 
-int	pbi_walk_cps	PARAMS(( void ));
+int	pbi_walk_cps		PARAMS(( void ));
 void	x_disp_heap_item	PARAMS(( PWord * ));
 int	pbi_x_swp_tr		PARAMS(( void ));
 int	x_disp_heap 		PARAMS(( void ));
-
-
-
 
 void
 x_disp_heap_item(CurT)
@@ -925,41 +906,5 @@ disp_item()
     SUCCEED;
 }
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif /* FREEZE */

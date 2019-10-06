@@ -220,9 +220,6 @@ EXPORT ALSPI_API(int)	PI_main(int argc, char *argv[], void (*init)(void))
 	exit(EXIT_ERROR);
     }
 
-//printf("Starting: DEBUGSYS=%d\n", DEBUGSYS);
-//printf("Starting: FREEZE=%d\n", FREEZE);
-
     if (init) init();
 
     if ((exit_status = PI_status_toplevel(&success)) != 0) {

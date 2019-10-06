@@ -213,7 +213,6 @@ static struct blt_struct {
 	BLT("x_swp_tr", 0, pbi_x_swp_tr, "_pbi_x_swp_tr"),
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
-#define FREEZE 1
 #ifdef FREEZE
 	BLT("cptx", 0, pbi_cptx, "_pbi_cptx"),
 	BLT("clct_tr", 1, pbi_clct_tr, "_pbi_clct_tr"),
