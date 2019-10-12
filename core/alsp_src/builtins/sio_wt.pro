@@ -1718,14 +1718,11 @@ show_substs_ext([N|Ns],[S|Ss],VPairs,Stream)
 wr_subs3(N,S,VPairs,Stream)
 	:-
 	'$is_delay_var'(S),
-pbi_write('wr_subs3_is_dv'),pbi_nl,pbi_ttyflush,
 	!,
 		%% inconstrs/0 is defined (or not) in main.c
 	(intconstr ->
-pbi_write('wr_subs3_is_dv-intconstr'),pbi_nl,pbi_ttyflush,
 		show_interval_binding(N,S, VPairs, Stream)
 		;
-pbi_write('wr_subs3_is_dv-NOT-intconstr'),pbi_nl,pbi_ttyflush,
 		show_delay_binding(N,S, VPairs, Stream)
 	).
 	

@@ -197,7 +197,6 @@ exhibit_var(Name,Var)
 	!,
 	sio:get_current_output_stream(Stream),
 	sio_var_to_atom(Var,VarAtom),
-pbi_write(call_show_delay_binding),pbi_nl,pbi_ttyflush,
 	(show_delay_binding(VarAtom, Var, [], Stream) ->
 		true 
 		; 
