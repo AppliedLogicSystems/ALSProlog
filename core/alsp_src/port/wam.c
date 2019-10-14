@@ -201,10 +201,8 @@ ck_intvl_punch(r, fv, ft)
 	PWord r3, mf;
 	int r3t, mfa;
 
-/*	w_get(&pr3, &ft, f); */
-
 	w_get_argn(&r3, &r3t, r, 4);
-	w_get_functor(&mf, r3);
+	if (r3t == WTP_SYMBOL || r3t == WTP_UIA) return 0;
 	w_get_arity(&mfa, r3);
 
 #ifdef DEBUGSYS	/*..................................................*/
@@ -239,7 +237,7 @@ ck_intvl_punch(r, fv, ft)
 	 *-------------------------------------------------*/
 
 	/*-------------------------------------------------*
-     | Code (in wam_unify)  where VVBIND is invoked:
+         | Code (in wam_unify)  where VVBIND is invoked:
 	 |   if (f1 < f2) {	;;;; swap f1 and f2
 	 |	temp = f1;
 	 |	f1 = f2;

@@ -430,11 +430,6 @@ prolog_shell_loop(Wins,InStream,OutStream)
 	prolog_shell_loop(Wins,InStream,OutStream).
 
 prolog_shell_loop(_,_,_).
-/*
-prolog_shell_loop(Wins,InStream,OutStream)
-	:-
-write(prolog_shell_loop_2),nl,flush_output.
-*/
 
 export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
@@ -651,14 +646,12 @@ do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream)
 	setRetry(0),            %%    and Retry in case of debugging.
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
-%	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,Wins,InStream,OutStream),
 	!.
 
 do_shell_query(Goal,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
-%	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).
 

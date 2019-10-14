@@ -100,6 +100,28 @@ subst_var(Term, V, W, Result)
 	
 subst_var(Term, V, W, Term).
 
+#if (not(all_procedures(syscfg,intconstr,0,_)))
+
+'$combine_dvars'(R,F)
+        :-
+                %% F is the senior var;
+        '$delay_term_for'(R, R_DelayTerm),
+        arg(4, R_DelayTerm, R_Constr),
+
+        '$delay_term_for'(F, F_DelayTerm),
+        arg(4, F_DelayTerm, F_Constr),
+
+        subst_var(F_Constr, F, NewVar, NewF_Constr),
+        subst_var(R_Constr, R, NewVar, NewR_Constr),
+
+        arg(3, F_DelayTerm, F_Mod),
+        arg(3, R_DelayTerm, R_Mod),
+
+        '$delay'(NewVar,F_Mod,(NewF_Constr, (R_Mod:NewR_Constr)),_),
+        '$bind_vars'(F, NewVar),
+        '$bind_vars'(R, NewVar).
+
+#endif
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% For showanswers, and relatives:
@@ -193,7 +215,6 @@ exhibit_var(Var)
 	printf(Stream, '\n<Var> = %t', [Var]).
 	
 :-dynamic(freeze_disp_vns/0).
-%freeze_disp_vns.
 
 export show_delay_binding/4.
 show_delay_binding(N, S, VPairs, Stream)

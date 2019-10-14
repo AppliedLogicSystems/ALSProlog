@@ -406,7 +406,7 @@ export getPrologInterrupt/1.
 	clct_tr(ActiveDelays),
 %pbi_write(active_delays=ActiveDelays), pbi_nl, pbi_ttyflush,
 	delay_handler(ActiveDelays),
-%pbi_write('--------$interrupt-3---delay_handler-DONE'), pbi_nl, pbi_ttyflush,
+%pbi_write('--------$interrupt-3---delay_handler-DONE-call'=(M:G)), pbi_nl, pbi_ttyflush,
 	M:G.
 
 		%% -------------------------------------

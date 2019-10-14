@@ -882,11 +882,11 @@ mark(val)
     register long *ptr, *bptr;
     register long tag, btag;
     int arity;
-#if 0
+
 #ifdef FREEZE
     long xval;
 #endif
-#endif
+
 
     bptr = (long *) 0;
     btag = 0;
@@ -922,7 +922,7 @@ mark_top:
 
 	case MTP_UNBOUND:
 
-#if 0
+
 #ifdef FREEZE
 				/* If the var is a delay var, mark the 
 				   whole delay term containing it:
@@ -945,7 +945,7 @@ mark_top:
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 			}
 #endif /* FREEZE */
-#endif
+
 
 	    if (MARKED(ptr))
 			goto mark_backup;
@@ -1041,7 +1041,6 @@ gc()
     long *b;
     long *ap;
     long *tr;
-printf("Start new GC\n");
 				/* printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
 					(int)wm_trailbase,(int)wm_B,(int)wm_TR,
 					(int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
@@ -1191,7 +1190,6 @@ core_gc();
 
     }	/* while (b <= oldestcp) */
 
-printf("End new GC\n");
 	return 1;
 }
 #endif    /* FREEZE */

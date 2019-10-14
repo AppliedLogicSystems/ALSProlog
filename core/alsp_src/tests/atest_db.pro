@@ -13,6 +13,8 @@ module als_testing.
 test_info(stack_overflow_test, stack_overflow_test, user, test,
 	'test correct handling of stack-overflows').
 
+test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
+
 test_info(bench, bench, user, main, 'The benchpress example.').
 
 test_info(jobs, jobs, user, go, 'The jobs example.').
@@ -75,8 +77,11 @@ test_info(par3, par3, user, main,
 test_info(par4, par4, user, main,
 			'  Producers and consumers (for primes) with added buffering.').
 
+%test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
+
 % test_info Format:
 % test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
+
 % Library tests:
 
 test_info(read_html_tokens_test, read_examp_toks, user, read_toks, 
@@ -96,6 +101,8 @@ test_info(library_arithx1_test, arithx1_tests, user, test_arithx1,
 
 test_info(library_rows_cols_test, rows_cols_test, user, test_cols,
 	'test of column formatting predicates').
+
+% end--Library tests
 
 test_info(testeoln, testeoln, user, test,
 'test of all eoln modes for all builtin predicates\n\
