@@ -3312,6 +3312,7 @@ put_atom(Stream_or_alias,Atom) :-
  *		byte
  *		short
  *		long
+ *		ulong
  *		float
  *		double
  */
@@ -3321,6 +3322,7 @@ num_output_type(short) :- !.
 num_output_type(long) :- !.
 num_output_type(float) :- !.
 num_output_type(double) :- !.
+num_output_type(ulong) :- !.
 
 export put_number/3.
 
