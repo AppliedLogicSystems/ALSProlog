@@ -266,7 +266,7 @@ w_d_t(Term, Stream, _, [])
 	:-
 	atomic(Term),
 	!,
-	put_atom(Stream, Term).
+	write_term(Stream, Term, []).
 
 w_d_t('%lettervar%'(QVarName), Stream, _, [])
 	:- !,
