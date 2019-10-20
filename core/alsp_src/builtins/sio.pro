@@ -3094,7 +3094,7 @@ put_failure(0,Stream,Arg,Call) :-	%% SIOE_INARG for put_string
 	functor(Call,_,LastArg),
 	arg(LastArg,Call,Culprit),
 	!,
-	type_error(list_of_code, Culprit, [Mod:Call]).
+	type_error(list, Culprit, [Mod:Call]).
 put_failure(0,_,_,Call) :-		%% SIOE_NORMAL (should not happen)
 	!,
 	fail.
@@ -3310,7 +3310,9 @@ put_atom(Stream_or_alias,Atom) :-
  *
  *	OutputType may take on the following values:
  *		byte
+ *		ubyte
  *		short
+ *		ushort
  *		long
  *		ulong
  *		float
@@ -3322,11 +3324,16 @@ num_output_type(short) :- !.
 num_output_type(long) :- !.
 num_output_type(float) :- !.
 num_output_type(double) :- !.
+num_output_type(ubyte) :- !.
+num_output_type(ushort) :- !.
 num_output_type(ulong) :- !.
 
 export put_number/3.
 
-
+put_number(Stream,OutputType,Number) :-
+	var(OutputType),
+	!,
+	instantiation_error(2).
 put_number(Stream,OutputType,Number) :-
 	num_output_type(OutputType),
 	!,
@@ -3926,8 +3933,28 @@ skip_layout(Stream_or_alias) :-
  *	double		floating point (64 bit)
  */
 
-export get_number/3.
+num_input_type(byte) :-!.
+num_input_type(ubyte) :-!.
+num_input_type(char) :-!.
+num_input_type(uchar) :-!.
+num_input_type(short) :-!.
+num_input_type(ushort) :-!.
+num_input_type(int) :-!.
+num_input_type(uint) :-!.
+num_input_type(long) :-!.
+num_input_type(ulong) :-!.
+num_input_type(float) :-!.
+num_input_type(double) :-!.
 
+export get_number/3.
+get_number(Stream,InputType,Number) :-
+	var(InputType),
+	!,
+	instantiation_error(2).
+get_number(Stream,InputType,Number) :-
+	not(num_input_type(InputType)),
+	!,
+	domain_error(num_input_type,InputType,2).
 get_number(Stream,InputType,Number) :-
 	sio_get_number(Stream,InputType,Number),
 	!.

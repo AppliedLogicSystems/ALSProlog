@@ -53,22 +53,22 @@ etest(put_string(user, f(a)), type_error(list,f(a))),
 etest(put_string(user, [a]),  representation_error(character_code)),
 
 etest(put_number(user, byte, V),    instantiation_error),
-etest(put_number(user, byte, a),    type_error(number,a)),
-etest(put_number(user, byte, [a]),  type_error(number,[a])),
-etest(put_number(user, byte, f(a)), type_error(number,f(a))),
+etest(put_number(user, byte, a),    type_error(byte,a)),
+etest(put_number(user, byte, [a]),  type_error(byte,[a])),
+etest(put_number(user, byte, f(a)), type_error(byte,f(a))),
 
 % Test number input/output type errors
 etest(put_number(user, V, 1),    instantiation_error),
-etest(put_number(user, 1, 1),    type_error(atom, 1)),
-etest(put_number(user, [a], 1),  type_error(atom, [a])),
-etest(put_number(user, f(a), 1), type_error(atom, f(a))),
-etest(put_number(user, a, 1),    domain_error(number_type, a)),
+etest(put_number(user, 1, 1),    domain_error(num_output_type,1)),
+etest(put_number(user, [a], 1),  domain_error(num_output_type,[a])),
+etest(put_number(user, f(a), 1), domain_error(num_output_type,f(a))),
+etest(put_number(user, a, 1),    domain_error(num_output_type, a)),
 
 etest(get_number(user, V, 1),    instantiation_error),
-etest(get_number(user, 1, 1),    type_error(atom, 1)),
-etest(get_number(user, [a], 1),  type_error(atom, [a])),
-etest(get_number(user, f(a), 1), type_error(atom, f(a))),
-etest(get_number(user, a, 1),    domain_error(number_type, a)),
+etest(get_number(user, 1, 1),    domain_error(num_input_type, 1)),
+etest(get_number(user, [a], 1),  domain_error(num_input_type, [a])),
+etest(get_number(user, f(a), 1), domain_error(num_input_type, f(a))),
+etest(get_number(user, a, 1),    domain_error(num_input_type, a)),
 
 true
 ]).
