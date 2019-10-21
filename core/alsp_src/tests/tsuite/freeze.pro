@@ -1,12 +1,14 @@
 :-[test].
 
 
-test_freeze :-
-	test([
-	f_1,
-	f_2,
-	pc2,
-	f_3,
+test_freeze :- test([
+
+	% Test freeze goal binding
+	( freeze(V, length(V, L)), append("ab", "c", Q), V = Q, L == 3 ),
+	( freeze(V, length(V, L)), V = [a,b,c], L == 3 ),
+
+	test_gc,
+
 	f_4,
 	f_5,
 	f_6,
@@ -15,27 +17,18 @@ test_freeze :-
 	f_9,
 	f_10,
 	f_11,
-	f_12,
-	f_13,
+
+	% Test freeze goal success/failure
+	( freeze(V, true), V=a ),
+	not(( freeze(V, fail), V=a )),
+
 	true
-	]),
-	true.
+]).
 
-
-f_1 :-  freeze(V, length(V, L)),
-        7 < 9,
-        append("ab", "c", Q),
-        V = Q,
-        L == 3.
-
-
-f_2 :- freeze(V, length(V, L)),
-        V = [a,b,c],
-        L==3.
-
-
-pc2 :-
-        freeze(S, produce2(0,S)), consume2(S).
+test_gc :- test([
+	( freeze(S, produce2(0,S)), consume2(S) ),
+	not((freeze(V, V=hi), gc, V==hello))
+]).
 
 produce2(N, [N | T])
         :-
@@ -49,12 +42,6 @@ consume2([N | T])
                 consume2(T) 
                 ; 
                 N == 20).
-
-
-f_3 :- not(f_01).
-
-f_01 :- freeze(V, V=hi),gc,V==hello.
-
 
 f_4 :- j(X, Y), Y==9.
 
@@ -158,13 +145,6 @@ fd([], 1).
 fd([A | As], B)
         :-!,
         freeze(A, fd(As, B)).
-
-f_12 :- freeze(V, true), V=a.
-
-f_13a :- freeze(V, fail), V=a.
-
-f_13 :- not(f_13a).
-
 
 
 
