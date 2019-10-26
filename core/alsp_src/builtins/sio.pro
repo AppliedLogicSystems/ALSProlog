@@ -3266,7 +3266,7 @@ put_string0([], _).
 put_string0([C | String], Stream) :-
 	put_code(Stream,C),
 	put_string0(String, Stream).
-	
+
 
 /*
  * put_atom(Atom)
@@ -3320,13 +3320,17 @@ put_atom(Stream_or_alias,Atom) :-
  */
 
 num_output_type(byte) :- !.
+num_output_type(ubyte) :- !.
+num_output_type(char) :- !.
+num_output_type(uchar) :- !.
 num_output_type(short) :- !.
+num_output_type(ushort) :- !.
+num_output_type(int) :- !.
+num_output_type(uint) :- !.
 num_output_type(long) :- !.
+num_output_type(ulong) :- !.
 num_output_type(float) :- !.
 num_output_type(double) :- !.
-num_output_type(ubyte) :- !.
-num_output_type(ushort) :- !.
-num_output_type(ulong) :- !.
 
 export put_number/3.
 
