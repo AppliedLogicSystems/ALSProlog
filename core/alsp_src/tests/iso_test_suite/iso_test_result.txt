@@ -1,0 +1,394 @@
+... partially consulted  (Errors)
+Starting tests for Section 7.8
+
+Beginning tests of common functions.
+
+
+Beginning tests of call.
+_AUnexpected failure rather than error in: cut_b(_A)
+3Unexpected failure rather than error in: cut_b(3)
+3Unexpected success rather than error in: call(write(3))
+3Unexpected success rather than error in: call(write(3),call(1))
+Unexpected failure rather than error in: call(_A)
+Unexpected failure rather than error in: call(1)
+Unexpected failure rather than error in: call(fail,1)
+3Unexpected success rather than error in: call(write(3),1)
+Unexpected failure rather than error in: call(1,true)
+
+Tests of call are completed, beginning tests of cut.
+Goal: call(!), fail ; true
+failed, when it should have succeeded.
+Goal:(twice(_), !, write('Forwards '), fail)
+Should now write: C forwards
+C Forwards 
+Goal: ((!; write('No ')),write('Cut Disjunction '),fail)
+Should now write:  Cut Disjunction
+Cut Disjunction 
+Goal: (twice(_), (write('No '); !), write('Cut '),fail )
+Should now write: C No cut Cut 
+C No Cut Cut 
+Goal:(twice(_), (!, fail ; write('No ')))
+Should now write: C 
+C 
+Goal:(twice(X), call(X),write('Forwards '),fail )
+Should now write:  C Forwards Moss Forwards
+C Forwards 
+Goal: (goal(X), call(X), write('Forwards '), fail)
+Should now write: C Forwards Three Forwards
+C Forwards 
+Goal: (twice(_), +(+(!)),write('Forwards '),fail)
+Should now write:  C Forwards Moss Forwards
+C Forwards Moss Forwards 
+Goal: (twice(_),call(!),write('Forwards '),fail)
+Should now write:  C Forwards Moss Forwards
+C Forwards 
+
+Tests of cut completed.
+Testing catch and throw
+
+Unexpected error:bla
+raised by goal: catch_test(4,_A)
+that should not raise an error
+
+Goal: catch_test(5,_A)
+failed, when it should have succeeded.
+Goal: catch_test(6,_A)
+failed, when it should have succeeded.
+
+Should now write h1
+h1
+
+Tests of catch and throw completed
+
+
+All testing completed for Section 7.8.
+Starting tests for Section 8.2
+
+Testing Prolog unify.
+
+Tests of unification complete, testing unify_with_occurs_check.
+
+
+Unify with occurs check function not supported.
+Tests of unify_with_occurs_check completed, testing not Prolog unifiable.
+
+
+Testing of not Prolog unifiable completed.
+
+All testing completed for Section 8.2.
+
+Starting tests for Section 8.2
+
+Testing Prolog unify.
+
+Tests of unification complete, testing unify_with_occurs_check.
+
+
+Unify with occurs check function not supported.
+Tests of unify_with_occurs_check completed, testing not Prolog unifiable.
+
+
+Testing of not Prolog unifiable completed.
+
+All testing completed for Section 8.2.
+
+Starting tests for Section 8.4
+
+Beginning tests of term comparisions.
+
+Tests of term comparisions are completed.
+
+All testing completed for Section 8.4.
+
+Starting tests for Section 8.5
+
+Test starting for functor.
+
+
+Test of functor finished, starting test of arg
+
+Test of arg finished, starting test of univ
+
+Test of univ finished, starting test of copy_term
+
+Testing copy_term more extensively.
+
+Tests of copyterm completed, testing errors secction 8.5
+
+
+Testing of error catching completed.
+
+All tests finished for Section 8.5.
+
+Starting tests for Section 8.6
+
+Testing Is/2
+
+Testing of is complete.
+
+All testing completed for Section 8.6.
+
+Starting tests for Section 8.7
+
+Testing Mathematical Comparisons
+
+Mathematical Comparisons finished, testing errors.
+
+Errors finished.
+
+All testing completed for Section 8.7
+
+Starting tests for Section 8.8.
+
+Testing clause/1.
+
+Testing of clause finished, checking error values.
+Unexpected failure rather than error in: clause(atom(_A),_B)
+
+Testing of error values finished, starting current_predicate tests.
+
+current_predicate/1 not supported.
+
+Testing completed of current_predicate.
+
+All testing completed for Section 8.8.
+
+
+Starting tests for Section 8.9.
+
+Starting tests of asserta.
+
+Tests of asserta completed, testing asserta errors.
+Unexpected failure rather than error in: asserta(_A)
+Unexpected failure rather than error in: asserta(4)
+Unexpected success rather than error in: asserta((foo :- 4))
+Unexpected success rather than error in: asserta((atom(_A) :- true))
+
+Tests of asserta errors completed, testing assertz.
+
+Tests of assertz completed, testing assertz errors.
+Unexpected failure rather than error in: assertz(_A)
+Unexpected failure rather than error in: assertz(4)
+Unexpected success rather than error in: assertz((foo :- 4))
+Unexpected success rather than error in: assertz((atom(_A) :- true))
+
+Tests of assertz errors completed, testing retract.
+Goal:  retract(legs(spider,6))
+succeeded when it should fail.
+Goal:  retract((legs(_A,_B) :- _C))
+succeeded when it should fail.
+
+Tests of retract completed, testing retract errors.
+Unexpected failure rather than error in: retract((4 :- _A))
+Unexpected failure rather than error in: retract((atom(_A) :- _A==[]))
+
+Tests of retract errors completed, testing abolish.
+
+Tests of abolish completed, testing abolish errors.
+
+Tests of abolish errors completed.
+
+All testing completed for Section 8.9.
+
+
+Beginning tests for Section 8.10
+
+Testing findall function.
+Unexpected success rather than error in: findall(_A,4,_B)
+
+Testing of findall completed, testing bagof function.
+Unexpected failure rather than error in: bagof(_A,_B^_C,_D)
+Unexpected failure rather than error in: bagof(_A,1,_B)
+Unexpected failure rather than error in: bagof(_A,4,_B)
+
+Testing of bagof completed, testing setof function.
+Goal: setof(_A,member(_A,[_B,_C,f(_C),f(_B)]),[a,b,f(a),f(a)])
+failed, when it should have succeeded.
+Goal: setof(_A,member(_A,[_B,_C,f(_C),f(_B)]),[a,b,f(b),f(a)])
+failed, when it should have succeeded.
+Goal:  setof(_A,member(_A,[f(b,_B),f(c,_C)]),[f(b,a),f(c,a)])
+succeeded when it should fail.
+Unexpected failure rather than error in: setof(_A,4,_B)
+
+Testing of setof completed.
+All testing completed for Section 8.10.
+Unexpected failure rather than error in: findall(_A,4,_B)
+
+Testing of findall completed, testing bagof function.
+Unexpected failure rather than error in: bagof(_A,_B^_C,_D)
+Unexpected failure rather than error in: bagof(_A,1,_B)
+Unexpected failure rather than error in: bagof(_A,4,_B)
+
+Testing of bagof completed, testing setof function.
+Goal: setof(_A,member(_A,[_B,_C,f(_C),f(_B)]),[a,b,f(a),f(a)])
+failed, when it should have succeeded.
+Goal: setof(_A,member(_A,[_B,_C,f(_C),f(_B)]),[a,b,f(b),f(a)])
+failed, when it should have succeeded.
+Goal:  setof(_A,member(_A,[f(b,_B),f(c,_C)]),[f(b,a),f(c,a)])
+succeeded when it should fail.
+Unexpected failure rather than error in: setof(_A,4,_B)
+
+Testing of setof completed.
+All testing completed for Section 8.10.
+
+testing at_end_of_stream
+
+testing at_end_of_stream done 
+
+testing current_input
+
+testing current_input done 
+
+testing current_output
+
+testing current_output done 
+
+testing open
+
+testing open done 
+
+testing close
+
+testing close done 
+
+testing flush_output
+
+testing flush_output done 
+
+testing stream_property
+Goal: stream_property(not/stream,_A) attempted.
+Standard Part of Expected Error: error(domain_error(stream,not/stream),_A)
+Error Thrown: error(domain_error(stream_or_alias,not/stream),
+    [sio:stream_property(not/stream,_A)])
+
+
+testing stream_property done 
+
+testing set_stream_position
+
+testing set_stream_position done 
+testing section 8.11 done
+
+
+Testing get and put chars.
+
+
+tests of char io done, testing code io.
+
+
+tests of code io done, testing peeks.
+
+
+tests of peeks done.
+tests of section 8.12 done.
+
+testing byte io.
+
+
+testing byte io done, testing peek_byte.
+
+peek_byte is not supported.
+
+testing  peek_byte done.
+tests of  section 8.13 done.
+Testing read and write of terms
+
+
+Testing read and write of terms done, testing op/3
+
+
+Testing op/3 done, testing char_conversion
+
+
+char_conversion/2 not supported.
+
+Testing char_conversion done.
+
+Testing of section 8.14 done. 
+
+
+testing not provable
+Unexpected success rather than error in: \+3
+Unexpected success rather than error in: \+_A
+
+testing not provable done, testing once
+Unexpected failure rather than error in: once(_A)
+Unexpected failure rather than error in: once(4)
+
+testing once done, testing repeat
+
+testing repeat done.
+
+testing of section 8.15 done
+
+testing atom_length/2
+
+testing atom_length/2 done, testing atom_concat/3
+
+testing atom_concat/2 done,testing sub_atom/5
+
+testing sub_atom/5 done,testing atom_chars/2
+
+testing atom_chars/2 done,testing atom_codes/2
+
+testing atom_codes/2 done,testing char_code/2
+
+testing char_code/2 done,testing number_chars/2
+
+testing number_chars/2 done,testing number_codes/2
+
+testing number_codes/2 done
+testing section 8.16 done
+
+Testing Arithmetic Operations + and -
+
+Done Testing Arithmetic Operations +  and -
+
+Testing Arithmetic Operations * and /
+Goal: _A is 1.5*(3.2+11)
+ gave unexpected value: 21.3
+ expected value: 21.3
+Goal: _A is 20.164/(3.2+11)
+ gave unexpected value: 1.42
+ expected value: 1.42
+Goal: _A is 7/-3
+ gave unexpected value: -2.333333333
+ expected value: -2.333333333
+Goal: _A is -7/3
+ gave unexpected value: -2.333333333
+ expected value: -2.333333333
+
+Done Testing Arithmatic Operations * and /
+
+Testing Arithmetic Operations mod etc..
+Goal: _A is float(5/3)
+ gave unexpected value: 1.666666667
+ expected value: 1.666666667
+
+Done Testing Elementary Arithmetic Operations
+
+Unexpected success rather than error in: _A is 134217727+1
+Unexpected success rather than error in: _A is 134217727+1-1
+Unexpected success rather than error in: _A is -1-134217727
+Unexpected success rather than error in: _A is 134217727*2
+Unexpected success rather than error in: _A is floor(268435454.0)
+
+testing power  functor
+
+test power done, testing trig functors 
+
+Done testing trig functors
+testing log and exponential functions
+
+Done testing log and exponential functions
+Done testing section 9.3
+
+testing bitwise  arithmetic functors
+
+testing and or and 1s complement 
+
+Done testing and or and 1s complement
+testing shift functions
+
+Done testing shifts
+Done testing section 9.4
