@@ -249,6 +249,6 @@ end_log.
 %
 
 log(Text) :-
-	write(Text).
+	write_term(Text, [lettervars(true)]).
 
 log_nl :-  nl.
