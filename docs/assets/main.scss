@@ -7,6 +7,10 @@
 // Use grey background for code
 pre, code, .highlighter-rouge .highlight { background-color: #f8f8f8; }
 
+// Disable code highlighting of errors, which are often false-positives
+// due to ALS Prolog syntax differences or highlighter bugs.
+.highlight .err { color: inherit; background-color: inherit; }
+
 // Add logo to masthead
 .site-title::before {
 	content: url("alsprolog-logo.png");
