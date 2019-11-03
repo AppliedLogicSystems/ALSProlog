@@ -1,14 +1,10 @@
 ---
 title: '=..(univ)'
 group: Terms
+iso: univ
 predicates:
 - {sig: '=../2', desc: 'composes/decomposes structures from/to components'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#univ)
-
-
-
-
 
 ## FORMS
 

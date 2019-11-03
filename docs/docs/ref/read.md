@@ -2,6 +2,7 @@
 title: 'read/[1,2]'
 group: Input Output
 module: sio
+iso: readterm
 predicates:
 - {sig: 'read', args: {
     1: 'read a term from the current input stream',
@@ -12,18 +13,6 @@ predicates:
     3: 'read term from specified stream with options'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#readterm)
-
-
-
-
-
-
-
-
-
-
-
 
 ## FORMS
 ```

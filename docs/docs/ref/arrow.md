@@ -1,11 +1,9 @@
 ---
 title: '->/2(arrow)'
+iso: ifthen
 predicates:
 - {sig: '->/2', desc: 'if-then, and if-then-else'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#ifthen)
-
-
 
 ## FORMS
 

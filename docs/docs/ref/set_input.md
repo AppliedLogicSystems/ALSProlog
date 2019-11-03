@@ -2,16 +2,11 @@
 title: 'set_input/1'
 group: Input Output
 module: sio
+iso: setoutput
 predicates:
 - {sig: 'set_input/1', desc: 'set current input stream'}
 - {sig: 'set_output/1', desc: 'set current output stream'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#setoutput)
-
-
-
-
-
 
 ## FORMS
 

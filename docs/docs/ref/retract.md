@@ -1,6 +1,7 @@
 ---
 title: 'retract/[1,2]'
 group: Prolog Database
+iso: retract
 predicates:
 - {sig: 'retract', args: {
     1: 'removes a clause from the database',
@@ -8,9 +9,6 @@ predicates:
   }}
 - {sig: 'erase/1', desc: 'removes a clause from the database'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#retract)
-
-
 
 ## FORMS
 ```
