@@ -1,11 +1,9 @@
 ---
 title: 'call/1'
+iso: call
 predicates:
 - {sig: 'call/1', desc: 'calls a goal'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#call)
-
-
 
 ## FORMS
 

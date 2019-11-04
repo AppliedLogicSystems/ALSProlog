@@ -1,12 +1,10 @@
 ---
 title: 'op/3'
 module: sio
+iso: operators
 predicates:
 - {sig: 'op/3', desc: 'define operator associativity and precedence'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#operators)
-
-
 
 ## FORMS
 ```

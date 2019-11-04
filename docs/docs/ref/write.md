@@ -2,6 +2,7 @@
 title: 'write/[1,2]'
 group: Input Output
 module: sio
+iso: write_term
 predicates:
 - {sig: 'write', args:
     {1: 'write term to current output stream', 2: 'write term to specified stream'}}
@@ -22,18 +23,6 @@ predicates:
   }}
 - {sig: 'display/1', desc: 'write term to current output stream in canonical form'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#write_term)
-
-
-
-
-
-
-
-
-
-
-
 
 ## FORMS
 

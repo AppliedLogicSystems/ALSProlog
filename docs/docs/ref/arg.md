@@ -1,12 +1,10 @@
 ---
 title: 'arg/3'
 group: Terms
+iso: arg
 predicates:
 - {sig: 'arg/3', desc: 'access the arguments of a structured term'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#arg)
-
-
 
 ## FORMS
 ```

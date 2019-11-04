@@ -2,20 +2,13 @@
 title: 'at_end_of_stream/[0,1]'
 group: Input Output
 module: sio
+iso: streamproperty
 predicates:
 - {sig: 'at_end_of_stream', args: {
      0: 'test for end of the curent input stream',
      1: 'test for end of a specific input stream'
    }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#streamproperty)
-
-
-
-
-
-
-
 
 ## FORMS
 ```

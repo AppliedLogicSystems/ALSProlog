@@ -1,6 +1,7 @@
 ---
 title: 'atom/1'
 group: Terms
+iso: number
 predicates:
 - {sig: 'atom/1', desc: 'the term is an atom'}
 - {sig: 'atomic/1', desc: 'the term is an atom or a number'}
@@ -8,23 +9,6 @@ predicates:
 - {sig: 'integer/1', desc: 'the term is an integer'}
 - {sig: 'number/1', desc: 'the term is an integer or a floating point'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#number)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## FORMS
 ```

@@ -2,18 +2,13 @@
 title: 'get_char/[1,2]'
 group: Input Output
 module: sio
+iso: getchar
 predicates:
 - {sig: 'get_char', args: {
     1: 'read a character from current input stream',
     2: 'read character from a specific stream'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#getchar)
-
-
-
-
-
 
 ## FORMS
 ```

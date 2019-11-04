@@ -2,18 +2,13 @@
 title: 'put_code/[1,2]'
 group: Input Output
 module: sio
+iso: putchar
 predicates:
 - {sig: 'put_code', args: {
     1: 'output a character code to the current output stream',
     2: 'output a character code to a specific output stream'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#putchar)
-
-
-
-
-
 
 ## FORMS
 ```

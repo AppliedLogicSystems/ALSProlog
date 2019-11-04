@@ -1,14 +1,10 @@
 ---
 title: 'catch/3'
+iso: catch
 predicates:
 - {sig: 'catch/3', desc: 'execute a goal, specifying an exception handler'}
 - {sig: 'throw/1', desc: 'give control to an exception handler'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#catch)
-
-
-
-
 
 ## FORMS
 ```
