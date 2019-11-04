@@ -28,7 +28,7 @@ Certain types of streams may have other actions performed. `Atom` streams opened
 
 `force(false)` -- This is the default. A system error or resource error which occurs while closing the stream may prevent the stream from being closed.
 
-`force(true)` -- Errors occuring while closing the stream are ignored and resources associated with the stream are freed anyway.
+`force(true)` -- Errors occurring while closing the stream are ignored and resources associated with the stream are freed anyway.
 
 
 ## ERRORS

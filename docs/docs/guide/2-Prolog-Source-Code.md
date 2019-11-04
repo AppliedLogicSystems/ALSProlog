@@ -19,7 +19,7 @@ Every Prolog source file must be a sequence of zero or more Prolog terms, each
 term followed by a period (.) and a white space character. A period followed by a
 white space character is called a full stop. Full stops are needed in source files to
 show where one term ends and another begins. Each term in a file is treated as a
-closed logical formula. This means that even though two seperate terms have variable names in common, each term's variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written '_ '), which is quantified for each occurrance. This means that within a single term, every occurrance
+closed logical formula. This means that even though two separate terms have variable names in common, each term's variables are actually distinct from the variables in any other term. Most variables are quantified once for each term. However, there is a special variable, the anonymous variable (written '_ '), which is quantified for each occurrence. This means that within a single term, every occurrence
 of '_' is a different variable.
 
 ### 2.1.1 Rules
@@ -79,7 +79,7 @@ Suppose the following program of simple facts has been loaded:
     wavelength(yellow, 570-590).
     wavelength(blue, 450-495).
 
-Then the follow are some simple query interations with this program using the shell:
+Then the follow are some simple query interactions with this program using the shell:
 ```
 ?- wavelength(blue,W).
 

@@ -95,7 +95,7 @@ demo
     demo1, nl, demo2, nl, demo3, nl, demo4, nl, demo5, nl, demo6, nl, demo7.
 ```
 
-The above program demonstrates the subtelties of combining global variables with backtracking. Here is a sample run of this program :
+The above program demonstrates the subtleties of combining global variables with backtracking. Here is a sample run of this program :
 
 ```
 ?- demo.

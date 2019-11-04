@@ -9,13 +9,13 @@
 
 ## 20.1 Introduction and Overview
 The interface between ALS Prolog and Tcl/Tk allows prolog programs to create,
-manipulate and destroy Tcl/Tk interpreters, to submit Tcl/Tk expressions for evaulation in those interpreters, and to allow expressions being evaluated to make calls
+manipulate and destroy Tcl/Tk interpreters, to submit Tcl/Tk expressions for evaluation in those interpreters, and to allow expressions being evaluated to make calls
 back into Prolog. Computed data can be passed in both directions:
 * A Tcl/Tk function called from Prolog can return a value to Prolog;
 * A Prolog goal called from Tcl/Tk can bind Tcl variables to computed values.
 The conversions between the datatypes of the two languages are described in the
 next section. In general, one cannot count on the interface to automatically handle
-all situations. One must either assure that the originating code (Prolog or Tcl) creates a data entity which coverts into the the desired target type, or one must explictly
+all situations. One must either assure that the originating code (Prolog or Tcl) creates a data entity which coverts into the the desired target type, or one must explicitly
 coerce the entity after it has passed through the interface (e.g., with tcl_coerce).
 
 ## 20.2 Prolog to Tcl Type Conversion
@@ -28,7 +28,7 @@ coerce the entity after it has passed through the interface (e.g., with tcl_coer
 tcl_new/1 creates a new Tcl interpreter. If the Interpreter argument is an
 uninstantiated (Prolog) variable, then a unique name is generated for the interpreter. If Interpreter is a atom, the new Tcl interpreter is given that name.
 
-tk_new/1 functions in the same manner as tcl_new/1, except that the newlycreated Tcl interpreter is initialized with theTk package.
+tk_new/1 functions in the same manner as tcl_new/1, except that the newly created Tcl interpreter is initialized with theTk package.
 
 Examples
 ```
@@ -49,7 +49,7 @@ Errors
 tcl_call and tcl_eval both execute a script using the Tcl interpreter and returns the
 Tcl result in Result. tcl_call passes the Script argument as a single argument
 toTcl's eval command. tcl_eval passes the elements of ArgList as arguments to the
-Tcl's eval command, which concatenates the arguments before evalating them.
+Tcl's eval command, which concatenates the arguments before evaluating them.
 
 tcl_call's Script can take the following form:
 * List - The list is converted to a Tcl list and evaluated by the Tcl interpreter. The
@@ -121,7 +121,7 @@ Passes arg as an atom.
 *list arg  
 Passes arg as a list.  
 *var varName  
-Passes an unbound Prolog varaible. When the Prolog variable is bound, the Tcl
+Passes an unbound Prolog variable. When the Prolog variable is bound, the Tcl
 variable with the name varName is set to the binding.
 
 #### prolog read_call termString ?varName ...?  
@@ -145,7 +145,7 @@ Normally Tcl/Tk is installed as a system independent of ALS Prolog. Typically th
 Tcl/Tk shared/dynamic libraries are stored in a system directory (/usr/local/lib on
 Linux, including Mac OS, and  \winnt\system32 on Windows NT). Tcl/Tk support libraries are similarly stored in a global location.
 
-When creating a stand alone Prolog/Tcl-Tk application, it is sometimes convienient
+When creating a stand alone Prolog/Tcl-Tk application, it is sometimes convenient
 to create a package which includes Tcl/Tk so that the application will run correctly
 even on systems without Tcl/Tk.
 

@@ -97,7 +97,7 @@ For transferring information outbound, data for POSTing can be supplied in one o
 
 - If `fields = <atom>` (or, `'FIELDS'=<atom>`) occurs on `Options`, then `<atom>` should represent a structured fields expression (e.g., `'name=admin&shoesize=12'`). The underlying curl program will POST the text of `<atom>` via `'POSTFIELDS'=<atom>`.
 
-- If `fieldsfile = <FilePathName>` (or, `'FIELDSFILE'= <FilePathName>`) occurs on `Options`, then the complete text occurring in `<FilePathName>` is read into a UIA `FE`, just as for `'DATAFILE'`, and the information is POSTED as if `'FIELDS'=FE` had been included on `Options`. As with `'DATAFILE'`, the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the `eol = <char> ('EOL'=<char>)` or `eolcode=<charcode> ('EOLCODE'=<charcode>)` special equations. (So, for example, amperstands (`&`) could be supplied as the separator.)
+- If `fieldsfile = <FilePathName>` (or, `'FIELDSFILE'= <FilePathName>`) occurs on `Options`, then the complete text occurring in `<FilePathName>` is read into a UIA `FE`, just as for `'DATAFILE'`, and the information is POSTED as if `'FIELDS'=FE` had been included on `Options`. As with `'DATAFILE'`, the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the `eol = <char> ('EOL'=<char>)` or `eolcode=<charcode> ('EOLCODE'=<charcode>)` special equations. (So, for example, ampersands (`&`) could be supplied as the separator.)
 
 Inspired by the REST approach to internet file transfer,
 ```

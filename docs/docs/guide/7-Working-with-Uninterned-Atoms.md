@@ -7,7 +7,7 @@
 * TOC
 {:toc}
 
-Like most symbolic programming langauges, ALS Prolog implements atoms in
+Like most symbolic programming languages, ALS Prolog implements atoms in
 two different ways:
 * Atoms can be interned which means that they have been installed in the Prolog symbol table. Atoms which have been interned are called symbols.
 * Atoms can also be uninterned which means that they have not been installed
@@ -48,7 +48,7 @@ Let us assume that none of p, q, x, y, f, or wombat are initially in the symbol 
 when these clauses are first read. Both p and q will be put into the symbol table
 because they are predicate names. y will also be put into the symbol table because
 it does not appear between single quotes. On the other hand, wombat will be
-stored as a UIA becasue it is surrounded by single quotes. Similarly, x and f will
+stored as a UIA because it is surrounded by single quotes. Similarly, x and f will
 initially start out as UIAs because they appear in single quotes. But both of them
 will eventually be entered into the symbol table because f appears as a functor in
 the second clause and x appears unquoted in the third clause.

@@ -44,7 +44,7 @@ sinks include files, screens (or windows on screens), devices, and again, other 
 for natural streams. The characters in a computer stream flow from the source to
 the sink.
 
-Streams always have a beginning, but have an end only if they are finite. In prinicple, there is a sense of location, called the stream position, for all streams. This
+Streams always have a beginning, but have an end only if they are finite. In principle, there is a sense of location, called the stream position, for all streams. This
 sense of location, or stream position, corresponds to the natural notion of the point
 on the bank of the stream where one stands and watches the stream flow by. In the
 natural world, one can sometimes change the stream position by running along the
@@ -155,7 +155,7 @@ of course holds on to 'this end' of the stream.) The particular sourcesink terms
 If the target source or sink is to be a file, the sourcesink term is a Prolog atom which
 is a name for the file, possibly including path information. (And conversely, an
 atom in the sourcesink position can only indicate a file as target source or sink.) As
-with consult/1, the file name may be either an abolute path name or a relative path
+with consult/1, the file name may be either an absolute path name or a relative path
 name. (On most operating systems, the 'raw' keyboard and screen are handled
 more or less as special files. They will be discussed later.)
 
@@ -237,16 +237,16 @@ form
 
     tk_win(Interp, Name)
 
-where Interp is the Tcl/Tk intepreter under which the text window has already
+where Interp is the Tcl/Tk interpreter under which the text window has already
 been created, and Name is an atom which is a name for the target window (see the
 Sections on use of the Tcl/Tk interface in the Development Tools part of the manuals).
 
 #### Null Streams
 
 For various design reasons, it is sometimes convenient to utilize null streams: i.e.,
-virtual emtpy or infinite streams which are not attached to any system resource.
-Such streams are analogous to the erzatz device /dev/null on Unix. These null
-streams are availabe on all computing platforms in ALS Prolog, and are available
+virtual empty or infinite streams which are not attached to any system resource.
+Such streams are analogous to the ersatz device /dev/null on Unix. These null
+streams are available on all computing platforms in ALS Prolog, and are available
 both for output and for input. To utilize a null stream for output, execute the goal
 
     open(null_stream(Name),write, S, Options),
@@ -302,7 +302,7 @@ A file sourcesink is said to be immediate in the sense that (normally) all of th
 stream is opened to the file. In contrast, a socket sourcesink is called delayed in the
 sense that access to some (possibly) all of the characters making up the stream may
 be delayed to the consuming process. We say that a stream is either immediate or
-dealyed if its corresponding sourcesink is immediate or delayed, respectively. This
+delayed if its corresponding sourcesink is immediate or delayed, respectively. This
 distinction is of particular significance for term-level I/O reading from this stream,
 but also has effects for character-level consumption of a delayed stream. Consider the situation sketched in the Figure below .
 
@@ -328,7 +328,7 @@ get_char/2
 The behavior of read_term/3 for a delayed stream is governed by the read option blocking(Bool), where Bool is either true or false. Note that the default behavior is blocking(true) -- a blocking read. Under the default blocking(true) option, read_term/3 behaves just as it does for immediate streams. The difference
 in behavior occurs for delayed streams. Suppose that the situation in the Delayed Streams Figure (above)
 came about as follows. The read_term(...) goal was initiated, and at that time,
-some charazcters were available. But before read_term can finish parsing a complete Prolog term, the characters are consumed. If the stream were an immediate
+some characters were available. But before read_term can finish parsing a complete Prolog term, the characters are consumed. If the stream were an immediate
 stream, we only run out of characters at end of stream, and in that case, the system
 would raise an exception, indicating that end_of_file (if it were a file) was encountered improperly.
 
@@ -368,7 +368,7 @@ is writing to the stream. However, if the sink for this stream is a file which
 existed prior to the stream being opened, any previously existing contents
 of the file are discarded (i.e., the file is truncated).
 * A stream opened in read_write mode is generally both read from and written to by the program; in general, this implies that the program's position
-in such a stream can be aribtrarily set and changed.
+in such a stream can be arbitrarily set and changed.
 * Finally, append mode is like write mode, except that the previously existing contents of a file which is the sink for this stream are not lost: the stream
 position is automatically set to the end of the file and all output through the
 stream to the file is written at the end of the file.
@@ -377,7 +377,7 @@ stream to the file is written at the end of the file.
 
 The options argument of open/4 is a list whose elements are acceptable stream
 open options. These provide additional information to the open/4 procedure for
-refined control of the stream being created. These latter are differnt sorts of Prolog
+refined control of the stream being created. These latter are different sorts of Prolog
 terms. Some of the options are applicable to all streams, while others apply only to
 streams connected to particular kinds or sources or sinks, or of particular modes or
 types.
@@ -406,7 +406,7 @@ stream creation; these will be discussed later.)
 
 #### seek_type
 
-Some streams can be repositioned during program execution. These options indicate the type of repositionion which is requested for the stream. Not all streams support such repositioning. It the stream to be opened does not support the requested
+Some streams can be repositioned during program execution. These options indicate the type of repositioning which is requested for the stream. Not all streams support such repositioning. It the stream to be opened does not support the requested
 repositioning, the repositioning request generates an exception from open/4..
 There are two types of repositioning requests:
 ```
@@ -661,7 +661,7 @@ set_output/1 raises an exception. Thus set_output(S_or_a) cannot
 fail. Either it succeeds or it raises an exception, in which case the current output
 stream remains unchanged. .
 
-### 10.3.3 Stream Charcteristics
+### 10.3.3 Stream Characteristics
 
 ```
 stream_property/2
@@ -675,7 +675,7 @@ streams possessing a certain property. Declaratively,
 
 is true if and only if Property holds of Stream. The possible values for
 Property include all of the expressions which may appear on the Options list
-passesd to open/4, together with the following:
+passed to open/4, together with the following:
 
     input, output, and mode(M),
 
@@ -911,7 +911,7 @@ Outputs the byte Byte to the stream associated with Alias_or_stream.
 ## 10.5 Character Input/Output
 
 The predicates in this section perform character-level input and output on streams.
-While these predicates are primarily inteded for use on streams opened in text
+While these predicates are primarily intended for use on streams opened in text
 mode, they have meaning for streams opened in binary mode, unless otherwise indicated. There are related byte-oriented predicates for streams opened in binary
 mode. (Note that ALS Prolog is more relaxed than the ISO standard; the latter states
 that character operations cannot be performed on binary streams, and that byte operations cannot be performed on character streams)
@@ -1442,15 +1442,15 @@ quoted_strings(Bool)
     If Bool = true, lists of suitably small integers will print out as a double 
     quoted string. If Bool = false, these lists will print out as lists of small numbers.
 
-depth_computation(Val) [default: Val = nonflat]
-    Val may be either flat or nonflat. This setting determines the nature of the pretty 
+depth_computation(Val) [default: Val = non-flat]
+    Val may be either flat or non-flat. This setting determines the nature of the pretty 
     printer's "depth in term" computation. If Val = flat, all arguments of a term or list 
-    will be treated as being at the same depth. If Val = nonflat, then each subsequent 
+    will be treated as being at the same depth. If Val = non-flat, then each subsequent 
     argument in a term (or each sebsequent element of a list) will be considered to be at a 
     depth one greater than the depth of the preceding structure argument (or list element).
 
 line_end(Bool) [default: Bool = true]
-    When Bool = true, nl(_) is normal; when Bool = false, line-breaks (new lines) are preceeded by a \ .
+    When Bool = true, nl(_) is normal; when Bool = false, line-breaks (new lines) are preceded by a \ .
 ```
 ### 10.7.3 Writing output
 ```
@@ -1825,7 +1825,7 @@ current_op(Priority, Op_specifier, Operator) is true iff Operator is an operator
 precedence Priority.
 
 #### Examples
-currentop(P, xfy, OP).Succeeds three times if the predefined operators have not been altered, producing the following bindings:
+currentop(P, xfy, OP). Succeeds three times if the predefined operators have not been altered, producing the following bindings:
 ```
 P ==> 1100        OP ==> ;
 
@@ -1998,7 +1998,7 @@ can also appear on Options.  Whatever HTTP result is produced from the underlyin
 ?- http(get,'http://example.com', [result=RR,response_code(RC),total_time(TTT)]).
 ?- http(get,'http://example.com', [response_code(RC),total_time=TTT,file='./myfile.txt']).
 ```
-For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12') and 2) free-form text data (e.g., 'lorem ipsum doler').  Either type of data can be supplied either directly in an equation on the options lisit, or in a file specified on the options list.  
+For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) structured data such as is uploaded from Web forms (e.g., 'name=admin&shoesize=12') and 2) free-form text data (e.g., 'lorem ipsum doler').  Either type of data can be supplied either directly in an equation on the options list, or in a file specified on the options list.  
 
 * If data = &lt;atom&gt; ('DATA'=&lt;atom&gt;) (where &lt;atom&gt; is a symbol or uia) occurs on the options list, then the underlying CURL program will POST the text of &lt;atom&gt; via the equation 'READDATA'=&lt;atom&gt;.
  
@@ -2006,7 +2006,7 @@ For RESTVerb = post, data for POSTing can be supplied in one of two forms: 1) st
 
 * If fields = &lt;atom&gt; ('FIELDS'=&lt;atom&gt; occurs on Options, then &lt;atom&gt; should represent a structured fields expression (e.g., 'name=admin&shoesize=12').  The underlying CURL program will POST the text of &lt;atom&gt; via 'POSTFIELDS'=&lt;atom&gt;.
 
-* If fieldsfile = FilePathName (or, 'FIELDSFILE'= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if 'FIELDS'=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = &lt;char&gt; ('EOL'=&lt;char&gt;) or eolcode=&lt;charcode&gt; ('EOLCODE'=&lt;charcode&gt;) special equations.  (So, for example, amperstands (&) could be supplied as the separator.)
+* If fieldsfile = FilePathName (or, 'FIELDSFILE'= FilePathName) occurs on Options, then the complete text occurring in FilePathName is read into a UIA FE, just as for 'DATAFILE',  and the information is POSTED as if 'FIELDS'=FE had been included on Options.  As with 'DATAFILE', the basic method of reading the file concatenates all the lines into a single UIA, but this can be modified by use of the eol = &lt;char&gt; ('EOL'=&lt;char&gt;) or eolcode=&lt;charcode&gt; ('EOLCODE'=&lt;charcode&gt;) special equations.  (So, for example, ampersands (&) could be supplied as the separator.)
 
 #### Examples:
 ```

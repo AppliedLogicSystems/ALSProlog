@@ -80,7 +80,7 @@ For a call to `writeq/2`, the line length is set to the default line length for 
 
 &nbsp;&nbsp;`[quoted(true), ignore_ops(true), lettervars(true) ]`
 
-This is the same behavior supplied by the DEC-10 compatiblity predicate `display/1`. `write_canonical` is useful in situations where it is desirable to output a term in a format which may subsequently read in without regard to operator definitions. Such terms are not particularly pleasing to look at, however.
+This is the same behavior supplied by the DEC-10 compatibility predicate `display/1`. `write_canonical` is useful in situations where it is desirable to output a term in a format which may subsequently read in without regard to operator definitions. Such terms are not particularly pleasing to look at, however.
 
 `write_term/2` behaves as if `write_term/3` were called with the current output stream bound to `Stream_or_Alias`.
 

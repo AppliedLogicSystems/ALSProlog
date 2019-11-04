@@ -188,18 +188,18 @@ searchdir("/usr/prolog/").
 Note that the current directory (or '.' to represent it) does not appear among these
 facts; however, it is always automatically searched first. Additional entries can be
 made to this collection of facts by using assert/1 (or asserta/1 or assertz/1). For example, the goal
-    :-builtins:asserta(searchdir("chimpanze/")).
-would cause the subdirectory chimpanze of the current directory to be searched
+    :-builtins:asserta(searchdir("chimpanzee/")).
+would cause the subdirectory chimpanzee of the current directory to be searched
 immediately after the current directory and before any other directories. And
     :-builtins:asserta(searchdir("../widget/")).
 would cause the sibling subdirectory widget of the current directory to be searched
 immediately after the current directory and before any other directories. Assertions
-such as these can be placed in the ALS Prolog startup file (described below) to customize search paths for particular directries. See the User Guide for more information concerning loading files.
+such as these can be placed in the ALS Prolog startup file (described below) to customize search paths for particular directories. See the User Guide for more information concerning loading files.
 
 ## 13.5 Controlling the Search Path
 If you want to be able to consult some of your files that are not in your current directory, and you don't want to use absolute pathnames, you can put the directories
-where those files reside on a path searchlist called ALSPATH. In additon, you can
-add directories using the comannd-line switch -S at start-up time ({ADD LINK}see Section 13.7
+where those files reside on a path searchlist called ALSPATH. In addition, you can
+add directories using the command-line switch -S at start-up time ({ADD LINK}see Section 13.7
 (ALS Prolog Command Line Options) ). The following is an example use of the ALSPATH variable on Linux or DOS:
 
     setenv ALSPATH /usr/eddie/programs:/usr/sue/src/prolog
@@ -239,7 +239,7 @@ appropriate argument. So one of the animals examples from the last section would
 work like this:
     :-builtins:ss_init_searchdir0(['usr:prolog:alsdir:examples', 'usr:gorilla']).
 Such a call can be placed in the Prolog startup file or in one of your source files to
-occur automatically, as descirbed in the next section.
+occur automatically, as described in the next section.
 
 ## 13.6 Using the Prolog Startup File
 When ALS Prolog starts up, it looks first in the current directory and then in your

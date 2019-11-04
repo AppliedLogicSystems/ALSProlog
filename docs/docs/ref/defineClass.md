@@ -39,7 +39,7 @@ Class definitions can supply default values for slots using an equation of the t
 ```
 defaults = [..., <SlotName> = <Value>, ...]
 ```
-where each &lt;`SlotName`&gt; is any one of the slotnames from the complete state schema of the class, and &lt;`Value`&gt; is any appropriate value for that slot. Omitting this keyword in a class definition is equivalent to including
+where each &lt;`SlotName`&gt; is any one of the slot names from the complete state schema of the class, and &lt;`Value`&gt; is any appropriate value for that slot. Omitting this keyword in a class definition is equivalent to including
 ```
 defaults = []
 ```

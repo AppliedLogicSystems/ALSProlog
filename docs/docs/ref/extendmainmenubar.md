@@ -47,7 +47,7 @@ where `Atom` is a prolog atom which will serve as the new menu entry, and `Expr`
 
 - PrologCall
 
-Here, `TclExpr` can be any Tcl/Tk expression for evaulation, and `PrologCall` is any ground Prolog goal. The entry
+Here, `TclExpr` can be any Tcl/Tk expression for evaluation, and `PrologCall` is any ground Prolog goal. The entry
 ```
 cascade(SubLabel, SubList)
 ```
@@ -112,7 +112,7 @@ and replace the call considered above by:
                 ['Test Entry #1' + tcl('bell'), 
                  'Test Entry #2' + test_write]).
 
-Then the appearance of the main menu and the new pulldown will be the same, but chooseing `Test Entry #1` will cause the bell to ring, and choosing `Test Entry #2` will cause
+Then the appearance of the main menu and the new pulldown will be the same, but choosing `Test Entry #1` will cause the bell to ring, and choosing `Test Entry #2` will cause
 ```
 This is a test ...
 ```
@@ -138,7 +138,7 @@ will add an entry at the end of the `Tools` cascade.
 
 ## NOTES
 
-The default Tcl interpreter for `menu_entries_list/3` and `path_to_main_menu_entry/4` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run [`init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`](init_tk_alslib.html).  If you wish to run `menu_entries_list/3` or `path_to_main_menu_entry/4` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
+The default Tcl interpreter for `menu_entries_list/3` and `path_to_main_menu_entry/4` is `tcli` as shown above.  This interpreter is *_NOT_* automatically initialized by alsdev.  You must first run [`init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`](init_tk_alslib.html).  If you wish to run `menu_entries_list/3` or `path_to_main_menu_entry/4` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
 
 ## SEE ALSO
 

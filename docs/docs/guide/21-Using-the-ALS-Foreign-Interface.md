@@ -52,7 +52,7 @@ more information on the C programming language.
 ## 21.1 A Simple Prolog Predicate in C
 
 Before going into detail about the components of the interface, let's look at a simple
-example. Let's consider a simple predicate for testing the eveness of an integer. The
+example. Let's consider a simple predicate for testing the evenness of an integer. The
 pure C code for this function is:
 ```
 static int even(void)
@@ -111,14 +111,14 @@ Now we'll consider some of the details of the even.c source code to see what the
 The file alspi.h contains declarations that define the Prolog data types and
 functions, together with macros which help with initialization.
 * Next in the even.c program comes the definition of C function even(),
-which performs the eveness test. All C-coded predicates are functions which
+which performs the evenness test. All C-coded predicates are functions which
 take no arguments and return an integer result.
 * The first statement in the even() function fetches the argument to the Prolog
 predicate even/1.
 	PI_getan(&arg, &arg_type, 1);
 PI_getan() retrieves the nth predicate argument based on its last argument,
 in this case the 1st argument. PI_getan() stores the argument in the two local
-vaiables arg and arg_type. The variable arg is a PWord which holds the value of the prolog object and arg_type is a integer which holds the Prolog type
+variables arg and arg_type. The variable arg is a PWord which holds the value of the prolog object and arg_type is a integer which holds the Prolog type
 of the argument.
 * The second statement of the even() function does the actual work of the
 predicate.
@@ -344,8 +344,7 @@ void PI_getstruct(PWord *, int *, PWord);
 void PI_getargn(PWord *, int *, PWord, int);
 ```
 PI_getstruct() returns the specified structure's functor and arity. This function takes the following three arguments:
-* The first argument is the address of a variable which will be used to hold the
-*tructure's functor. The returned functor will be of type PI_SYM.
+* The first argument is the address of a variable which will be used to hold the structure's functor. The returned functor will be of type PI_SYM.
 * The second argument is the address of a variable which will be used to hold
 the arity of the structure. The arity will be of type PI_INT.
 * The third argument is the value of the structure which you want information
@@ -663,7 +662,7 @@ variable nil_sym to see if they are the [] symbol. The code for initialization f
 ```
 /*
 * This is more efficient than calling PI_makesym()
-* everytime you want to check for the nil symbol.
+* every-time you want to check for the nil symbol.
 */
 void pi_init(void)
 {
@@ -855,7 +854,7 @@ list:
 
 In the above discussion, we assumed that we were dealing with an unbound variable
 as the incoming argument from Prolog. The magic thing about using the
-PI_unify() function is that it works for all cases of instantitation without the
+PI_unify() function is that it works for all cases of instantiation without the
 programmer having to explicitly handle each case.
 Here is a conversation with the Prolog shell which shows the use of the predicates,
 collect/1 and enter/1.
@@ -939,7 +938,7 @@ There are further facilities available in the ALS foreign interface. They are di
 ### 21.2.8 Using Prolog's Output Streams
 
 When programming on the C side of the interface, using the standard output facilities of C is often problematic. Some operating systems may not support C's standard output. Even when standard output is supported, it is unlikely to be aligned
-with Prolog output which is seperately buffered, nor will the output be redirected
+with Prolog output which is separately buffered, nor will the output be redirected
 by Prolog's set_output/1 predicate.
 
 #### Prolog Output Functions
@@ -959,8 +958,8 @@ PI_aprintf functions for all output.
 ### 21.3.1 Predicates that Maintain State
 
 As an example of a set of predicates that maintain state, let's build a little counter
-package. When you consult this package, there will be a counter and a set of functions for manipulating that counter. Although this package is not very useful or ef-
-ficient, it serves as a good example. There are four things you can do with a counter:
+package. When you consult this package, there will be a counter and a set of functions for manipulating that counter. Although this package is not very useful or
+efficient, it serves as a good example. There are four things you can do with a counter:
 * initialize the counter by setting it to an integer
 * increment the counter
 * decrement the counter
@@ -1091,7 +1090,7 @@ backtrack into the previous definition. This is illustrated in the second exampl
 above by showing that listing/0 does not print out the clauses in the database
 even after failure occurs.
 
-### 21.3.3 Staticly Linking Prolog Predicates in C
+### 21.3.3 Statically Linking Prolog Predicates in C
 
 C defined prolog predicates can be statically linked with ALS Prolog to create extended version of the ALS Prolog development system. The even predicate example can be statically linked to ALS Prolog according to the following steps.
 
@@ -1152,10 +1151,10 @@ void main(int argc, char **argv)
 }
 ```
 Figure. The outline main program for ALS Prolog.
-The PI_prolog_init function performs the initilization of ALS Prolog.
+The PI_prolog_init function performs the initialization of ALS Prolog.
 PI_top_level() starts a prolog shell. Finally, when shell terminates and PI_top_level
 returns, PI_shutdown cleans up in preparation for exit. Once the Prolog system is
-initilized C defined Prolog predicates can be initilized using the PI_INIT macro.
+initialized C defined Prolog predicates can be initialized using the PI_INIT macro.
 
 When this main is compiled it creates a simple Prolog shell program. This shell
 used standard input and output for communication.
@@ -1217,7 +1216,7 @@ interfaces are likely to be quite similar to that illustrated here.
 The “glue” between ALS Prolog predicates and C functions is a collection of C
 functions which defines the interface. These are functions (operating on the 'Cside' of the interface) for:
 * Obtaining arguments from the Prolog stack (normally used at the beginning
-of C fuction being called from the Prolog side of the interface);
+of C function being called from the Prolog side of the interface);
 * Decomposing Prolog data structures into components;
 * Creating Prolog data structures from components;
 * Unifying Prolog data structures.;
@@ -1484,7 +1483,7 @@ C: The value of 3 is unknown
 Enter item > 4.4
 C: The value of 4.4 is unknown
 Enter item > quit
-Goobye.
+Goodbye.
 ```
 Figure. Trace of the execution of Q&A
 

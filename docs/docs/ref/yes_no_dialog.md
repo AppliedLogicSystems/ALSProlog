@@ -42,7 +42,7 @@ For the general call
 yes_no_dialog(Interp, Msg, Title, YesLbl, NoLbl, Answer)
 ```
 
-`Interp`, `Msg`, `Title`, `YesLbl`, and `NoLbl` should all be atoms, and `Answer` should be an uninstatiated variable.
+`Interp`, `Msg`, `Title`, `YesLbl`, and `NoLbl` should all be atoms, and `Answer` should be an uninstantiated variable.
 
 
 ## EXAMPLES
@@ -74,12 +74,12 @@ produces the popup dialog:
 
 ![](images/yes_no-2.gif)
 
-Clicking " OK " yields `Answer = OK` while clicking " Cancel " yeilds
+Clicking " OK " yields `Answer = OK` while clicking " Cancel " yields
 `Answer = Cancel`.
 
 ## NOTES
 
-The default Tcl interpreter for `yes_no_dialog/4` and `yes_no_dialog/6` is `tcli` as shown above.  This interpreter is *_NOT_* automatically intialized by alsdev.  You must first run [`init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`](init_tk_alslib.html).  If you wish to run `yes_no_dialog/4` or `yes_no_dialog/6` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
+The default Tcl interpreter for `yes_no_dialog/4` and `yes_no_dialog/6` is `tcli` as shown above.  This interpreter is *_NOT_* automatically initialized by alsdev.  You must first run [`init_tk_alslib/0` or `init_tk_alslib/1`, or run `init_tk_alslib/2` with `Interp = tcli`](init_tk_alslib.html).  If you wish to run `yes_no_dialog/4` or `yes_no_dialog/6` with `Interp` bound to a Tcl interpreter `I` other than `tcli`, you must first run `init_tk_alslib/2` with `Interp` bound to this same `I` (only once is necessary).
 
 ## SEE ALSO
 
