@@ -1,7 +1,7 @@
 ---
 title: 'assert/[1,2]'
 group: Prolog Database
-iso: assertz
+iso: asserta
 predicates:
 - {sig: 'assert', args: { 
     1: 'adds a clause to a procedure',

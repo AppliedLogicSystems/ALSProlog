@@ -1,6 +1,7 @@
 ---
 title: 'dynamic/1'
 group: Prolog Database
+iso: dynamic
 predicates:
 - {sig: 'dynamic/1', desc: 'declare a procedure to be dynamic'}
 ---

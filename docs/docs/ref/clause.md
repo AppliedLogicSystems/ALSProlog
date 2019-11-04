@@ -1,6 +1,7 @@
 ---
 title: 'clause/[2,3]'
 group: Prolog Database
+iso: clause
 predicates:
 - {sig: 'clause', args: {
     2: 'retrieve a clause',

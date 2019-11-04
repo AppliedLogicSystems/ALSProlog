@@ -1,7 +1,7 @@
 ---
 title: 'atom/1'
 group: Terms
-iso: number
+iso: atom
 predicates:
 - {sig: 'atom/1', desc: 'the term is an atom'}
 - {sig: 'atomic/1', desc: 'the term is an atom or a number'}
