@@ -41,7 +41,7 @@ functor/3
 functor(Term, Atom, Integer)
 functor(?,?,?)
 ```
-If Term is instatiated to a compound term (including an atom, which is viewed as
+If Term is instantiated to a compound term (including an atom, which is viewed as
 a compound term of arity 0), then Atom and Integer are unified respectively
 with the functor of Term and the number of arguments of Term. Conversely, if
 Atom is an atom and Integer is a non-negative integer, then Term is unified
@@ -58,7 +58,7 @@ then Term is unified with the nth argument of Structure.
 Term =.. List
 ? =.. ?
 ```
-Term =.. List (pronouced 'univ') translates between terms and lists of their
+Term =.. List (pronounced 'univ') translates between terms and lists of their
 components. If Term is instantiated, List will be unified with a list of the form [F,
 A1,...,An], where F is the functor of Term and A1,...,An are the arguments
 of Term. Conversely, if List is of the form [F, A1,...,An] where F is an atom,
@@ -81,7 +81,7 @@ nonvar(+)
 ```
 var(Term) succeeds iff Term is an uninstantiated variable, and nonvar/1 behaves exactly opposite.
 
-### 11.1.4 List manipultation predicates
+### 11.1.4 List manipulation predicates
 
 ```
 append/3
@@ -128,7 +128,7 @@ keysort/2
 keysort(List, SortedList)
 keysort(+, -)
 ```
-sort/2 sorts List according to the standard order, merging dentical elements as
+sort/2 sorts List according to the standard order, merging identical elements as
 defined by ==/2,and unifying the result with SortedList. keysort/2 expects
 List to be a list of terms of the form: Key-Data, sorting each pair by Key alone.
 See also the ALS Library.
@@ -166,7 +166,7 @@ sub_atom/5
 sub_atom(Atom,Before,Length,After,SubAtom)
 sub_atom(+, ?, ?, ?)
 ```
-Dissects atoms. When instatiated, Before, Length, and After  must be non-negative integers, and SubAtom must be an atom. Only Atom is required to be instantiated. If Atom and SubAtom are both instantiated, 
+Dissects atoms. When instantiated, Before, Length, and After  must be non-negative integers, and SubAtom must be an atom. Only Atom is required to be instantiated. If Atom and SubAtom are both instantiated, 
 and if SubAtom is not in fact a subsidiary of Atom, then the call
 
     sub_atom(Atom,Before,Length,After,SubAtom)
@@ -180,7 +180,7 @@ If SubAtom is in fact a subsidiary of Atom, then
 succeeds iff the length of SubAtom is Length, there are Before many characters in Atom ahead of the first character of SubAtom, and 
 there are After many characters in Atom following the last character of SubAtom.
 
-If SubAtom is an uninstantiated variable, various combinations of Before,Length,After (some uninstantiated) can be used to extract subatoms of Atom. For example:
+If SubAtom is an uninstantiated variable, various combinations of Before,Length,After (some uninstantiated) can be used to extract sub-atoms of Atom. For example:
 ```
 ?- sub_atom(abcdefg, 2, 3, _, SubAtom).
 SubAtom=cde 
@@ -580,9 +580,9 @@ are internally represented by terms of the form
     YY/MM/DD
 
 where YY, MM, DD are integers representing, respectively, the year, the month
-(counted from 1 to 12) and the day (couunted from 1 to 31, as appropriate to the month).
+(counted from 1 to 12) and the day (counted from 1 to 31, as appropriate to the month).
 The format of dates can be controlled by the predicate
-set_date_pattern/1. Any permuation of YY, MM, and DD is permitted. The predicates are defined in the builtins file fs_cmn.pro together with the various systemspecific files fs_unix.pro, fs_dos.pro, fs_mac.pro.
+set_date_pattern/1. Any permutation of YY, MM, and DD is permitted. The predicates are defined in the builtins file fs_cmn.pro together with the various system specific files fs_unix.pro, fs_dos.pro, fs_mac.pro.
 ```
 date/1.
 date(Date)
@@ -596,7 +596,7 @@ date_pattern(+,+,+,-).
 ```
 This predicate consists of a single fact which provides the mapping between the
 three integers representing the date and the pattern expressing the date; this fact is
-goverrned by set_date_pattern/1.
+governed by set_date_pattern/1.
 ```
 set_date_pattern/1.
 set_date_pattern(Pattern).
@@ -795,7 +795,7 @@ split_path/2.
 split_path(Path, List)
 split_path(+, -)
 ```
-This predicate splits an atomic file system Path into a List of its constitutent directory components, including any root or drive elements (of an absolute path) at the
+This predicate splits an atomic file system Path into a List of its constituent directory components, including any root or drive elements (of an absolute path) at the
 beginning, and including the file name (if any) at the end. It is defined by:
 ```
 split_path(Path, List)
@@ -808,7 +808,7 @@ join_path/2.
 join_path(List, Path)
 join_path(List, Path)
 ```
-This predicate composes an atomic file system Path from a List of its constitutent
+This predicate composes an atomic file system Path from a List of its constituent
 directory components, possibly including root or drive elements (of an absolute
 path) at the beginning, and including a file name (if any) at the end. It is defined by:
 ```
@@ -1058,7 +1058,7 @@ get_current_drive/1
 get_current_drive(Drive)
 get_current_drive(-)
 ```
-Returns the current logical drive. On Unix, returns the erzataz drive ''.
+Returns the current logical drive. On Unix, returns the ersatz drive ''.
 ```
 change_current_drive/1
 change_current_drive(Drive)

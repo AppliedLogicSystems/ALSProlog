@@ -1,12 +1,11 @@
 ---
 title: '==/2'
 group: Terms
+iso: termcomp
 predicates:
 - {sig: '==/2', desc: 'terms are identical'}
 - {sig: '\==/2', desc: 'terms are not identical'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#termcomp)
-
 
 ## FORMS
 ```

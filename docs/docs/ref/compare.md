@@ -45,13 +45,13 @@ More precisely, if `TermL` and `TermR` are structured terms, then
 
 the arity of `TermL` is less than the arity of `TermR`, or
 
-`TermL` and `TermR` have the same arity, and the functor name of `TermL` preceeds
+`TermL` and `TermR` have the same arity, and the functor name of `TermL` precedes
 the functor name of `TermR` in the standard order, or
 
 `TermL` and `TermR` have the same arity and functor name, 
 and there is an integer N less than or equal to the arity of `TermL` such that for all i less than N,
 the ith arguments of `TermL` and `TermR` are identical, and
-the Nth argument of `TermL` preceeds the Nth argument of `TermR` in the standard order.
+the Nth argument of `TermL` precedes the Nth argument of `TermR` in the standard order.
 
 ## EXAMPLES
 

@@ -5,12 +5,6 @@ predicates:
 - {sig: 'var/1', desc: 'the variable is unbound'}
 - {sig: 'nonvar/1', desc: 'the variable is instantiated'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#var)
-
-
-
-
-
 
 ## FORMS
 

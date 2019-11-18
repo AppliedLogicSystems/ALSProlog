@@ -4,9 +4,9 @@ group: Input Output
 predicates:
 - {sig: 'bufread', args: {
     2: 'runs the Prolog parser on a string of text',
-    3: 'similiar to bufread/2, allowing read options'
+    3: 'similar to bufread/2, allowing read options'
   }}
-- {sig: 'old_bufread/2', desc: 'similiar to bufread/2, giving additional information on variables'}
+- {sig: 'old_bufread/2', desc: 'similar to bufread/2, giving additional information on variables'}
 ---
 
 ## FORMS
@@ -23,9 +23,9 @@ old_bufread(Buffer, [Term | VarNames ])
 
 - Reading the first term out of Buffer(trailing characters from Buffer are ignored) and unifying it with Term.  A closing fullstop (period) is not need: The implementation of `bufread/2` utilizes the `attach_fullstop(true)` read-option.
 
-- If an error has occured, the error message is printed on the terminal in a manner similar to that for `consult` and for `read` generally.
+- If an error has occurred, the error message is printed on the terminal in a manner similar to that for `consult` and for `read` generally.
 
-`old_bufread/2` behaves similarly, except that it returns in VarNamess a list of the quoted variable names occurring in the term read.  The same information can be obtain using `bufread/3` with Options containing either `variable_names(VNs)` or `vars_and_names(Vars,Names)`.
+`old_bufread/2` behaves similarly, except that it returns in VarNames a list of the quoted variable names occurring in the term read.  The same information can be obtain using `bufread/3` with Options containing either `variable_names(VNs)` or `vars_and_names(Vars,Names)`.
 
 ## EXAMPLES
 

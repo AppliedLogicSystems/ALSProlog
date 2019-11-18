@@ -44,7 +44,7 @@ The octal notation is a `0o` followed by a sequence of valid octal digits. The o
 
     0 1 2 3 4 5 6 7
 
-The binary notation is a `0b` follwed by a sequence of 0's and 1's.
+The binary notation is a `0b` followed by a sequence of 0's and 1's.
 Here are some examples of integers:  
 
     0  4532  -273 0000001  0x1fff  0b1001 0o123  
@@ -122,7 +122,7 @@ they occur without the enclosing single quotes, then it is not necessary to use 
 quoted form. However, if the atom contains characters that aren't allowed in a simple atom, then the quotes are required. Note that the last example above is an atom
 whose print name is `99999`, not the integer `99999`.
 Quoted atoms can span multiple lines, but in this case the end of each such line must
-be preceeded by the backslash escape character, as in the following example of an
+be preceded by the backslash escape character, as in the following example of an
 atom:  
 
     'We are the stars which sing. \
@@ -137,8 +137,7 @@ A special atom is any sequence of characters from the following set:
 
     +-*/\^<>=':.?@#&.
 
-In addition, the atoms, `[]`, `!`, `;` and `,` are considered to be special atoms. Some oth-
-er examples of special atoms are:  
+In addition, the atoms, `[]`, `!`, `;` and `,` are considered to be special atoms. Some other examples of special atoms are:  
 
       +=   &&   @>=   ==   <---------
 
@@ -150,7 +149,7 @@ A variable consists of either a _ (underbar character) or an upper case letter, 
 
     Variable X123a _a$bc _123 _
 
-## 1.3 Compund Terms
+## 1.3 Compound Terms
 
 A compound term is consists of a symbolic constant, called a functor, followed
 by a left parenthesis followed by one or more terms separated by commas, followed
@@ -179,7 +178,7 @@ The simplest list is the empty list, represented by the atom '[]'. Any other lis
 a structured term with `./2` as principal functor and whose second argument is a list.
 Lists can be written by using '.' explicitly as a functor, or using the special _list_ notation.
 A list using list notation is written as a `[` followed by the successive first arguments
-of all the sublists in order seperated by commas, followed by `]`. The following are
+of all the sublists in order separated by commas, followed by `]`. The following are
 all different ways of writing the same list:  
 
     a.b.c.[]
@@ -193,7 +192,7 @@ specified explicitly by using `|`, as in these examples:
     [1,2,3|[]]
     [Head|Tail]  
 
-The list notation for lists is preferrable to using '.' explicitly because the dot is also
+The list notation for lists is preferable to using '.' explicitly because the dot is also
 used in floating point numbers and to signal termination of input terms.
 
 ## 1.6 Strings

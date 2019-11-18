@@ -11,13 +11,13 @@ ALS Prolog provides a method of globally associating values with arbitrary terms
 (which occur on the heap).  The associations are immune to backtracking. That is,
 once an association is installed, backtracking to a point prior to creation of the association does not undo the association. (However, see the discussion below for fine
 points concerning this.) Because both the associated term and value may occur on
-the heap, both a term and its associated value can contain uninstatiated variables.
+the heap, both a term and its associated value can contain uninstantiated variables.
 
 ## 8.1 'Named' Global Variables
 
 The underlying primitive predicates set_global/2 and get_global/2 defined in the
 next section maintain a uniform global association list. This has the disadvantage
-that as the number of distint associations to be mainted grows, the performance of
+that as the number of distint associations to be maintained grows, the performance of
 both set_global/2 and get_global/2 will degrade. The facility described in this section avoids this problem by providing individual global variables which are accessed by programmer-specified unary predicates; hence this mechanism is said to provide 'named global variables.'
 ```
 make_gv/1

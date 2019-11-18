@@ -61,7 +61,7 @@ primitive predicates for manipulating objects, as well as any ordinary Prolog pr
 
 Objects are activated by sending them message . The methods of the class to which
 the object belongs (or from which its class inherits) determine the object's reaction
-to the message. A message can be an arbitrary Prolog term which may include uninstantiated variables, thus implementing the partially-instatiated message paradigm of Concurrent Prolog [Ref]
+to the message. A message can be an arbitrary Prolog term which may include uninstantiated variables, thus implementing the partially-instantiated message paradigm of Concurrent Prolog [Ref]
 The ALS ObjectPro system is integrated with the module system of ALS Prolog, in
 that class definitions in ALS ObjectPro may be exported from their defining modules so as to be visible in other modules, or may be left unexported, rendering them
 local to the defining module. However, each object 'knows' the module of its defining class, so that if one has hold of the object in a variable Object, then the call
@@ -209,7 +209,7 @@ equation pairs
 
     <SlotName> = <Value>,
 
-where <SlotName> is any one of the slotnames from the complete state schema of
+where <SlotName> is any one of the slot names from the complete state schema of
 the class, and <Value> is any appropriate value for that slot. Omitting this keyword
 in a class definition is equivalent to including
 
@@ -247,11 +247,11 @@ The constraint expression slotName < valueList requires that
 the values of slotName be among the Prolog terms appearing on the list valueList. Here '<' is a short hand for 'is an element of'. The generated code for the class methods applies a test to any attempted update of the value of slotName to ensure that the new value is on the list valueList.
 
 As indicated, the third constraint expression subsumes the first two. Var is a Prolog variable, and Condition is an arbitrary Prolog call in which Var occurs.
-Conditon expresses a condition which any potential value for slotName in an
+Condition expresses a condition which any potential value for slotName in an
 instance of the class must meet in order to be installed. The generated code imposes
 this test on all attempts to update the value of slotName. The test is imposed by
 binding the incoming candidate value to the variable Var , and then calling the test
-Conditon. Here is a class specification including a constraint of the second type:
+Condition. Here is a class specification including a constraint of the second type:
 ```
 defineClass([name=engine,
      subClassOf=genericObjects,
@@ -336,7 +336,7 @@ accessObjStruct(SlotDescrip, State, VarOrValue)
 Besides these two constructs, calls on send/2 can be used in the clauses defining
 methods. The code for the action predicate should be defined in the same module
 as the definition of the class. (But it can reside in separate files.)
-Consider the class engine specified in the preceeding section. Simple start and
+Consider the class engine specified in the preceding section. Simple start and
 stop methods can be implemented for this class by the following clauses:
 ```
 engineAction(start,State) :- State^running := yes.

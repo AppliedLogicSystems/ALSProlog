@@ -1,12 +1,10 @@
 ---
 title: 'copy_term/2'
 group: Terms
+iso: copyterm
 predicates:
 - {sig: 'copy_term/2', desc: 'make copy of a term'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#copyterm)
-
-
 
 ## FORMS
 ```

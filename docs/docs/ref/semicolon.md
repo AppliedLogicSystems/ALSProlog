@@ -1,11 +1,9 @@
 ---
 title: ';/2 (semi-colon)'
+iso: or
 predicates:
 - {sig: ';/2', desc: 'disjunction of two goals'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#or)
-
-
 
 ## FORMS
 
@@ -39,7 +37,7 @@ yes.
 Notice that although postscript isn't a food, the goal succeeds. This is because only one of the two subgoals has to succeed for `;` to succeed. In the next example, we add a few more facts to the database. This example shows that `;` goal also succeeds if both of its arguments can succeed.
 
 ```
-- [user].
+?- [user].
 Consulting user.
 food(prolog).
 language(prolog).

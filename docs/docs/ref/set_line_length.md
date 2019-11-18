@@ -24,7 +24,7 @@ set_depth_computation(Stream_or_Alias, Flat_Nonflat)
 
 `set_maxdepth/2` sets the default depth limit to which terms are output for the output stream associated with `Stream_or_Alias` to the integer value bound to `Depth`. The default depth limit is used by the term output predicates to determine the maximum depth to write to. This parameter may also be set at the time of an open with the appropriate open option and may be overridden in calls to [`write_term/[3,4]`](write.html) with the appropriate write option.
 
-`set_depth_computation/2` sets the manner in which the depth of a term is computed for the output stream associated with `Stream_or_Alias` to the atomic value bound to `Flat_Nonflat`. As the name of the variable implies, `Flat_Nonflat` must be bound to one of the two atoms, flat or nonflat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is nonflat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.
+`set_depth_computation/2` sets the manner in which the depth of a term is computed for the output stream associated with `Stream_or_Alias` to the atomic value bound to `Flat_Nonflat`. As the name of the variable implies, `Flat_Nonflat` must be bound to one of the two atoms, flat or non-flat. If the depth computation method is flat, all arguments in a structured term and all list elements are considered to be at the same level. If the method is non-flat, then each subsequent structure argument or list element is considered to be at a depth one greater than the previous element.
 
 ## EXAMPLES
 
@@ -92,7 +92,7 @@ g,...]
 
 -- -- -- -- > `type_error(atom, Flat_or_nonflat)`
 
-`Flat_or_Nonflat` is an atom, but is neither flat nor nonflat
+`Flat_or_Nonflat` is an atom, but is neither flat nor non-flat
 
 -- -- -- -- > `domain_error(depth_computation, Flat_or_nonflat)`
 

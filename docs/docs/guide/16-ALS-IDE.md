@@ -8,11 +8,11 @@
 {:toc}
 
 The ALS Integrated Development Environment (IDE) provides a GUI-based developer-friendly setting for developing ALS Prolog programs. Start the ALS IDE by issuing alsdev
-in an appropriate command window. The IDE displays an initial spash screen
+in an appropriate command window. The IDE displays an initial splash screen
 
 ![](images/turnstile_splash.gif)
 
-while it loads, and then replaces the spash screen with the main listener window.
+while it loads, and then replaces the splash screen with the main listener window.
 
 ## 16.1 Main Environment Window
 The details of the appearance of the ALS IDE windows will vary across the platforms. Here is what reduced-size versions of the main window look like on Linux/Unix and on Windows:
@@ -64,7 +64,7 @@ having the current focus.  Quit allows you to exit from the ALS Prolog IDE.
 ![](images/edit_menu.gif)
 
 Cut, Copy, Paste, and Clear apply as usual to the current selection in an editor
-window. Copy also applies in the main llistener window. Paste in the main window always pastes into the last line of the window. Select All only applies to editor
+window. Copy also applies in the main listener window. Paste in the main window always pastes into the last line of the window. Select All only applies to editor
 windows.
 
 The Find button brings up the following dialog:
@@ -87,7 +87,7 @@ debugger, or editor window) from which the Preferences button was pressed. For e
 ![](images/jobs_alt_colors.png)
 
 Selecting Cancel simply removes the Fonts & Colors window without undoing
-any changes. Selecting Save records the selected preferences in the inititialization
+any changes. Selecting Save records the selected preferences in the initialization
 file (alsdev.ini) which is read at start-up time, and also records the selections globally for the current session. Although no existing editor windows are changed, all
 new editor windows created will use the newly recorded preferences. Preferences
 for the main listener window and the debugger window are saved separately from
@@ -124,7 +124,7 @@ Prolog> Consult, or typing ^K will cause the file to be reconsulted, and the err
 panes to be closed.
 
 Clear Workspace causes all procedures which have been consulted to be abolished, including clauses which have been dynamically asserted. In addition, future
-releases, all user-defined Tc/Tkl interpreters will also be destroyed.
+releases, all user-defined Tc/Tk interpreters will also be destroyed.
 
 The four Project-related buttons as well as the bottom entry on this menu are described in the next section.
 
@@ -138,19 +138,19 @@ Selecting IDE Settings raises the following dialog:
 
 The Heartbeat is the time interval between moments when a Prolog program temporarily yields control to the Tcl/Tk interface to allow for processing of GUI events,
 including clicks on the Interrupt button.
-The Print depth setting contols how deep printing of nested terms will proceed;
+The Print depth setting controls how deep printing of nested terms will proceed;
 when the depth limit is reached, some representation (normally '*' or '...') is printed
 instead of continuing with the nested term.
 The Printing depth type setting determines whether traversing a list or the top-level arguments of a term increases the print depth counter. The Flat setting indicates
 that the counter will not increase as one traverses a list or the top level of a term,
 while Non-flat specifies that the counter will increase.
 
-Selecting Dynamic Flags produces a popup window which displays the current values of all of the changable Prolog flags in the system, and allows one to reset any of those values:
+Selecting Dynamic Flags produces a popup window which displays the current values of all of the changeable Prolog flags in the system, and allows one to reset any of those values:
 
 ![](images/dynamic_flags.gif)
 
-Selecting Static Flags producs a popup window displaying the values of all of the
-unchangable Prolog flags for the system:
+Selecting Static Flags produces a popup window displaying the values of all of the
+unchangeable Prolog flags for the system:
 
 ![](images/static_flags.gif)
 

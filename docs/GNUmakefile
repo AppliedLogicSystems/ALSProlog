@@ -52,7 +52,7 @@ test-site : site
 	$(BUNDLE) exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
-	--empty-alt-ignore _site
+	--check-external-hash --empty-alt-ignore _site
 
 ## Test local docs
 test-local : local

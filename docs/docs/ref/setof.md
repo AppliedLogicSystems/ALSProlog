@@ -1,20 +1,12 @@
 ---
 title: 'setof/3'
+iso: setof
 predicates:
 - {sig: 'setof/3', desc: 'all unique solutions for a goal, sorted'}
 - {sig: 'bagof/3', desc: 'all solutions for a goal, not sorted'}
 - {sig: 'findall/3', desc: 'all solutions for a goal, not sorted'}
 - {sig: 'b_findall/4', desc: 'bound list of solutions for a goal, not sorted'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#setof)
-
-
-
-
-
-
-
-
 
 ## FORMS
 

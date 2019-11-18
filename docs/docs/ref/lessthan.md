@@ -1,5 +1,6 @@
 ---
 title: '</2'
+iso: arithmeticcomparison
 predicates:
 - {sig: '</2', desc: 'The left expression is less than the right expression'}
 - {sig: '>/2', desc: 'The left expression is greater than the right expression'}

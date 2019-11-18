@@ -18,7 +18,7 @@ tcl_eval(+ Interpreter, + ArgList, ? Result)
 ## DESCRIPTION
 
 `tcl_call/3` and `tcl_eval/3` both execute a
-script using the Tcl interpreter and return the Tcl result in `Result`. `Tcl_call` passes the `Script` argument as a single argument toTcl's `eval` command. `Tcl_eval` passes the elements of `ArgList` as arguments to Tcl's `eval` command, which concatenates the arguments before evalating them.
+script using the Tcl interpreter and return the Tcl result in `Result`. `Tcl_call` passes the `Script` argument as a single argument toTcl's `eval` command. `Tcl_eval` passes the elements of `ArgList` as arguments to Tcl's `eval` command, which concatenates the arguments before evaluating them.
 
 Tcl_call's script can take the following forms:
 

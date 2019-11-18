@@ -130,7 +130,8 @@ test_app_image: alspro
 	$(TEST_DIR)/tsuite/test_app_image.sh
 
 iso_test_suite: alspro
-	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
+	./alspro -no_obp -q -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests." | tee iso_test.out
+	diff --ignore-space-change $(TEST_DIR)/iso_test_suite/iso_test_result.txt iso_test.out
 
 #	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro $(TEST_DIR)/iso_test_suite/utils_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 

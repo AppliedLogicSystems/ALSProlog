@@ -1,12 +1,10 @@
 ---
 title: 'sub_atom/5'
 group: Terms
+iso: subatom
 predicates:
 - {sig: 'sub_atom/5', desc: 'dissect an atom'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#subatom)
-
-
 
 ## FORMS
 
@@ -16,7 +14,7 @@ sub_atom(Atom, Before, Length, After, SubAtom)
 
 ## DESCRIPTION
 
-`sub_atom/5` is used to take apart an atom. The only instantiation requirement is that `Atom` be instantiated to an atom. If any of `Before`, `Length`, or `After` are instantiated, they must be instantatiated to integers. If `SubAtom` is instantiated, it must be instantiated to an atom.
+`sub_atom/5` is used to take apart an atom. The only instantiation requirement is that `Atom` be instantiated to an atom. If any of `Before`, `Length`, or `After` are instantiated, they must be instantiated to integers. If `SubAtom` is instantiated, it must be instantiated to an atom.
 
 The `Before` parameter gives the number of characters in `Atom` before the start of the atom `SubAtom`. `Length` is the length of this `SubAtom`. `After` is the number of characters of `Atom` following the end of `SubAtom`. The first character of any atom is considered to begin at position 1.
 

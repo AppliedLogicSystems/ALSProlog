@@ -2,12 +2,10 @@
 title: 'set_stream_position/2'
 group: Input Output
 module: sio
+iso: setstreamposition
 predicates:
 - {sig: 'set_stream_position/2', desc: 'seek to a new position in a stream'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#setstreamposition)
-
-
 
 ## FORMS
 

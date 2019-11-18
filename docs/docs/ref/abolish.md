@@ -1,5 +1,6 @@
 ---
 title: 'abolish/2'
+iso: abolish
 predicates:
 - {sig: 'abolish', args: {
     1: 'remove a procedure from the database',
@@ -7,7 +8,6 @@ predicates:
     3: 'remove a procedure from the database'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#abolish)
 
 ## FORMS
 

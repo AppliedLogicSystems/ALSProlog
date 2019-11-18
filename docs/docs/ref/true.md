@@ -1,11 +1,9 @@
 ---
 title: 'true/0'
+iso: true
 predicates:
 - {sig: 'true/0', desc: 'always succeeds'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#true)
-
-
 
 ## FORMS
 

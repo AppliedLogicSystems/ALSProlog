@@ -10,7 +10,7 @@
 The ALS Prolog Development Environment (alsdev) supports a simple concept of
 development project which nonetheless, is quite useful. At it's most elementary, a
 project is just a named collection of files. Projects are accessed through the Prolog
-menu introduced in the preceeding section: 
+menu introduced in the preceding section: 
 
 ![](images/PrologProjectMenu.png)
 Figure. Prolog Project Menu

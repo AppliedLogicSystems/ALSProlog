@@ -25,7 +25,7 @@ This version directly calls a predicate in a module with type-converted argument
 
 `-list arg` Passes arg as a list.
 
-`-var varName` Passes an unbound Prolog varaible. When the Prolog variable is bound, the Tcl variable with the name `varName` is set to the binding.
+`-var varName` Passes an unbound Prolog variable. When the Prolog variable is bound, the Tcl variable with the name `varName` is set to the binding.
 ```
 **prolog read_call** termString ? varName ... ?
 ```

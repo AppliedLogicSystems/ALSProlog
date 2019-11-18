@@ -2,18 +2,13 @@
 title: 'peek_code/[1,2]'
 group: Input Output
 module: sio
+iso: peekcode
 predicates:
 - {sig: 'peek_code', args: {
     1: 'obtain char code from stream',
     2: 'obtain char from stream'
    }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#peekcode)
-
-
-
-
-
 
 ## FORMS
 ```

@@ -25,4 +25,9 @@ layout: default
 {%- endfor %}
 </p>
 
+{% if page.iso -%}
+<p><a href="https://www.deransart.fr/prolog/bips.html#{{page.iso}}">ISO Standard Predicate</a></p>
+
+{% endif -%}
+
 {{ content }}

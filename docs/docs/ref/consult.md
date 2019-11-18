@@ -182,7 +182,7 @@ symbol('3').
 
 The present semantics of `reconsult/1` are that all clauses which were previously defined in a `File` being loaded are wiped out, with new clauses replacing (positionally in the procedure) any old clauses. Thus, a procedure that is defined by several files will not be entirely wiped out when `reconsult/1` is invoked on just one of the procedure's files -- only those clauses defined by the one given `File` are wiped out and subsequently replaced.
 
-The file `user` is special. When `user` is consulted or reconsulted, the input clauses will be taken from the user's terminal. The end-of-file character (often Control-D or Contol-Z) should be used to terminate the consultation and return to the shell.
+The file `user` is special. When `user` is consulted or reconsulted, the input clauses will be taken from the user's terminal. The end-of-file character (often Control-D or Control-Z) should be used to terminate the consultation and return to the shell.
 
 
 ## SEE ALSO

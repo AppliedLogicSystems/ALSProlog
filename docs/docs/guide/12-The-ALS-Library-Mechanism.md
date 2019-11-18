@@ -7,7 +7,7 @@
 * TOC
 {:toc}
 
-The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution pro- ceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
+The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution proceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
 The files making up the library reside in the folder ...alsdir/library/.
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools
@@ -30,11 +30,11 @@ loaded (really, reconsulted, which is important), and the interrupt is released,
 for p has been replaced by a normal name table entry p, so that execution proceeds
 as if the code for p had always been loaded. Note that there is no interpretive overhead for this mechanism. The sole cost is born by the predicates which are stored
 as library predicates. And the overhead for the library predicates is not measurably
-greater that their own portion of the loading time at program initialiation, were they
+greater that their own portion of the loading time at program initialization, were they
 to be loaded with the rest of the the system.
 
 The primitive mechanisms which implement this approach to libraries are to be
-found in the builtins file blt_sys.pro. The acutal loading mechanism is defined by
+found in the builtins file blt_sys.pro. The actual loading mechanism is defined by
 load_lib/2. The related predicate force_libload_all/2 can be used to force the
 loading of a list of library files. This can be useful during construction of a stand-alone
 package. The low level mechanism for installing a library-type name table entry is
@@ -45,7 +45,7 @@ A tool for managing this process is described in the ALS Development Tools
 Guide.
 
 The library includes
-such facilities as the macro processing tools and the structure definition/abstracton
+such facilities as the macro processing tools and the structure definition/abstraction
 tools. These are described in their own sections of this manual or the ALS Tools
 Guide. The survey below lists the remaining groups which have been installed as
 of the date of writing of this chapter.
@@ -228,7 +228,7 @@ subst_nth(+, +, +, -)
 -- non-destructively changes the Nth element of a list
 
 If N is a non-negative integer, List is list, and NewItem is any non-var object,
-NewList is the result of non-destrctively changing the Nth element of List to become NewItem; this predicate numbers the list beginning with 0.
+NewList is the result of non-destructively changing the Nth element of List to become NewItem; this predicate numbers the list beginning with 0.
 
 ## 12.4 Lists: Miscellaneous List Predicates (listutl3.pro)
 ```

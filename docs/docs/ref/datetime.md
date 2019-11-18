@@ -43,7 +43,7 @@ datetime_less(DateTime0, DateTime1)
 
 `date_time(Date, Time)` obtains the current system local `Date` and `Time` from the same call to the OS/system clock. 
 
-`gm_date_time(Date, Time)` obtains the current Geenwich UTC `Date` and `Time` from the same call to the OS/system clock. 
+`gm_date_time(Date, Time)` obtains the current Greenwich UTC `Date` and `Time` from the same call to the OS/system clock. 
 
 `date/1` and `time/1` are effectively defined by:
 ```
@@ -76,7 +76,7 @@ valid_date(Date)
 ```
 (Date0,Time0), (Date1,Time1)
 ```
-and `DateTime0` preceeds or equals `DateTime1`.
+and `DateTime0` precedes or equals `DateTime1`.
 
 ## EXAMPLES
 ```
