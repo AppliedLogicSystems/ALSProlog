@@ -1,6 +1,6 @@
 ---
 title: 'var/1'
-group: Prolog Database
+group: Terms
 predicates:
 - {sig: 'var/1', desc: 'the variable is unbound'}
 - {sig: 'nonvar/1', desc: 'the variable is instantiated'}
