@@ -1165,8 +1165,8 @@ set_cutneeded (-17)
     While this is rather arcane, there are good reasons for it internally. For 
     consistent results, the cutneeded flag should be set for each clause 
     sometime before asserting it. If the cut_needed flag is set for either 
-    assertz or asserta, an instruction to move the current choice point to the 
-    cut point will be inserted prior to creation of the first choice point.
+    assertz or asserta, an instruction to move the current choicepoint to the 
+    cut point will be inserted prior to creation of the first choicepoint.
 
 reset_obp (-18) 
     Erases the the icode parameters in the .obp file back to the most recent 

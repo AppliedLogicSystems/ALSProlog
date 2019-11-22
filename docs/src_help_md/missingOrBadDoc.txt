@@ -19,7 +19,7 @@ unwind_protect
 * Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to builtins, also add to alssystem.md.
 
 * Determine whether the following Note from catch/3 is still true:
-catch/3 leaves a choice point....
+catch/3 leaves a choicepoint....
 
 * calloc23.md needs both EXAMPLES and ERRORS
 * ccreate3.md needs both EXAMPLES and ERRORS

@@ -333,7 +333,7 @@ will now operationally look as though it were
 
 Rather than f/2 running, $int/1 will run. When $int/1 returns, d/0 will run,
 which is what would have happened if f/2 had run and returned. If $int/1
-decides to run f/2, all it has to do is call f/2. $int/1 can leave choice points on
+decides to run f/2, all it has to do is call f/2. $int/1 can leave choicepoints on
 the stack, and also be cut, since it is exactly like any other procedure call. Any cuts
 inside $int/1 will have no effects outside of the call. In other words, it is a fairly
 safe operation. Once the interrupt handler is called, the interrupt trigger should be

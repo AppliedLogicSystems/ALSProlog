@@ -2,7 +2,7 @@
 title: '!/0'
 iso: cut
 predicates:
-- {sig: '!/0', desc: '(cut) removes choice points'}
+- {sig: '!/0', desc: '(cut) removes choicepoints'}
 ---
 
 ## FORMS
@@ -13,7 +13,7 @@ FirstGoal, !; SecondGoal
 ```
 ## DESCRIPTION
 
-Discards all choice points made since the parent goal started execution, including the choice points, if any, created by calling the parent goal. In the following two cases, a cut in `Condition` will remove all choice points created by the `Condition`, any subgoals to the left of the `Condition`, and the choice point for the parent goal.
+Discards all choicepoints made since the parent goal started execution, including the choicepoints, if any, created by calling the parent goal. In the following two cases, a cut in `Condition` will remove all choicepoints created by the `Condition`, any subgoals to the left of the `Condition`, and the choicepoint for the parent goal.
 ```
 Condition = (Things, !, MoreThings)
 
@@ -32,7 +32,7 @@ In other words,
 
 ## EXAMPLES
 
-In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
+In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choicepoint for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
 
 ```
 ?- listing.

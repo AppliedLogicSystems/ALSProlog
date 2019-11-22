@@ -132,11 +132,11 @@ The reason this didn't work is an implementation issue. The following is the seq
 
 - First the `assert(movie(jaws))` subgoal was run, causing a new procedure to be placed in the Prolog database.
 
-- When the subgoal `movie(X)` was run, no choice point was created because there were no other clauses to try if failure occurred.
+- When the subgoal `movie(X)` was run, no choicepoint was created because there were no other clauses to try if failure occurred.
 
 - After `movie(X)` succeeded, the second clause of `movie/1` was asserted, and the initial goal succeeded, binding `X` to `jaws`.
 
-- Backtracking was initiated by the `';'` response to the solution, but no second solution was found for `movie/1`, even though there was a solution to be found. This was because there was no choice point to return to in `movie/1`.
+- Backtracking was initiated by the `';'` response to the solution, but no second solution was found for `movie/1`, even though there was a solution to be found. This was because there was no choicepoint to return to in `movie/1`.
 
 One of the interesting(and possibly bad) parts to this phenomenon is that the second time this goal is run it will backtrack through the clauses of `movie/1`. This is shown below:
 
