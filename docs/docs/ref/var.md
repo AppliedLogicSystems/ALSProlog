@@ -1,6 +1,7 @@
 ---
 title: 'var/1'
 group: Terms
+iso: var
 predicates:
 - {sig: 'var/1', desc: 'the variable is unbound'}
 - {sig: 'nonvar/1', desc: 'the variable is instantiated'}
