@@ -1,0 +1,70 @@
+<script> $( document ).ready(function() {
+    console.log( "ready!" );
+});
+</script>
+
+<script>
+$(document).ready(function(){
+    // Get value on button click and show alert
+    $("#srchbtn").click(function(){
+        var str = $("#mysearchvalue").val();
+	var rng = "ONE"
+	if ($('#searchrange').is(":checked")){;
+		rng = "ALL"
+	} 
+alert("target=" + str + " " + "range=" + rng);
+    });
+});
+</script>
+
+<nav>
+<div style="border:1px solid black;margin-left:10px; width:94%;">
+<input type=text" id="mysearchvalue" id="mysearchvalue" class="mysearch" type="search" placeholder="Search predicates..." incremental style="margin-left:0px; width:95%; font-size:18px; border:2px solid black;" >
+<br>
+<input type="checkbox" id="searchrange" style="font-size:14px;" value="All">
+<label for="searchrange" font-size:12px;">Search all Packages</label>
+<input type=button"  id="srchbtn" style="font-size:16px; margin-left:0.5em; width:3.5em;" value="Search">
+</div>
+
+<ul>
+{%- for package in site.ref_packages %}
+
+<li><details {% if package == page.package %}open{% endif %}>
+<summary>{{package | escape}}</summary>
+
+{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
+
+<ul>
+{%- for g in groups %}
+
+<li><details {% if g.name == page.group %}open{% endif %}>
+<summary>{{g.name | escape}}</summary>
+<ul>
+
+	{%- assign predicates = "" | split: "" %}
+	{%- for r in g.items %}
+		{% for p in r.predicates %}
+			{% assign predicates = predicates | push: p %}
+		{% endfor %}
+	{%- endfor %}
+
+	{%- assign sorted_preds = predicates | sort: "sig" %}
+
+	{%- for p in sorted_preds %}
+		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+		<li>
+		<a href="{{ppage.url}}">
+			{{ p.sig }}
+			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
+		</a>
+		</li>
+	{%- endfor %}
+</ul>
+</details>
+{%- endfor %}
+</ul>
+</details>
+{%- endfor %}
+
+</ul>
+</nav>
