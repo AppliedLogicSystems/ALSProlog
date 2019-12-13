@@ -1,56 +1,55 @@
+$.fn.filterPreds = function(str) {
+            console.log('str = ' + str);
+        // Usually iterate over the items and return for chainability:
+        return this.each(function() {
+             // do something to each item matching the selector
+            console.log($(this).text());
 
-$(function() {
-    $('#mysearch').on('search', function() {
-        var needle = $(this).val();
-  	$('.eentry').hide().filter(function (i, e) {
-            if (needle == '') return true;
-            return  $(e).find('a[title*="'+ needle +'"]').length;
-        }).show();
-    })
-});
+	   var str2 = '\^' + str;
+	   var rx = new RegExp(str2);
 
+            console.log('match str = ' + $(this).text().match(str));
+            console.log('match str2 = ' + $(this).text().match(str2));
+            console.log('match rx = ' + $(this).text().match(rx));
 
-$(function() {
-    $("#core_p_trigger").click(function() {
-        $("#alsdev_trigger").css("background-color", "white");
-        $("#alslib_trigger").css("background-color", "white");
-        $("#c_intf_trigger").css("background-color", "white");
-	$( "#sb_toc" ).load( "toc_core_prolog.html" );
-	$("#core_p_trigger").css("background-color", "LightBlue");
-   });
-});
+           if ($(this).text().match(rx) != null) {
+                console.log('IF=' + $(this).text())
+                $(this).css("background-color", "LightCyan")
+           } else {
+                console.log('ELSE=' + $(this).text())
+//                $(this).hide()
+                $(this).css("background-color", "yellow")
 
-	// Doesn't fire:
-$( "#core_p_trigger" ).trigger( "click" );
+           }
+        });
+};
 
+function doSearch(){
+        var str = $("#mysearchvalue").val();
+        window.console.log("target=" + str);
+	var asides = $("aside");
+	
+	var As = $(".prd");
+	As.myfunction();
+	As.filterPreds(str);
+};
 
-$(function() {
-    $("#alsdev_trigger").click(function() {
-        $("#core_p_trigger").css("background-color", "white");
-        $("#alslib_trigger").css("background-color", "white");
-        $("#c_intf_trigger").css("background-color", "white");
-	$( "#sb_toc" ).load( "toc_alsdev.html" );
-	$("#alsdev_trigger").css("background-color", "LightBlue");
-   });
-});
+function doTest(){
+        var str = $("#mysearchvalue").val();
+        window.console.log("target=" + str);
+        var As = $(".funny");
+console.log(As);
+        As.filterPreds(str);
+};
 
-$(function() {
-   $("#alslib_trigger").click(function() {
-        $("#core_p_trigger").css("background-color", "white");
-        $("#alsdev_trigger").css("background-color", "white");
-        $("#c_intf_trigger").css("background-color", "white");
-	$( "#sb_toc" ).load( "toc_alslib.html" );
-	$("#alslib_trigger").css("background-color", "LightBlue");
-   });
-});
+$.fn.myfunction = function () {
+    console.log('L='+this.length);
+};
 
-$(function() {
-   $("#c_intf_trigger").click(function() {
-        $("#core_p_trigger").css("background-color", "white");
-        $("#alsdev_trigger").css("background-color", "white");
-        $("#alslib_trigger").css("background-color", "white");
-	$( "#sb_toc" ).load( "toc_c_intf.html" );
-	$("#c_intf_trigger").css("background-color", "LightBlue");
-   });
-});
+$.fn.myfunction2 = function (color) {
+    console.log(this.length);
+//    console.log(this.eq(2).text);
+ //   this.css( "background-color", color );
+	$.each(this,function(index, value){alert(index + " = " + value + " | " + value.html)});
+};
 

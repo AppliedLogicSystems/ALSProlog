@@ -1,35 +1,46 @@
 <script> $( document ).ready(function() {
     console.log( "ready!" );
+    $("#outer-nav").removeAttr("hidden");
 });
 </script>
 
 <script>
 $(document).ready(function(){
-    // Get value on button click and show alert
-    $("#srchbtn").click(function(){
-        var str = $("#mysearchvalue").val();
-	var rng = "ONE"
-	if ($('#searchrange').is(":checked")){;
-		rng = "ALL"
-	} 
-alert("target=" + str + " " + "range=" + rng);
-    });
+    $("#srchbtn").click( doSearch );
 });
 </script>
 
-<nav>
+<script>
+$(document).ready(function(){
+    $("#testbtn").click( doTest );
+});
+</script>
+
+<nav id="outer-nav" hidden>
+
+<input type=button"  id="testbtn" style="font-size:16px; width:3.5em;" value="Test" float:right;>
+
+<ul>
+<li><a class="funny"href="foo1.html">blue</a></li>
+<li><a class="funny"href="foo2.html">asserta</a></li>
+<li><a class="funny"href="foo3.html">assertz</a></li>
+<li><a class="funny"href="foo4.html">erase</a></li>
+<li><a class="funny"href="foo5.html">black</a></li>
+</ul>
+
 <div style="border:1px solid black;margin-left:10px; width:94%;">
-<input type=text" id="mysearchvalue" id="mysearchvalue" class="mysearch" type="search" placeholder="Search predicates..." incremental style="margin-left:0px; width:95%; font-size:18px; border:2px solid black;" >
+<input type=search" id="mysearchvalue" autocomplete="off" class="mysearch" placeholder="Search predicates..." incremental style="margin-left:-1px; margin-top:-4px; width:95%; font-size:16px; border-right:1px solid black;border-bottom:1px solid black;" >
 <br>
-<input type="checkbox" id="searchrange" style="font-size:14px;" value="All">
+<!-- <input type="checkbox" id="searchrange" style="font-size:14px;" value="All">
 <label for="searchrange" font-size:12px;">Search all Packages</label>
-<input type=button"  id="srchbtn" style="font-size:16px; margin-left:0.5em; width:3.5em;" value="Search">
+-->
+<input type=button"  id="srchbtn" style="font-size:16px; width:3.5em;" value="Search" float:right;>
 </div>
 
 <ul>
 {%- for package in site.ref_packages %}
 
-<li><details {% if package == page.package %}open{% endif %}>
+<li class="pkg" ><details {% if package == page.package %}open{% endif %}>
 <summary>{{package | escape}}</summary>
 
 {%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
@@ -37,7 +48,7 @@ alert("target=" + str + " " + "range=" + rng);
 <ul>
 {%- for g in groups %}
 
-<li><details {% if g.name == page.group %}open{% endif %}>
+<li class="grp" ><details {% if g.name == page.group %}open{% endif %}>
 <summary>{{g.name | escape}}</summary>
 <ul>
 
@@ -52,7 +63,7 @@ alert("target=" + str + " " + "range=" + rng);
 
 	{%- for p in sorted_preds %}
 		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
-		<li>
+		<li class="prd">
 		<a href="{{ppage.url}}">
 			{{ p.sig }}
 			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}

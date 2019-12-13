@@ -22,6 +22,7 @@ pre, code, .highlighter-rouge .highlight { background-color: #f8f8f8; }
 .doc-wrapper {
 	display: flex;
 	flex-direction: row-reverse;
+	margin-left: 30px;
 
 	.doc-main { flex: 3; }
 	.doc-sidebar  { flex: 1; }
