@@ -1,40 +1,38 @@
 <script> $( document ).ready(function() {
-    console.log( "ready!" );
     $("#outer-nav").removeAttr("hidden");
+    setupRef();
 });
 </script>
 
 <script>
 $(document).ready(function(){
-    $("#srchbtn").click( doSearch );
-});
-</script>
-
-<script>
-$(document).ready(function(){
-    $("#testbtn").click( doTest );
+    $("#searchInput").on("search", function(evt){
+        if($(this).val().length > 0){
+        	// the search is being executed
+	    clearSearch()
+	    doSearch($(this).val())
+        } else {
+        	// user clicked reset
+	    clearSearch()
+        }
+    })
 });
 </script>
 
 <nav id="outer-nav" hidden>
 
-<input type=button"  id="testbtn" style="font-size:16px; width:3.5em;" value="Test" float:right;>
-
-<ul>
-<li><a class="funny"href="foo1.html">blue</a></li>
-<li><a class="funny"href="foo2.html">asserta</a></li>
-<li><a class="funny"href="foo3.html">assertz</a></li>
-<li><a class="funny"href="foo4.html">erase</a></li>
-<li><a class="funny"href="foo5.html">black</a></li>
-</ul>
-
 <div style="border:1px solid black;margin-left:10px; width:94%;">
-<input type=search" id="mysearchvalue" autocomplete="off" class="mysearch" placeholder="Search predicates..." incremental style="margin-left:-1px; margin-top:-4px; width:95%; font-size:16px; border-right:1px solid black;border-bottom:1px solid black;" >
+<input type="search" id="searchInput" autocomplete="off" class="mysearch" 
+	placeholder="Search predicates..." incremental 
+ 	style="border:1px solid white; width:100%; font-size:18px;">
 <br>
-<!-- <input type="checkbox" id="searchrange" style="font-size:14px;" value="All">
-<label for="searchrange" font-size:12px;">Search all Packages</label>
--->
-<input type=button"  id="srchbtn" style="font-size:16px; width:3.5em;" value="Search" float:right;>
+<div>
+<input type="radio" name="searchtype" id="srchname" value="srchname"><label style="font-size:12px;" for="srchname">By Name</label>
+<input type="radio" name="searchtype" id="srchdesc" value="srchdesc"><label style="font-size:12px;" for="srchdesc">By Desc</label>
+<input type="radio" name="searchtype" id="srchboth" value="srchboth" checked><label style="font-size:12px;" for="srchboth">By Both</label>
+</div>
+<hr style="border:1px solid black;">
+<div style="text-align:center;"><a href="/docs/ref/#control">View All Predicates</a></div>
 </div>
 
 <ul>
@@ -48,7 +46,8 @@ $(document).ready(function(){
 <ul>
 {%- for g in groups %}
 
-<li class="grp" ><details {% if g.name == page.group %}open{% endif %}>
+<!-- <li class="grp" ><details {% if g.name == page.group %}open{% endif %}>  -->
+<li class="grp" ><details >
 <summary>{{g.name | escape}}</summary>
 <ul>
 
@@ -64,10 +63,10 @@ $(document).ready(function(){
 	{%- for p in sorted_preds %}
 		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
 		<li class="prd">
-		<a href="{{ppage.url}}">
-			{{ p.sig }}
+		<a href="{{ppage.url}}" id="{{ppage.url | split: "/" | last | split: "." | first}}" onclick="accessPredPage('{{ppage.url | split: "/" | last | split: "." | first}}')" >{{ p.sig }} 
 			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
 		</a>
+		<div class="dscr" hidden>{{p.desc}}</div>
 		</li>
 	{%- endfor %}
 </ul>
