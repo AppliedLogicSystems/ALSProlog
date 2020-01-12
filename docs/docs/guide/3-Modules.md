@@ -81,7 +81,7 @@ a use list.
 
 ## 3.3 Finding Procedures in Another Module
 
-Whenever the Prolog system tries to call a procedure, it first looks for that procedure in the module where the call occured. This is done automatically, and independently of use list and inheritance declarations.
+Whenever the Prolog system tries to call a procedure, it first looks for that procedure in the module where the call occurred. This is done automatically, and independently of use list and inheritance declarations.
 
 If the called procedure p/n is not defined in a module, M, from which it is called, then the system will search the use list of M (see 3.3.2 below) for a module M1 that exports
 the procedure (p/n) in question. If such a module M1 is found, then all occurrences
@@ -171,7 +171,7 @@ bar :- true.
 endmod.
 ```
 As this example demonstrates, the export declarations of a module aren't sacred
-and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explict references be used only when there are compelling reasons for
+and the lack of an export declaration can be overridden by :/2. However, good software engineering practice suggests that explicit references be used only when there are compelling reasons for
 avoiding the use list and export declaration mechanism.
 
 ## 3.6 Nested Modules

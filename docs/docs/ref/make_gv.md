@@ -24,7 +24,7 @@ The `setNAME/1` predicate is used to set the allocated global variable to the te
 
 In situations where this is a problem, a call to [`copy_term/2`](copy_term.html) may be used to create a copy of the term prior to setting the global variable. The instantiation of the term that exists at the time of the copy will be the instantiation of the term which survives backtracking over the copy operation.
 
-Also of interest is the time complexity of the set operation. So long as the argument to `setNAME/1` is a non-pointer type that is a suitably small integer or is of certain types of atoms (the non-UIA variety), the set operation is a constant time operation. Otherwise it requires time linearly proportional to the current depth of the choice point stack.
+Also of interest is the time complexity of the set operation. So long as the argument to `setNAME/1` is a non-pointer type that is a suitably small integer or is of certain types of atoms (the non-UIA variety), the set operation is a constant time operation. Otherwise it requires time linearly proportional to the current depth of the choicepoint stack.
 
 The `getNAME/1` predicate created by `make_gv/1` is used to get the contents of one of these global variables. The contents of the global variable is unified with the single parameter passed to `getNAME/1`.
 
@@ -95,7 +95,7 @@ demo
     demo1, nl, demo2, nl, demo3, nl, demo4, nl, demo5, nl, demo6, nl, demo7.
 ```
 
-The above program demonstrates the subtelties of combining global variables with backtracking. Here is a sample run of this program :
+The above program demonstrates the subtleties of combining global variables with backtracking. Here is a sample run of this program :
 
 ```
 ?- demo.

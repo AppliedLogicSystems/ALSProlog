@@ -1,12 +1,10 @@
 ---
 title: 'not/1'
+iso: notprovable
 predicates:
 - {sig: 'not/1', desc: 'tests whether a goal fails'}
 - {sig: '\+/1', desc: 'tests whether a goal fails'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#notprovable)
-
-
 
 ## FORMS
 ```

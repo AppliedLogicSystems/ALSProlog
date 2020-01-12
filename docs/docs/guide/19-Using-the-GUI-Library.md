@@ -8,7 +8,7 @@
 {:toc}
 
 The ALS library includes a growing collection of routines designed to make it easy
-to utilize various GUI constructs easly from ALS Prolog.
+to utilize various GUI constructs easily from ALS Prolog.
 
 ## 19.1 Initializing the GUI library
 In order to make use of these routines, one must first initialize the library. This is
@@ -66,7 +66,7 @@ produces the popup dialog
 
 Clicking “OK” yields
     Answer = OK
-while clicking “Cancel” yeilds
+while clicking “Cancel” yields
     Answer = Cancel.
 
 ## 19.3 Choices from lists

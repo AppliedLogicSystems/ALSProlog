@@ -1,12 +1,10 @@
 ---
 title: 'char_code/2'
 group: Terms
+iso: charcode
 predicates:
 - {sig: 'char_code/2', desc: 'convert between characters and codes'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#charcode)
-
-
 
 ## FORMS
 ```

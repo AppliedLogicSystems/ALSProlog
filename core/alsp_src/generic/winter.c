@@ -149,7 +149,6 @@ w_get(vp, tp, in)
 		    break;
 #ifdef MTP_CONST
 		default:
-printf("w_get:incoming(in)=%x\n",(int)in);
 		    fatal_error(FE_IN_WGET1, MTP_CONSTTAG(in));
 		    break;
 	    }

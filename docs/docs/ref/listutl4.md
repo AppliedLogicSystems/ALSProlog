@@ -3,7 +3,7 @@ title: 'split_ll_by_blank/3'
 package: ALS Library
 group: Lists
 predicates:
-- {sig: 'split_ll_at_start/5', desc: 'splits a list of atoms according to an initial subatom'}
+- {sig: 'split_ll_at_start/5', desc: 'splits a list of atoms according to an initial sub-atom'}
 - {sig: 'split_ll_by_blank/3', desc: 'splits a list of atoms by the first null atom'}
 ---
 ## FORMS

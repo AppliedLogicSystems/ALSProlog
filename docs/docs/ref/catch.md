@@ -1,14 +1,10 @@
 ---
 title: 'catch/3'
+iso: catch
 predicates:
 - {sig: 'catch/3', desc: 'execute a goal, specifying an exception handler'}
 - {sig: 'throw/1', desc: 'give control to an exception handler'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#catch)
-
-
-
-
 
 ## FORMS
 ```
@@ -114,7 +110,7 @@ yes.
 
 ## NOTES
 
-In the present implementation of ALS Prolog, `catch/3` leaves a choice point which is used to restore the scope of the catch when backtracked into. This choice point remains around even for determinate goals which are called from catch. Thus when catch succeeds, you should assume that a choice point has been created. If the program should be determinate, a cut should be placed immediately after the catch. It is expected that at some point in the future, this unfortunate aspect of ALS Prolog will be fixed, thus obviating the need for an explicit cut.
+In the present implementation of ALS Prolog, `catch/3` leaves a choicepoint which is used to restore the scope of the catch when backtracked into. This choicepoint remains around even for determinate goals which are called from catch. Thus when catch succeeds, you should assume that a choicepoint has been created. If the program should be determinate, a cut should be placed immediately after the catch. It is expected that at some point in the future, this unfortunate aspect of ALS Prolog will be fixed, thus obviating the need for an explicit cut.
 
-If `throw/1` is called with Reason instantiated to a pattern which does not match Pattern in any call of `catch/3`, control will return to the program which started the Prolog environment. This usually means that Prolog silently exits to an operating system shell. When using the development environment, however, the Prolog shell establishes a handler for catching uncaught throws or errors thus avoiding this unceremonious exit from the Prolog system. It is occassionally possible, particularly with resource errors, to end up in this last chance handler only to have another error occur in attempting to handle the error. Since no handler exists to handle this error, control returns to the operating system often with no indication of what went wrong.
+If `throw/1` is called with Reason instantiated to a pattern which does not match Pattern in any call of `catch/3`, control will return to the program which started the Prolog environment. This usually means that Prolog silently exits to an operating system shell. When using the development environment, however, the Prolog shell establishes a handler for catching uncaught throws or errors thus avoiding this unceremonious exit from the Prolog system. It is occasionally possible, particularly with resource errors, to end up in this last chance handler only to have another error occur in attempting to handle the error. Since no handler exists to handle this error, control returns to the operating system often with no indication of what went wrong.
 

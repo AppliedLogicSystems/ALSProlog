@@ -1,11 +1,9 @@
 ---
 title: ',/2 (comma)'
+iso: and
 predicates:
 - {sig: ',/2', desc: 'conjunction of two goals'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#and)
-
-
 
 ## FORMS
 ```
@@ -63,4 +61,4 @@ Note that the parentheses around the argument to [`call/1`](call.html) are to ke
 - [`;/2`](semicolon.html)
 
 - {% include book.md id="bratko86"   sec="2.3" %}
-- {% include book.md id="clocksin81" sec="6.7" %}`
+- {% include book.md id="clocksin81" sec="6.7" %}

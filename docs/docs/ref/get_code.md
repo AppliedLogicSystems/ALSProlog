@@ -2,18 +2,13 @@
 title: 'get_code/[1,2]'
 group: Input Output
 module: sio
+iso: getcode
 predicates:
 - {sig: 'get_code', args: {
     1: 'read a character code from current input stream',
     2: 'read character code from a specific stream'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#getcode)
-
-
-
-
-
 
 ## FORMS
 ```

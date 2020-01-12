@@ -2,18 +2,13 @@
 title: 'get_char/[1,2]'
 group: Input Output
 module: sio
+iso: getchar
 predicates:
 - {sig: 'get_char', args: {
     1: 'read a character from current input stream',
     2: 'read character from a specific stream'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#getchar)
-
-
-
-
-
 
 ## FORMS
 ```
@@ -73,7 +68,7 @@ The stream associated with `Stream_or_Alias` has no input ready to be read and t
 
 A character is simply an atom with length 1. [`get_code/[1,2]`](get_code.html) is used to retrieve a character code.
 
-If `get_char/[1,2]` is called with `Char` instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelyhood be from [`char_code/2`](char_code.html), not `get_char/[1,2]`.
+If `get_char/[1,2]` is called with `Char` instantiated to a term which is not a character, an error will be thrown. The error thrown though will in all likelihood be from [`char_code/2`](char_code.html), not `get_char/[1,2]`.
 
 ## SEE ALSO
 

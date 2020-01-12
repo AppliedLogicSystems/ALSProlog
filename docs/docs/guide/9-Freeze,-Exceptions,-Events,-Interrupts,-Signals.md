@@ -102,7 +102,7 @@ u111(W1).
 
 u1_4(W3).
 ```
-Runing this produces:
+Running this produces:
 ```
 ?- u1.
 silly_running(igloo,yellow)
@@ -160,7 +160,7 @@ The exception mechanism of ALS Prolog allows programs to react to extraordinary
 circumstances in an efficient and appropriate manner. The most common extraordinary circumstance to be dealt with is errors. Often an error (perhaps inappropriate user input, etc.) is detected deep in the calling sequence of predicates in a program.
 The most appropriate reaction on the part of the program may be to return to a much
 earlier state. However, if the code is written to support such a return using the ordinary predicate calling mechanisms, the result is often difficult to understand and
-has poor effeiciency. The exception mechanism allows the program to mark a point
+has poor efficiency. The exception mechanism allows the program to mark a point
 in its calling state, and to later be able to return directly to this marked point independently of the pending calls between the marked state and the later state. This notion is illustrated in the figure below.
 
 ![](images/CatchDirectReturn.png)
@@ -194,7 +194,7 @@ a call on call/1. However, if
 i) there is a subsequent call to throw/1 whose argument Ball unifies with the second argument of the call on catch/3, and if 
 ii) there is no interposed call to catch/3 whose second argument also unifies with
 Ball, 
-then all computation of the call on the first argumentt, WatchedGoal, is
+then all computation of the call on the first argument, WatchedGoal, is
 aborted, and the third argument of the call to catch/3, ExceptionGoal, is run as
 a result of the call to throw/1.
 
@@ -333,7 +333,7 @@ will now operationally look as though it were
 
 Rather than f/2 running, $int/1 will run. When $int/1 returns, d/0 will run,
 which is what would have happened if f/2 had run and returned. If $int/1
-decides to run f/2, all it has to do is call f/2. $int/1 can leave choice points on
+decides to run f/2, all it has to do is call f/2. $int/1 can leave choicepoints on
 the stack, and also be cut, since it is exactly like any other procedure call. Any cuts
 inside $int/1 will have no effects outside of the call. In other words, it is a fairly
 safe operation. Once the interrupt handler is called, the interrupt trigger should be
@@ -595,7 +595,7 @@ sigalrm, which is handled by the second clause.
 ## 9.5 Signals
 
 ALS Prolog provides a strong mechanism for interfacing to external operating system signaling
-mechanisms. The machinery allows the programmer to connect external signals to internal Prolog events generally as described in the previous section. The details for the coupling are found in the builtins file blt_evt.pro. The connection between signal numbers and signal names is provied
+mechanisms. The machinery allows the programmer to connect external signals to internal Prolog events generally as described in the previous section. The details for the coupling are found in the builtins file blt_evt.pro. The connection between signal numbers and signal names is provided
 by the predicate signal_name/2:
 ```
 signal_name(1,sighup).

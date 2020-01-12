@@ -1,5 +1,6 @@
 ---
 title: 'is/2'
+iso: arithmeticevaluation
 predicates:
 - {sig: 'is/2', desc: 'evaluates an arithmetic expression'}
 ---

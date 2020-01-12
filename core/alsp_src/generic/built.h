@@ -168,6 +168,9 @@ extern	int 	pbi_clct_tr 		PARAMS(( void ));
 extern	int 	pbi_unset_2nd 		PARAMS(( void ));
 extern	int 	pbi_del_tm_for		PARAMS(( void ));
 extern	int	pbi_bind_vars		PARAMS(( void ));
+extern	int	pbi_cptz		PARAMS(( void ));
+extern	int	x_disp_heap		PARAMS(( void ));
+extern	int	pbi_x_swp_tr		PARAMS(( void ));
 
 #ifdef INTCONSTR
 

@@ -2,6 +2,7 @@
 title: 'read/[1,2]'
 group: Input Output
 module: sio
+iso: readterm
 predicates:
 - {sig: 'read', args: {
     1: 'read a term from the current input stream',
@@ -12,18 +13,6 @@ predicates:
     3: 'read term from specified stream with options'
   }}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#readterm)
-
-
-
-
-
-
-
-
-
-
-
 
 ## FORMS
 ```
@@ -65,19 +54,19 @@ The following additional options are supported by ALS Prolog:
 
 - `blocking(Bool)` -- For streams such as socket streams or IPC queue streams, it is possible for the stream to remain open, yet there be no characters available at the time a read is issued. The value of `Bool` controls the behavior of the read in this setting. The values of `Bool` are as follows:
 
-    **`true`** In this type of read, the read susends or waits until enough characters are available to parse as a valid Prolog term.
+    **`true`** In this type of read, the read suspends or waits until enough characters are available to parse as a valid Prolog term.
 
     **`false`** In this type of read, if no characters are available, the read will immediately return with success, unifying the 'read term argument' (which is argument 1 for `read_term/2` and is argument 2 for `read_term/3`) with the term `unfinished_read`; any tokens consumed in the read attempt are saved in the stream data structure, and subsequent attempts to read from this stream begin with these tokens, followed by tokens created from further characters which arrive at later times.
 
 - `syntax_errors(Val)` -- Val indicates how the system is to handle any syntax errors which occur during the reading of `Term`.  The possible values of `Val` and their interpretations are:
 
-    **`error`** Occurrence of a sysntax error will cause the system to raise an exception, which includes outputing a warning message. This is the default.
+    **`error`** Occurrence of a syntax error will cause the system to raise an exception, which includes outputting a warning message. This is the default.
 
     **`fail`** Occurrence of a syntax error will cause the attempt to read `Term` to fail, and and error message will be output.
 
     **`quiet`** Occurrence of a syntax error will cause the attempt to read `Term` to fail quietly, with no message output.
 
-    **`dec10`** Occurrence of a syntax error will cause the attempt to read `Term` to output an error message, to skip over the offending input charaters, and attempt to re-read `Term` from the source stream.
+    **`dec10`** Occurrence of a syntax error will cause the attempt to read `Term` to output an error message, to skip over the offending input characters, and attempt to re-read `Term` from the source stream.
 
 ## EXAMPLES
 `?- read(Term).`
@@ -158,7 +147,7 @@ zipper.
 
 -- -- -- -- &gt; instantiation_error.
 
-`Options` is a list containing an element E which is neithera variable nor a valid read option
+`Options` is a list containing an element E which is neither a variable nor a valid read option
 
 -- -- -- -- &gt; domain_error(read_option, E)
 

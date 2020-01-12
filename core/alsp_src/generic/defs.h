@@ -314,6 +314,9 @@
  |	System-Level Debugging 
  *---------------------------------------------------------------------*/
 
+//#define DEBUGSYS	1
+#define PRIM_DBG	1
+
 #ifdef DEBUGSYS
 #include "debugsys.h"
 #endif

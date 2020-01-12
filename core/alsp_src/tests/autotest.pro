@@ -25,9 +25,10 @@ run_tests :-
 	printf(autotestlog,'    OS=%t-%t  Proc=%t  Ver=%t\n',[OS,OSVar,Proc,PVer]),
 	printf(autotestlog,'*********************************************\n',[]),
 	configure_testing,
+	(getenv('ID', ID) ; true),
 	!,
 	tell(autotestlog),
-	run_tests0,
+	run_tests0(ID),
 	bagOf(TestID, failed(TestID), FailedTests),
 	final_message(FailedTests,autotestlog, _),
 	flush_output(LOGStream),
@@ -73,12 +74,12 @@ add_search_dirs([D | Ds])
 	builtins:assert(searchdir(D)),
 	add_search_dirs(Ds).
 
-run_tests0 :-
+run_tests0(TestID) :-
 	test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
 	conduct_test(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
 	flush_output(autotestlog),
 	fail.
-run_tests0.
+run_tests0(_).
 
 conduct_test(TestID, TestFile, TestMod, TestStartCall, TestDescrip)
 	:-

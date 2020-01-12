@@ -48,7 +48,7 @@ The principal use of Undefined is for indicating module_closure entries in all m
 If `N` is instantiated to a valid name_table index, and if F is instantiated to a valid procedure type code as given in the table above, then `'$nextproc'(N,F,NN)` will succeed if and only if there is a nametable entry index KK > N containing a procedure entry of type F, and NN is the first such index.
 
 `'$exported_proc'(Module,Pred,Arity)`  
-succeeds if and only if `Module` is instatiated to an existing module, `Pred/Arity` is a predicate defined in `Module`, and `Pred/Arity` is exported from `Module`.
+succeeds if and only if `Module` is instantiated to an existing module, `Pred/Arity` is a predicate defined in `Module`, and `Pred/Arity` is exported from `Module`.
 
 `'$resolve_module'(Mod, Pred, Arity, ResMod)`
 If Pred/Arity is called(used) in module Mod, but is not defined in Mod, but instead is defined in some other module, then `'$resolve_module'(Mod, Pred, Arity, ResMod)` succeeds if and only if ResMod is a module containing a definition of `Pred/Arity`, `Pred/Arity` is exported from `ResMod`, and `ResMod` is on the *uselist* of `Mod`.  Note that if `Pred/Arity` is defined in `Mod`, then `'$resolve_module'(Mod, Pred, Arity, ResMod)` will succeed with `ResMod = Mod`.

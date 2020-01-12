@@ -18,7 +18,7 @@ predicates:
     2: 'creates a UIA corresponding to an arbitrary string',
     3: 'insert list of char (codes) into a UIA'
   }}
-- {sig: 'string_to_sized_uia/3', desc: 'creates a UIA containg chars corresponding to a string'}
+- {sig: 'string_to_sized_uia/3', desc: 'creates a UIA containing chars corresponding to a string'}
 - {sig: 'atomic_to_uia/2', desc: 'create a UIA corresponding to an atomic item'}
 - {sig: 'cnvrt_to_UIA/2', desc: 'create a UIA corresponding to an arbitrary term'}
 - {sig: 'truncate/3', desc: 'creates a UIA truncating the input expression'}
@@ -148,7 +148,7 @@ predicates:
 **`string_to_uia/2`** Given a String of arbitrary characters, UIA will be a uia
     containing exactly the same characters, in order.
 
-**`string_to_uia/3`** If Chars is a list of charater codes of length L, if UIA is a
+**`string_to_uia/3`** If Chars is a list of character codes of length L, if UIA is a
     uia, if Pos is a positive integer =< length(UIA), then:
     This predicate attempts to inserts the characters (in order)
     corresponding to Chars into UIA beginning at position Pos

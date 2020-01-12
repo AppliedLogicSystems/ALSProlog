@@ -37,7 +37,7 @@ c_call(CFuncPtr, Arglist, RetVal)
 <br>**`c_create_abs(SType,[ FieldName, Val,...], Ptr)`** equivalent to [`c_alloc_abs/2` plus `c_set/3`](c_alloc.html). `Type` can be an integral type or `'str'`. `SType` must be a structure type.
 
 **`c_createn(Type, Num,[ Val,...], UIA)`**
-<br>**`c_createn( SType, Num,[[ FieldName, Val,...], ...],  UIA)`** allocate and initialize an array of data valuesin a UIA.  equivalent to [`c_allocn/3` plus several `c_setn/4`](c_alloc.html).
+<br>**`c_createn( SType, Num,[[ FieldName, Val,...], ...],  UIA)`** allocate and initialize an array of data values in a UIA.  equivalent to [`c_allocn/3` plus several `c_setn/4`](c_alloc.html).
 
 **`c_createn_abs(Type, Num,[ Val,...], Ptr)`**
 <br>**`c_createn_abs( SType, Num,[[ FieldName, Val,...], ...],  Ptr)`** same as `c_createn/4`, except that the data is created in a C malloced area.

@@ -208,6 +208,9 @@ static struct blt_struct {
 	BLT("display_item_addr", 1, disp_item, "_disp_item"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+	BLT("cptz", 0, pbi_cptz, "_pbi_cptz"),
+	BLT("x_display_heap", 2, x_disp_heap, "_x_disp_heap"),
+	BLT("x_swp_tr", 0, pbi_x_swp_tr, "_pbi_x_swp_tr"),
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE

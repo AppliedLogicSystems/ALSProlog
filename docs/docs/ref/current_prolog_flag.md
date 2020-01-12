@@ -1,5 +1,6 @@
 ---
 title: 'current_prolog_flag/2'
+iso: current_prolog_flag
 predicates:
 - {sig: 'current_prolog_flag/2', desc: 'retrieve value(s) of prolog flag(s)'}
 - {sig: 'set_prolog_flag/2', desc: 'set value of a Prolog flag'}

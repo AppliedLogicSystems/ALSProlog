@@ -1,9 +1,9 @@
 ---
 title: '!/0'
+iso: cut
 predicates:
-- {sig: '!/0', desc: '(cut) removes choice points'}
+- {sig: '!/0', desc: '(cut) removes choicepoints'}
 ---
-[ISO Standard Predicate](https://www.deransart.fr/prolog/bips.html#cut)
 
 ## FORMS
 ```
@@ -13,7 +13,9 @@ FirstGoal, !; SecondGoal
 ```
 ## DESCRIPTION
 
+
 Discards all choice points made since the parent goal started execution, including the choice points, if any, created by calling the parent goal. In the following three cases, a cut in `Condition` will remove all choice points created by the `Condition`, any subgoals to the left of the `Condition`, and the choice point for the parent goal.
+
 ```
 Condition = (Things, !, MoreThings)
 
@@ -32,7 +34,7 @@ In other words,
 
 ## EXAMPLES
 
-In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choice point for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
+In the following example, the solution eats(chris, pizza) causes a cut to be executed. This removes the choicepoint for the goal `eats/2`. As a result, the solution eats(mick, pizza) is not found, even though Mick will eat anything.
 
 ```
 ?- listing.
@@ -84,7 +86,7 @@ will be equivalent to
 
 &nbsp;&nbsp;&nbsp;&nbsp;`cool(peewee) :- !, fail.`
 
-The next example shows the transparency of - &gt; with respect to cut.
+The next example shows the transparency of -> with respect to cut.
 
 ```
 ?- listing.
@@ -114,7 +116,7 @@ the `'!'` after `X = peewee` cuts the choicepoint for `cool/1`. The condition su
 
 yes.
 ```
-succeeds because the '!' is never reached in the condition of -&gt;. The -&gt; fails because there is no else subgoal. This causes the next clause for `cool/1` to be executed. This clause always succeeds, therefore `daffyduck` is considered cool.
+succeeds because the '!' is never reached in the condition of ->. The -> fails because there is no else subgoal. This causes the next clause for `cool/1` to be executed. This clause always succeeds, therefore `daffyduck` is considered cool.
 
 
 ## SEE ALSO
