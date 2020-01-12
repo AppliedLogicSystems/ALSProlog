@@ -6,6 +6,15 @@
 
 <script>
 $(document).ready(function(){
+        $('#searchdiv').change(function(){
+	    clearSearch();
+	    doSearch($("#searchInput").val());
+        });
+    });
+</script>
+
+<script>
+$(document).ready(function(){
     $("#searchInput").on("search", function(evt){
         if($(this).val().length > 0){
         	// the search is being executed
@@ -26,7 +35,7 @@ $(document).ready(function(){
 	placeholder="Search predicates..." incremental 
  	style="border:1px solid white; width:100%; font-size:18px;">
 <br>
-<div>
+<div id="searchdiv">
 <input type="radio" name="searchtype" id="srchname" value="srchname"><label style="font-size:12px;" for="srchname">By Name</label>
 <input type="radio" name="searchtype" id="srchdesc" value="srchdesc"><label style="font-size:12px;" for="srchdesc">By Desc</label>
 <input type="radio" name="searchtype" id="srchboth" value="srchboth" checked><label style="font-size:12px;" for="srchboth">By Both</label>
