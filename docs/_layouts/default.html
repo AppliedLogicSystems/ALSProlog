@@ -3,6 +3,15 @@
 
   {%- include head.html -%}
 
+  {%- if jekyll.environment != "production" %}
+  <script>
+  window.onerror = function(message, source, lineno, colno, error) {
+  	alert(message);
+  	return false;
+  }
+  </script>
+  {% endif -%}
+
   <script type="text/javascript" src="/assets/jquery-3.4.1.js"></script>
   <script type="text/javascript" src="/assets/searchhelp.js"></script>
 
