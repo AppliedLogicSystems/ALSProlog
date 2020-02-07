@@ -321,7 +321,8 @@ check_result(Test, ExpectedResult, Result) :-
 	!.
 	%%printf('Done: %t\n', [Test]).
 check_result(Test, ExpectedResult, Result) :-
-	printf('Error in: %t\nExpected: %t But got: %t\n', [Test, ExpectedResult, Result]).
+	printf('Error in: %t\nExpected: %t But got: %t\n', [Test, ExpectedResult, Result]),
+	throw(error(check_result(Test, ExpectedResult, Result),[])).
 
 do_split_path(OS, Path, NewList) :-
 	split_path(OS, Path, NewList), !.
