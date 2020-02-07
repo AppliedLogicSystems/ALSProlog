@@ -61,10 +61,10 @@ predicates:
     beginning of every atom on List.
 
 **`prefix_dir/3`** If List is a list of atoms representing file names, and if
-    Dir is an atom representing a path in the filesystem, then
-    XList is that list obtained from list by combining Dir
-    successively with each element of List to create a path
-    terminating in that List element.
+    Dir is an atom representing a path in the filesystem, then XList is that 
+    list obtained from list by combining Dir successively with each element 
+    of List to create a path terminating in that List element.  Functionally
+    identical to pathPlusFilesList/3 in builtins file filepath.pro.
 
 **`strip_prefix/3`** List is a list of atoms, NN is an natural number (the length
     of the prefix to strip), and Result is that list

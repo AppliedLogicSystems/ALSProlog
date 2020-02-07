@@ -232,6 +232,7 @@ mk_rows_atoms([Row | RowsTail], NumCols, [RowAtoms | RowsAtomsTail],
 	 [RowItemsLen | RowsItemLensTail], [RowMinColWidths | RowsMinColsWidthsTail])
 	:-
 	atoms_for_row(Row, 0, RowNumCols, RowAtoms, RowItemsLen, RowMinColWidths),
+write(afr=Row),nl,
 	(RowNumCols = NumCols ->
 		mk_rows_atoms(RowsTail, NumCols, RowsAtomsTail, 
 				RowsItemLensTail, RowsMinColsWidthsTail)

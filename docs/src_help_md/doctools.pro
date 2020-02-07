@@ -60,7 +60,6 @@ export mknnp/0.
  * ====================================================================== */
 
 	%% Default: assumes this is being run in ~docs/src_help_md:
-mdFolderPath('../docs/ref').
 src_folder_md_files( P ) :- mdFolderPath( P ).
 
 /*!---------------------------------------------------------------------
@@ -88,6 +87,9 @@ do_file_doc
 	pull_out_nullswitches(SwitchVals, Items, ReducedSwitchVals),
 %printf('SwitchVals=%t\nItems=%t\nReducedSwitchVals=%t\n',[SwitchVals,Items,ReducedSwitchVals]),
 	chkSrcTreeTop(ReducedSwitchVals, Src_Tree_Top),
+	do_doc:als_tree_top(Src_Tree_Top),
+	join_path([Src_Tree_Top, 'docs/docs/ref'], MDFolderPath),
+	assert(mdFolderPath(MDFolderPath)),
 	printf('Using source tree top = %t\n', [Src_Tree_Top]),
 
 	check_for_blt_lib(ReducedSwitchVals, Switch, Block),
@@ -242,7 +244,7 @@ exit_libsetup(Block, File, IssueInfo)
  |	If Block = library or builtins, and if Overwrite = true,false,
  |	and if FilesList is a a list of files from the library (when
  |	Block = library) or from ~builtins (when Block = builtins),
- |	recursively applies doc_one_file/2 to each file.
+ |	recursively applies doc_one_file/3 to each file.
  *!--------------------------------------------------------------------*/
 do_files_setup([], _, _).
 do_files_setup([File | FilesList], Block, Overwrite)
@@ -253,32 +255,33 @@ do_files_setup([File | FilesList], Block, Overwrite)
 	do_files_setup(FilesList, Block, Overwrite).
 
 /*!---------------------------------------------------------------------
- |	doc_one_file/2
- |	doc_one_file(LibFile, Overwrite)
- |	doc_one_file(+, +)
+ |	doc_one_file/3
+ |	doc_one_file(LibBltFile, Block, Overwrite)
+ |	doc_one_file(+, +, +)
  |
- |	-- Workhorse for library maintenance on a single library file
+ |	-- Workhorse for library/builtlins doc  maintenance on a single library/builtins file
  |
- |	Given the name (without extension) of a library file residing
- |	in the library area, constructs the path P to the file and
+ |	Given Block = library/builtins, and Overwrite = true/false, and
+ |	given the name (without extension) of a library/builtins file residing
+ |	in the library/builtins area, constructs the path P to the file and
  |	reads all the lines in the file.  This file should be in the
  |	format specified by the file "lib_skeleton.txt" in the library
  |	area.  Then:
  |	A) Extracts Group and DocTitle from the head comment;
  |	B) Gets the Module;
  |	C) Gets the list EX of exported P/As;
- |	D) Assembles the contents CC of all of the lib-documenting comments
+ |	D) Assembles the contents CC of all of the predicte-documenting comments
  |	   (comments with initial * followed by !);
  |	E) Extracts (and sorts) the list LPA of P/As obtained from CC;
  |	F) Checks for problems:
  |	   i) Mismatch between EX and LPA; 
  |	   ii) Checks that DocTitle is in both EX and LPA
  |	   If there is a mismatch, or ii) fails, throws a message and halts;
- |	G) Writes <LibFile>.alb in the library area ( next to <LibFile>.pro )
- |	H) If src_help_md/md_help/<LibFile>.md exists, then:
- |		1) If Overwrite==true, writes a new version of src_help_md/md_help/<LibFile>.md;
+ |	G) Writes <LibBltFile>.alb in the library area ( next to <LibBltFile>.pro )
+ |	H) If src_help_md/md_help/<LibBltFile>.md exists, then:
+ |		1) If Overwrite==true, writes a new version of src_help_md/md_help/<LibBltFile>.md;
  |		2) If Overwrite\=true, skips this step
- |	I) If src_help_md/md_help/<LibFile>.md does not exist, then
+ |	I) If src_help_md/md_help/<LibBltFile>.md does not exist, then
  |	   writes a (new) version.
  *!--------------------------------------------------------------------*/
 doc_one_file(File, Block, Overwrite)
@@ -307,7 +310,7 @@ doc_one_file(File, Block, Overwrite)
 		;
 		true
 	),
-	write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite).
+	write_md(PlainFile, Block, Module, DocList, DocTitle, Group, Overwrite).
 
 check_get_file_path(Block, File, FilePath, BlockPath)
 	:-
@@ -775,12 +778,12 @@ getPandA(P, P, 0)
 getPandA(P/A, P, A) :-!.
 
 	/*---------------------------------------------------------------------
-	 | 	write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
+	 | 	write_md(PlainFile, Block, Module, DocList, DocTitle, Group, Overwrite)
 	 |
 	 |	-- write out the *.md file in ../docs/ref
 	 *--------------------------------------------------------------------*/
 
-write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
+write_md(PlainFile, Block, Module, DocList, DocTitle, Group, Overwrite)
 	:-
 	mdFolderPath(MDFolderPath),
 	file_extension(MdFullName, PlainFile, md),
@@ -803,7 +806,8 @@ write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
 	),
 	assemblePreds(DocList, Preds, Forms, Descs, Examps),
 
-	yaml(DocTitle, als_library, Group, Module, Preds, OS),
+	(BLock == library -> Package = als_library ; Package = core_prolog),
+	yaml(DocTitle, Package, Group, Module, Preds, OS),
 	printf(OS, '## FORMS\n\n', []),
 	writeFoms(Forms, OS),
 	printf(OS, '## DESCRIPTION\n', []),
@@ -811,7 +815,7 @@ write_md(PlainFile, Module, DocList, DocTitle, Group, Overwrite)
 	printf(OS, '\n## EXAMPLES\n\n', []),
 	outExamps(Examps, OS),
 	close(OS),
-	printf('Library doc file %t written.\n', [MdFullName]).
+	printf('%t doc file %t written.\n', [Package,MdFullName]).
 
 assemblePreds([], [], [], [], []).
 assemblePreds([d(PA, Form, Summary, Desc, Examps) | DocList], 
