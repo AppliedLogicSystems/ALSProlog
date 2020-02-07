@@ -82,7 +82,6 @@
 ['setof/3','#setof'].
 ['stream_property/2','#streamproperty'].
 ['sub_atom/5','#subatom'].
-['throw/1','#catch'].
 ['true/0','#true'].
 ['unify_with_occurs_check/2','#unifywithoccurscheck'].
 ['var/1','#var'].
@@ -93,14 +92,14 @@
 
 Matched ISO Items:
 
-['!/0','#cut',''].
+['!/0','#cut','cut.md'].
 [',/2','#and','comma.md'].
 ['->/2','#ifthen','arrow.md'].
 [';/2','#or','semicolon.md'].
 ['=../2','#univ','univ.md'].
 ['=/2','#unify','unify.md'].
 ['\\+/1','#notprovable','not.md'].
-['abolish/1','#abolish',''].
+['abolish/1','#abolish','abolish.md'].
 ['arg/3','#arg','arg.md'].
 ['asserta/1','#asserta','assert.md'].
 ['assertz/1','#assertz','assert.md'].
@@ -169,7 +168,6 @@ Matched ISO Items:
 ['setof/3','#setof','setof.md'].
 ['stream_property/2','#streamproperty','stream_property.md'].
 ['sub_atom/5','#subatom','sub_atom.md'].
-['throw/1','#catch','catch.md'].
 ['true/0','#true','true.md'].
 ['var/1','#var','var.md'].
 ['write/1','#write_term','write.md'].
