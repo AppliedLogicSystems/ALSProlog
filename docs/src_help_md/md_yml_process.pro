@@ -46,7 +46,8 @@ group: Development Env.
 module: alsdev
 */
 	%% sub_atom length/offset of the tag + 2 ( = length of ': ' )
-yaml_tags(['title: '-7, 'package: '-9, 'group: '-7, 'module: '-8]).
+%yaml_tags(['title: '-7, 'package: '-9, 'group: '-7, 'module: '-8]).
+yaml_tags(['title: '-7, 'package: '-9, 'group: '-7, 'module: '-8, 'iso: '-5]).
 
 
 	%% For tag title:
@@ -109,6 +110,17 @@ get_tag_val('module: ', TagLen, Line, TagVal, PrevVals, false)
 	:-
 	member('package: '-Package, PrevVals),
 	default_module(Package, TagVal).
+
+        %% For tag iso:
+        %% If the tag occurs at the beginning
+        %% of the line, get it's value; there is no default.
+get_tag_val('iso: ', TagLen, Line, TagVal, _, true)
+        :-
+        Tag = 'iso: ',
+        sub_atom(Line, 0, TagLen, _, Tag),
+	!,
+        sub_atom(Line, TagLen, _, 0, TagVal).
+get_tag_val('iso: ', _, Line, '', _, false).
 	
 handle_header_lines([], RestLines0, [], _, RestLines)
 	:-

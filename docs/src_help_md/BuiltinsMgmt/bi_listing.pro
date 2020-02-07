@@ -6,11 +6,17 @@
  |              -- Provides tables of info about builtins
  *=====================================================================*/
 :-['md_yml_process.pro'].
-:-['ISO/iso.pro'].
+:-['../ISO/iso.pro'].
 :-['mods_blts.pro'].
 
-ref_path('../docs/ref/').
+ref_path('../../docs/ref/').
 init_src_file('./TmpDir/exps_blts.txt').
+iso_master_path('../ISO/master_iso.pro').
+iso_status_info_path('../ISO/iso_status_info.txt').
+iso_matched_list_path('../ISO/iso_matched_list.txt').
+iso_plus_md_path('../ISO/iso_plus_md.pro').
+
+blt_files_output('Exported_Undocd.txt').
 
 check_working_folders
 	:-
@@ -47,8 +53,8 @@ bi :- bi_table_lists.
 
 bi_table_lists
 	:-
-	check_working_folders,
 	cleanup_all,
+	check_working_folders,
 
 	printf('Processing docs/ref/*.md files\n', []),
 	proc_all_yml(_, MdInfoByPreds, MdInfoByPredsTail),
@@ -58,7 +64,8 @@ bi_table_lists
 	bg2_by_pred(BixGroups, PredsWithFiles),
 
 	printf('Loading ISO info\n', []),
-	open('ISO/master_iso.pro', read, ISOIn),
+	iso_master_path(ISO_masterPath),
+	open(ISO_masterPath, read, ISOIn),
 	read(ISOIn, ISOMasterList),
 	close(ISOIn),
 
@@ -68,8 +75,9 @@ bi_table_lists
 	grindNtbl(Date, BltsMods, RawNTblList),
 	rearr(RawNTblList, MdInfoByPreds, PredsWithFiles, ISOMasterList, NearFinal, MatchedISO),
 
-	(exists_file('ISO/iso_status_info.txt') -> remove_file('ISO/iso_status_info.txt'); true),
-	open('ISO/iso_status_info.txt', write, ISOstream),
+	iso_status_info_path(ISOstatusInfoPath),
+	(exists_file(ISOstatusInfoPath) -> remove_file(ISOstatusInfoPath); true),
+	open(ISOstatusInfoPath, write, ISOstream),
 	list_diff(ISOMasterList, MatchedISO, UnMatchedISO),
 	sort(UnMatchedISO, SortedUnMatchedISO),
 	printf(ISOstream, '\n Unmatched ISO Items:\n\n', []),
@@ -78,7 +86,8 @@ bi_table_lists
 	printf(ISOstream, '\nMatched ISO Items:\n\n', []),
 	write_clauses(ISOstream, SortedMatchedISO, [quoted(true)]),
 	close(ISOstream),
-	open('ISO/iso_matched_list.pro', write, IMLstream),
+	iso_matched_list_path(ISOmatchedListPath),
+	open(ISOmatchedListPath, write, IMLstream),
 	printf(IMLstream, 'iso_matched(%t).\n', [SortedMatchedISO], [quoted(true)]),
 	close(IMLstream),
 
@@ -87,13 +96,15 @@ bi_table_lists
 	printf(FPIstream, 'total_bi_pred_info(%t).\n', [SortedNearFinal],[quoted(true)]),
 	close(FPIstream),
 
+	undoc_bi_by_file(SortedNearFinal),
+
 	iso_md(SortedNearFinal, ISOMd),
-	open('ISO/iso_plus_md.pro', write, MDISOstream),
+	iso_plus_md_path(ISOplusMDpro),
+	open(ISOplusMDpro, write, MDISOstream),
 	printf(MDISOstream, 'md_iso(%t).\n', [ISOMd],[quoted(true)]),
 	close(MDISOstream),
 
-
-	PHH = pu(['Pred', 'Mod', 'Type', 'ISO', 'ISOlink', 'MDFile', 'SrcFile']),
+	PHH = u(['Pred', 'Mod', 'Type', 'ISO', 'ISOlink', 'MDFile', 'SrcFile']),
 	insert_page_headers(SortedNearFinal, 30, 30, PHH, HeadedFinal),
 	printf('Begin writing master output table\n', []),
 
@@ -110,12 +121,13 @@ write('-----'),nl,
 write('    ---'),nl,
 	printf('primary_pred_info.txt\n', []),
 	printf('final_pred_info.pro\n', []),
+	printf('Exported_Undocd.txt\n', []),
 	printf('ResultDir/grindNtbl.txt\n', []),
 	printf('TmpDir/blt_exported_grep.txt\n', []),
 
-	printf('ISO/iso_status_info.txt\n', []),
-	printf('ISO/iso_matched_list.pro\n', []),
-	printf('iso_plus_md.pro\n', []),
+	printf('..ISO/iso_status_info.txt\n', []),
+	printf('../ISO/iso_matched_list.pro\n', []),
+	printf('../ISO/iso_plus_md.pro\n', []),
 	nl,
 
 statistics.
@@ -343,3 +355,71 @@ iso_md([_ | SNF], ISOMd)
 	iso_md(SNF, ISOMd).
 
 
+undoc_bi_by_file(SortedNearFinal)
+	:-
+	printf('Begin undocumented, but exported, builtins preds.\n',[]),
+	find_undoc_with_file(SortedNearFinal, File_Undoc),
+	sort(File_Undoc, SortedUndoc_File),
+	merge_groups(SortedUndoc_File, MergeGroups),
+	outputGroups(MergeGroups).
+
+/*
+SortedNearFinal:
+	.....
+	[all_ntbl_entries/4,builtins,P_def,,,procedures.md,blt_sys.pro],
+	[all_procedures/3,builtins,P_def,,,,blt_sys.pro],
+	[all_procedures/4,builtins,P_def,,,procedures.md,blt_sys.pro],
+	.....
+	[assert_all/1,builtins,C_def,,,,],
+	[assert_all/2,builtins,Lib,,,,],
+	.....
+ */
+find_undoc_with_file([], []).
+find_undoc_with_file([SNFE | RestSortedNearFinal], [(BltFile,PA) | RestUndocBList])
+	:-
+	SNFE = [PA,_,_,_,_,MDE,BltFile],
+	MDE == '',
+	BltFile \= '',
+%printf('SNFE=%t  PA=%t  MDE=%t  BltFile=%t\n', [SNFE,PA,MDE,BltFile]),flush_output,
+	!,
+	find_undoc_with_file(RestSortedNearFinal, RestUndocBList).
+find_undoc_with_file([SNFE | RestSortedNearFinal], UndocBList)
+	:-
+	find_undoc_with_file(RestSortedNearFinal, UndocBList).
+
+merge_groups([], []).
+merge_groups([(BltFile,PA) | RestSortedUndoc_File], [(BltFile,FileGroupPreds) | MergedGroups])
+	:-
+%printf('merge: %t\n', [BltFile]),
+%(BltFile == 'xconsult.pro' -> trace ; true),
+	xtractFileEntries([(BltFile,PA) | RestSortedUndoc_File], 
+				BltFile, FileGroupPreds, RemSortedUndoc_File),
+	merge_groups(RemSortedUndoc_File, MergedGroups).
+
+xtractFileEntries([], _, [], []).
+xtractFileEntries([(BltFile,PA) | RestSortedUndoc_File], 
+			BltFile, [PA | RestFileGroupPreds], RemSortedUndoc_File)
+	:-
+	!,
+	xtractFileEntries(RestSortedUndoc_File, BltFile, RestFileGroupPreds, RemSortedUndoc_File).
+
+xtractFileEntries([(OtherBltFile,PA) | RestSortedUndoc_File], BltFile, [], RestSortedUndoc_File)
+	:-
+	OtherBltFile \= BltFile,
+	!.
+
+outputGroups(MergeGroups)
+	:-
+	blt_files_output(Expt_Undocd),
+	open(Expt_Undocd, write, OutS),
+%	OutS = user_output,
+	outGroups(MergeGroups, OutS).
+
+outGroups([], OutS).
+outGroups([(FileName, Preds) | RestMergeGroups], OutS)
+	:-
+	sort(Preds, SortedPreds),
+	printf(OutS, '\n%t:\n==========\n', [FileName]),
+	write_lines(OutS,SortedPreds, [left_mar('      ')]),
+	outGroups(RestMergeGroups, OutS).
+	

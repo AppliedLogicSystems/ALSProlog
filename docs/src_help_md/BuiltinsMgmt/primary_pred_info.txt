@@ -1,6 +1,6 @@
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
-!/0                                builtins  C_def  ISO  #cut                                                       
+!/0                                builtins  C_def  ISO  #cut                cut.md                                 
 $access/2                          builtins  C_def                           access.md                              
 $arrow/3                           builtins  C_def                                                                  
 $atom_concat/3                     builtins  C_def                                                                  
@@ -30,7 +30,6 @@ $icode/5                           builtins  C_def
 $is_delay_var/1                    builtins  C_def                                                                  
 $kill_freeze/1                     builtins  C_def                                                                  
 $libbreak/4                        builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
 $listasm_clause/1                  builtins  C_def                                                                  
@@ -44,6 +43,7 @@ $resolve_module/4                  builtins  C_def                           pro
 $semicolon/3                       builtins  C_def                                                                  
 $stack_info/1                      builtins  C_def                                                                  
 $stack_overflow/1                  builtins  C_def                                                                  
+$strlen/2                          builtins  C_def                                                                  
 $sub_atom/4                        builtins  C_def                                                                  
 $time/10                           builtins  C_def                                                                  
 $uia_alloc/2                       builtins  C_def                           uia_alloc.md                           
@@ -62,10 +62,9 @@ $uia_pokel/3                       builtins  C_def                           uia
 $uia_pokes/3                       builtins  C_def                           uia_alloc.md                           
 $uia_pokew/3                       builtins  C_def                           uia_alloc.md                           
 $uia_size/2                        builtins  C_def                           uia_alloc.md                           
-,/2                                builtins  C_def  ISO  #and                comma.md                               
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+,/2                                builtins  C_def  ISO  #and                comma.md                               
 ->/2                               builtins  C_def  ISO  #ifthen             arrow.md                               
 :/2                                builtins  C_def                           colon.md                               
 :=/2                               builtins  P_def                                                                  
@@ -86,19 +85,18 @@ Pred                               Mod       Type   ISO  ISOlink             MDF
 \+/1                               builtins  C_def  ISO  #notprovable        not.md                                 
 \=/2                               builtins  P_def                           unify.md                 blt_term.pro  
 \==/2                              builtins  C_def                           identity.md              blt_term.pro  
-abolish/1                          builtins  C_def  ISO  #abolish                                                   
+abolish/1                          builtins  C_def  ISO  #abolish            abolish.md                             
 abolish/2                          builtins  C_def                           abolish.md                             
-abolish/3                          builtins  C_def                                                                  
+abolish/3                          builtins  C_def                           abolish.md                             
 abolish_clausegroup/4              builtins  C_def                                                                  
 abolish_list/1                     builtins  C_def                                                                  
 abolish_list/2                     builtins  Lib                                                                    
 abolish_list0/2                    builtins  Lib                                                                    
 abolish_module/1                   builtins  P_def                                                    blt_db.pro    
 abort/0                            builtins  P_def                           abort.md                 blt_shl.pro   
-accept_socket_connection/1         sio       P_def                                                    sio.pro       
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+accept_socket_connection/1         sio       P_def                                                    sio.pro       
 accept_socket_connection/2         sio       P_def                                                    sio.pro       
 accessObjStruct/3                  builtins  P_def                           setObjStruct.md          objs_run.pro  
 access_cslt_opts/3                 builtins  P_def                                                                  
@@ -128,10 +126,9 @@ asplit0_all/3                      builtins  P_def                              
 assert/1                           builtins  C_def                           assert.md                              
 assert/2                           builtins  C_def                           assert.md                              
 assert_all/1                       builtins  C_def                                                                  
-assert_all/2                       builtins  Lib                                                                    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+assert_all/2                       builtins  Lib                                                                    
 assert_all_refs/2                  builtins  C_def                                                                  
 assert_all_refs/3                  builtins  Lib                                                                    
 assert_all_refs0/3                 builtins  Lib                                                                    
@@ -161,10 +158,9 @@ atom_length/2                      builtins  C_def  ISO  #atomlength
 atom_ok/1                          builtins  P_def                                                    blt_evt.pro   
 atomic/1                           builtins  C_def  ISO  #atomic             atom.md                                
 atomic_to_uia/2                    builtins  P_def                           strings.md                             
-atomread/2                         builtins  P_def                                                    blt_io.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+atomread/2                         builtins  P_def                                                    blt_io.pro    
 atomread/3                         builtins  P_def                                                    blt_io.pro    
 attach_image/1                     builtins  P_def                                                    blt_pckg.pro  
 attach_image/2                     builtins  P_def                                                    blt_pckg.pro  
@@ -194,10 +190,9 @@ c_create_abs/3                     builtins  P_def                           c_c
 c_create_arglist/2                 builtins  P_def                                                    cutils.pro    
 c_create_arglist/3                 builtins  P_def                                                    cutils.pro    
 c_createn/4                        builtins  P_def                           c_create.md              cutils.pro    
-c_createn_abs/4                    builtins  P_def                           c_create.md              cutils.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+c_createn_abs/4                    builtins  P_def                           c_create.md              cutils.pro    
 c_examine/3                        builtins  P_def                           c_alloc.md               cutils.pro    
 c_examine_raw/4                    builtins  P_def                           c_alloc.md               cutils.pro    
 c_examine_str/4                    builtins  P_def                           c_alloc.md               cutils.pro    
@@ -227,10 +222,9 @@ changable_flags_info/1             builtins  P_def                              
 change_case_sym/2                  builtins  P_def                           strings.md                             
 change_current_drive/1             builtins  P_def                                                    fsdos.pro     
 change_cwd/1                       builtins  P_def                           get_cwd.md               fs_cmn.pro    
-change_nth/3                       builtins  Lib                             listutl2.md                            
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+change_nth/3                       builtins  Lib                             listutl2.md                            
 change_source_level_debugging/1    xconsult  P_def                                                    xconsult.pro  
 change_source_level_debugging/2    xconsult  P_def                                                    xconsult.pro  
 char_code/2                        builtins  C_def  ISO  #charcode           char_code.md                           
@@ -260,10 +254,9 @@ columns/3                          builtins  Lib                             row
 colwrite/4                         builtins  Lib                                                                    
 command_line/1                     builtins  P_def                           command_line.md          builtins.pro  
 comp_times/3                       builtins  Lib                                                                    
-compare/3                          builtins  C_def                           compare.md                             
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+compare/3                          builtins  C_def                           compare.md                             
 compiletime/0                      builtins  P_def                           compiletime.md           builtins.pro  
 compound/1                         builtins  C_def  ISO  #compound                                                  
 comptype/0                         builtins  Lib                                                                    
@@ -293,10 +286,9 @@ crypt/3                            builtins  C_def
 cstr2pstr/1                        builtins  P_def                                                    cutils.pro    
 cstr2str/2                         builtins  P_def                                                    cutils.pro    
 cstr2uia/2                         builtins  P_def                                                    cutils.pro    
-curl/1                             curl      P_def                           curl.md                  blt_curl.pro  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+curl/1                             curl      P_def                           curl.md                  blt_curl.pro  
 curl/2                             curl      P_def                           curl.md                  blt_curl.pro  
 curl/3                             curl      P_def                           curl.md                  blt_curl.pro  
 curl_c_builtin/2                   builtins  C_def                                                                  
@@ -326,10 +318,9 @@ dblisting/0                        builtins  P_def                              
 dblisting/1                        builtins  P_def                                                    blt_std.pro   
 dca/2                              builtins  P_def                                                    simplio.pro   
 dcg_expand/2                       builtins  P_def                                                    dcgs.pro      
-dcg_phrase/3                       builtins  P_def                                                    blt_std.pro   
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+dcg_phrase/3                       builtins  P_def                                                    blt_std.pro   
 debug_trace/1                      debugger  C_def                                                                  
 debugger_abort/0                   debugger  P_def                                                    debugger.pro  
 debugger_mgr/2                     alsdev    P_def                                                                  
@@ -359,10 +350,9 @@ do_curl/1                          curl      P_def                              
 do_shell_query2/2                  builtins  P_def                                                    blt_shl.pro   
 do_type_comp/3                     builtins  P_def                                                    tc_base.pro   
 do_type_comp/5                     builtins  P_def                                                    tc_base.pro   
-do_type_comp/8                     builtins  P_def                                                    tc_base.pro   
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+do_type_comp/8                     builtins  P_def                                                    tc_base.pro   
 doexport/1                         builtins  P_def                                                    blt_db.pro    
 domain_error/3                     builtins  P_def                                                    blt_evt.pro   
 douse/1                            builtins  P_def                                                    blt_db.pro    
@@ -392,10 +382,9 @@ export_from/2                      builtins  P_def                              
 exportpred/2                       builtins  P_def                                                    builtins.pro  
 fail/0                             builtins  C_def  ISO  #fail               fail.md                                
 file_extension/3                   builtins  P_def                                                    filepath.pro  
-file_status/2                      builtins  P_def                                                    fsdos.pro     
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+file_status/2                      builtins  P_def                                                    fsdos.pro     
 filename_equal/2                   builtins  P_def                           get_cwd.md               fs_cmn.pro    
 files/2                            builtins  P_def                                                    fsdos.pro     
 files/3                            builtins  P_def                                                    fsdos.pro     
@@ -425,10 +414,9 @@ freeze_list_ground/2               builtins  C_def
 freeze_list_ground/3               builtins  P_def                                                    blt_frez.pro  
 functor/3                          builtins  C_def  ISO  #functor            functor.md                             
 gc/0                               builtins  C_def                           gc.md                                  
-gen_file_header/3                  builtins  Lib                                                                    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+gen_file_header/3                  builtins  Lib                                                                    
 gen_file_header/4                  builtins  Lib                                                                    
 gen_project_mgr/2                  alsdev    P_def                                                                  
 general_os/3                       builtins  Lib                                                                    
@@ -458,10 +446,9 @@ get_code/2                         sio       P_def  ISO  #getcode            get
 get_code/3                         sio       P_def                                                    sio.pro       
 get_current_drive/1                builtins  P_def                                                    fsdos.pro     
 get_current_image/1                builtins  C_def                                                                  
-get_cwd/1                          builtins  P_def                           get_cwd.md               fs_cmn.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+get_cwd/1                          builtins  P_def                           get_cwd.md               fs_cmn.pro    
 get_depth_computation/2            sio       P_def                                                    sio.pro       
 get_examples_dir/1                 builtins  P_def                                                    blt_shlc.pro  
 get_examples_write_dir/1           builtins  P_def                                                    blt_shlc.pro  
@@ -491,10 +478,9 @@ gv_alloc/1                         builtins  C_def
 gv_alloc_init/2                    builtins  C_def                                                                  
 gv_free/1                          builtins  C_def                                                                  
 gv_get/2                           builtins  C_def                                                                  
-gv_isfree/1                        builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+gv_isfree/1                        builtins  C_def                                                                  
 gv_maxpossible/1                   builtins  C_def                                                                  
 gv_number/2                        builtins  C_def                                                                  
 gv_set/2                           builtins  C_def                                                                  
@@ -524,10 +510,9 @@ install_links0/2                   builtins  Lib
 instance/2                         builtins  P_def                           clause.md                blt_std.pro   
 instantiation_error/1              builtins  P_def                                                    blt_evt.pro   
 int_diff/4                         builtins  Lib                             listutl1.md                            
-integer/1                          builtins  C_def  ISO  #integer            atom.md                                
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+integer/1                          builtins  C_def  ISO  #integer            atom.md                                
 integer_ok/1                       builtins  P_def                                                    blt_evt.pro   
 intersect/2                        builtins  Lib                             listutl1.md                            
 intersect/3                        builtins  Lib                             listutl1.md                            
@@ -557,10 +542,9 @@ listing/1                          builtins  P_def                           lis
 listing/2                          builtins  P_def                                                    blt_std.pro   
 listing_to/1                       builtins  P_def                                                    blt_std.pro   
 load_file_source/9                 builtins  P_def                                                    blt_cslt.pro  
-load_plugin/4                      builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+load_plugin/4                      builtins  C_def                                                                  
 load_slib/1                        builtins  P_def                                                    blt_cslt.pro  
 locate_struct/3                    builtins  Lib                                                                    
 lookup_opt_info/1                  builtins  C_def                                                                  
@@ -590,10 +574,9 @@ makeproject_mgrStruct/1            alsdev    P_def
 makeshl_source_handlerStruct/1     alsdev    P_def                                                                  
 makeshl_source_handlerStruct/1     alsshell  P_def                                                                  
 makesource_handlerStruct/1         builtins  P_def                                                                  
-makesource_trace_mgrStruct/1       alsdev    P_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+makesource_trace_mgrStruct/1       alsdev    P_def                                                                  
 mangle/3                           builtins  C_def                           mangle.md                              
 mangle_change_tagged/3             builtins  Lib                             listutl3.md                            
 massively_abolish_clausegroup/1    builtins  C_def                                                                  
@@ -623,10 +606,9 @@ nl/1                               sio       P_def  ISO  #putchar               
 nobind_member/2                    builtins  Lib                             listutl3.md                            
 non_sys_modules/1                  builtins  P_def                                                    blt_sys.pro   
 noneq/2                            builtins  C_def                                                                  
-nonmember/2                        builtins  Lib                             listutl2.md                            
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+nonmember/2                        builtins  Lib                             listutl2.md                            
 nonvar/1                           builtins  C_def  ISO  #nonvar             var.md                                 
 nonvar_ok/1                        builtins  P_def                                                    blt_evt.pro   
 noshow/2                           debugger  P_def                                                    debugger.pro  
@@ -656,10 +638,9 @@ obp_close/0                        builtins  C_def
 obp_load/2                         builtins  C_def                                                                  
 obp_open/1                         builtins  C_def                                                                  
 obp_pop/0                          builtins  C_def                                                                  
-obp_push_stop/0                    builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+obp_push_stop/0                    builtins  C_def                                                                  
 old_bufread/2                      builtins  P_def                           buf_read.md              blt_io.pro    
 once/1                             builtins  C_def  ISO  #once                                        blt_ctl.pro   
 op/3                               sio       P_def  ISO  #operators          op.md                    sio_rt.pro    
@@ -689,10 +670,9 @@ pbi_display/1                      builtins  C_def
 pbi_get/1                          builtins  C_def                                                                  
 pbi_get0/1                         builtins  C_def                                                                  
 pbi_get_command_line/1             builtins  C_def                                                                  
-pbi_halt/0                         builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+pbi_halt/0                         builtins  C_def                                                                  
 pbi_nl/0                           builtins  C_def                                                                  
 pbi_op/3                           builtins  C_def                                                                  
 pbi_put/1                          builtins  C_def                                                                  
@@ -722,10 +702,9 @@ pp_xform_clause/3                  sio       P_def                              
 prefix_dir/3                       builtins  Lib                             miscatom.md                            
 prefix_to/3                        builtins  Lib                             miscatom.md                            
 print/1                            sio       P_def                                                    sio_wt.pro    
-print/2                            sio       P_def                                                    sio_wt.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+print/2                            sio       P_def                                                    sio_wt.pro    
 print_warning/0                    builtins  C_def                                                                  
 printf/1                           builtins  P_def                           printf.md                blt_io.pro    
 printf/2                           builtins  P_def                           printf.md                blt_io.pro    
@@ -755,10 +734,9 @@ pstr2str/2                         builtins  P_def                              
 pstr2uia/2                         builtins  P_def                                                    cutils.pro    
 ptermaddr/1                        builtins  C_def                                                                  
 pull_out_nullswitches/3            builtins  Lib                                                                    
-push_clausegroup/1                 builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+push_clausegroup/1                 builtins  C_def                                                                  
 push_prompt/1                      sio       P_def                                                    sio.pro       
 put/1                              sio       P_def                           put.md                   sio_d10.pro   
 put/2                              sio       P_def                                                    sio_d10.pro   
@@ -788,10 +766,9 @@ read_as_list/3                     builtins  P_def
 read_chars/3                       sio       Lib                                                                    
 read_eval_results/2                builtins  P_def                                                    cutils.pro    
 read_lines/2                       builtins  Lib                                                                    
-read_n/3                           builtins  P_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+read_n/3                           builtins  P_def                                                                  
 read_term/2                        sio       P_def  ISO  #readterm           read.md                  sio_rt.pro    
 read_term/3                        sio       P_def  ISO  #readterm           read.md                  sio_rt.pro    
 read_terms/1                       builtins  P_def                                                                  
@@ -821,10 +798,9 @@ remove_clauses/2                   builtins  C_def
 remove_file/1                      builtins  P_def                           get_cwd.md               fs_cmn.pro    
 remove_files/1                     builtins  Lib                                                                    
 remove_subdir/1                    builtins  P_def                                                    fsdos.pro     
-remove_tagged/3                    builtins  Lib                             listutl3.md                            
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+remove_tagged/3                    builtins  Lib                             listutl3.md                            
 repair_path/1                      builtins  Lib                                                                    
 repeat/0                           builtins  P_def  ISO  #repeat             repeat.md                blt_ctl.pro   
 replace_char_atom/4                builtins  P_def                           strings.md                             
@@ -854,10 +830,9 @@ seen/0                             sio       P_def                           see
 send/2                             builtins  C_def                           send.md                                
 send_all/2                         builtins  P_def                                                    objs_run.pro  
 send_each/2                        builtins  P_def                                                    objs_run.pro  
-send_parent/2                      builtins  P_def                                                    objs_run.pro  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+send_parent/2                      builtins  P_def                                                    objs_run.pro  
 send_self/2                        builtins  P_def                                                    objs_run.pro  
 setCall/1                          debugger  P_def                                                    blt_sys.pro   
 setDebugInterrupt/1                debugger  P_def                                                    blt_sys.pro   
@@ -887,10 +862,9 @@ set_stream_addl1/2                 sio       P_def                              
 set_stream_addl2/2                 sio       P_def                                                    sio.pro       
 set_stream_addl3/2                 sio       P_def                                                    sio.pro       
 set_stream_blocking/2              sio       P_def                                                    sio.pro       
-set_stream_buffer/2                sio       P_def                                                    sio.pro       
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+set_stream_buffer/2                sio       P_def                                                    sio.pro       
 set_stream_eof_action/2            sio       P_def                                                    sio.pro       
 set_stream_extra/2                 sio       P_def                                                    sio.pro       
 set_stream_identifier/2            sio       P_def                                                    sio.pro       
@@ -920,10 +894,9 @@ shell_read_execute/4               builtins  P_def                              
 shl_source_handler/2               alsdev    P_def                                                                  
 shl_source_handler/2               alsshell  P_def                                                                  
 show_delay_binding/4               builtins  P_def                                                    blt_frez.pro  
-show_substs_ext/3                  builtins  P_def                                                    sio_wt.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+show_substs_ext/3                  builtins  P_def                                                    sio_wt.pro    
 show_v_list/1                      builtins  P_def                                                    blt_frez.pro  
 show_v_list/2                      builtins  P_def                                                    blt_frez.pro  
 show_variable/1                    builtins  P_def                                                    blt_frez.pro  
@@ -953,10 +926,9 @@ sio_gethostname/1                  builtins  C_def
 sio_getpos/2                       builtins  C_def                                                                  
 sio_increment_bufpos/1             builtins  C_def                                                                  
 sio_is_server_socket/1             builtins  C_def                                                                  
-sio_isgraphicatom/1                builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+sio_isgraphicatom/1                builtins  C_def                                                                  
 sio_lettervar/2                    builtins  C_def                                                                  
 sio_linenumber/2                   builtins  C_def                                                                  
 sio_lpos/2                         builtins  C_def                                                                  
@@ -986,10 +958,9 @@ sio_reset_eof/1                    builtins  C_def
 sio_seek/4                         builtins  C_def                                                                  
 sio_set_do_lineedit/1              builtins  C_def                                                                  
 sio_set_eof/1                      builtins  C_def                                                                  
-sio_set_errcode/2                  builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+sio_set_errcode/2                  builtins  C_def                                                                  
 sio_set_history_file/1             builtins  C_def                                                                  
 sio_set_lineedit_prompt/1          builtins  C_def                                                                  
 sio_set_no_load_prev_history/0     builtins  C_def                                                                  
@@ -1019,10 +990,9 @@ split_ll_at_start/5                builtins  Lib                             lis
 split_ll_by_blank/3                builtins  Lib                             listutl4.md                            
 split_path/2                       builtins  P_def                                                    filepath.pro  
 split_path/3                       builtins  P_def                                                    filepath.pro  
-sprintf/3                          builtins  P_def                           sprintf.md               blt_io.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+sprintf/3                          builtins  P_def                           sprintf.md               blt_io.pro    
 sprintf/4                          builtins  P_def                                                    blt_io.pro    
 spy/0                              debugger  P_def                           spy.md                   debugger.pro  
 spy/1                              debugger  P_def                           spy.md                   debugger.pro  
@@ -1052,10 +1022,9 @@ stream_name/2                      sio       P_def                              
 stream_open_status/2               sio       P_def                                                    sio.pro       
 stream_or_alias_ok/2               sio       P_def                                                    sio.pro       
 stream_pgoals/2                    sio       P_def                                                    sio.pro       
-stream_position/2                  sio       P_def                                                    sio.pro       
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+stream_position/2                  sio       P_def                                                    sio.pro       
 stream_position/3                  sio       P_def                                                    sio.pro       
 stream_property/2                  sio       P_def  ISO  #streamproperty     stream_property.md       sio.pro       
 stream_repositionability/2         sio       P_def                                                    sio.pro       
@@ -1085,10 +1054,9 @@ subset/2                           builtins  Lib                             lis
 subst_nth/4                        builtins  Lib                             listutl2.md                            
 subst_tagged/4                     builtins  Lib                             listutl3.md                            
 sum_square_diffs/3                 builtins  Lib                             arithx1.md                             
-sum_squares/2                      builtins  Lib                             arithx1.md                             
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+sum_squares/2                      builtins  Lib                             arithx1.md                             
 sumlist/2                          builtins  Lib                             arithx1.md                             
 suppress_spying/0                  debugger  P_def                                                    debugger.pro  
 symmetric_diff/3                   builtins  Lib                             listutl1.md                            
@@ -1104,7 +1072,7 @@ telling/1                          sio       P_def                           tel
 term_chars/2                       builtins  P_def                           term_chars.md            blt_atom.pro  
 term_codes/2                       builtins  P_def                           term_chars.md            blt_atom.pro  
 throw/0                            builtins  C_def                                                                  
-throw/1                            builtins  P_def  ISO  #catch              catch.md                 builtins.pro  
+throw/1                            builtins  P_def                           catch.md                 builtins.pro  
 tilda_expand/2                     builtins  P_def                                                    filepath.pro  
 time/1                             builtins  P_def                           datetime.md              fs_cmn.pro    
 time_less/2                        builtins  P_def                           datetime.md              fs_cmn.pro    
@@ -1118,10 +1086,9 @@ tp_get_token_list/2                sio       P_def                              
 trace/0                            debugger  P_def                           trace.md                 debugger.pro  
 trace/1                            debugger  C_def                           trace.md                 debugger.pro  
 trace/2                            debugger  P_def                                                    debugger.pro  
-traildump/0                        builtins  C_def                                                                  
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+traildump/0                        builtins  C_def                                                                  
 trap/2                             builtins  C_def                                                                  
 trigger_event/2                    builtins  P_def                                                    blt_evt.pro   
 trim_atoms/3                       builtins  Lib                             miscatom.md                            
@@ -1151,10 +1118,9 @@ vi/1                               builtins  P_def                              
 winsystems_for/2                   builtins  Lib                                                                    
 winsystems_for/3                   builtins  Lib                                                                    
 write/1                            sio       P_def  ISO  #write_term         write.md                 sio_wt.pro    
-write/2                            sio       P_def  ISO  #write_term         write.md                 sio_wt.pro    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+write/2                            sio       P_def  ISO  #write_term         write.md                 sio_wt.pro    
 write_canonical/1                  sio       P_def                           write.md                 sio_wt.pro    
 write_canonical/2                  sio       P_def                           write.md                 sio_wt.pro    
 write_clause/1                     builtins  Lib                                                                    
@@ -1184,10 +1150,9 @@ writeq/2                           sio       P_def                              
 ws_vars/3                          builtins  Lib                                                                    
 ws_vars/5                          builtins  Lib                                                                    
 xcomptype/2                        builtins  Lib                                                                    
-xcomptype/3                        builtins  Lib                                                                    
-
 Pred                               Mod       Type   ISO  ISOlink             MDFile                   SrcFile       
 ====                               ===       ====   ===  =======             ======                   =======       
+xcomptype/3                        builtins  Lib                                                                    
 xconsult/2                         xconsult  P_def                                                    xconsult.pro  
 xconsult/3                         xconsult  P_def                                                    xconsult.pro  
 xform_command_or_query/2           builtins  P_def                                                    builtins.pro  
