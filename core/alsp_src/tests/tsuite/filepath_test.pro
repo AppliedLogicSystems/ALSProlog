@@ -2,11 +2,16 @@
 
 test_filepath
 	:-
+	sys_env(OS,_,_),
+	do_test_filepath(OS).
+
+do_test_filepath(OS)
+	:-
 	test([
 	test_file_extension,
-	test_path_directory_tail,
+	test_path_directory_tail(OS),
 	test_is_absolute_path,
-	test_tilda_expand,
+%	test_tilda_expand,
 %	test_make_change_cwd,
 	test_pathPlusFile,
 	test_pathPlusFilesList,
@@ -29,7 +34,21 @@ test_file_extension :-
 	file_extension(FullName, bar, pro),
 	FullName == 'bar.pro'.
 	
-test_path_directory_tail :-
+test_path_directory_tail(mswin32) :-!,
+	path_directory_tail(Path, 'mom\kids', 'bar\zip.pro'),
+	Path == 'mom\kids\bar\zip.pro',
+	path_directory_tail('mom\kids\bar\zip.pro', 'mom\kids\bar', Tail1),
+	Tail1 == 'zip.pro',
+	path_directory_tail('mom\kids\bar\zip.pro', Directory2, 'zip.pro'),
+	Directory2 == 'mom\kids\bar',
+	path_directory_tail('mom\kids\bar\zip.pro', Directory3, Tail3),
+	Directory3 == 'mom\kids\bar',
+	Tail3 == 'zip.pro',
+	path_directory_tail('zip.pro', Directory4, Tail4),
+	Directory4 == '.' ,
+	Tail4 == 'zip.pro'.
+
+test_path_directory_tail(_) :-
 	path_directory_tail(Path, 'mom/kids', 'bar/zip.pro'),
 	Path == 'mom/kids/bar/zip.pro',
 	path_directory_tail('mom/kids/bar/zip.pro', 'mom/kids/bar', Tail1),
