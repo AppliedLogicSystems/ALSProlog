@@ -1,4 +1,4 @@
-:-[test].
+%:-[test].
 
 test_filepath
 	:-
@@ -132,8 +132,8 @@ test_path_type(mswin32) :-!,
 	Type0== relative,
 	path_type('\\mom\\kids\\foo.pro', Type1),
 	Type1 == volume_relative,
-	path_type('C:\\mom\\kids\\foo.pro', Type1),
-	Type1 == absolute.
+	path_type('C:\\mom\\kids\\foo.pro', Type2),
+	Type2 == absolute.
 
 test_path_type(_) :-
 	path_type('mom/kids/foo.pro', Type0),
