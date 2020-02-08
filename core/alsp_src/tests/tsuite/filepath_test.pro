@@ -131,6 +131,8 @@ test_path_type(mswin32) :-!,
 	path_type('mom\\kids\\foo.pro', Type0),
 	Type0== relative,
 	path_type('\\mom\\kids\\foo.pro', Type1),
+	Type1 == volume_relative,
+	path_type('C:\\mom\\kids\\foo.pro', Type1),
 	Type1 == absolute.
 
 test_path_type(_) :-
@@ -148,8 +150,8 @@ test_split_path(_) :-
 	List == [mom,kids,'foo.pro'].
 
 test_join_path(mswin32) :-!,
-	join_path(['mom/dad',kids,'foo.pro'], Path),
-	Path == 'mom/dad/kids/foo.pro'.
+	join_path(['mom\\dad',kids,'foo.pro'], Path),
+	Path == 'mom\\dad\\kids\\foo.pro'.
 
 test_join_path(_) :-
 	join_path(['mom/dad',kids,'foo.pro'], Path),
