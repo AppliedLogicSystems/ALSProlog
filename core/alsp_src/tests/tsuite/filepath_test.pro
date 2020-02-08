@@ -10,16 +10,17 @@ do_test_filepath(OS)
 	test([
 	test_file_extension,
 	test_path_directory_tail(OS),
-	test_is_absolute_path,
+	test_is_absolute_path(OS),
 %	test_tilda_expand,
 %	test_make_change_cwd,
-	test_pathPlusFile,
-	test_pathPlusFilesList,
+	test_pathPlusFile(OS),
+	test_pathPlusFilesList(OS),
 	test_same_path,
 	test_same_disk,
-	test_path_elements,
-	test_path_type,
-	test_split_path,
+	test_path_elements(OS),
+	test_path_type(OS),
+	test_split_path(OS),
+	test_join_path(OS),
 	test_directory_self,
 	test_parent_path,
 	true]).
@@ -62,7 +63,11 @@ test_path_directory_tail(_) :-
 	Directory4 == '.' ,
 	Tail4 == 'zip.pro'.
 
-test_is_absolute_path :-
+test_is_absolute_path(mswin32) :-!,
+	is_absolute_path('\\foo\\bar'),
+	not(is_absolute_path('foo\\bar')).
+
+test_is_absolute_path(_) :-
 	is_absolute_path('/foo/bar'),
 	not(is_absolute_path('foo/bar')).
 
@@ -77,14 +82,25 @@ test_make_change_cwd :-
 
 */
 
-test_pathPlusFile :-
+test_pathPlusFile(mswin32) :-!,
+	pathPlusFile('foo\\bar', 'zip.pro', PathAndFile),
+	PathAndFile='foo\\bar\\zip.pro',
+	pathPlusFile(Path,File,'foo\\bar\\zip.pro'),
+	Path='foo\\bar',
+	File='zip.pro'.
+
+test_pathPlusFile(_) :-
 	pathPlusFile('foo/bar', 'zip.pro', PathAndFile),
 	PathAndFile='foo/bar/zip.pro',
 	pathPlusFile(Path,File,'foo/bar/zip.pro'),
 	Path='foo/bar',
 	File='zip.pro'.
 
-test_pathPlusFilesList :-
+test_pathPlusFilesList(mswin32) :-!,
+	pathPlusFilesList(['foo.pro','bar.pro','zip.pro'], 'mom\\kids', EFL),
+	EFL == ['mom\\kids\\foo.pro','mom\\kids\\bar.pro','mom\\kids\\zip.pro'].
+
+test_pathPlusFilesList(OS) :-
 	pathPlusFilesList(['foo.pro','bar.pro','zip.pro'], 'mom/kids', EFL),
 	EFL == ['mom/kids/foo.pro','mom/kids/bar.pro','mom/kids/zip.pro'].
 
@@ -95,7 +111,15 @@ test_same_path :-
 test_same_disk :-
 	same_disk('mYDiskA', 'mYDiskA').
 
-test_path_elements :-
+test_path_elements(mswin32) :-!,
+	path_elements('mom\\kids\\foo.pro', Elements),
+	Elements == [mom,kids,'foo.pro'],
+	path_elements(Path0, [mom,kids,'foo.pro']),
+	Path0 == 'mom\\kids\\foo.pro',
+	path_elements(Path1, ['mom\\dad',kids,'foo.pro']),
+	Path1 == 'mom\\dad\\kids\\foo.pro'.
+
+test_path_elements(_) :-
 	path_elements('mom/kids/foo.pro', Elements),
 	Elements == [mom,kids,'foo.pro'],
 	path_elements(Path0, [mom,kids,'foo.pro']),
@@ -103,17 +127,31 @@ test_path_elements :-
 	path_elements(Path1, ['mom/dad',kids,'foo.pro']),
 	Path1 == 'mom/dad/kids/foo.pro'.
 
-test_path_type :-
+test_path_type(mswin32) :-!,
+	path_type('mom\\kids\\foo.pro', Type0),
+	Type0== relative,
+	path_type('\\mom\\kids\\foo.pro', Type1),
+	Type1 == absolute.
+
+test_path_type(_) :-
 	path_type('mom/kids/foo.pro', Type0),
 	Type0== relative,
 	path_type('/mom/kids/foo.pro', Type1),
 	Type1 == absolute.
 
-test_split_path :-
+test_split_path(mswin32) :-!,
+	split_path('mom\\kids\\foo.pro', List),
+	List == [mom,kids,'foo.pro'].
+
+test_split_path(_) :-
 	split_path('mom/kids/foo.pro', List),
 	List == [mom,kids,'foo.pro'].
 
-test_join_path :-
+test_join_path(mswin32) :-!,
+	join_path(['mom/dad',kids,'foo.pro'], Path),
+	Path == 'mom/dad/kids/foo.pro'.
+
+test_join_path(_) :-
 	join_path(['mom/dad',kids,'foo.pro'], Path),
 	Path == 'mom/dad/kids/foo.pro'.
 
