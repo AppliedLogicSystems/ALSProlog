@@ -15,8 +15,6 @@ do_test_filepath(OS)
 %	test_make_change_cwd,
 	test_pathPlusFile(OS),
 	test_pathPlusFilesList(OS),
-	test_same_path,
-	test_same_disk,
 	test_path_elements(OS),
 	test_path_type(OS),
 	test_split_path(OS),
@@ -103,13 +101,6 @@ test_pathPlusFilesList(mswin32) :-!,
 test_pathPlusFilesList(OS) :-
 	pathPlusFilesList(['foo.pro','bar.pro','zip.pro'], 'mom/kids', EFL),
 	EFL == ['mom/kids/foo.pro','mom/kids/bar.pro','mom/kids/zip.pro'].
-
-	%% TODO: Need win32 versions of next two:
-test_same_path :-
-	same_path(['/mOM','fIle1.pro'], ['/mOM','fIle1.pro']).
-
-test_same_disk :-
-	same_disk('mYDiskA', 'mYDiskA').
 
 test_path_elements(mswin32) :-!,
 	path_elements('mom\\kids\\foo.pro', Elements),
