@@ -11,8 +11,7 @@ do_test_filepath(OS)
 	(OS == mswin32 ->
 	 test([
 % file_extension:
-%	(file_extension(foo, Name, Ext), Name == foo, Ext == ''),
-	(file_extension('foo.pro', Name, Ext), Name == foobar, Ext == pro),
+	(file_extension(foo, Name, Ext), Name == foo, Ext == ''),
 	(file_extension('foo.pro', Name, Ext), Name == foo, Ext == pro),
 	(file_extension(FullName, bar, pro), FullName == 'bar.pro'),
 % path_directory_tail(OS):
@@ -72,7 +71,6 @@ do_test_filepath(OS)
 	 test([
 % file_extension:
 	(file_extension(foo, Name, Ext), Name == foo, Ext == ''),
-%	(file_extension('foo.pro', Name, Ext), Name == foobar, Ext == pro),
 	(file_extension('foo.pro', Name, Ext), Name == foo, Ext == pro),
 	(file_extension(FullName, bar, pro), FullName == 'bar.pro'),
 % path_directory_tail(OS):
