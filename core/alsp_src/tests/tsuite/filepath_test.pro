@@ -28,16 +28,15 @@ do_test_filepath(OS)
 
 test_file_extension :-
 	test([
-%	(file_extension(foo, Name, Ext), Name == foo, Ext == ''),
-	(file_extension('foo.pro', Name, Ext), Name == foobar, Ext == pro),
+	(file_extension(foo, Name, Ext), Name == foo, Ext == ''),
 	(file_extension('foo.pro', Name, Ext), Name == foo, Ext == pro),
 	(file_extension(FullName, bar, pro), FullName == 'bar.pro'),
 	true ]).
 	
 test_path_directory_tail(mswin32) :-!,
 	test([
-	 ( path_directory_tail(P, 'mom\kids', 'bar\zip.pro'), P == 'mom\kids\bar\zip.pro' ),
-%	(path_directory_tail(Path, 'mom\\kids', 'bar\\zip.pro'), 
+%	 ( path_directory_tail(P, 'mom\kids', 'bar\zip.pro'), P == 'mom\kids\bar\zip.pro' ),
+	(path_directory_tail(Path, 'mom\\kids', 'bar\\zip.pro'), 
 %		Path == 'mom\\kids\\bar\\zip.pro'),
 	(path_directory_tail('mom\\kids\\bar\\zip.pro', 'mom\\kids\\bar', Tail),
 		Tail == 'zip.pro'),
