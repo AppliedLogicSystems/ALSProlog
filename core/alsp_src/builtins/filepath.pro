@@ -214,8 +214,6 @@ make_path_segments([E | PElts], IS)
 	(exists_file(SIP) -> true ; make_subdir(SIP)),
 	make_path_segments(PElts, [E | IS]).
 
-	%%% ---- Convenience routines
-
 /*!---------------------------------------------------------------------
  |	pathPlusFile/3
  |	pathPlusFile(Path, File, PathAndFile)
