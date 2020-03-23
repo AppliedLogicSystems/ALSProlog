@@ -4,9 +4,13 @@ set -eux -o pipefail
 
 cd "$(dirname "$0")"
 
+
 case "$(uname)" in
     "CYGWIN"*)  OS=win32 ;;
-    *)          OS=unix ;;
+    *)          OS=unix
+                # Report common warnings as errors
+                export CFLAGS="${CFLAGS:-} -Werror=all"
+                ;;
 esac
 
 pushd $OS

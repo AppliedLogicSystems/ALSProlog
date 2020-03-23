@@ -2,6 +2,9 @@
 
 .DELETE_ON_ERROR:
 
+# Prevent passing custom CFLAGS, because it can interfere with Bundle builds.
+unexport CFLAGS
+
 ifneq (,$(findstring CYGWIN, $(shell uname)))
   BUNDLE = bundle.bat
 else
