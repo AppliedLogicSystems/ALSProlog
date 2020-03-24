@@ -50,8 +50,22 @@ etest(put_string(user, V),    instantiation_error),
 etest(put_string(user, a),    type_error(list,a)),
 etest(put_string(user, 1),    type_error(list,1)),
 etest(put_string(user, f(a)), type_error(list,f(a))),
-etest(put_string(user, [a]),  representation_error(character_code)),
-
+%% TODO: determine correct errors for put_string/2 clause:
+%% etest(put_string(user, [a]),  representation_error(character_code)),
+%% Possibilities:
+%% etest(put_string(user,[a]), ... prob integer type error ...)
+%% etest(put_string(user,[-1000]), ... prob rep error ... )
+%% There’s no defn in builtins for representation_error(character_code).  
+%% Most of the others, like domain_error/3, are in blt_evt.pro.
+%% The only call on it is found in blt_term.pro:
+/*
+S =.. L :-
+       var(S),
+       list(L),
+       length(L, Length),
+       Length > 255,
+	representation_error(max_arity, 2).
+*/
 etest(put_number(user, byte, V),    instantiation_error),
 etest(put_number(user, byte, a),    type_error(byte,a)),
 etest(put_number(user, byte, [a]),  type_error(byte,[a])),
