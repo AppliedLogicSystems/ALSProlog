@@ -1131,7 +1131,7 @@ icode(iidx, w, x, y, z)
 	    case IC_INIT:
 		ic_ptr = icode_buf;
 		
-		memset(icode_buf, -1, ICBUFSIZE);
+		memset(icode_buf, -1, sizeof(Code)*ICBUFSIZE);
 
 		callidx = 0;
 
