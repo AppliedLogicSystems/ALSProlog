@@ -1,6 +1,6 @@
 #define MinorOSStr	"darwin"
 
-#undef REXEC
+#undef HAVE_REXEC
 #define EXTERNAL_STATE 1
 #define MAP_ANONYMOUS MAP_ANON
 #if 0

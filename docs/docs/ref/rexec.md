@@ -32,7 +32,7 @@ If none of host, username, or password are specified, then `rexec/2` will use th
 ## EXAMPLES
 
 The following procedure will call the unix word count program, wc, to determine the length of an atom.
-[[FAILS on macOS 10.12.6]]
+
 ```
 slow_atom_length(A, Len) 
     :-
@@ -47,7 +47,7 @@ Len=17
 yes.
 ```
 
-The version of `slow_atom_length/2` above assumes one is running on a Unix machine and calls wc running on the same machine. The version below, `slow_atom_length/3`, will work on any system which supports sockets (Unix workstations, Windows 95 with WinSock, Macintosh):
+The version of `slow_atom_length/2` above assumes one is running on a Unix machine and calls wc running on the same machine. The version below, `slow_atom_length/3`, will work on systems that support the `rexec`/`rexecd` client-server remote execution protocol (now deprecated):
 ```
 rstrlen(Host, A, Len) 
     :-
