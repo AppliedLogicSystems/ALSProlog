@@ -47,7 +47,7 @@ margin: 0;
 			{%- else -%}
 				{{ p.desc }}
 			{%- endif -%}">
-			{{ p.sig }}
+			{{ p.sig | escape }}
 			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
 		</a>
 		</li>
