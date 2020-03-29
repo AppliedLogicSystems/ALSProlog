@@ -222,7 +222,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 	
 	{
-		char path[MAX_PATH], dir[MAX_PATH], env[MAX_PATH], *dir_end;
+		char path[MAX_PATH], dir[MAX_PATH], env[2*MAX_PATH], *dir_end;
 		
 		if (GetModuleFileName(NULL, path, MAX_PATH) == 0)
 			panic("Couldn't get mod name");
