@@ -203,6 +203,7 @@ ck_intvl_punch(r, fv, ft)
 
 	w_get_argn(&r3, &r3t, r, 4);
 	if (r3t == WTP_SYMBOL || r3t == WTP_UIA) return 0;
+	w_get_functor(&mf, r3);
 	w_get_arity(&mfa, r3);
 
 #ifdef DEBUGSYS	/*..................................................*/
