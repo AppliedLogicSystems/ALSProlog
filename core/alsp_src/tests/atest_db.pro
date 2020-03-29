@@ -81,9 +81,10 @@ test_info(par4, par4, user, main,
 
 test_info(filepath_test, filepath_test, user, test_filepath, 'tests for file system paths.').
 
+test_info(recursive_dirs, fsunix_mswin32, user, test_fsunix_mswin32, 'tests for recursive file system paths.').
+
 % test_info Format:
 % test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
-
 
 % Library tests:
 
