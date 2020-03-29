@@ -59,9 +59,9 @@ struct am_header {
 					/* address of als_mem_init */
 	int (*integ_w_unify) PARAMS(( PWord, int, PWord, int ));
 					/* address of w_unify */
-	char integ_version_num[12];	/* version number information */
-	char integ_processor[12];	/* name of processor */
-	char integ_minor_os[12];	/* OS name */
+	char integ_version_num[128];	/* version number information */
+	char integ_processor[128];	/* name of processor */
+	char integ_minor_os[128];	/* OS name */
 
 	/* the block information */
 	struct {
