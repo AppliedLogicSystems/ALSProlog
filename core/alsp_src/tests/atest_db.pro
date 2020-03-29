@@ -40,6 +40,8 @@ test_info(counter, counter, user, bench,
 test_info(ident, ident, user, test,
 			'tests for == and \==.').
 
+test_info(put_test, put_test, user, test, 'test for put/get_*').
+
 test_info(numio, numio, user, test,
 			'tests for get_number/3 and put_number/3.').
 

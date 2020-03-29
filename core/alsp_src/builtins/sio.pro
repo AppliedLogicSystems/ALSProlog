@@ -3078,6 +3078,7 @@ put_failure(3,Stream,Arg,Call) :-	%% SIOE_WRITE
 	!,
 	sio_aux(Stream,Aux),
 	put_failure_write(Aux,Call).
+
 put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ
 	stream_type(Stream,Type),
 	read_buffer(Type,Stream),
@@ -3087,9 +3088,17 @@ put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ and read_buffer failure
 	sio_errcode(Stream,8),		%% SIOE_EOF
 	!,
 	call(Call).
+
+put_failure(0,Stream,Arg,Call) :-	%% SIOE_INARG for put_string
+	curmod(Mod),
+	functor(Call,_,LastArg),
+	arg(LastArg,Call,Culprit),
+	!,
+	type_error(list, Culprit, [Mod:Call]).
 put_failure(0,_,_,Call) :-		%% SIOE_NORMAL (should not happen)
 	!,
 	fail.
+
 put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
 	var(Arg),
 	!,
@@ -3100,7 +3109,8 @@ put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
 	curmod(Mod),
 	functor(Call,_,LastArg),
 	arg(LastArg,Call,Culprit),
-	type_error(integer, Culprit, [Mod:Call]).
+	put_failure_inarg(Call, Arg, Culprit, Mod, Call).
+
 put_failure(_,Stream,Arg,Call) :-	%% catchall
 	!,
 	curmod(Mod),
@@ -3110,6 +3120,15 @@ put_failure(_,Stream,Arg,Call) :-	%% catchall
 put_failure_write(0,_) :- !.
 put_failure_write(_,Call) :- call(Call).
 
+
+put_failure_inarg(put_atom(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(atom, Culprit, [Mod:Call]).
+put_failure_inarg(put_code(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(code, Culprit, [Mod:Call]).
+put_failure_inarg(put_char(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(character, Culprit, [Mod:Call]).
+put_failure_inarg(put_number(_, KindNum, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(KindNum, Culprit, [Mod:Call]).
 
 /*
  * put_char(Char)
@@ -3229,15 +3248,25 @@ put_string(String) :-
 export put_string/2.
 
 put_string(Stream_or_alias, String) :-
+	var(String),
+	!,
+	curmod(Mod),
+	instantiation_error(Mod:Call).
+put_string(Stream_or_alias, String) :-
 	is_stream(Stream_or_alias,Stream),
 	is_output_stream(Stream),
-	put_string0(String, Stream).
+	put_string0(String, Stream),
+	!.
+put_string(Stream_or_alias, String) :-
+	output_stream_or_alias_ok(Stream_or_alias,Stream),
+	sio_errcode(Stream,FailCode),
+	put_failure(FailCode,Stream,String,put_string(Stream_or_alias,String)).
 
 put_string0([], _).
 put_string0([C | String], Stream) :-
 	put_code(Stream,C),
 	put_string0(String, Stream).
-	
+
 
 /*
  * put_atom(Atom)
@@ -3281,26 +3310,52 @@ put_atom(Stream_or_alias,Atom) :-
  *
  *	OutputType may take on the following values:
  *		byte
+ *		ubyte
  *		short
+ *		ushort
  *		long
+ *		ulong
  *		float
  *		double
  */
 
+num_output_type(byte) :- !.
+num_output_type(ubyte) :- !.
+num_output_type(char) :- !.
+num_output_type(uchar) :- !.
+num_output_type(short) :- !.
+num_output_type(ushort) :- !.
+num_output_type(int) :- !.
+num_output_type(uint) :- !.
+num_output_type(long) :- !.
+num_output_type(ulong) :- !.
+num_output_type(float) :- !.
+num_output_type(double) :- !.
 
 export put_number/3.
 
-
 put_number(Stream,OutputType,Number) :-
+	var(OutputType),
+	!,
+	instantiation_error(2).
+put_number(Stream,OutputType,Number) :-
+	num_output_type(OutputType),
+	!,
+	put_number0(Stream,OutputType,Number).
+put_number(Stream,OutputType,Number) :-
+	domain_error(num_output_type,OutputType,2).
+
+
+put_number0(Stream,OutputType,Number) :-
 	sio_put_number(Stream,OutputType,Number),
 	!.
 %	tk_setmark(Stream).
-put_number(Alias, OutputType,Number) :-
+put_number0(Alias, OutputType,Number) :-
 	is_output_alias(Alias, Stream),
 	sio_put_number(Stream,OutputType,Number),
 	!.
 %	tk_setmark(Stream).
-put_number(Stream_or_alias,OutputType,Number) :-
+put_number0(Stream_or_alias,OutputType,Number) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Number,
@@ -3882,8 +3937,28 @@ skip_layout(Stream_or_alias) :-
  *	double		floating point (64 bit)
  */
 
-export get_number/3.
+num_input_type(byte) :-!.
+num_input_type(ubyte) :-!.
+num_input_type(char) :-!.
+num_input_type(uchar) :-!.
+num_input_type(short) :-!.
+num_input_type(ushort) :-!.
+num_input_type(int) :-!.
+num_input_type(uint) :-!.
+num_input_type(long) :-!.
+num_input_type(ulong) :-!.
+num_input_type(float) :-!.
+num_input_type(double) :-!.
 
+export get_number/3.
+get_number(Stream,InputType,Number) :-
+	var(InputType),
+	!,
+	instantiation_error(2).
+get_number(Stream,InputType,Number) :-
+	not(num_input_type(InputType)),
+	!,
+	domain_error(num_input_type,InputType,2).
 get_number(Stream,InputType,Number) :-
 	sio_get_number(Stream,InputType,Number),
 	!.
