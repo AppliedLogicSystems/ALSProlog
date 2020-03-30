@@ -214,46 +214,6 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 	/* this should be in <netdb.h>, but sometimes isn't */
 #endif	/* MAXHOSTNAMELEN */
 
-/* Declare socket related functions */
-#if defined(HAVE_SOCKET)
-#ifdef MISSING_EXTERN_SOCKET
-extern	int	socket		PARAMS(( int, int, int ));
-#endif
-#ifdef MISSING_EXTERN_BIND
-extern	int	bind		PARAMS(( int, struct sockaddr *, int ));
-#endif
-#ifdef MISSING_EXTERN_CONNECT
-extern	int	connect 	PARAMS(( int, struct sockaddr *, int ));
-#endif
-#ifdef MISSING_EXTERN_LISTEN
-extern	int	listen		PARAMS(( int, int ));
-#endif
-#ifdef MISSING_EXTERN_GETHOSTNAME
-extern	int	gethostname	PARAMS(( char *, int ));
-#endif
-#ifdef MISSING_EXTERN_GETSOCKNAME
-extern	int	getsockname	PARAMS(( int, struct sockaddr *, int * ));
-#endif
-#ifdef MISSING_EXTERN_SELECT
-extern	int	select		PARAMS(( int, fd_set *, fd_set *, fd_set *, struct timeval * ));
-#endif
-#ifdef MISSING_EXTERN_ACCEPT
-extern	int	accept		PARAMS(( int, struct sockaddr *, int * ));
-#endif
-#ifdef MISSING_EXTERN_REXEC
-extern	int	rexec		PARAMS(( char **, int, char *, char *, char *, int * ));
-#endif
-#ifdef MISSING_EXTERN_SENDTO
-extern	int	sendto		PARAMS(( int, void *, int, int, struct sockaddr *, int ));
-#endif
-#ifdef MISSING_EXTERN_RECVFROM
-extern	int	recvfrom	PARAMS(( int, void *, int, int, struct sockaddr *, int * ));
-#endif
-#ifdef MISSING_EXTERN_SHUTDOWN
-extern	int	shutdown	PARAMS(( int, int) );
-#endif
-#endif /* HAVE_SOCKET */
-
 #include "bsio.h"
 #include "newsiolex.h"
 

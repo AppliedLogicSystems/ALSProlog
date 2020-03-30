@@ -8,13 +8,6 @@
 
 #define MISSING_GLOB 1
 
-/*
-#define MISSING_EXTERN_TEMPNAM
-#define MISSING_EXTERN_GETHOSTNAME
-#define MISSING_EXTERN_REXEC
-#define MISSING_EXTERN_REALPATH
-*/
-
 /*---------------------
 #define DIRENT	1
 #define HAVE_FCNTL_H	1

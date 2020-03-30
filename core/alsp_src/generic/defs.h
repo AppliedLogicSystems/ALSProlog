@@ -254,8 +254,6 @@
 #undef HAVE_SIGACTION
 #endif	/* HAVE_SIGACTION && !SA_SIGINFO */
 
-#include "missing.h"		/* extern decls missing from header files */
-
 #define BERKELEY_SOCKETS 1
 
 #endif	/* UNIX */
