@@ -167,9 +167,6 @@ foreign_shutdown()
 #include <setjmp.h>
 #include <string.h>
 
-#ifdef MISSING_EXTERN_LDOPEN
-extern	LDFILE *ldopen		PARAMS(( CONST char *, LDFILE * ));
-#endif
 extern	int	ldclose		PARAMS(( LDFILE * ));
 extern	int	ldshread	PARAMS(( LDFILE *, unsigned int, SCNHDR * ));
 extern	int	ldtbread	PARAMS(( LDFILE *, long, SYMENT * ));

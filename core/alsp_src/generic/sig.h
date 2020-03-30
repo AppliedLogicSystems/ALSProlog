@@ -9,9 +9,6 @@
  *====================================================================*/
 
 #include <signal.h>
-#ifdef UNIX
-#include "missing.h"
-#endif
 
 #if defined(HAVE_UCONTEXT_H)
 #include <ucontext.h>

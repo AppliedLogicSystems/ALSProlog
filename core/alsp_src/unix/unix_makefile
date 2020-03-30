@@ -14,7 +14,7 @@ MAKEFS += $(SUBOS)_makefile
 
 CPPFLAGS += -DUNIX
 
-OS_SOURCE = unixio.c missing.c unix_engine.c unix_locate.c compat_glob.c  linenoise.c
+OS_SOURCE = unixio.c unix_engine.c unix_locate.c compat_glob.c  linenoise.c
 
 STATIC_SOURCE = unix_static.c
 STATIC_OBJECTS = $(STATIC_SOURCE:.c=.o)
