@@ -35,7 +35,6 @@ test_file_extension :-
 	
 test_path_directory_tail(mswin32) :-!,
 	test([
-%	 ( path_directory_tail(P, 'mom\kids', 'bar\zip.pro'), P == 'mom\kids\bar\zip.pro' ),
 	(path_directory_tail(Path, 'mom\\kids', 'bar\\zip.pro'), 
 		Path == 'mom\\kids\\bar\\zip.pro'),
 	(path_directory_tail('mom\\kids\\bar\\zip.pro', 'mom\\kids\\bar', Tail),
