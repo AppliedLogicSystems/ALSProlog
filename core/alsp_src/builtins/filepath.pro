@@ -128,7 +128,8 @@ file_extension(FullName, FileName, Ext) :-
 path_directory_tail(Path, Directory, Tail) :-
 	var(Path),
 	!,
-	join_path([Directory, Tail], Path).
+	join_path([Directory, Tail], Path),
+O = user_output,printf(O,">p_d_t-c1:D=%t Path=%t\n", [Directory, Path]).
 path_directory_tail(Path, Directory, Tail) :-
 	split_path(Path, Elements),
 	dreverse(Elements, [Tail | RevDirElements]),
