@@ -56,7 +56,9 @@ test_recursive_dir_path :-
 	clean_dirs123(TestDir),
 	test([
 	    ( Path_List = [dir1,dir2,dir3], 
+O = user_output,printf(O,">t_r_d_p:PL=%t\n", [Path_List]),
 		recursive_dir_path(Path_List, Path),
+O = user_output,printf(O,">r_d_p:PL=%t P=%t\n", [Path_List, Path]),
 	        path_directory_tail(FullPath, TestDir, Path),
 		change_cwd(Path),
 		get_cwd(ThisPath),
