@@ -489,7 +489,7 @@ consultd(+)
 
 reconsultd/1
 reconsultd(File)
-reconsultd+)
+reconsultd(+)
 ```
 These are various ways of dynamically loading a File of Prolog clauses into a running ALS
 Prolog program. All these versions are defined in the builtins file blt_io.pro.  Note that in the above, File can be a list of files:  [File1, File2, ….].
