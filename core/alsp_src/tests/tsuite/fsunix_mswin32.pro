@@ -54,10 +54,14 @@ test_make_subdir2 :-
 test_recursive_dir_path :-
 	get_cwd(TestDir),
 	clean_dirs123(TestDir),
+open(zippo3, write, ZZ),
 	test([
 	    ( Path_List = [dir1,dir2,dir3], 
+write(ZZ, 'Path_List'=Path_List),nl(ZZ),
 		recursive_dir_path(Path_List, Path),
+write(ZZ, recursive_dir_path(Path_List, Path)),nl(ZZ),
 	        path_directory_tail(FullPath, TestDir, Path),
+write(ZZ, path_directory_tail(FullPath, TestDir, Path)),nl(ZZ),
 		change_cwd(Path),
 		get_cwd(ThisPath),
 		FullPath == ThisPath),
