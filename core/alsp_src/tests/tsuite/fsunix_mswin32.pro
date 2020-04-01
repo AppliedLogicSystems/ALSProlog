@@ -54,6 +54,11 @@ test_make_subdir2 :-
 test_recursive_dir_path :-
 	get_cwd(TestDir),
 	clean_dirs123(TestDir),
+	Path_ListA = [dir1,dir2,dir3], 
+O = user_output,printf(O,">nnn_r_d_p:PLA=%t\n", [Path_ListA]),
+	test([
+		(recursive_dir_path(Path_ListA, PathZ)),
+	    true ]),
 	test([
 	    ( Path_List = [dir1,dir2,dir3], 
 O = user_output,printf(O,">t_r_d_p:PL=%t\n", [Path_List]),
