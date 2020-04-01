@@ -167,7 +167,7 @@ kill_subdir(SubDir)
  *!----------------------------------------------------------------*/
 recursive_dir_path(Path_List, Path)
         :-
-O = user_output,printf(O,">r_d_p:ENTER", [],[]),
+O = user_output,printf(O,">r_d_p:ENTER\n", [],[]),
         join_path(Path_List, Path),
 O = user_output,printf(O,">r_d_p:after j_p:PL=%t P=%t\n", [Path_List, Path],[]),
         sys_env(OS, _, _),
