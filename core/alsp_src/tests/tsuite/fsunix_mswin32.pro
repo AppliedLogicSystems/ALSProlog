@@ -76,20 +76,19 @@ O = user_output,printf(O,">r_d_p:PL=%t P=%t\n", [Path_List, Path]),
 test_recursive_dir_path :-
 	get_cwd(TestDir),
 	clean_dirs123(TestDir),
-	Path_ListA = [dir1,dir2,dir3], 
-O = user_output,printf(O,">nnn_r_d_p:PLA=%t\n", [Path_ListA]),
 
 %	test([
 	    Path_List = [dir1,dir2,dir3], 
-O = user_output,printf(O,">t_r_d_p:PL=%t\n", [Path_List]),
+printf(user_output,">t_r_d_p:PL=%t\n", [Path_List]),
 		recursive_dir_path(Path_List, Path),
-O = user_output,printf(O,">r_d_p:PL=%t P=%t\n", [Path_List, Path]),
+printf(user_output,">r_d_p:PL=%t P=%t\n", [Path_List, Path]),
 	        path_directory_tail(FullPath, TestDir, Path),
 		change_cwd(Path),
 		get_cwd(ThisPath),
-O = user_output,printf(O,">t_r_d_p:FP=%t TP=%t\n", [FullPath, ThisPath]),
+printf(user_output,">t_r_d_p:FP=%t TP=%t\n", [FullPath, ThisPath]), 
 		FullPath == ThisPath,
 		clean_dirs123(TestDir).
+%	    true ]).
 
 clean_dirs123(TestDir) :-
 	change_cwd(TestDir),
