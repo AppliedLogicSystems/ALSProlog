@@ -11,6 +11,7 @@ module als_testing.
 
 export run_tests/0.
 
+:- dynamic(failed/1).
 
 run_tests :-
 	open('autotest.log',write,LOGStream,[alias(autotestlog)]),
@@ -45,7 +46,6 @@ run_tests :-
 
 configure_testing
 	:-
-set_prolog_flag(unknown, fail),
 	get_cmdline_vals(CmdLineVs),
 	bagOf(TD, member(['-td',TD], CmdLineVs), TDs),
 	configure_testing(TDs, CmdLineVs).
