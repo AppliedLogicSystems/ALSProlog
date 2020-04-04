@@ -9,6 +9,7 @@
  |	Date:	Begun 4/88
  |	Revision: Ken Bowen -- 11/88, 1/91 
  |		-- library version: 11/91
+ |	Note: Depends on core/alsp_src/unix/unix_makefile & friends
  *===========================================================================*/
 module builtins.
 
@@ -143,58 +144,52 @@ kill_subdir(SubDir)
 	system(Cmd).
 
 /*!----------------------------------------------------------------
- |        recursive_dir_path/2
- |        recursive_dir_path(Path_List, Path)
- |        recursive_dir_path(+, -)
+ |	recursive_dir_path/2
+ |	recursive_dir_path(Path_List, Path)
+ |	recursive_dir_path(+, -)
  |
- |        Creates a nested directories path
+ |	Creates a nested directories path
  |
- |        If Path_List is a list of atoms which potentially describe
- |        a nested path of directories in the filesystem, (and which may
- |        need to be created), and if the last atom either describes a
- |        directory or a file, then:
- |        1) Path is an atom describing the path described by Path_List
+ |	If Path_List is a list of atoms which potentially describe
+ |	a nested path of directories in the filesystem, (and which may
+ |	need to be created), and if the last atom either describes a
+ |	directory or a file, then:
+ |	1) Path is an atom describing the path described by Path_List
  |		(as created by join_path/2), and
- |        2) That Path is created in the filesystem, if possible;
- |        2a) Moreover, either Path is absolute,
- |        2b) Or path is not absolute, and so is created relative to
- |                the current working directory.
- |        Fails if the mkdir command in the underlying filesystem (unix
- |        or mswin32) throws an error.
- |        If the underlying OS is mswin32, the first element of Path_List
- |        is permitted to be a drive letter atom (e.g., 'C:').
- |        If the underlying OS is mswin32,  enableextensions must be active.
+ |	2) That Path is created in the filesystem, if possible;
+ |	2a) Moreover, either Path is absolute,
+ |	2b) Or path is not absolute, and so is created relative to
+ |       the current working directory.
+ |	Fails if the mkdir command in the underlying filesystem (unix
+ |	or mswin32) throws an error.
+ |	If the underlying OS is mswin32, the first element of Path_List
+ |	is permitted to be a drive letter atom (e.g., 'C:').
+ |	If the underlying OS is mswin32,  enableextensions must be active.
  *!----------------------------------------------------------------*/
 recursive_dir_path(Path_List, Path)
         :-
-printf(user_output,">r_d_p:ENTER PL=%t\n", [Path_List]),
         join_path(Path_List, Path),
-printf(user_output,">r_d_p:after j_p:PL=%t P=%t\n", [Path_List, Path]),
-        sys_env(OS, _, _),
-        (OS == unix ->
-printf(user_output,">r_d_p:unix\n", []),
-                sprintf(atom(Cmd), 'mkdir -p -- %t\n', [Path])
-                ;
-		(OS == mswin32 ->
-printf(user_output,">r_d_p:mswin32\n", []),
-                	sprintf(atom(Cmd), 'mkdir %t\n', [Path])
-			;
-			true
-		)
-        ),
+        sprintf(atom(Cmd), 'mkdir -p -- %t\n', [Path]),
         system(Cmd).
 
 /*!----------------------------------------------------------------
- |        recursive_dir_paths/2
- |        recursive_dir_paths(List_of_Path_Lists, Paths)
- |        recursive_dir_paths(+, -)
+ |	recursive_dir_paths/2
+ |	recursive_dir_paths(List_of_Path_Lists, Paths)
+ |	recursive_dir_paths(+, -)
  |
- |        Creates multiple nested directories paths
+ |	Creates multiple nested directory paths
  |
- |        If Path_List is a list of atoms which potentially describe
- |        a nested path of directories in the filesystem, (and which may
- |        need to be created), and if the last atom either describes a
- |        directory or a file, then:
+ |	If List_of_Path_Lists is a list of lists of atoms each of which 
+ |	potentially describe a nested path of directories in the 
+ |	filesystem, (and which may need to be created), and if the 
+ |	last atom of each list either describes a directory or a file, 
+ |	then:
+ |	1) The length of Paths equals the length of List_of_Path_Lists,
+ |	   and each element of Paths is an atom;
+ |	2) For each list Path_List on List_of_Path_Lists, Path is the 
+ |	   corresponding atom on Paths and
+ | 		recursive_dir_path(Path_List, Path)
+ |	   holds.
  *!----------------------------------------------------------------*/
 recursive_dir_paths(List_of_Path_Lists, Paths)
         :-
@@ -207,15 +202,6 @@ recursive_dir_paths(List_of_Path_Lists, Paths)
                 catenate(['mkdir ' | Markers], Pattern),
                 sprintf(atom(Cmd), Pattern, Paths)
         ),
-/*
-        join_path(Path_List, Path),
-        sys_env(OS, _, _),
-        (OS == unix ->
-                sprintf(atom(Cmd), 'mkdir -p -- %t\n', [Path])
-                ;
-                sprintf(atom(Cmd), 'mkdir %t\n', [Path])
-        ),
-*/
         system(Cmd).
 
 prepare_path_cmd_list([], [], []).

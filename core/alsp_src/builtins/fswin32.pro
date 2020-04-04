@@ -7,6 +7,7 @@
  |
  |	Authors:	Chuck Hoput (based on other fs-xxx.pro files)
  |	Date:		1/96
+ |	Note: Depends on core/alsp_src/win32/win32_makefile & friends
  *====================================================================*/
 
 module builtins.
@@ -32,12 +33,24 @@ export move_file/2.
  |	make_subdir(NewDir)
  |	make_subdir(+)
  |
+ |	- creates a subdirectory in the current working directory
+ |
+ |      make_subdir(NewDir) calls make_subdir(NewDir,511)
+ |      where 511 indicates full permissions [rwx,rwx,rwx]
+ |
+ | Examples
+ |      ?- make_subdir(myNewFolder).
+ |      %% Creates subdir myNewFolder below the current
+ |      %% working directory, with permissions
+ |      %%      [rwx,rwx,rwx]
+ *!--------------------------------------------------------------*/
+
+/*!--------------------------------------------------------------
  |	make_subdir/2
  |	make_subdir(NewDir,Permissions)
  |	make_subdir(+,+)
  |
  |	- creates a subdirectory in the current working directory
- |	- with the indicated permissions
  |
  |	If NewDir is an atom, creates a subdirectory named NewDir in 
  |	the current working directory, if possible; if Permissions
@@ -53,6 +66,12 @@ export move_file/2.
  |		[[read,write,execute],
  |		 [read,write],
  |		 [execute]  ]
+ |
+ | Examples
+ |      ?- make_subdir(myNewFolder, 457).
+ |      %% Creates subdir myNewFolder below the current
+ |      %% working directory, with permissions
+ |      %%      [rwx,x,x]
  *!--------------------------------------------------------------*/
 
 make_subdir(NewDir)
@@ -66,6 +85,43 @@ make_subdir(NewDir,Permissions)
 	0 =< Permissions, Permissions =< 512,
 	mkdir(NewDir,Permissions).
 
+make_subdir(NewDir,Permissions)
+        :-
+        symb_perms(Permissions,64,0,NumPermissions),
+        mkdir(NewDir,NumPermissions).
+
+symb_perms([],_,N,N)
+        :-!.
+
+symb_perms(_,0,N,N)
+        :-!.
+
+symb_perms([P | Perms],F,Cur,Final)
+        :-
+        (atom(P) ->
+                name(P, PCodes)
+                ;
+                PCodes = P
+        ),
+        iperms(PCodes,F, 0,IT),
+        Next is Cur + IT,
+        NextF is F div 8,
+        symb_perms(Perms,NextF,Next,Final).
+
+iperms([],_,Cur,Cur).
+
+iperms([PC | PCodes],F,Cur,IT)
+        :-
+        indv_perm_code(PC, PCVal),
+        Next is Cur + (F * PCVal),
+        iperms(PCodes,F,Next,IT).
+
+indv_perm_code(0'r, 4).
+indv_perm_code(0'w, 2).
+indv_perm_code(0'x, 1).
+indv_perm_code(read, 4).
+indv_perm_code(write, 2).
+indv_perm_code(execute, 1).
 
 /*!--------------------------------------------------------------
  |	remove_subdir/1
@@ -78,11 +134,88 @@ make_subdir(NewDir,Permissions)
  |	the current working directory, if it exists.
  *!--------------------------------------------------------------*/
  
- remove_subdir(SubDir)
+remove_subdir(SubDir)
 	:-
 	rmdir(SubDir).
- 
- /*!----------------------------------------------------------------
+
+kill_subdir(SubDir)
+        :-
+        sprintf(atom(Cmd),'rm -r %t',[SubDir]),
+        system(Cmd).
+
+/*!----------------------------------------------------------------
+ |        recursive_dir_path/2
+ |        recursive_dir_path(Path_List, Path)
+ |        recursive_dir_path(+, -)
+ |
+ |        Creates a nested directories path
+ |
+ |        If Path_List is a list of atoms which potentially describe
+ |        a nested path of directories in the filesystem, (and which may
+ |        need to be created), and if the last atom either describes a
+ |        directory or a file, then:
+ |        1) Path is an atom describing the path described by Path_List
+ |              (as created by join_path/2), and
+ |        2) That Path is created in the filesystem, if possible;
+ |        2a) Moreover, either Path is absolute,
+ |        2b) Or path is not absolute, and so is created relative to
+ |                the current working directory.
+ |        Fails if the mkdir command in the underlying filesystem (unix
+ |        or mswin32) throws an error.
+ |        If the underlying OS is mswin32, the first element of Path_List
+ |        is permitted to be a drive letter atom (e.g., 'C:').
+ |        If the underlying OS is mswin32,  enableextensions must be active.
+ *!----------------------------------------------------------------*/
+recursive_dir_path(Path_List, Path)
+        :-
+printf(user_output,">r_d_p:ENTER PL=%t\n", [Path_List]),
+        join_path(Path_List, Path),
+printf(user_output,">r_d_p:after j_p:PL=%t P=%t\n", [Path_List, Path]),
+        sprintf(atom(Cmd), 'mkdir %t\n', [Path]),
+        system(Cmd).
+
+/*!----------------------------------------------------------------
+ |        recursive_dir_paths/2
+ |        recursive_dir_paths(List_of_Path_Lists, Paths)
+ |        recursive_dir_paths(+, -)
+ |
+ |        Creates multiple nested directory paths
+ |
+ |      If List_of_Path_Lists is a list of lists of atoms each of which
+ |      potentially describe a nested path of directories in the
+ |      filesystem, (and which may need to be created), and if the
+ |      last atom of each list either describes a directory or a file,
+ |      then:
+ |      1) The length of Paths equals the length of List_of_Path_Lists,
+ |         and each element of Paths is an atom;
+ |      2) For each list Path_List on List_of_Path_Lists, Path is the 
+ |         corresponding atom on Paths and
+ |              recursive_dir_path(Path_List, Path)
+ |         holds.
+ *!----------------------------------------------------------------*/
+recursive_dir_paths(List_of_Path_Lists, Paths)
+        :-
+        prepare_path_cmd_list(List_of_Path_Lists, Paths, Markers),
+        sys_env(OS, _, _),
+        (OS == unix ->
+                catenate(['mkdir -p -- ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+                ;
+                catenate(['mkdir ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+        ),
+        system(Cmd).
+
+prepare_path_cmd_list([], [], []).
+prepare_path_cmd_list([Path_List | RestList_of_Path_Lists],
+                        [Path | RestCmdList], ['%t ' | RestMarkers])
+        :-
+        join_path(Path_List, Path),
+        prepare_path_cmd_list(RestList_of_Path_Lists, RestCmdList, RestMarkers).
+
+
+
+/*!----------------------------------------------------------------
  |	files/2
  |	files(Pattern,FileList)
  |	files(+,-)
