@@ -12,3 +12,10 @@ git,make,gcc-core,mingw64-i686-gcc-core,libcrypt-devel,mingw64-i686-libgcrypt,mi
 
 build_script:
   - C:\Cygwin\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild
+
+on_finish:
+  - ps: |
+        if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
+          $blockRdp = $true
+          iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+        }

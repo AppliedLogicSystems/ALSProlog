@@ -21,6 +21,12 @@ then
 fi
 make test
 
+if [[ ${APPVEYOR_RE_BUILD:-} == 'True' && ${APPVEYOR_REPO_BRANCH:-} != 'master' ]]
+then
+	echo 'Skipping clean test to allow interactive debugging.'
+	exit
+fi
+
 # Test clean and check that no source files are modified
 make distclean
 [ -z "$(git status --short --ignored)" ]
