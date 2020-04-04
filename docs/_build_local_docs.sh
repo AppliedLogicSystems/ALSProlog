@@ -2,7 +2,7 @@
 
 # Builds a local version of docs
 
-set -eux
+set -eu
 
 cd "$(dirname "$0")/_local_site"
 

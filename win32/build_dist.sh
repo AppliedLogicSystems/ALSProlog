@@ -121,5 +121,5 @@ fi
 
 rm -f $DISTNAME-$ARCH.zip
 pushd $ARCH
-zip -r ../$DISTNAME-$ARCH.zip $DISTNAME
+zip --quiet --recurse-paths ../$DISTNAME-$ARCH.zip $DISTNAME
 popd
