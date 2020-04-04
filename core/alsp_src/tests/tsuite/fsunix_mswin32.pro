@@ -54,8 +54,11 @@ test_make_subdir2 :-
 test_recursive_dir_path :-
 	get_cwd(TestDir),
 	clean_dirs123(TestDir),
+builtins:clause(recursive_dir_path(Path_List, Path), BODY),
+printf(user_output, ">trdp:rdp_clause_body=%t\n", [BODY]),
 
 	test([
+printf(user_output, "Enter test_recursive_dir_path-test\n", []),
 	    (Path_List = [dir1,dir2,dir3], 
 		recursive_dir_path(Path_List, Path),
 	        path_directory_tail(FullPath, TestDir, Path),
