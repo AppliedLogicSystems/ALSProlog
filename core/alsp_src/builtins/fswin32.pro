@@ -14,6 +14,8 @@ module builtins.
 
 export make_subdir/1.
 export make_subdir/2.
+export recursive_dir_path/2.
+export recursive_dir_paths/2.
 export remove_subdir/1.
 export file_status/2.
 
