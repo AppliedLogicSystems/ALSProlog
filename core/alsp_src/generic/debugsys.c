@@ -49,7 +49,7 @@ int debug_system[MAX_DEBUG_FEATS] = {0};
 	/*-------------------------------------------------------
 	 |	For access to debug_system[] from prolog:
 	 *------------------------------------------------------*/
-int pbi_toggle_debug_system	PARAMS(( void ));
+int pbi_toggle_debug_system	( void );
 
 int
 pbi_toggle_debug_system()
@@ -78,7 +78,7 @@ pbi_toggle_debug_system()
 	 |		GARBAGE COLLECTION ROUTINES
 	 *------------------------------------------------------*/
 
-void print_chpts PARAMS ((register long *));
+void print_chpts (register long *);
 
 void
 print_chpts(register long *b)

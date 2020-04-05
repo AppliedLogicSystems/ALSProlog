@@ -13,13 +13,8 @@
 #include <stdio.h>
 #include "../parser.h"
 
-#if __STDC__ || !defined(OldStrs)
 #define TK(idx,t) {#idx,t,0,0}
 #define OP(idx,t,a,p) {#idx,t,a,p}
-#else
-#define TK(idx,t) {"idx",t,0,0}
-#define OP(idx,t,a,p) {"idx",t,a,p}
-#endif
 
 struct tokini {
     char *id;

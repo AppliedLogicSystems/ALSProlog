@@ -22,7 +22,7 @@
 #include <Types.h>
 #endif
 
-static	void	abortmessage	PARAMS(( void ));
+static	void	abortmessage	( void );
 
 int
 pbi_ouch()

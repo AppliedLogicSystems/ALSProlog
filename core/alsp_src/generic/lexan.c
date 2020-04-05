@@ -38,7 +38,7 @@ lxi_but *lexbdp = &seetbl[USRSEEI].lb;	/* pointer to buffer descriptor */
 
 char  tokstr[1024];
 
-static	int	escape_char	PARAMS(( char ** ));
+static	int	escape_char	( char ** );
 
 /*----------------------------------------------------------------------*
  | next_token gets the next token from the input stream, classifies it and

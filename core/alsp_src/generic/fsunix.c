@@ -728,8 +728,8 @@ pmkdir()
 
 #define STAT stat_with_timeout
 
-static	void	stat_timedout		PARAMS(( void ));
-static	int	stat_with_timeout	PARAMS(( const char *, struct stat * ));
+static	void	stat_timedout		( void );
+static	int	stat_with_timeout	( const char *, struct stat * );
 
 static void
 stat_timedout()
@@ -1018,7 +1018,7 @@ canonicalize_pathname()
 
 long 
 get_file_modified_time(fname)
-    CONST char *fname;
+    const char *fname;
 {
     struct stat buf;
 
@@ -1034,7 +1034,7 @@ get_file_modified_time(fname)
  */
 int
 isdir(fname)
-    CONST char *fname;
+    const char *fname;
 {
     struct stat buf;
 

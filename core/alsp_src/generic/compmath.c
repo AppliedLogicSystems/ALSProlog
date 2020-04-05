@@ -344,7 +344,7 @@ int   cmictab[] =
 
 
 
-static	void	comp_exp	PARAMS(( pword ));
+static	void	comp_exp	( pword );
 
 /*
  * comp_math is called from compile.c with four arguments.

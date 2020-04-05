@@ -26,8 +26,8 @@
 #define PI_DOUBLE       6
 */
 
-int	curl_c_builtin	PARAMS(( void ));
-int	lookup_opt_info	PARAMS(( void ));
+int	curl_c_builtin	( void );
+int	lookup_opt_info	( void );
 char* 	normalize_opt(char* option_str);
 char* normalize_info(char* option_str);
 int lookup_code(const char *opt_name);

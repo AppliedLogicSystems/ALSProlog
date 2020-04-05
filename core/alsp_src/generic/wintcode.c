@@ -28,7 +28,7 @@
 #include <sys/mman.h>
 
 #elif	defined(arch_m88k)  /* !HAME_MMAP */
-extern	int	memctl		PARAMS(( void *, int, int ));
+extern	int	memctl		( void *, int, int );
 
 #endif /* HAVE_MMAP */
 
@@ -77,14 +77,14 @@ long *aib_clause_addr;		/* used by assertz */
 
 /*//static struct codeblock *codeblock_list = (struct codeblock *) 0;*/
 
-static	long *	code_alloc	PARAMS(( size_t, int ));
-static	void	makerunable	PARAMS(( void ));
-static	void	makewritable	PARAMS(( void ));
-static	ntbl_entry * alloc_name_entry PARAMS(( void ));
-static	long *	cbsffa		PARAMS(( Code * ));
-static	long *	clause_start_from_retaddr PARAMS(( Code *, long * ));
-static	void	mark_fromretaddr PARAMS(( Code * ));
-static	void	mark_clause	PARAMS(( long * ));
+static	long *	code_alloc	( size_t, int );
+static	void	makerunable	( void );
+static	void	makewritable	( void );
+static	ntbl_entry * alloc_name_entry ( void );
+static	long *	cbsffa		( Code * );
+static	long *	clause_start_from_retaddr ( Code *, long * );
+static	void	mark_fromretaddr ( Code * );
+static	void	mark_clause	( long * );
 
 /*-----------------------------------------------------------------*
  | code_alloc
@@ -684,9 +684,9 @@ w_installcode(buffer, bufsize, extra, actualsize)
  | copy_code procedure for the 88k.
  *-----------------------------------------------------------------*/
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 void
 copy_code(buffer, to, bufsize)
@@ -755,9 +755,9 @@ copy_code(buffer, to, bufsize)
 #else  /* arch_m88k */
 #ifdef arch_sparc
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 /*-----------------------------------------------------------------*
  * copy_code procedure for the Sparc.
@@ -1735,7 +1735,7 @@ void
 w_assert_builtin(name, arity, builtin)
     const char *name;
     int   arity;
-    int   (*builtin) PARAMS(( void ));
+    int   (*builtin) ( void );
 {
     ntbl_entry *ent;
 
@@ -1750,7 +1750,7 @@ void
 w_assert_built2(name, arity, installer, p1, p2)
     const char *name;
     int   arity;
-    void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
+    void  (*installer) ( ntbl_entry *, PWord, PWord );
     PWord p1, p2;
 {
     ntbl_entry *ent;
@@ -1780,7 +1780,7 @@ w_assert_foreign(modid, name, arity, builtin)
     PWord modid;
     const char *name;
     int   arity;
-    int   (*builtin) PARAMS(( void ));
+    int   (*builtin) ( void );
 {
     ntbl_entry *ent;
 

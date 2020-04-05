@@ -91,11 +91,11 @@
 /* These should be in sys/ipc.h or sys/msg.h, but some systems have really
  * lame include files.
  */
-extern	key_t	ftok		PARAMS(( CONST char *, int ));
-extern	int	msgget		PARAMS(( key_t, int ));
-extern	int	msgsnd		PARAMS(( int, CONST void *, size_t, int ));
-extern	int	msgrcv		PARAMS(( int, void *, size_t, long, int ));
-extern	int	msgctl		PARAMS(( int, int, ... ));
+extern	key_t	ftok		( const char *, int );
+extern	int	msgget		( key_t, int );
+extern	int	msgsnd		( int, const void *, size_t, int );
+extern	int	msgrcv		( int, void *, size_t, long, int );
+extern	int	msgctl		( int, int, ... );
 
 #endif /* SysVIPC */
 
@@ -217,28 +217,28 @@ extern	int	msgctl		PARAMS(( int, int, ... ));
 #include "bsio.h"
 #include "newsiolex.h"
 
-static	UCHAR *	get_stream_buffer PARAMS(( PWord, int ));
-static	void	incr_fdrefcnt	PARAMS(( int ));
-static	int	decr_fdrefcnt	PARAMS(( int ));
-static	int	compute_flags	PARAMS(( char *, int , int ));
+static	UCHAR *	get_stream_buffer ( PWord, int );
+static	void	incr_fdrefcnt	( int );
+static	int	decr_fdrefcnt	( int );
+static	int	compute_flags	( char *, int , int );
 #ifdef HAVE_SOCKET
-static	void	delete_stream_name PARAMS(( PWord ));
-static	int	accept_connection PARAMS(( PWord, char * , char **));
+static	void	delete_stream_name ( PWord );
+static	int	accept_connection ( PWord, char * , char **);
 #endif
-static	int	stream_is_ready	PARAMS(( char *, long ));
-static	void	shift_buffer	PARAMS(( UCHAR * ));
-static	int	write_buf	PARAMS(( PWord, UCHAR * ));
-static	long	stream_end	PARAMS(( UCHAR * ));
-static	int	skip_layout	PARAMS(( UCHAR * ));
-static	int	octal		PARAMS(( UCHAR ** ));
-static	unsigned long	hexadecimal	PARAMS(( UCHAR ** ));
-static	int	decimal		PARAMS(( UCHAR **, UCHAR *, double *, int *));
-static	int	escaped_char	PARAMS(( UCHAR ** ));
-static	void	quoted_atom	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf));
-static	int	quoted_string	PARAMS(( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * ));
-static	int	char_constant	PARAMS(( UCHAR **, UCHAR *, int, int ));
-static	int	next_token0	PARAMS(( UCHAR *, PWord *, int *, PWord *, int * ));
-static	int	format_type	PARAMS(( UCHAR * ));
+static	int	stream_is_ready	( char *, long );
+static	void	shift_buffer	( UCHAR * );
+static	int	write_buf	( PWord, UCHAR * );
+static	long	stream_end	( UCHAR * );
+static	int	skip_layout	( UCHAR * );
+static	int	octal		( UCHAR ** );
+static	unsigned long	hexadecimal	( UCHAR ** );
+static	int	decimal		( UCHAR **, UCHAR *, double *, int *);
+static	int	escaped_char	( UCHAR ** );
+static	void	quoted_atom	( PWord *, PWord *, int *, UCHAR **, UCHAR *lim, UCHAR *buf);
+static	int	quoted_string	( PWord *, PWord *, int *, UCHAR **, UCHAR *, UCHAR * );
+static	int	char_constant	( UCHAR **, UCHAR *, int, int );
+static	int	next_token0	( UCHAR *, PWord *, int *, PWord *, int * );
+static	int	format_type	( UCHAR * );
 
 enum {CONSOLE_READ, CONSOLE_WRITE, CONSOLE_ERROR};
 
@@ -2998,7 +2998,7 @@ sio_simple_select()
  * sio_poll(Stream, WaitTime)
  */
 
-extern	int	get_number	PARAMS( (PWord, int, double *) );
+extern	int	get_number	(PWord, int, double *);
 
 int
 sio_poll()
@@ -4163,7 +4163,7 @@ sio_seek()
  *
  */
 
-static int scan_eoln(CONST char *cs, int eoln_type)
+static int scan_eoln(const char *cs, int eoln_type)
 {
     int len;
     
@@ -5624,9 +5624,9 @@ sio_get_number()
  * get_eoln_str() returns a pointer to a string containing the end-of-line characters for
  * the stream.
  */
-static CONST char *get_eoln_str(UCHAR *buf)
+static const char *get_eoln_str(UCHAR *buf)
 {
-    CONST char *eoln_str;
+    const char *eoln_str;
     
     switch(SIO_EOLNTYPE(buf) & SIOEOLN_WRITE_MASK) {
     case SIOEOLN_WRITE_CRLF:
@@ -6431,7 +6431,7 @@ sio_nl(void)
     PWord v1;
     int   t1;
     UCHAR *buf, *b, *l;
-    CONST UCHAR *s, *eoln_str;
+    const UCHAR *s, *eoln_str;
 
     w_get_An(&v1, &t1, 1);
 

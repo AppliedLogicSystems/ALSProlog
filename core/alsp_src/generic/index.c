@@ -92,18 +92,18 @@ static index_node *free_ptr;
 static int nodes_left;
 static jmp_buf alloc_overflow;
 
-static	void	initialize_nodeallocator PARAMS(( void ));
-static	index_node * alloc_node	PARAMS(( void ));
-static	void	insert_node	PARAMS(( index_header *, long, int, Code * ));
-static	void	compute_size	PARAMS(( index_header *, int, Code * ));
-static	int	computetablesize PARAMS(( int ));
-static	void	addtobuf	PARAMS(( int, index_header * ));
-static	switchTableEntry * walk_tree PARAMS(( index_node *, switchTableEntry *,
-					      int ));
-static	void	installtreeoverhead PARAMS(( int, int, switchTableEntry ** ));
-static	void	walk_bottom	PARAMS(( index_node *, int ));
+static	void	initialize_nodeallocator ( void );
+static	index_node * alloc_node	( void );
+static	void	insert_node	( index_header *, long, int, Code * );
+static	void	compute_size	( index_header *, int, Code * );
+static	int	computetablesize ( int );
+static	void	addtobuf	( int, index_header * );
+static	switchTableEntry * walk_tree ( index_node *, switchTableEntry *,
+					      int );
+static	void	installtreeoverhead ( int, int, switchTableEntry ** );
+static	void	walk_bottom	( index_node *, int );
 static	long *	get_clause_information
-				PARAMS (( long *, int *, long *, Code ** ));
+				( long *, int *, long *, Code ** );
 
 
 static void
@@ -613,8 +613,8 @@ walk_tree(ip, tp, isdet)
 #define wm_sw_const    W_SW_CONST
 #define wm_sw_struct   W_SW_STRUCT
 #else
-extern	void	wm_sw_const	PARAMS(( void ));
-extern	void	wm_sw_struct	PARAMS(( void ));
+extern	void	wm_sw_const	( void );
+extern	void	wm_sw_struct	( void );
 #endif
 
 /*

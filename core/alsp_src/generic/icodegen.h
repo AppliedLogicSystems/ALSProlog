@@ -37,48 +37,48 @@ extern ic_uptr_type ic_uptr;
 #define ic_ptr	ic_uptr.code_ptr
 
 /* icode1.c */
-extern 	void	icode		PARAMS(( int, long, long, long, long ));
+extern 	void	icode		( int, long, long, long, long );
 
 /* icode2.c */
-extern	void	ic_install_overflow_call PARAMS(( ntbl_entry * ));
-extern	void	ic_install_call_entry	PARAMS(( ntbl_entry * ));
-extern	void	ic_install_normal_exec_entry PARAMS(( ntbl_entry * ));
-extern	void	ic_install_spy		PARAMS(( ntbl_entry * ));
-extern	void	ic_install_libbreak	PARAMS(( ntbl_entry *, int ));
-extern	void	ic_install_decr_icount	PARAMS(( ntbl_entry * ));
-extern	void	ic_install_resolve_ref	PARAMS(( ntbl_entry * ));
-extern	void	ic_install_jmp		PARAMS(( ntbl_entry *, Code *, int ));
-extern	void	ic_install_try_me_jmp	PARAMS(( ntbl_entry *, Code *, PWord ));
+extern	void	ic_install_overflow_call ( ntbl_entry * );
+extern	void	ic_install_call_entry	( ntbl_entry * );
+extern	void	ic_install_normal_exec_entry ( ntbl_entry * );
+extern	void	ic_install_spy		( ntbl_entry * );
+extern	void	ic_install_libbreak	( ntbl_entry *, int );
+extern	void	ic_install_decr_icount	( ntbl_entry * );
+extern	void	ic_install_resolve_ref	( ntbl_entry * );
+extern	void	ic_install_jmp		( ntbl_entry *, Code *, int );
+extern	void	ic_install_try_me_jmp	( ntbl_entry *, Code *, PWord );
 extern	void	ic_install_switch_on_term
-		    PARAMS((ntbl_entry *, Code *, Code *, Code *, Code *, int ));
-extern	void	ic_install_builtin	PARAMS(( ntbl_entry *, int (*) PARAMS(( void )) ));
-extern	void	ic_install_true		PARAMS(( ntbl_entry * ));
-extern	void	ic_install_fail		PARAMS(( ntbl_entry * ));
-extern	void	ic_install_equal	PARAMS(( ntbl_entry * ));
-extern	void	ic_install_call		PARAMS(( ntbl_entry *, long * ));
-extern	void	ic_install_module_closure PARAMS(( ntbl_entry *, Code * ));
+		    (ntbl_entry *, Code *, Code *, Code *, Code *, int );
+extern	void	ic_install_builtin	( ntbl_entry *, int (*) ( void ) );
+extern	void	ic_install_true		( ntbl_entry * );
+extern	void	ic_install_fail		( ntbl_entry * );
+extern	void	ic_install_equal	( ntbl_entry * );
+extern	void	ic_install_call		( ntbl_entry *, long * );
+extern	void	ic_install_module_closure ( ntbl_entry *, Code * );
 extern	void	ic_install_next_choice_in_a_deleted_clause
-					PARAMS(( Code * ));
-extern	void	ic_install_try_me	PARAMS(( Code *, PWord, int ));
-extern	void	ic_install_retry_me	PARAMS(( Code *, PWord, int, int ));
-extern	void	ic_install_trust_me	PARAMS(( Code *, PWord, int, int ));
-extern	long *	ic_install_try		PARAMS(( long *, Code *, int ));
-extern	long *	ic_install_retry	PARAMS(( long *, Code *, int, int ));
-extern	long *	ic_install_trust	PARAMS(( long *, Code *, int, int ));
-extern	Code *	ic_install_tree_overhead PARAMS(( long *, int, Code * ));
-extern	Code *	ic_install_no		PARAMS(( Code *, Code *, const char * ));
-extern	void	ic_install_reference	PARAMS(( Code *, PWord ));
+					( Code * );
+extern	void	ic_install_try_me	( Code *, PWord, int );
+extern	void	ic_install_retry_me	( Code *, PWord, int, int );
+extern	void	ic_install_trust_me	( Code *, PWord, int, int );
+extern	long *	ic_install_try		( long *, Code *, int );
+extern	long *	ic_install_retry	( long *, Code *, int, int );
+extern	long *	ic_install_trust	( long *, Code *, int, int );
+extern	Code *	ic_install_tree_overhead ( long *, int, Code * );
+extern	Code *	ic_install_no		( Code *, Code *, const char * );
+extern	void	ic_install_reference	( Code *, PWord );
 
 #if Portable
 /* icode1.c */
-extern	void	ic_punch		PARAMS(( Code *, Code ));
-extern	void	ic_putl			PARAMS(( PWord ));
-extern	void	ic_put_align		PARAMS(( Code ));
-extern	void	ic_put_reg		PARAMS(( Code, long ));
+extern	void	ic_punch		( Code *, Code );
+extern	void	ic_putl			( PWord );
+extern	void	ic_put_align		( Code );
+extern	void	ic_put_reg		( Code, long );
 /* icode2.c */
-extern	void	ic_install_bref		PARAMS(( ntbl_entry *, PWord, PWord ));
-extern	void	ic_install_instr	PARAMS(( ntbl_entry *, PWord, PWord ));
-extern	void	ic_install_tmjmp	PARAMS(( ntbl_entry *, long *, PWord ));
+extern	void	ic_install_bref		( ntbl_entry *, PWord, PWord );
+extern	void	ic_install_instr	( ntbl_entry *, PWord, PWord );
+extern	void	ic_install_tmjmp	( ntbl_entry *, long *, PWord );
 #define ic_install_try_me_jmp ic_install_tmjmp
 #endif /* Portable */
 

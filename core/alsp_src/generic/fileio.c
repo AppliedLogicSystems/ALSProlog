@@ -17,9 +17,9 @@
 
 #ifdef OLDFIO
 
-static	void	fio_nxln	PARAMS(( lxi_but * ));
-static	int	fio_syntax_err	PARAMS(( lxi_but *, const char * ));
-static	void	file_error	PARAMS(( const char * ));
+static	void	fio_nxln	( lxi_but * );
+static	int	fio_syntax_err	( lxi_but *, const char * );
+static	void	file_error	( const char * );
 
 sefldsc seetbl[MAXSEE] =
 { {
@@ -120,7 +120,7 @@ static char *univ_fgets(char *s, int n, FILE *stream)
  */
 
 #define GEN_TABS(fncname,tbl,tbmax)				\
-static int fncname PARAMS(( int ));				\
+static int fncname ( int );				\
 static int							\
 fncname(tok)							\
     int tok;							\

@@ -77,21 +77,21 @@ static pword ps_rand[PSTKSZ];
 
 int   errcount = 0;
 
-static	void	bld_struct	PARAMS(( void ));
-static	int	reduce_stack	PARAMS(( int ));
-static	void	push_op		PARAMS(( int ));
-static	void	nt_term0	PARAMS(( void ));
-static	void	nt_term		PARAMS(( int ));
-static	void	nt_list		PARAMS(( void ));
-static	void	nt_listexpr	PARAMS(( void ));
-static	void	nt_args		PARAMS(( void ));
-static	void	nt_uselist	PARAMS(( void ));
-static	void	nt_exportlist	PARAMS(( void ));
-static	void	check_sym	PARAMS(( const char * ));
-static	void	nt_toplevel	PARAMS(( void ));
-static	int	bottomRead	PARAMS(( const char *, const char * ));
-static	void	buf_nextline	PARAMS(( lxi_but * ));
-static	int	buf_syntaxerror	PARAMS(( lxi_but *, const char * ));
+static	void	bld_struct	( void );
+static	int	reduce_stack	( int );
+static	void	push_op		( int );
+static	void	nt_term0	( void );
+static	void	nt_term		( int );
+static	void	nt_list		( void );
+static	void	nt_listexpr	( void );
+static	void	nt_args		( void );
+static	void	nt_uselist	( void );
+static	void	nt_exportlist	( void );
+static	void	check_sym	( const char * );
+static	void	nt_toplevel	( void );
+static	int	bottomRead	( const char *, const char * );
+static	void	buf_nextline	( lxi_but * );
+static	int	buf_syntaxerror	( lxi_but *, const char * );
 
 
 /*
@@ -748,7 +748,7 @@ parser_error(errstring)
 
 void
 read_loop(rdfunc, pptidx)
-    void  (*rdfunc) PARAMS(( void ));
+    void  (*rdfunc) ( void );
     int   pptidx;
 {
     int   eof = 0;

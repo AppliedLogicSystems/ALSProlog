@@ -212,11 +212,11 @@ pbi_mangle()
 
 }
 
-extern void	disp_heap_item	PARAMS(( PWord * ));
+extern void	disp_heap_item	( PWord * );
 
 #ifdef TRAILVALS
 
-int trailed_mangle0	PARAMS((PWord,PWord,int,PWord,int));
+int trailed_mangle0	(PWord,PWord,int,PWord,int);
 
 int
 pbi_trailed_mangle(void)

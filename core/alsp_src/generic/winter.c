@@ -72,7 +72,7 @@ long *Fail;
 
 #define round(x,s) ((((x)-1) & ~(long)((s)-1)) + (s))
 
-PWord	deref		PARAMS(( PWord ));
+PWord	deref		( PWord );
 
 #ifdef DEBUG
 static int valid_pword(PWord p)

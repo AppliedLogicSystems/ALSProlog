@@ -93,42 +93,38 @@ extern long *char_to_tok_map;
 extern char tokstr[];		/* defined in lexan.c */
 
 
-#ifdef PARAMS			/* prevent errors in bldtok.c */
-
 /* symtab.c */
-extern	void	symtab_init	PARAMS(( void ));
-extern	long	find_token	PARAMS(( const UCHAR * ));
-extern	long	probe_token	PARAMS(( UCHAR * ));
-extern	int	tok_table_size	PARAMS((void));
+extern	void	symtab_init	( void );
+extern	long	find_token	( const UCHAR * );
+extern	long	probe_token	( UCHAR * );
+extern	int	tok_table_size	(void);
 
 /* parser.c */
-extern	void	parser_init	PARAMS(( void ));
-extern	void	parser_reset	PARAMS(( void ));
-extern	int	find_var	PARAMS(( char * ));
-extern	void	push_rator	PARAMS(( long, long ));
-extern	void	bld_clause	PARAMS(( void ));
-extern	void	nt_query	PARAMS(( void ));
-extern	void	parser_error	PARAMS(( const char * ));
-extern	void	read_loop	PARAMS(( void (*) PARAMS((void)), int ));
-extern	pword	bld_strl	PARAMS(( char * ));
-extern	pword	bld_vlst	PARAMS(( void ));
-extern	int	qtok		PARAMS(( int ));
-extern	void	bld_showanswers	PARAMS(( void ));
-extern	int	consult		PARAMS(( int ));
-extern	pword	prim_read	PARAMS(( void ));
-extern	int	exec_query_from_buf PARAMS(( char * ));
-extern	UCHAR *	token_name	PARAMS(( int ));
+extern	void	parser_init	( void );
+extern	void	parser_reset	( void );
+extern	int	find_var	( char * );
+extern	void	push_rator	( long, long );
+extern	void	bld_clause	( void );
+extern	void	nt_query	( void );
+extern	void	parser_error	( const char * );
+extern	void	read_loop	( void (*) (void), int );
+extern	pword	bld_strl	( char * );
+extern	pword	bld_vlst	( void );
+extern	int	qtok		( int );
+extern	void	bld_showanswers	( void );
+extern	int	consult		( int );
+extern	pword	prim_read	( void );
+extern	int	exec_query_from_buf ( char * );
+extern	UCHAR *	token_name	( int );
 
 /* mapsym.c */
-extern	void	push_symmap	PARAMS(( void ));
-extern	void	pop_symmap	PARAMS(( void ));
-extern	long	symmap		PARAMS(( long ));
-extern	long *	sym_order	PARAMS(( long * ));
+extern	void	push_symmap	( void );
+extern	void	pop_symmap	( void );
+extern	long	symmap		( long );
+extern	long *	sym_order	( long * );
 
 /* expand.c */
-extern	void	parser_action	PARAMS(( int, pword ));
-extern	pword	cvt_term_to_rule PARAMS(( PWord, int ));
-
-#endif /* PARAMS */
+extern	void	parser_action	( int, pword );
+extern	pword	cvt_term_to_rule ( PWord, int );
 
 #endif /* __parser_h_ */
