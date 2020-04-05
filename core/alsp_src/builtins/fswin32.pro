@@ -170,9 +170,7 @@ kill_subdir(SubDir)
  *!----------------------------------------------------------------*/
 recursive_dir_path(Path_List, Path)
         :-
-printf(user_output,">r_d_p:ENTER PL=%t\n", [Path_List]),
         join_path(Path_List, Path),
-printf(user_output,">r_d_p:after j_p:PL=%t P=%t\n", [Path_List, Path]),
         sprintf(atom(Cmd), 'mkdir %t\n', [Path]),
         system(Cmd).
 

@@ -53,45 +53,44 @@ test_make_subdir2 :-
 
 test_recursive_dir_path :-
 	get_cwd(TestDir),
-	clean_dirs123(TestDir),
-builtins:clause(recursive_dir_path(Path_List, Path), BODY),
-printf(user_output, ">trdp:rdp_clause_body=%t\n", [BODY]),
+	clean_dirs(TestDir, [dir1,dir2,dir3]),
 
 	test([
-printf(user_output, "Enter test_recursive_dir_path-test\n", []),
 	    (Path_List = [dir1,dir2,dir3], 
 		recursive_dir_path(Path_List, Path),
 	        path_directory_tail(FullPath, TestDir, Path),
 		change_cwd(Path),
 		get_cwd(ThisPath),
 		FullPath == ThisPath,
-		clean_dirs123(TestDir)),
+		clean_dirs(TestDir, [dir1,dir2,dir3]),
+		change_cwd(TestDir)),
 	    true ]).
 
-clean_dirs123(TestDir) :-
-	change_cwd(TestDir),
-	(exists_file(dir1) -> 
-		change_cwd(dir1),
-		(exists_file(dir2) -> 
-			change_cwd(dir2),
-			(exists_file(dir3) -> 
-				remove_subdir(dir3),
-				change_cwd('..'),
-				remove_subdir(dir2),
-				change_cwd('..'),
-				remove_subdir(dir1)
-				;
-				true
-			)
-			;
-			change_cwd('..'),
-			remove_subdir(dir2),
-			change_cwd('..'),
-			remove_subdir(dir1)
-		)
-		; 
+clean_dirs(TestDir, DirsList) :-
+	do_clean_dirs([TestDir | DirsList], []).
+
+do_clean_dirs([], Stack) :-
+	climb_and_clean(Stack).
+	
+do_clean_dirs([Dir | DirsList], Stack) :-
+	(exists_file(Dir) ->
+		change_cwd(Dir), 
+		do_clean_dirs(DirsList, [Dir | Stack])
+		;
 		true
 	).
+
+climb_and_clean([]).
+climb_and_clean([Top]) :- !,
+	change_cwd('..').
+climb_and_clean([Dir | Stack]) :-
+	change_cwd('..'),
+	remove_subdir(Dir),
+	climb_and_clean(Stack).
+	
+
+
+
 	
 clean_dirsfoobar(TestDir) :-
 	change_cwd(TestDir),
