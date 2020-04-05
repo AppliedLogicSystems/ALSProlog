@@ -70,7 +70,7 @@ clean_dirs(TestDir, DirsList, Status) :-
 do_clean_dirs([], Stack, Status) :-
 	climb_and_clean(Stack, Status).
 	
-do_clean_dirs([Dir | ListOfDirsList], Stack, Status) :-
+do_clean_dirs([Dir | DirsList], Stack, Status) :-
 	(exists_file(Dir) ->
 		change_cwd(Dir), 
 		do_clean_dirs(DirsList, [Dir | Stack], Status)
