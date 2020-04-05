@@ -21,15 +21,15 @@
 #include "compile.h"
 #include "freeze.h"
 
-int	pbi_delay		PARAMS(( void ));
-int	pbi_is_delay_var	PARAMS(( void ));
-int	update_chpt_slots	PARAMS(( PWord ));
-int	pbi_clct_tr		PARAMS(( void ));
-int	pbi_unset_2nd		PARAMS(( void ));
-int 	pbi_del_tm_for		PARAMS(( void ));
-PWord	deref_2			PARAMS(( PWord ));
+int	pbi_delay		( void );
+int	pbi_is_delay_var	( void );
+int	update_chpt_slots	( PWord );
+int	pbi_clct_tr		( void );
+int	pbi_unset_2nd		( void );
+int 	pbi_del_tm_for		( void );
+PWord	deref_2			( PWord );
 
-int pbi_kill_freeze		PARAMS(( void ));
+int pbi_kill_freeze		( void );
 
 /*---------------------------------------------------------------*
  | pbi_delay()
@@ -445,10 +445,10 @@ printf("combin_dels:r=_%lu f=_%lu wm_H=%x wm_HB=%x wm_B=%x\n",
                                DEBUGGING FUNCTIONS
  *========================================================================*/
 
-int	pbi_walk_cps		PARAMS(( void ));
-void	disp_heap_item		PARAMS(( PWord * ));
-int	pbi_swp_tr		PARAMS(( void ));
-int	disp_heap 		PARAMS(( void ));
+int	pbi_walk_cps		( void );
+void	disp_heap_item		( PWord * );
+int	pbi_swp_tr		( void );
+int	disp_heap 		( void );
 
 	/*-------------------------------------------------*
 	 | Walk the choice point stack,from newest to
@@ -703,7 +703,7 @@ printf("Heap display: start = %x --> stop = %x\n",start,stop);
 }
 
 
-int disp_item	PARAMS((void));
+int disp_item	(void);
 
 int
 disp_item()
@@ -722,10 +722,10 @@ disp_item()
                                DEBUGGING FUNCTIONS_xxxx
  *========================================================================*/
 
-int	pbi_walk_cps		PARAMS(( void ));
-void	x_disp_heap_item	PARAMS(( PWord * ));
-int	pbi_x_swp_tr		PARAMS(( void ));
-int	x_disp_heap 		PARAMS(( void ));
+int	pbi_walk_cps		( void );
+void	x_disp_heap_item	( PWord * );
+int	pbi_x_swp_tr		( void );
+int	x_disp_heap 		( void );
 
 void
 x_disp_heap_item(CurT)
@@ -891,7 +891,7 @@ printf("====== Heap display_x: start = %x --> stop = %x\n",start,stop);
 
 
 /*
-int disp_item	PARAMS((void));
+int disp_item	(void);
 
 int
 disp_item()

@@ -154,9 +154,9 @@ static tkentry initial_table[] =
 /*//long *char_to_tok_map;*/
 
 /* Prototypes */
-static	tkentry ** lookup		PARAMS(( UCHAR *, size_t * ));
-static	void	new_string_space	PARAMS(( size_t ));
-static	void	increase_table_size	PARAMS(( void ));
+static	tkentry ** lookup		( UCHAR *, size_t * );
+static	void	new_string_space	( size_t );
+static	void	increase_table_size	( void );
 
 
 

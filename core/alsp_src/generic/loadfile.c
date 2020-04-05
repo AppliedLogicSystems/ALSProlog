@@ -638,12 +638,12 @@ obp_pop()
 
 #if (defined(__DJGPP__) || defined(__GO32__))
 
-static	long	get_file_modified_time	PARAMS(( CONST char * ));
-static	int	isdir			PARAMS((CONST char * ));
+static	long	get_file_modified_time	( const char * );
+static	int	isdir			(const char * );
 
 static long 
 get_file_modified_time(fname)
-    CONST char *fname;
+    const char *fname;
 {
 #if defined(DOS)
 
@@ -691,7 +691,7 @@ get_file_modified_time(fname)
  */
 static int
 isdir(fname)
-    CONST char *fname;
+    const char *fname;
 {
 #if defined(DOS)
 

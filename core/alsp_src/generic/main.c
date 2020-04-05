@@ -116,20 +116,20 @@ static char versionYear[] = VERSION_YEAR;	/* from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
 
-static	void	panic_fail	PARAMS(( void ));
+static	void	panic_fail	( void );
 #ifdef arch_m88k
-static	void	panic_continue	PARAMS(( void ));
+static	void	panic_continue	( void );
 #endif
-static	void	abolish_predicate PARAMS(( const char *, const char *, int ));
-static	void	assert_sys_searchdir PARAMS(( char * ));
-static	void	assert_als_system PARAMS((const char *, const char *,
+static	void	abolish_predicate ( const char *, const char *, int );
+static	void	assert_sys_searchdir ( char * );
+static	void	assert_als_system (const char *, const char *,
 					  const char *, const char *,
-					  const char *, const char *));
-static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
+					  const char *, const char *);
+static	void	assert_atom_in_module ( const char*, const char * );
 
 
-static	void	autoload	PARAMS(( char * ));
-static	void	chpt_init	PARAMS(( void ));
+static	void	autoload	( char * );
+static	void	chpt_init	( void );
 
 static void
 panic_fail()
@@ -808,7 +808,7 @@ chpt_init()
  | backs.  Who knows, maybe someday we will want to call it.
  *-------------------------------------------------------------------*/
 
-extern	char *	copyright	PARAMS(( void ));
+extern	char *	copyright	( void );
 
 char *
 copyright()

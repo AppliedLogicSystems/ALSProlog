@@ -20,14 +20,14 @@
 #include <stdio.h>
 #include "alspi.h"
 
-static	int	lookup_c_sym	PARAMS(( char * ));
-static	int	c_structinfo	PARAMS(( void ));
-static	int	c_typeinfo	PARAMS(( void ));
-static	int	c_constinfo	PARAMS(( void ));
-static	int	c_rconstinfo	PARAMS(( void ));
-static	int	c_call		PARAMS(( void ));
-static	int	c_makeuia	PARAMS(( void ));
-static	int	c_convertCstrPstr PARAMS(( void ));
+static	int	lookup_c_sym	( char * );
+static	int	c_structinfo	( void );
+static	int	c_typeinfo	( void );
+static	int	c_constinfo	( void );
+static	int	c_rconstinfo	( void );
+static	int	c_call		( void );
+static	int	c_makeuia	( void );
+static	int	c_convertCstrPstr ( void );
 
 /*
  * symbols for "$farptr", "f", "[]" and "c";
@@ -660,7 +660,7 @@ c_call()
     int   t2;			/* arglist */
     PWord vret;
     int   tret;			/* function return value */
-    int   (*funcptr) PARAMS(( char *, ...));
+    int   (*funcptr) ( char *, ...);
     long  retval;
     PWord head;
     int   headtype;
@@ -673,7 +673,7 @@ c_call()
 
     if (!CI_get_integer(&v1, t1))
 	PI_FAIL;
-    funcptr = (int (*)PARAMS((char *, ...))) v1;
+    funcptr = (int (*)(char *, ...)) v1;
 
     while (t2 == PI_LIST) {
 	PI_gethead(&head, &headtype, v2);
@@ -689,7 +689,7 @@ c_call()
 
     switch (nargs) {
 	case 0:
-	    retval = (*(int (*)PARAMS((void)))funcptr) ();
+	    retval = (*(int (*)(void))funcptr) ();
 	    break;
 	case 1:
 	    retval = (*funcptr) (args[0]);

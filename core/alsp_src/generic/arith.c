@@ -49,19 +49,19 @@
 
 #include "random.h"
 
-extern	double	als_random	PARAMS(( void ));
+extern	double	als_random	( void );
 #ifndef HAVE_AINT
-extern	double	aint		PARAMS(( double ));
+extern	double	aint		( double );
 #endif
 /*****
 #ifndef HAVE_RINT
-extern	double	rint		PARAMS(( double ));
+extern	double	rint		( double );
 #endif
 ****/
 #ifndef HAVE_EXP10
-extern	double	exp10		PARAMS(( double ));
+extern	double	exp10		( double );
 #endif
-static	double	do_is		PARAMS(( PWord, int, int * ));
+static	double	do_is		( PWord, int, int * );
 
 static jmp_buf is_error;
 
@@ -83,14 +83,14 @@ PWord error_functor; int error_arity;
 #ifdef HAVE_SRAND48
 #define drandom drand48
 #define srandom srand48
-extern	void	srand48		PARAMS(( long ));
-extern	double	drand48		PARAMS(( void ));
+extern	void	srand48		( long );
+extern	double	drand48		( void );
 
 #elif defined(HAVE_SRANDOM)
 #define RANDRANGE 0x7fffffff
 #ifndef __DJGPP__
-extern	long	random		PARAMS(( void ));
-extern	void	srandom		PARAMS(( int ));
+extern	long	random		( void );
+extern	void	srandom		( int );
 #endif
 
 #elif defined(HAVE_SRAND)
@@ -727,7 +727,7 @@ NUMCOMP(pbi_arithnotequal, !=)
 
 
 
-int pbi_fpconst_val	PARAMS(( void ));
+int pbi_fpconst_val	( void );
 
 int
 pbi_fpconst_val()
@@ -753,7 +753,7 @@ pbi_fpconst_val()
 		FAIL;
 }
 
-int pbi_uia_poke_fpconst 	PARAMS (( void ));
+int pbi_uia_poke_fpconst 	( void );
 
 int
 pbi_uia_poke_fpconst()

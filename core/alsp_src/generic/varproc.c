@@ -23,12 +23,12 @@ varinf vtbl[VTBLSIZE + 2];	/* variable table               */
 
 int   call_env_sizes[MAXGLS];
 
-static	void	init_vtbl	PARAMS(( int ));
-static	void	vwalk_term	PARAMS(( pword, int, int ));
-static	void	vwalk_const	PARAMS(( pword, int, int ));
-static	void	vwalk_list	PARAMS(( pword, int, int ));
-static	void	vwalk_rule	PARAMS(( pword, int, int ));
-static	void	vwalk_vo	PARAMS(( pword, int, int ));
+static	void	init_vtbl	( int );
+static	void	vwalk_term	( pword, int, int );
+static	void	vwalk_const	( pword, int, int );
+static	void	vwalk_list	( pword, int, int );
+static	void	vwalk_rule	( pword, int, int );
+static	void	vwalk_vo	( pword, int, int );
 
 static void
 init_vtbl(n)
@@ -57,7 +57,7 @@ init_vtbl(n)
 
 #define vwalk(t) vwalk_rule(t,-1,-1)
 
-static void (*vwalk_tbl[]) PARAMS(( pword, int, int )) = {
+static void (*vwalk_tbl[]) ( pword, int, int ) = {
     vwalk_term,
 	vwalk_const,
 	vwalk_list,

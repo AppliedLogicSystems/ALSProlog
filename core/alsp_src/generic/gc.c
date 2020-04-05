@@ -27,11 +27,11 @@
 
 #if 0 /* RH6 */
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-extern void stack_overflow  PARAMS(( int, siginfo_t *, ucontext_t * ));
+extern void stack_overflow  ( int, siginfo_t *, ucontext_t * );
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-extern void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t ));
+extern void    stack_overflow  ( int, int, struct sigcontext *, caddr_t );
 #elif defined(Portable)
-extern void   stack_overflow  PARAMS(( int ));
+extern void   stack_overflow  ( int );
 #else
 #error
 #endif
@@ -130,15 +130,15 @@ static int gccallcount;		/* number of times gc has been called */
 extern int gcbeep;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-static	long *	mark_args	PARAMS(( long *, Code * ));
-static	void	mark_from	PARAMS(( long * ));
-static	void	rev		    PARAMS(( long *, long *, long *, long ));
-static	void	rev_update	PARAMS(( long *, long ));
-static	void	init_marks	PARAMS(( void ));
-static	void	mark		PARAMS(( long ));
+static	long *	mark_args	( long *, Code * );
+static	void	mark_from	( long * );
+static	void	rev		    ( long *, long *, long *, long );
+static	void	rev_update	( long *, long );
+static	void	init_marks	( void );
+static	void	mark		( long );
 
 #ifdef INTCONSTR
-static	int	core_gc		PARAMS(( void ));
+static	int	core_gc		( void );
 #endif
 
 #include <stdio.h>

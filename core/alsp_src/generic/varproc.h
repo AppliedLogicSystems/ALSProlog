@@ -45,10 +45,10 @@ extern int call_env_sizes[];	/* size of environment for each call (goal) in body
 #define ENVIDX VTBLSIZE
 
 /* ----------- varproc.c ----------- */
-extern	int		classify_vars		PARAMS(( pword ));
-extern	void	compute_call_env_sizes	PARAMS(( int, int ));
+extern	int		classify_vars		( pword );
+extern	void	compute_call_env_sizes	( int, int );
 
 /* ----------- compile.c ----------- */
 #ifdef NewMath
-extern	int	isarithmetic		PARAMS(( pword ));
+extern	int	isarithmetic		( pword );
 #endif

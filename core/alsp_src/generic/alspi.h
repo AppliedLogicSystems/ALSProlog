@@ -34,8 +34,6 @@ extern char executable_path[PATH_MAX];
  * Set up some macros for dealing with prototypes and other ANSI C features.
  */
 
-#define PARAMS(arglist) arglist
-
 #if defined(macintosh)
 #define ALSPI_API(X)		pascal X
 #define ALSPI_APIP(X,Y)		pascal X (*Y)
@@ -63,14 +61,14 @@ typedef long PWord;
 typedef struct {
 		const char *name;
 		int  arity;
-		int (*func) PARAMS((void));
+		int (*func) (void);
 		const char *funcname;
 } PSTRUCT;
 
 #define PI_BEGIN static PSTRUCT pi_init_array[] = {
 #define PI_DEFINE(p,a,f) {p,a,f,((char *) -1)},
-#define PI_MODULE(m) {m,-1,((int (*)PARAMS((void))) 0),((char *) -1)},
-#define PI_END {((char *) -1),-1,((int (*)PARAMS((void))) 0),((char *) -1)} };
+#define PI_MODULE(m) {m,-1,((int (*)(void)) 0),((char *) -1)},
+#define PI_END {((char *) -1),-1,((int (*)(void)) 0),((char *) -1)} };
 
 #define PI_PDEFINE(p,a,f,fn) {p,a,f,fn},
 
@@ -132,48 +130,48 @@ typedef struct {
  * Declarations for foreign interface functions - 6/15/88 - chris
  */
 
-extern	ALSPI_API(char *)	PI_forceuia	PARAMS(( PWord *, int * ));
-extern	ALSPI_API(void)	PI_getan	PARAMS(( PWord *, int *, int ));
-extern	ALSPI_API(void)	PI_getargn	PARAMS(( PWord *, int *, PWord, int ));
-extern	ALSPI_API(void)	PI_gethead	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(void)	PI_gettail	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(void)	PI_getdouble	PARAMS(( double *, PWord ));
-extern	ALSPI_API(void)	PI_getstruct	PARAMS(( PWord *, int *, PWord ));
-extern	ALSPI_API(char *)	PI_getsymname	PARAMS(( char *, PWord, int ));
-extern	ALSPI_API(char *)	PI_getuianame	PARAMS(( char *, PWord, int ));
-extern	ALSPI_API(void)	PI_getuiasize	PARAMS(( PWord, int * ));
-extern	ALSPI_API(void)	PI_makedouble	PARAMS(( PWord *, int *, double ));
-extern	ALSPI_API(void)	PI_makelist	PARAMS(( PWord *, int * ));
-extern	ALSPI_API(void)	PI_makestruct	PARAMS(( PWord *, int *, PWord, int ));
-extern	ALSPI_API(void)	PI_makesym	PARAMS(( PWord *, int *, const char * ));
-extern	ALSPI_API(void)	PI_makeuia	PARAMS(( PWord *, int *, const char * ));
-extern	ALSPI_API(void)	PI_allocuia	PARAMS(( PWord *, int *, int ));
-extern	ALSPI_API(int)	PI_printf	PARAMS(( const char *, ... ));
-extern	ALSPI_API(int)	PI_aprintf	PARAMS(( const char *, const char *, ... ));
-extern  ALSPI_API(int)	PI_vprintf	PARAMS(( const char *, va_list ));
-extern  ALSPI_API(int)	PI_vaprintf	PARAMS(( const char *, const char *, va_list ));
-extern	ALSPI_API(int)	PI_rungoal	PARAMS(( PWord, PWord, int ));
-extern	ALSPI_API(int)	PI_rungoal_with_update	PARAMS(( PWord, PWord *, int * ));
-extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	PARAMS(( PWord, PWord *, int *, int * ));
-extern	ALSPI_API(int)	PI_unify	PARAMS(( PWord , int, PWord , int ));
-extern	ALSPI_API(void)	PrologInit	PARAMS(( PSTRUCT * ));
-extern	ALSPI_API(void)	PI_shutdown	PARAMS(( void ));
-extern	ALSPI_API(void)	PI_toplevel	PARAMS(( void ));
-extern	ALSPI_API(int)	PI_status_toplevel	PARAMS(( int * ));
-extern	ALSPI_API(int)	PI_prolog_init	PARAMS(( int, char **));
-extern	ALSPI_API(int)	PI_startup	PARAMS(( const PI_system_setup *));
-extern	ALSPI_API(void)	PI_throw	PARAMS((PWord obj, int objt));
-extern	ALSPI_API(void)	PI_getball	PARAMS((PWord *obj, int *objt));
-extern	ALSPI_API(int)	PI_main		PARAMS((int argc, char *argv[], void (*init)(void)));
-extern	ALSPI_API(void)	PI_interrupt	PARAMS((void));
+extern	ALSPI_API(char *)	PI_forceuia	( PWord *, int * );
+extern	ALSPI_API(void)	PI_getan	( PWord *, int *, int );
+extern	ALSPI_API(void)	PI_getargn	( PWord *, int *, PWord, int );
+extern	ALSPI_API(void)	PI_gethead	( PWord *, int *, PWord );
+extern	ALSPI_API(void)	PI_gettail	( PWord *, int *, PWord );
+extern	ALSPI_API(void)	PI_getdouble	( double *, PWord );
+extern	ALSPI_API(void)	PI_getstruct	( PWord *, int *, PWord );
+extern	ALSPI_API(char *)	PI_getsymname	( char *, PWord, int );
+extern	ALSPI_API(char *)	PI_getuianame	( char *, PWord, int );
+extern	ALSPI_API(void)	PI_getuiasize	( PWord, int * );
+extern	ALSPI_API(void)	PI_makedouble	( PWord *, int *, double );
+extern	ALSPI_API(void)	PI_makelist	( PWord *, int * );
+extern	ALSPI_API(void)	PI_makestruct	( PWord *, int *, PWord, int );
+extern	ALSPI_API(void)	PI_makesym	( PWord *, int *, const char * );
+extern	ALSPI_API(void)	PI_makeuia	( PWord *, int *, const char * );
+extern	ALSPI_API(void)	PI_allocuia	( PWord *, int *, int );
+extern	ALSPI_API(int)	PI_printf	( const char *, ... );
+extern	ALSPI_API(int)	PI_aprintf	( const char *, const char *, ... );
+extern  ALSPI_API(int)	PI_vprintf	( const char *, va_list );
+extern  ALSPI_API(int)	PI_vaprintf	( const char *, const char *, va_list );
+extern	ALSPI_API(int)	PI_rungoal	( PWord, PWord, int );
+extern	ALSPI_API(int)	PI_rungoal_with_update	( PWord, PWord *, int * );
+extern	ALSPI_API(int)	PI_rungoal_with_update_and_catch	( PWord, PWord *, int *, int * );
+extern	ALSPI_API(int)	PI_unify	( PWord , int, PWord , int );
+extern	ALSPI_API(void)	PrologInit	( PSTRUCT * );
+extern	ALSPI_API(void)	PI_shutdown	( void );
+extern	ALSPI_API(void)	PI_toplevel	( void );
+extern	ALSPI_API(int)	PI_status_toplevel	( int * );
+extern	ALSPI_API(int)	PI_prolog_init	( int, char **);
+extern	ALSPI_API(int)	PI_startup	( const PI_system_setup *);
+extern	ALSPI_API(void)	PI_throw	(PWord obj, int objt);
+extern	ALSPI_API(void)	PI_getball	(PWord *obj, int *objt);
+extern	ALSPI_API(int)	PI_main		(int argc, char *argv[], void (*init)(void));
+extern	ALSPI_API(void)	PI_interrupt	(void);
 
 
 #ifdef APP_PRINTF_CALLBACK
 extern	ALSPI_API(void)	PI_set_app_printf_callback(void (*callback)(int, va_list));
 #endif
-extern	ALSPI_API(void)	PI_app_printf	PARAMS(( int, ... ));
-extern  ALSPI_API(void)    PI_vapp_printf  PARAMS(( int, va_list ));
-extern	ALSPI_API(const char *)	PI_get_options	PARAMS(( void ));
+extern	ALSPI_API(void)	PI_app_printf	( int, ... );
+extern  ALSPI_API(void)    PI_vapp_printf  ( int, va_list );
+extern	ALSPI_API(const char *)	PI_get_options	( void );
 
 typedef long (*console_func)(char *, long);
 
@@ -183,7 +181,7 @@ extern ALSPI_API(void)	PI_set_console_functions(console_func readf,
 #ifdef macintosh
 extern	long	yield_interval;
 extern  long	yield_counter;
-extern	void	PI_yield_time	PARAMS(( void ));
+extern	void	PI_yield_time	( void );
 extern	ALSPI_API(void)	PI_set_yield_proc(void (*p)(void));
 #endif
 
@@ -351,10 +349,10 @@ typedef struct {
  * interface generator ).
  *-----------------------------------------------------------------------*/
 
-extern	ALSPI_API(int)	sym_insert_2long PARAMS(( char *, int, long, long ));
-extern	ALSPI_API(int)	sym_insert_dbl	PARAMS(( char *, int, double ));
-extern	ALSPI_API(int)	CI_get_integer	PARAMS(( PWord *, int ));
-extern	ALSPI_API(int)	CI_get_double	PARAMS(( double *, unsigned long, unsigned long ));
+extern	ALSPI_API(int)	sym_insert_2long ( char *, int, long, long );
+extern	ALSPI_API(int)	sym_insert_dbl	( char *, int, double );
+extern	ALSPI_API(int)	CI_get_integer	( PWord *, int );
+extern	ALSPI_API(int)	CI_get_double	( double *, unsigned long, unsigned long );
 
 extern	ALSPI_API(const char *) find_callback(void *func, void *object);
 

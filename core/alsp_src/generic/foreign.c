@@ -21,8 +21,8 @@
 
 #ifndef DoubleType
 
-static	void	fixTag		PARAMS(( PWord *, int * ));
-static	void	tagFix		PARAMS(( PWord *, int * ));
+static	void	fixTag		( PWord *, int * );
+static	void	tagFix		( PWord *, int * );
 
 static void
 fixTag(v, t)
@@ -59,7 +59,7 @@ load_foreign(filename, libstr, initfcn)
     char *initfcn;
 {
 #ifdef DynamicForeign
-    void (*fptr)PARAMS(( void ));
+    void (*fptr)( void );
     if ( (fptr = load_object(filename, libstr, initfcn)) ) {
 	(*fptr)();
 	return 1;

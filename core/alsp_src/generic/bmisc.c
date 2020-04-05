@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <time.h>
 
-static	unsigned long hashN	PARAMS(( PWord, int, int ));
-static	void	als_gensym	PARAMS(( UCHAR *, UCHAR * ));
+static	unsigned long hashN	( PWord, int, int );
+static	void	als_gensym	( UCHAR *, UCHAR * );
 
 #ifdef CMeta
 

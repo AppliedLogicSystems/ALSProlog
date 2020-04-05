@@ -10,8 +10,8 @@
 
 #include <math.h>
 
-int is_ieee_nan PARAMS( (double) );
-int is_ieee_inf PARAMS( (double) );
+int is_ieee_nan (double);
+int is_ieee_inf (double);
 
 int
 is_ieee_nan(v)

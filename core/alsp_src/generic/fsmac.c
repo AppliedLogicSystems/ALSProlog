@@ -317,7 +317,7 @@ static int canonicalize_pathname(void)
 /* Other routines. */
 
 
-int absolute_pathname(CONST char *name)
+int absolute_pathname(const char *name)
 {    
     return *name != ':' && (strchr(name, ':') != NULL);
 }

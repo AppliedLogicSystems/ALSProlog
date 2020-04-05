@@ -102,7 +102,7 @@ pbi_abolish_clausegroup()
 }
 
 extern long *aib_clause_addr;
-static	int	doassert	PARAMS(( int, PWord, pword, int ));
+static	int	doassert	( int, PWord, pword, int );
 
 int
 pbi_asserta()

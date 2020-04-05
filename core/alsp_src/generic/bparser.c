@@ -15,8 +15,8 @@
  *=============================================================================*/
 #include "defs.h"
 
-static	int	string_to_number PARAMS(( UCHAR *, double * ));
-static	int	get_prec	PARAMS(( PWord, PWord ));
+static	int	string_to_number ( UCHAR *, double * );
+static	int	get_prec	( PWord, PWord );
 
 /*
  * string_to_number is used by pbi_name to convert a potential string
@@ -1057,7 +1057,7 @@ enum C_list_codes {
     C_list_code
 };
 
-static int string_to_C_list PARAMS(( PWord *, int *, UCHAR *, enum C_list_codes ));
+static int string_to_C_list ( PWord *, int *, UCHAR *, enum C_list_codes );
 
 static int
 string_to_C_list(vp,tp,str,C_which)
@@ -1101,7 +1101,7 @@ enum ltos_retcodes {
     ltos_SUCCESS
 };
 
-static enum ltos_retcodes C_list_to_string PARAMS(( PWord *, int *, PWord, int, enum C_list_codes ));
+static enum ltos_retcodes C_list_to_string ( PWord *, int *, PWord, int, enum C_list_codes );
 
 static enum ltos_retcodes
 C_list_to_string(vp,tp,vin,tin,C_which)
@@ -1353,7 +1353,7 @@ pbi_eq_sut_int()
 	    FAIL;
 }
 
-extern void    w_mk_sut_int PARAMS(( PWord *, int *, long ));
+extern void    w_mk_sut_int ( PWord *, int *, long );
 
 void
 w_mk_sut_int(rval, rtag, ival)
