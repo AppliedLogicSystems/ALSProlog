@@ -140,9 +140,20 @@ remove_subdir(SubDir)
 	:-
 	rmdir(SubDir).
 
+/*!--------------------------------------------------------------
+ |      kill_subdir/1
+ |      kill_subdir(SubDir)
+ |      kill_subdir(+)
+ |
+ |      - kills a (possibly nonempty) subdirectory from the current working directory
+ |
+ |      If SubDir is an atom, remove the subdirectory named SubDir from
+ |      the current working directory, if it exists, even if it
+ |	is non-empty.
+ *!--------------------------------------------------------------*/
 kill_subdir(SubDir)
         :-
-        sprintf(atom(Cmd),'rm -r %t',[SubDir]),
+        sprintf(atom(Cmd), 'rmdir /Q /S %t', [SubDir]),
         system(Cmd).
 
 /*!----------------------------------------------------------------

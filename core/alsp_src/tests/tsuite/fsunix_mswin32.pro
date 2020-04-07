@@ -86,12 +86,38 @@ climb_and_clean([Dir | Stack], Status) :-
 	remove_subdir(Dir),
 	climb_and_clean(Stack, Status).
 
-list_clean_dirs([], TestDir, Status).
-list_clean_dirs([Path_List | List_of_Path_Lists], TestDir, Status) :-
-	do_clean_dirs([TestDir | List_of_Path_Lists], [], Status).
+
+check_multi_dirs([], [], TestDir, ok).
+check_multi_dirs([Path_List], [Top], TestDir, Status) :-
+	Path_List = [Top | _],
+	check_list(Path_List, TestDir, [], Status),
+	Status = ok.
+check_multi_dirs([Path_List | List_of_Path_Lists], [Top | Tops], TestDir, Status) :-
+	Path_List = [Top | _],
+	check_list(Path_List, TestDir, [], Status),
+	check_multi_dirs(List_of_Path_Lists, Tops, TestDir, Status).
+
+check_list([], TestDir, Stack, Status) :-
+	climb_dirs(Stack, TestDir, Status).
+
+check_list([Dir | DirsList], TestDir, Stack, Status) :-
+	(exists_file(Dir) ->
+		change_cwd(Dir), 
+		check_list(DirsList, TestDir, [Dir | Stack], Status)
+		;
+		Status = fail,
+	    	change_cwd(TestDir)
+	).
+
+
+climb_dirs([], TestDir, Status).
+climb_dirs([Dir | Stack], TestDir, Status) :-
+	change_cwd('..'),
+	climb_dirs(Stack, TestDir, Status).
 	
 	
-/*
+/* 	Multiple paths forming a tree:
+
 	rr/
 	  qq/                  pp/
             kk/ mm/    nn/       aa/
@@ -103,12 +129,44 @@ list_clean_dirs([Path_List | List_of_Path_Lists], TestDir, Status) :-
 test_recursive_dir_paths :-
 	List_of_Path_Lists = [[rr,qq,kk],[rr,qq,mm,jj],[rr,qq,nn],[rr,pp,aa,bb]],
 	get_cwd(TestDir),
-	clean_dirs(TestDir, List_of_Path_Lists, _),
 
 	test([
 	    (recursive_dir_paths(List_of_Path_Lists, Paths),
-	    clean_dirs(TestDir, List_of_Path_Lists, Status),
+	    check_multi_dirs(List_of_Path_Lists, Tops, TestDir, Status),
 	    Status == ok,
-	    change_cwd(TestDir)),
+	    change_cwd(TestDir),
+	    remove_list_dirs(Tops)),
 	    true ]).
 
+check_multi_dirs([], [], TestDir, ok).
+check_multi_dirs([Path_List], [Top], TestDir, Status) :-
+	Path_List = [Top | _],
+	check_list(Path_List, TestDir, [], Status),
+	Status = ok.
+check_multi_dirs([Path_List | List_of_Path_Lists], [Top | Tops], TestDir, Status) :-
+	Path_List = [Top | _],
+	check_list(Path_List, TestDir, [], Status),
+	check_multi_dirs(List_of_Path_Lists, Tops, TestDir, Status).
+
+check_list([], TestDir, Stack, Status) :-
+	climb_dirs(Stack, TestDir, Status).
+
+check_list([Dir | DirsList], TestDir, Stack, Status) :-
+	(exists_file(Dir) ->
+		change_cwd(Dir), 
+		check_list(DirsList, TestDir, [Dir | Stack], Status)
+		;
+		Status = fail,
+	    	change_cwd(TestDir)
+	).
+
+climb_dirs([], TestDir, Status).
+climb_dirs([Dir | Stack], TestDir, Status) :-
+	change_cwd('..'),
+	climb_dirs(Stack, TestDir, Status).
+	
+remove_list_dirs([]).
+remove_list_dirs([Top | Tops]) :-
+	(exists_file(Top) ->
+		kill_subdir(Top) ; true),
+	remove_list_dirs(Tops).
