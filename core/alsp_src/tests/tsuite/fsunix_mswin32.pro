@@ -87,29 +87,6 @@ climb_and_clean([Dir | Stack], Status) :-
 	climb_and_clean(Stack, Status).
 
 
-check_multi_dirs([], [], TestDir, ok).
-check_multi_dirs([Path_List], [Top], TestDir, Status) :-
-	Path_List = [Top | _],
-	check_list(Path_List, TestDir, [], Status),
-	Status = ok.
-check_multi_dirs([Path_List | List_of_Path_Lists], [Top | Tops], TestDir, Status) :-
-	Path_List = [Top | _],
-	check_list(Path_List, TestDir, [], Status),
-	check_multi_dirs(List_of_Path_Lists, Tops, TestDir, Status).
-
-check_list([], TestDir, Stack, Status) :-
-	climb_dirs(Stack, TestDir, Status).
-
-check_list([Dir | DirsList], TestDir, Stack, Status) :-
-	(exists_file(Dir) ->
-		change_cwd(Dir), 
-		check_list(DirsList, TestDir, [Dir | Stack], Status)
-		;
-		Status = fail,
-	    	change_cwd(TestDir)
-	).
-
-
 climb_dirs([], TestDir, Status).
 climb_dirs([Dir | Stack], TestDir, Status) :-
 	change_cwd('..'),
