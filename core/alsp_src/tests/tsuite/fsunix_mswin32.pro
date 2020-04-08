@@ -11,7 +11,7 @@ do_test_fs(OS)
 		test_make_subdir1,
 		test_make_subdir2,
 		test_recursive_dir_path,
-		test_recursive_dir_paths,
+%		test_recursive_dir_paths,
 	true]).
 
 do_test_fs(OS)
