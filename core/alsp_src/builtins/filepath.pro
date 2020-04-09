@@ -97,6 +97,34 @@ file_extension(FullName, FileName, Ext) :-
 	atom_concat(FileName,'.',FileNameDot),
 	atom_concat(FileNameDot, Ext, FullName).
 
+/*!---------------------------------------------------------------------
+ |      path_directory_tail/3
+ |      path_directory_tail(Path, Directory, Tail)
+ |      path_directory_tail(+/-, +/-, +/-)
+ |
+ |      - Compose or decompose a path to a file in a directory.
+ |
+ |      If Path is uninstantiated, then joins Directory with Tail, and
+ |      unifies the result with Path.
+ |      If Path is instantiated, removes the last element from Path,
+ |      leaving Not-Last, unifies the last element with Tail, and:
+ |      if Not-Last is empty, unifies Directory with '.', else
+ |      unifies Directory with Not-Last.
+ |
+ | Examples
+ |      ?- path_directory_tail(Path, 'mom/kids', 'bar/zip.pro').
+ |      Path == 'mom/kids/bar/zip.pro'
+ |      ?- path_directory_tail('mom/kids/bar/zip.pro', 'mom/kids/bar', Tail).
+ |      Tail == 'zip.pro'
+ |      ?- path_directory_tail('mom/kids/bar/zip.pro', Directory, 'zip.pro').
+ |      Directory == 'mom/kids/bar'
+ |      ?- path_directory_tail('mom/kids/bar/zip.pro', Directory, Tail).
+ |      Directory == 'mom/kids/bar'
+ |      Tail='zip.pro'
+ |      ?- path_directory_tail('zip.pro', Directory, Tail).
+ |      Directory='.'
+ |      Tail='zip.pro'
+ *!--------------------------------------------------------------------*/
 path_directory_tail(Path, Directory, Tail) :-
 	var(Path),
 	!,
