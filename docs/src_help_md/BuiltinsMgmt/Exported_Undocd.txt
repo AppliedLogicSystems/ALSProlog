@@ -251,8 +251,6 @@ filepath.pro:
       path_elements/2
       path_type/2
       path_type/3
-      same_disk/2
-      same_path/2
       split_path/2
       split_path/3
       tilda_expand/2

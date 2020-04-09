@@ -874,21 +874,6 @@ directory_self(macos, ':').
 directory_self(mswin32, '.').
 ```
 ```
-same_path/2
-same_path(Path1, Path2)
-same_path(+, +)
-```
-If Path1 and Path2 are two lists denoting file paths, determines whether they denote the same path, allowing for identification of uppercase and lowercase names
-as appropriate for the OS.
-```
-same_disk/2
-same_disk(Disk1, Disk2)
-same_disk(+, +)
-```
-If Disk1 and Disk2 are atoms denoting disks, determines whether they are the
-same, allowing for identification of upper and lower case letters, as appropriate for
-the os.
-
 ## 11.12 File System
 The most important aspects of access to the file system are described in Chapter 11
 on Prolog I/O. However, there are a number of further useful operations which are

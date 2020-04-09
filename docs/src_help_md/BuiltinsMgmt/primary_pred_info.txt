@@ -816,8 +816,6 @@ retract_all0/2                     builtins  Lib
 retract_each/2                     builtins  Lib                                                                    
 reverse/2                          builtins  P_def                           reverse.md               blt_term.pro  
 rexec/2                            sio       P_def                           rexec.md                 sio.pro       
-same_disk/2                        builtins  P_def                                                    filepath.pro  
-same_path/2                        builtins  P_def                                                    filepath.pro  
 same_uc/2                          builtins  P_def                           strings.md                             
 save_image/1                       builtins  P_def                                                    blt_pckg.pro  
 save_image/2                       builtins  P_def                           save_image.md            blt_pckg.pro  
