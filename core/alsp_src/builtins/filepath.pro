@@ -1,52 +1,53 @@
 /*=================================================================
- |		filepath.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
+ |              filepath.pro
+ |      Copyright (c) 1991-96,2020 Applied Logic Systems, Inc.
+ |              Group: File System
+ |              DocTitle: file_extension/3
  |
- |	Abstract handling of building and decomposing file names with paths.
  |
- |  Author: Ken Bowen
- |  Date:	May, 1991
- |	Revised with "root" terminology: October,1991
+ |      Abstract handling of building and decomposing file names with paths.
  |
- |	Terminology
- |	-----------
- |		File -- the name part of a file designator, as:
- |					zip in 'zip.pro' ;
- |		Extension -- the extension part of a file designator:
- |					pro in 'zip.pro' ;
- |		Full file name -- name part plus extension (if any):
- |					'zip.pro',    zip
- |		(Sub)path -- sequence of names of (sub)directories, each
- |					a subdirectory of the preceeding:
- |					foo/bar/silly
- |					foo\bar\silly
- |		Root -- the file root symbol, combined with a "disk" indicator,
- |			if any:
- |				'c:\'
- |				'\'
- |	Revised to use sub_atom, atom_concat, etc: November 1993 by K. Buettner
+ |  Author: Chuck Houpt, Ken Bowen
+ |  Date:       May, 1991
+ |  Revised with "root" terminology: October,1991
+ |
+ |      Terminology
+ |      -----------
+ |              File -- the name part of a file designator, as:
+ |                                      zip in 'zip.pro' ;
+ |              Extension -- the extension part of a file designator, as:
+ |                                      pro in 'zip.pro' ;
+ |              Full file name -- name part plus extension (if any), as:
+ |                                      'zip.pro',    zap (no extension)
+ |              (Sub)path -- sequence of names of (sub)directories, each
+ |                                      a subdirectory of the preceeding, as:
+ |                                      foo/bar/silly
+ |                                      foo\bar\silly
+ |              Root -- the file root symbol, combined with a "disk" indicator,
+ |                                      if any, as:
+ |                                      'c:\'
+ |                                      '\'
+ |              Parent (of a file,directory) -- the directory containing
+ |                                      a given file or (sub)directory, as:
+ |                                      mom/kid.txt   mom is parent of kid.txt
+ |
+ |  Revised to use sub_atom, atom_concat, etc: November 1993 by K. Buettner
  *================================================================*/
 module builtins.
 
 export file_extension/3.
-export path_elements/2.
 export path_directory_tail/3.
 export is_absolute_path/1.
-%export is_absolute_path/2.
-export path_type/2.
-export path_type/3.
-export split_path/2.
-export split_path/3.
-export join_path/2.
-export join_path/3.
 export tilda_expand/2.
-export directory_self/1.
-export directory_self/2.
-export parent_path/1.
-export parent_path/2.
+export make_change_cwd/1.
 export pathPlusFile/3.
 export pathPlusFilesList/3.
-export make_change_cwd/1.
+export path_elements/2.
+export path_type/2.
+export split_path/2.
+export join_path/2.
+export directory_self/1.
+export parent_path/1.
 
 file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),
