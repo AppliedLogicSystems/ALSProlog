@@ -414,52 +414,10 @@ pathPlusFilesList([File | SourceFilesList], Path,
 	pathPlusFile(Path,File,XFile),
 	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList).
 
-/*!-------------------------------------------------------*
-	same_path/2
-	same_path(Path1, Path2)
-	same_path(+, +)
 
-	-	determines whether two file paths are the same
 
-	If Path1 and Path2 are two lists denoting file paths,
-	determines whether they denote the same path, allowing
-	for identification of uppercase and lowercase names 
-	as appropriate for the OS.
- *!-------------------------------------------------------*/
 
-export same_path/2.
-same_path([], []).
-same_path([Node1 | RestPath1], [Node2 | RestPath2]) :-
-	(Node1 = Node2 ;
-			%% Must make case identif. conditional on the os:
-		builtins:sys_env(OS,_,_),
-		identify_case(OS),
-		same_uc(Node1, Node2) ),
-	!,
-	same_path(RestPath1, RestPath2).
 
-/*!-------------------------------------------------------*
-	same_disk/2
-	same_disk(Disk1, Disk2)
-	same_disk(+, +)
-
-	-	determines whether two disks are the same
-
-	If Disk1 and Disk2 are atoms denoting disks, determines
-	whether they are the same, allowing for identification
-	of upper and lower case letters, as appropriate for the
-	os.
-
- *!-------------------------------------------------------*/
-
-export same_disk/2.
-same_disk(Disk, Disk) :-
-	!.
-same_disk(Disk1, Disk2) :-
-		%% Must make case identif. conditional on the os:
-	builtins:sys_env(OS,_,_),
-	identify_case(OS),
-	same_uc(Disk1, Disk2).
 
 %%% Convenience routines
 
