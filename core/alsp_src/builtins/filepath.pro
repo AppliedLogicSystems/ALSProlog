@@ -49,6 +49,31 @@ export join_path/2.
 export directory_self/1.
 export parent_path/1.
 
+/*!---------------------------------------------------------------------
+ |      file_extension/3
+ |      file_extension(FullName, Name, Ext)
+ |      file_extension(+/-, +/-, +/-)
+ |
+ |      - Access or add the extension for a filename.
+ |
+ |      If FullName is instantiated, decomposes it to yield the
+ |      underlying Filename (unified with Name)  and extension (unified
+ |      with Ext.  If FullName is instantiated but has no extension, then
+ |      Name is unified with FullName and Ext is unified with ''.
+ |      If FullName is uninstantiated and both Name, Ext are instantiated,
+ |      composes the filename plus extension out of Name, Ext and unifies
+ |      that with FullName.
+ |
+ | Examples
+ |      ?- file_extension(foo, Name1, Ext1).
+ |      Name1=foo
+ |      Ext1=''
+ |      ?- file_extension('foo.pro', Name2, Ext2).
+ |      Name2=foo
+ |      Ext2=pro
+ |      ?- file_extension(FullName, bar, pro).
+ |      FullName='bar.pro'
+ *!--------------------------------------------------------------------*/
 file_extension(FullName, Name, Ext) :-
 	nonvar(FullName),
 	!,
