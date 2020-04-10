@@ -349,7 +349,21 @@ win32_path_type(Path, volume_relative) :-
 	!.
 win32_path_type(Path, relative).
 
-
+/*!---------------------------------------------------------------------
+ |      split_path/2
+ |      split_path(Path, List)
+ |      split_path(+, -)
+ |
+ |      - decomposes Path into List of elements
+ |
+ |      If Path is a file system path, decomposes Path into a List
+ |      of it's minimal elements, and unifies that list with List
+ |      in an OS-independent manner. Utilized by path_elements/2 above.
+ |
+ | Examples
+ |      ?- split_path('mom/kids/foo.pro', List).
+ |      List=[mom,kids,'foo.pro']
+ *!--------------------------------------------------------------------*/
 split_path(Path, List) :-
 	sub_atom(Path,0,1,_,'{'),
 	!,
@@ -364,7 +378,21 @@ split_path(Path, List) :-
 	sys_env(OS, _, _),
 	!,
 	split_path(OS, Path, List).
-	
+
+/*!---------------------------------------------------------------------
+ |      join_path/2
+ |      join_path(List, Path)
+ |      join_path(+, -)
+ |
+ |      - composes Path from a List of elements
+ |
+ |      If List consists of atoms representing elements of a file system
+ |      path, composes Path out of List in an OS-independent manner.
+ |
+ | Examples
+ |      ?- join_path(['mom/dad',kids,'foo.pro'], Path),
+ |      Path='mom/dad/kids/foo.pro'.
+ *!--------------------------------------------------------------------*/
 join_path(List, Path) :-
 	sys_env(OS, _, _),
 	join_path(OS, List, Path).
