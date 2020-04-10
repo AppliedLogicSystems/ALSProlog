@@ -135,6 +135,94 @@ path_directory_tail(Path, Directory, Tail) :-
 	dreverse(RevDirElements, DirElements),
 	(DirElements = [] -> directory_self(Directory) ; join_path(DirElements, Directory)).
 
+/*!---------------------------------------------------------------------
+ |      is_absolute_path/1
+ |      is_absolute_path(Path)
+ |      is_absolute_path(Path)
+ |
+ |      - Determines whether Path begins at the file system root.
+ |
+ |      Succeeds if Path begins at the file system root, fails otherwise.
+ |
+ | Examples
+ |      ?- is_absolute_path('/foo/bar').
+ |      yes.
+ |      ?- not(is_absolute_path('foo/bar')).
+ |      yes.
+ *!--------------------------------------------------------------------*/
+is_absolute_path(Path) :-
+	path_type(Path, PathType),
+	PathType \= relative.
+
+tilda_expand(TildaPath, Path) :-
+	sub_atom(TildaPath, 0, 1, _, '~'),
+	split_path(TildaPath, [Head | Rest]),
+	sub_atom(Head, 0, 1, After, '~'), 
+	sub_atom(Head, 1, After, 0, Name),
+	(After = 0 -> getenv('HOME', Home) ; get_user_home(Name, Home)),
+	!,
+	(Home = '' -> Path = TildaPath ; join_path([Home | Rest], Path)).
+tilda_expand(Path, Path).
+
+make_change_cwd(P)
+	:-
+	exists_file(P),
+	!,
+	change_cwd(P).
+
+make_change_cwd(P)
+	:-
+	path_elements(P, PElts),
+	make_path_segments(PElts),
+	exists_file(P),
+	change_cwd(P).
+
+make_path_segments(PElts)
+	:-
+	make_path_segments(PElts, []).
+
+make_path_segments([], _).
+make_path_segments([E | PElts], IS)
+	:-
+	dreverse([E | IS], SI),
+	path_elements(SIP, SI),
+	(exists_file(SIP) -> true ; make_subdir(SIP)),
+	make_path_segments(PElts, [E | IS]).
+
+pathPlusFile(Path, File, PathAndFile)
+	:-
+	var(PathAndFile),
+	!,
+	split_path(Path, PathElts),
+	dappend(PathElts, [File], PFElts),
+	join_path(PFElts, PathAndFile).
+
+pathPlusFile(Path, File, PathAndFile)
+	:-
+	nonvar(PathAndFile),
+	split_path(PathAndFile, PFElts),
+	dreverse(PFElts, [File | RevPathElts]),
+	dreverse(RevPathElts, PathElts),
+	join_path(PathElts, Path).
+
+/*!-------------------------------------------------------*
+	pathPlusFilesList/3.
+	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList)
+	pathPlusFilesList(+, +, -)
+
+	- attaches a path to each of a list of file names
+
+	If SourceFilesList is list of items denoting files, and
+	if Path denotes a path, creates a list of atoms which
+	consist of the Path prepended to each of the file names.
+ *!-------------------------------------------------------*/
+
+pathPlusFilesList([], _, []).
+pathPlusFilesList([File | SourceFilesList], Path, 
+					[XFile | ExtendedFilesList]) :-
+	pathPlusFile(Path,File,XFile),
+	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList).
+
 path_elements(Path, Elements) :-
 	var(Path),
 	!,
@@ -143,9 +231,6 @@ path_elements(Path, Elements) :-
 	split_path(Path, Elements).
 
 
-is_absolute_path(Path) :-
-	path_type(Path, PathType),
-	PathType \= relative.
 
 path_type(Path, Type) :-
 	sys_env(OS, _, _),
@@ -419,16 +504,6 @@ rev_sub_atom(Atom, Before, Length, After, SubAtom) :-
 rev_sub_atom(_, _, _, _, _) :- fail.
 
 
-tilda_expand(TildaPath, Path) :-
-	sub_atom(TildaPath, 0, 1, _, '~'),
-	split_path(TildaPath, [Head | Rest]),
-	sub_atom(Head, 0, 1, After, '~'), 
-	sub_atom(Head, 1, After, 0, Name),
-	(After = 0 -> getenv('HOME', Home) ; get_user_home(Name, Home)),
-	!,
-	(Home = '' -> Path = TildaPath ; join_path([Home | Rest], Path)).
-tilda_expand(Path, Path).
-
 directory_self(Self) :-
 	sys_env(OS, _, _),
 	!,
@@ -450,70 +525,5 @@ parent_path(mswin32, '..').
 parent_path(win32, '..').
 
 
-/*!-------------------------------------------------------*
-	pathPlusFilesList/3.
-	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList)
-	pathPlusFilesList(+, +, -)
-
-	- attaches a path to each of a list of file names
-
-	If SourceFilesList is list of items denoting files, and
-	if Path denotes a path, creates a list of atoms which
-	consist of the Path prepended to each of the file names.
- *!-------------------------------------------------------*/
-
-pathPlusFilesList([], _, []).
-pathPlusFilesList([File | SourceFilesList], Path, 
-					[XFile | ExtendedFilesList]) :-
-	pathPlusFile(Path,File,XFile),
-	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList).
-
-
-
-
-
-
-%%% Convenience routines
-
-pathPlusFile(Path, File, PathAndFile)
-	:-
-	var(PathAndFile),
-	!,
-	split_path(Path, PathElts),
-	dappend(PathElts, [File], PFElts),
-	join_path(PFElts, PathAndFile).
-
-pathPlusFile(Path, File, PathAndFile)
-	:-
-	nonvar(PathAndFile),
-	split_path(PathAndFile, PFElts),
-	dreverse(PFElts, [File | RevPathElts]),
-	dreverse(RevPathElts, PathElts),
-	join_path(PathElts, Path).
-
-make_change_cwd(P)
-	:-
-	exists_file(P),
-	!,
-	change_cwd(P).
-
-make_change_cwd(P)
-	:-
-	path_elements(P, PElts),
-	make_path_segments(PElts),
-	exists_file(P),
-	change_cwd(P).
-
-make_path_segments(PElts)
-	:-
-	make_path_segments(PElts, []).
-
-make_path_segments([], _).
-make_path_segments([E | PElts], IS)
-	:-
-	dreverse([E | IS], SI),
-	path_elements(SIP, SI),
-	(exists_file(SIP) -> true ; make_subdir(SIP)),
-	make_path_segments(PElts, [E | IS]).
 
 endmod.
