@@ -457,8 +457,6 @@
   pathPlusFile/3
   pathPlusFilesList/3
   make_change_cwd/1
-  same_path/2
-  same_disk/2
 
  >>> File: fs_cmn.pro << 
 

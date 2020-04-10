@@ -416,14 +416,12 @@ N=5668 [NN=5669] M=builtins P=abolish_clausegroup A=4 PT=1
 N=5699 [NN=5702] M=builtins P=abolish A=3 PT=1
 N=5700 [NN=5702] M=builtins P=abolish A=2 PT=1
 N=5701 [NN=5702] M=builtins P=abolish A=1 PT=1
-N=5702 [NN=5703] M=builtins P=same_path A=2 PT=0
 N=5703 [NN=5715] M=builtins P=source_handler A=2 PT=0
 N=5731 [NN=5764] M=builtins P=$procinfo A=6 PT=1
 N=5763 [NN=5764] M=builtins P=$nextproc A=3 PT=1
 N=5765 [NN=5766] M=builtins P=same_uc A=2 PT=0
 N=5795 [NN=5797] M=builtins P=compound A=1 PT=1
 N=5796 [NN=5797] M=builtins P=$create_mod_close A=4 PT=1
-N=5797 [NN=5798] M=builtins P=same_disk A=2 PT=0
 N=5827 [NN=5828] M=builtins P=$next_module A=4 PT=1
 N=5828 [NN=5829] M=builtins P=change_cwd A=1 PT=0
 N=5852 [NN=5860] M=sio P=seeing A=1 PT=0

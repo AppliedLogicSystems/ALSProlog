@@ -426,8 +426,6 @@ export parent_path/2.
 export pathPlusFile/3.
 export pathPlusFilesList/3.
 export make_change_cwd/1.
-export same_path/2.
-export same_disk/2.
 
 bix_file='fs_cmn.pro'
 export date/1.

@@ -21,8 +21,6 @@ p('directory_self/1', ''),
 p('directory_self/2', ''),
 p('parent_path/1', ''),
 p('parent_path/2', ''),
-p('same_path/2', ''),
-p('same_disk/2', ''),
 p('pathPlusFile/3', ''),
 p('pathPlusFilesList/3', ''),
 p('make_change_cwd/1', '')]
