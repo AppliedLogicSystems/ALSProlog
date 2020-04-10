@@ -214,6 +214,26 @@ make_path_segments([E | PElts], IS)
 	(exists_file(SIP) -> true ; make_subdir(SIP)),
 	make_path_segments(PElts, [E | IS]).
 
+/*!---------------------------------------------------------------------
+ |      pathPlusFile/3
+ |      pathPlusFile(Path, File, PathAndFile)
+ |      pathPlusFile(+/-, +/-, +/-)
+ |
+ |      - Compose/decompose a path with a terminating file.
+ |
+ |      If PathAndFile is uninstantiated, adds File to the end of
+ |      Path and unifies that with PathAndFile.  If PathAndFile is
+ |      instantiated, removes the final element from PathAndFile,
+ |      unifies the remainder with Path, and unifies that last
+ |      element with File.
+ |
+ | Examples
+ |      ?- pathPlusFile('foo/bar', 'zip.pro', PF).
+ |      PF='foo/bar/zip.pro'
+ |      ?- pathPlusFile(P,F,'foo/bar/zip.pro').
+ |      P='foo/bar'
+ |      F='zip.pro'
+ *!--------------------------------------------------------------------*/
 pathPlusFile(Path, File, PathAndFile)
 	:-
 	var(PathAndFile),
@@ -230,18 +250,22 @@ pathPlusFile(Path, File, PathAndFile)
 	dreverse(RevPathElts, PathElts),
 	join_path(PathElts, Path).
 
-/*!-------------------------------------------------------*
-	pathPlusFilesList/3.
-	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList)
-	pathPlusFilesList(+, +, -)
-
-	- attaches a path to each of a list of file names
-
-	If SourceFilesList is list of items denoting files, and
-	if Path denotes a path, creates a list of atoms which
-	consist of the Path prepended to each of the file names.
- *!-------------------------------------------------------*/
-
+/*!---------------------------------------------------------------------
+ |      pathPlusFilesList/3.
+ |      pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList)
+ |      pathPlusFilesList(+, +, -)
+ |
+ |      - attaches a path to each of a list of file names
+ |
+ |      If SourceFilesList is list of items denoting file names, and
+ |      if Path denotes a path, creates a list of atoms which consists
+ |      of the Path prepended to each of the file names.  Functionally
+ |      identical to prefix_dir/3 in library file miscatom.pro.
+ |
+ | Examples
+ |      ?- pathPlusFilesList(['foo.pro','bar.pro','zip.pro'], 'mom/kids', EFL).
+ |      EFL=['mom/kids/foo.pro','mom/kids/bar.pro','mom/kids/zip.pro']
+ *!--------------------------------------------------------------------*/
 pathPlusFilesList([], _, []).
 pathPlusFilesList([File | SourceFilesList], Path, 
 					[XFile | ExtendedFilesList]) :-
