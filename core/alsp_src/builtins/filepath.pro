@@ -154,6 +154,19 @@ is_absolute_path(Path) :-
 	path_type(Path, PathType),
 	PathType \= relative.
 
+/*!---------------------------------------------------------------------
+ |      tilda_expand/2
+ |      tilda_expand(TildaPath, Path)
+ |      tilda_expand(+, -)
+ |
+ |      - Expands a tilda-path to an absolute file system path.
+ |
+ |      Replaces the leading tilde (~) appropriately.
+ |
+ | Examples
+ |      ?- tilda_expand('~/foo/bar.pro', Path).
+ |      Path='/Users/mike/foo/bar.pro'
+ *!--------------------------------------------------------------------*/
 tilda_expand(TildaPath, Path) :-
 	sub_atom(TildaPath, 0, 1, _, '~'),
 	split_path(TildaPath, [Head | Rest]),
@@ -164,6 +177,18 @@ tilda_expand(TildaPath, Path) :-
 	(Home = '' -> Path = TildaPath ; join_path([Home | Rest], Path)).
 tilda_expand(Path, Path).
 
+/*!---------------------------------------------------------------------
+ |      make_change_cwd/1
+ |      make_change_cwd(P)
+ |      make_change_cwd(+)
+ |
+ |      - Creates path P to a directory, as needed, and changes to it.
+ |
+ |      If P is instantiated to a legal path to a directory, then:
+ |      If the directory exists, executes change_cwd(P).
+ |      Otherwise, creates the directory, including all intermediate
+ |      directories, and then executes change_cwd(P).
+ *!--------------------------------------------------------------------*/
 make_change_cwd(P)
 	:-
 	exists_file(P),
