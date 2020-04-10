@@ -617,7 +617,22 @@ rev_sub_atom(Atom, Before, Length, After, SubAtom) :-
 	(Before = LBefore, After = LAfter)).
 rev_sub_atom(_, _, _, _, _) :- fail.
 
-
+/*!---------------------------------------------------------------------
+ |      directory_self/1
+ |      directory_self(Self)
+ |      directory_self(+/-)
+ |
+ |      - Returns an atom representing a relative path to the current directory.
+ |      
+ |      Unifies Self with an atom representing the minimal relative path
+ |      to the current directory, in an OS-independent manner.
+ |      
+ | Examples
+ |      ?- directory_self(Self).
+ |      Self='.'
+ |      ?- directory_self('.').
+ |      yes.
+ *!--------------------------------------------------------------------*/
 directory_self(Self) :-
 	sys_env(OS, _, _),
 	!,
@@ -628,6 +643,22 @@ directory_self(macos, ':').
 directory_self(mswin32, '.').
 directory_self(win32, '.').
 
+/*!---------------------------------------------------------------------
+ |      parent_path/1
+ |      parent_path(PP)
+ |      parent_path(+/-)
+ |      
+ |      - Returns an atom representing a relative path to the parent of the current directory.
+ |
+ |      Unifies PP with an atom representing the minimal relative path
+ |      to the parent of the current directory, in an OS-independent manner.
+ |      
+ | Examples
+ |      ?- parent_path(PP).
+ |      PP='..'
+ |      ?- parent_path('..').
+ |      yes.
+ *!--------------------------------------------------------------------*/
 parent_path(PP) :-
 	sys_env(OS, _, _),
 	!,
@@ -637,7 +668,5 @@ parent_path(unix, '..').
 parent_path(macos, '::').
 parent_path(mswin32, '..').
 parent_path(win32, '..').
-
-
 
 endmod.
