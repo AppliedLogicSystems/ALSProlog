@@ -272,6 +272,28 @@ pathPlusFilesList([File | SourceFilesList], Path,
 	pathPlusFile(Path,File,XFile),
 	pathPlusFilesList(SourceFilesList, Path, ExtendedFilesList).
 
+/*!---------------------------------------------------------------------
+ |      path_elements/2
+ |      path_elements(Path, Elements)
+ |      path_elements(+/-, +/-)
+ |
+ |      - compose/decompose a file system path from/to its elements
+ |
+ |      If Path is a file system path to a file or directory, then
+ |      this call decomposes Path into a list of it's minimal elements,
+ |      and unifies that list with Elements.  If Path is uninstantiated
+ |      and Elements is a list of path elements (some of which may consist
+ |      of more than a single element), this call composes the list
+ |      Elements into an atom and unifies that atom with Path.
+ |
+ | Examples
+ |      ?- path_elements('mom/kids/foo.pro', E).
+ |      E=[mom,kids,'foo.pro']
+ |      ?- path_elements(P, [mom,kids,'foo.pro']).
+ |      P='mom/kids/foo.pro'
+ |      ?- path_elements(P, ['mom/dad',kids,'foo.pro']).
+ |      P='mom/dad/kids/foo.pro'
+ *!--------------------------------------------------------------------*/
 path_elements(Path, Elements) :-
 	var(Path),
 	!,
@@ -279,8 +301,23 @@ path_elements(Path, Elements) :-
 path_elements(Path, Elements) :-
 	split_path(Path, Elements).
 
-
-
+/*!---------------------------------------------------------------------
+ |      path_type/2
+ |      path_type(Path, Type)
+ |      path_type(+, +)
+ |
+ |      - determines the type (absolute,relative) of a file system path
+ |
+ |      If Path is a file system path, unifies Type with 'absolute' or
+ |      'relative' according to the type of Path.  Utilized by
+ |      is_absolute_path/1 above.
+ |
+ | Examples
+ |      ?- path_type('mom/kids/foo.pro', T).
+ |      T=relative
+ |      ?- path_type('/mom/kids/foo.pro', T).
+ |      T=absolute
+ *!--------------------------------------------------------------------*/
 path_type(Path, Type) :-
 	sys_env(OS, _, _),
 	!,
