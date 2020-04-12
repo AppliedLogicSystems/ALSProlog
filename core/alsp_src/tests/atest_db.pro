@@ -79,6 +79,8 @@ test_info(par3, par3, user, main,
 test_info(par4, par4, user, main,
 			'  Producers and consumers (for primes) with added buffering.').
 
+test_info(filepath_test, filepath_test, user, test_filepath, 'tests for file system paths.').
+
 %test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
 
 % test_info Format:
