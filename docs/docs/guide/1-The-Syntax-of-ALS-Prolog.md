@@ -141,7 +141,7 @@ In addition, the atoms, `[]`, `!`, `;` and `,` are considered to be special atom
 
       +=   &&   @>=   ==   <---------
 
-Most special atoms are automatically read as quoted atoms unless they have been declared as operators (See Section 1.7 Operators {ADD LINK}).
+Most special atoms are automatically read as quoted atoms unless they have been declared as operators (See [Section 1.7 Operators](#17-operators)).
 
 ## 1.2 Variables
 
@@ -326,4 +326,4 @@ Each of these must occur at the beginning of a line of program text. Each of `#i
 
 No full stop (.) should follow this expression, nor the expressions following `#if` and `#elif`. The expression following `#if` or `#elif` can be an arbitrary Prolog term.
 
-The expressions `#if`, `#else`, `#elif`, `#endif` must be organized as conditionals in a manner similar to their use in C programs. Thus, the first expression occurring must be an `#if`, and the last must be an `#endif`. Between them there can be zero or more occurrences of `#else` and `#elif`. There can be at most one occurrence of #else between a given `#if ... #endif` pair, and it must follow all of the zero or more occurrences of `#elif` between the same pair.   Preprocessor directive semantics appears in Section 2.3 Preprocessor Directives: Semantics.  {ADD LINK}
+The expressions `#if`, `#else`, `#elif`, `#endif` must be organized as conditionals in a manner similar to their use in C programs. Thus, the first expression occurring must be an `#if`, and the last must be an `#endif`. Between them there can be zero or more occurrences of `#else` and `#elif`. There can be at most one occurrence of #else between a given `#if ... #endif` pair, and it must follow all of the zero or more occurrences of `#elif` between the same pair.   Preprocessor directive semantics appears in [Section 2.3 Preprocessor Directives](2-Prolog-Source-Code.html#23-preprocessor-directives).

@@ -43,8 +43,8 @@ or declaration. For example,
 
     module mymodule.
 
-would not be interpreted as a fact since it is a module declaration - see Chapter 3
-Modules.{ADD LINK}  More specifically, a fact is any term that cannot be interpreted as a declaration and whose principal functor is not :-/1, ?-/1, or :-/2. One way to understand a fact is to say that it is a rule without a body, or a rule with a trivial body
+would not be interpreted as a fact since it is a module declaration - see [Chapter 3
+Modules](3-Modules.html).  More specifically, a fact is any term that cannot be interpreted as a declaration and whose principal functor is not :-/1, ?-/1, or :-/2. One way to understand a fact is to say that it is a rule without a body, or a rule with a trivial body
 (one that is always true). These are example facts:  
 
     mortal(socrates).  
@@ -121,7 +121,7 @@ Program files are sequences of source terms that are meant to be read in by cons
 ### 2.2.1 Consulting Program Files
 
 To consult a file means to read the file, load the file's clauses into the internal Prolog database, and execute any commands or directives occurring in the file. Reconsulting a file causes part or all of the current definitions in the internal prolog database for
-procedures which occur in the file to be discarded and the new ones (from the file) to be loaded, as well as executing any commands or directives in the file (again). See Chapter 11 (Prolog Builtins: Non-I/O) consult/1.  {ADD LINK}
+procedures which occur in the file to be discarded and the new ones (from the file) to be loaded, as well as executing any commands or directives in the file (again). See [Chapter 11 (Prolog Builtins: Non-I/O) consult/1](11-Prolog-Builtins-Non-I-O.html#119-program-and-system-management).
 
 A file is consulted by the query or goal
 
