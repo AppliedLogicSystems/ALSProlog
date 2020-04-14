@@ -9,23 +9,94 @@
  |	Date:	Begun 4/88
  |	Revision: Ken Bowen -- 11/88, 1/91 
  |		-- library version: 11/91
+ |
+ |	Note: Depends on core/alsp_src/unix/unix_makefile & friends
+ |	Note: Some examples below utilize ls/0 as defined in blt_sys.pro.
  *===========================================================================*/
 module builtins.
 
+export file_status/2.
+export files/2.
+export files/3.
+export move_file/2.
 export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
 export kill_subdir/1.
-export file_status/2.
-export files/2.
-export files/3.
 export subdirs/1.
 export subdirs_red/1.
 export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
-export move_file/2.
 
+/*!------------------------------------------------------------------
+ |	file_status/2
+ |	file_status(FileName, Status) 
+ |	file_status(+, -) 
+ |
+ |	- Returns OS information about a file named FileName
+ |
+ |	If FileName is the name associated with an entry in the
+ |	OS filesystem, returns OS information about that entry,
+ |	as in the following two examples:
+ |
+ | Examples
+ |	?- file_status(alspro, Status).
+ |
+ |	Status=[type = regular,permissions = [read,write,execute],
+ |	    mod_time = 1586731762.0,size = 462720] 
+ |
+ |	?- file_status(alsdir, Status).
+ |
+ |	Status=[type = directory,permissions = [read,write,execute],
+ |	    mod_time = 1586652989.0,size = 204]
+ *!-----------------------------------------------------------------*/
+file_status(FileName, Status) 
+	:-
+	'$getFileStatus'(FileName,
+			 fileStatus(FileTypeCode, ModTime, OwnerPermiss,
+					ByteSize,NBlocks)),
+	fileTypeCode(FileTypeCode,FileType),
+	ownerPermissionsCoding(OwnerPermiss, Permissions),
+	Status = [type=FileType, permissions=Permissions,
+			  mod_time=ModTime, size=ByteSize].
+
+/*---------------------------------------------------------------
+ |	File types/attributes -- at the abstract (Prolog) level:
+ |		regular -- an ordinary file
+ |		directory
+ *---------------------------------------------------------------*/
+
+/*----------------------------------------------------------------
+ | Unix file status/type codes:
+ |
+ |		0 = unknown
+ |		1 = directory
+ |		2 = character_special
+ |		3 = block_special
+ |		4 = regular
+ |		5 = symbolic_link
+ |		6 = socket
+ |		7 = fifo_pipe
+ *----------------------------------------------------------------*/
+
+fileTypeCode(0, unknown).
+fileTypeCode(1, directory).
+fileTypeCode(2, character_special).
+fileTypeCode(3, block_special).
+fileTypeCode(4, regular).
+fileTypeCode(5, symbolic_link).
+fileTypeCode(6, socket).
+fileTypeCode(7, fifo_pipe).
+
+ownerPermissionsCoding(0,[]).
+ownerPermissionsCoding(1,[execute]).
+ownerPermissionsCoding(2,[write]).
+ownerPermissionsCoding(3,[write,execute]).
+ownerPermissionsCoding(4,[read]).
+ownerPermissionsCoding(5,[read,execute]).
+ownerPermissionsCoding(6,[read,write]).
+ownerPermissionsCoding(7,[read,write,execute]).
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
@@ -193,59 +264,6 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
 
-/*---------------------------------------------------------------
- |	File types/attributes:
- |		-- at the abstract (Prolog) level:
- |
- |		regular -- an ordinary file
- |		directory
- *---------------------------------------------------------------*/
-
-/*----------------------------------------------------------------
- | Unix file status/type codes:
- |
- |		0 = unknown
- |		1 = directory
- |		2 = character_special
- |		3 = block_special
- |		4 = regular
- |		5 = symbolic_link
- |		6 = socket
- |		7 = fifo_pipe
- *----------------------------------------------------------------*/
-
-fileTypeCode(0, unknown).
-fileTypeCode(1, directory).
-fileTypeCode(2, character_special).
-fileTypeCode(3, block_special).
-fileTypeCode(4, regular).
-fileTypeCode(5, symbolic_link).
-fileTypeCode(6, socket).
-fileTypeCode(7, fifo_pipe).
-
-ownerPermissionsCoding(0,[]).
-ownerPermissionsCoding(1,[execute]).
-ownerPermissionsCoding(2,[write]).
-ownerPermissionsCoding(3,[write,execute]).
-ownerPermissionsCoding(4,[read]).
-ownerPermissionsCoding(5,[read,execute]).
-ownerPermissionsCoding(6,[read,write]).
-ownerPermissionsCoding(7,[read,write,execute]).
-
-/*!------------------------------------------------------------------
- |	file_status/2
- |	file_status(FileName, Status) 
- |	file_status(+, -) 
- *!-----------------------------------------------------------------*/
-file_status(FileName, Status) 
-	:-
-	'$getFileStatus'(FileName,
-			 fileStatus(FileTypeCode, ModTime, OwnerPermiss,
-					ByteSize,NBlocks)),
-	fileTypeCode(FileTypeCode,FileType),
-	ownerPermissionsCoding(OwnerPermiss, Permissions),
-	Status = [type=FileType, permissions=Permissions,
-			  mod_time=ModTime, size=ByteSize].
 
 /*!------------------------------------------------------------------
  |	directory/3
