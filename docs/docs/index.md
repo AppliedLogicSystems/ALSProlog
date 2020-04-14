@@ -3,6 +3,8 @@ title: Documentation
 regenerate: true
 ---
 
+- [Preface](Preface.html)
+
 ## [User's Guide](guide/)
 
 - **Language: Standard Part**
