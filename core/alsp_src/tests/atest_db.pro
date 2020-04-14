@@ -81,6 +81,8 @@ test_info(par4, par4, user, main,
 
 test_info(filepath_test, filepath_test, user, test_filepath, 'tests for file system paths.').
 
+test_info(fsunix_mswin32_test, fsunix_mswin32_test, user, test_fsunix_mswin32, 'tests for misc filesystem functions.').
+
 %test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
 
 % test_info Format:

@@ -7,25 +7,93 @@
  |
  |	Authors:	Chuck Hoput (based on other fs-xxx.pro files)
  |	Date:		1/96
+ |
+ |	Note: Depends on core/alsp_src/win32/win32_makefile & friends
+ |      Note: Some examples below utilize dir/0 as defined in blt_sys.pro.
  *====================================================================*/
-
 module builtins.
 
+export file_status/2.
+export files/2.
+export files/3.
+export move_file/2.
 export make_subdir/1.
 export make_subdir/2.
 export remove_subdir/1.
-export file_status/2.
 
-export files/2.
-export files/3.
+export kill_subdir/1.
+
 export subdirs/1.
 export subdirs_red/1.
 export directory/3.
-
 export get_current_drive/1.
 export change_current_drive/1.
 
-export move_file/2.
+/*!------------------------------------------------------------------
+ |      file_status/2
+ |      file_status(FileName, Status)
+ |      file_status(+, -)
+ |
+ |      - Returns OS information about a file named FileName
+ |
+ |      If FileName is the name associated with an entry in the
+ |      OS filesystem, returns OS information about that entry,
+ |      as in the following two examples:
+ |
+ | Examples
+ |      ?- file_status(alspro, Status).
+ |
+ |      Status=[type = regular,permissions = [read,write,execute],
+ |          mod_time = 1586731762.0,size = 462720]
+ |
+ |      ?- file_status(alsdir, Status).
+ |
+ |      Status=[type = directory,permissions = [read,write,execute],
+ |          mod_time = 1586652989.0,size = 204]
+ *!-----------------------------------------------------------------*/
+file_status(FileName,Status) :-
+	'$getFileStatus'(FileName,
+			 fileStatus(FileTypeCode,ModTime,OwnerPermiss,ByteSize,NBlocks)),
+	fileTypeCode(FileTypeCode,FileType),
+	ownerPermissionsCoding(OwnerPermiss,Permissions),
+	Status = [type=FileType,permissions=Permissions,mod_time=ModTime,size=ByteSize].
+
+ /*---------------------------------------------------------------
+ |	File types/attributes -- at the abstract (Prolog) level:
+ |		regular -- an ordinary file
+ |		directory
+ *---------------------------------------------------------------*/
+
+/*
+fileTypeCode('????', unknown).
+fileTypeCode('Fldr', directory).
+fileTypeCode('TEXT', regular).
+fileTypeCode(_,unknown).
+*/
+
+/*
+ownerPermissionCoding(0,[]).
+ownerPermissionCoding(4,[read]).
+ownerPermissionCoding(6,[read,write]).
+*/
+
+
+fileTypeCode(0, unknown).
+fileTypeCode(1, directory).
+fileTypeCode(4, regular).
+fileTypeCode(5, symbolic_link).
+fileTypeCode(5, alias).
+
+%fileTypeCode(30 , mac_type('TEXT')).
+
+ownerPermissionsCoding(0,[]).
+ownerPermissionsCoding(1,[execute]).
+ownerPermissionsCoding(2,[write]).
+ownerPermissionsCoding(3,[write,execute]).
+ownerPermissionsCoding(4,[read]).
+ownerPermissionsCoding(5,[read,execute]).
+ownerPermissionsCoding(6,[read,write]).
+ownerPermissionsCoding(7,[read,write,execute]).
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
@@ -146,53 +214,6 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
  
- /*---------------------------------------------------------------
- |	File types/attributes:
- |		-- at the abstract (Prolog) level:
- |
- |		regular -- an ordinary file
- |		directory
- *---------------------------------------------------------------*/
-
-/*
-fileTypeCode('????', unknown).
-fileTypeCode('Fldr', directory).
-fileTypeCode('TEXT', regular).
-fileTypeCode(_,unknown).
-*/
-
-ownerPermissionCoding(0,[]).
-ownerPermissionCoding(4,[read]).
-ownerPermissionCoding(6,[read,write]).
-
-
-fileTypeCode(0, unknown).
-fileTypeCode(1, directory).
-fileTypeCode(4, regular).
-fileTypeCode(5, symbolic_link).
-fileTypeCode(5, alias).
-
-fileTypeCode(30 , mac_type('TEXT')).
-
-
-ownerPermissionsCoding(0,[]).
-ownerPermissionsCoding(1,[execute]).
-ownerPermissionsCoding(2,[write]).
-ownerPermissionsCoding(3,[write,execute]).
-ownerPermissionsCoding(4,[read]).
-ownerPermissionsCoding(5,[read,execute]).
-ownerPermissionsCoding(6,[read,write]).
-ownerPermissionsCoding(7,[read,write,execute]).
-
-/*!------------------------------------------------------------------
- *!-----------------------------------------------------------------*/
-file_status(FileName,Status) :-
-	'$getFileStatus'(FileName,
-				fileStatus(FileTypeCode,ModTime,OwnerPermiss,ByteSize,NBlocks)),
-	fileTypeCode(FileTypeCode,FileType),
-%	ownerPermissionCoding(OwnerPermiss,Permissions),
-	ownerPermissionsCoding(OwnerPermiss,Permissions),
-	Status = [type=FileType,permissions=Permissions,mod_time=ModTime,size=ByteSize].
 
 /*!------------------------------------------------------------------
  |	directory/3
