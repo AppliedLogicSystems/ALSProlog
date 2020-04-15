@@ -8,7 +8,7 @@ test_fsunix_mswin32
 do_test_fs(OS)
         :-
         test([
-	    test_file_status,
+	    test_file_status(OS),
 	    
 %	    test_make_subdir1,
 %	    test_make_subdir2,
@@ -21,18 +21,27 @@ do_test_fs(OS)
         test([
         true]).
 
-
-test_file_status 
+test_file_status(mswin32) 
 	:-
-	system('rm -rf regFile1.txt'),
-	system('echo "hi" > regFile1.txt'),
 	test([
-	    (file_status('regFile1.txt', Status),
-	     nonvar(Status),
-	     member(mod_time = M, Status),
-	     Status == [type = regular,permissions = [read,write], mod_time = M, size = 3]),
-	    true]),
-	system('rm -rf regFile1.txt'). 
+	    (file_status('alspro.exe', Status),
+  %Status == [type = regular,permissions = [read,write,execute], mod_time = M, size = 3]),
+		member(type = regular, Status),
+		member(permissions = [read,write,execute], Status),
+		member(mod_time = _, Status),
+		member(size = _, Status)),
+	    true]).
 
+
+test_file_status(unix) 
+	:-
+	test([
+	    (file_status(alspro, Status),
+  %Status == [type = regular,permissions = [read,write,execute], mod_time = M, size = 3]),
+		member(type = regular, Status),
+		member(permissions = [read,write,execute], Status),
+		member(mod_time = _, Status),
+		member(size = _, Status)),
+	    true]).
 
 
