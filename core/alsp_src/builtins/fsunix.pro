@@ -98,6 +98,95 @@ ownerPermissionsCoding(5,[read,execute]).
 ownerPermissionsCoding(6,[read,write]).
 ownerPermissionsCoding(7,[read,write,execute]).
 
+/*!----------------------------------------------------------------
+ |	files/2
+ |	files(Pattern,FileList)
+ |	files(+,-)
+ |
+ |	- returns a list of regular files in the current directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary (regular) files 
+ |	in the current directory which match Pattern, which can 
+ |	includethe usual '*' and '?' wildcard characters.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |      ?- files('*.pst', F).
+ |
+ |	F=['alsdev.pst','alspro.pst']
+ |
+ |	?-  files('*', F).
+ |
+ |	F=['LICENSE.txt','README.txt','als-prolog-manual.pdf',
+ |	'als-ref-manual.pdf',alsdev,'alsdev.pst',alspro,'alspro.1',
+ |	'alspro.pst','libalspro.a','libalspro.dylib','test.pro']
+ *!----------------------------------------------------------------*/
+files(Pattern, FileList)
+	:-
+	directory(Pattern, 4, FileList).
+
+/*!----------------------------------------------------------------
+ |	files/3
+ |	files(Directory, Pattern,FileList)
+ |	files(+,+,-)
+ |
+ |	- returns a list of regular files residing in Directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary files in the 
+ |	directory Directory which match Pattern, which can include
+ |	the usual '*' and '?' wildcard characters.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |	?- files('examples/more', '*', F).
+ |
+ |	F=['concurrent_interrupts.pro','core_concurrent.pro',
+ |	   'finger.pro','freeze.pro','interrupts_coroutine.pro',
+ |	   'mathserv1.pro','mathserv2.pro','primes_coroutine.pro',
+ |	   'simple_coroutine.pro'] 	
+ |
+ |	?- files('examples/more', 'p*', F).
+ |
+ |	F=['primes_coroutine.pro'] 
+ *!----------------------------------------------------------------*/
+files(Directory, Pattern, List) 
+	:-
+	getDirEntries(Directory, Pattern, FirstResult),
+	!,
+	fixFileType(regular, InternalFileType),
+	filterForFileType(FirstResult, Directory, InternalFileType, List).
+
+/*!----------------------------------------------------------------
+ |	move_file/2
+ |	move_file(Source, Target)
+ |	move_file(+, +)
+ |
+ |	- Change the name of a file from Source to Target
+ |
+ |	If both Source and Target are atoms which can be the
+ |	names of a file, and if Source is the name of a file
+ |	existing in the file system, then the name of that file
+ | 	will be changed from Source to Target.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |	ls i*
+ |	> ls i*
+ |	ls: i*: No such file or directory
+ |	?- move_file('README.txt', 'intro-README.txt').
+ |	> ls i*
+ |	intro-README.txt
+ *!----------------------------------------------------------------*/
+move_file(Source, Target)
+	:-
+	sprintf(atom(Cmd),'mv %t %t', [Source, Target]),
+	system(Cmd).
+
+
+
+
+
+
 /*!--------------------------------------------------------------
  |	make_subdir/1
  |	make_subdir(NewDir)
@@ -182,6 +271,11 @@ indv_perm_code(read, 4).
 indv_perm_code(write, 2).
 indv_perm_code(execute, 1).
 
+
+
+
+
+
 /*!--------------------------------------------------------------
  |	remove_subdir/1
  |	remove_subdir(SubDir)
@@ -201,38 +295,6 @@ kill_subdir(SubDir)
 	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
 	system(Cmd).
 
-/*!----------------------------------------------------------------
- |	files/2
- |	files(Pattern,FileList)
- |	files(+,-)
- |
- |	- returns a list of files in the current directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	current directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Pattern, FileList)
-	:-
-	directory(Pattern, 4, FileList).
-
-/*!----------------------------------------------------------------
- |	files/3
- |	files(Directory, Pattern,FileList)
- |	files(+,+,-)
- |
- |	- returns a list of files residing in Directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	directory Directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Directory, Pattern, List) 
-	:-
-	getDirEntries(Directory, Pattern, FirstResult),
-	!,
-	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Directory, InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1

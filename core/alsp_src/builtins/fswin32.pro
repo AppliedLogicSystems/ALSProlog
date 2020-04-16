@@ -41,15 +41,15 @@ export change_current_drive/1.
  |      as in the following two examples:
  |
  | Examples
- |      ?- file_status(alspro, Status).
+ |      ?- file_status('alspro.exe', Status).
  |
  |      Status=[type = regular,permissions = [read,write,execute],
- |          mod_time = 1586731762.0,size = 462720]
+ |          mod_time = 1524876154.0,size = 783127]
  |
  |      ?- file_status(alsdir, Status).
  |
  |      Status=[type = directory,permissions = [read,write,execute],
- |          mod_time = 1586652989.0,size = 204]
+ |          mod_time = 1524503247.0,size = 0]
  *!-----------------------------------------------------------------*/
 file_status(FileName,Status) :-
 	'$getFileStatus'(FileName,
@@ -94,6 +94,105 @@ ownerPermissionsCoding(4,[read]).
 ownerPermissionsCoding(5,[read,execute]).
 ownerPermissionsCoding(6,[read,write]).
 ownerPermissionsCoding(7,[read,write,execute]).
+
+ /*!----------------------------------------------------------------
+ |	files/2
+ |	files(Pattern,FileList)
+ |	files(+,-)
+ |
+ |	- returns a list of files in the current directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary (regular) files 
+ |	in the current directory which match Pattern, which can 
+ |	include the usual '*' and '?' wildcard characters.
+ |
+ | Examples
+ |	Executed in the ALS Prolog distribution directory:
+ | 	?- files('*.pst', F).
+ |
+ |	F = ['alsdev.exe.pst','alspro.exe.pst']
+ |
+ | 	?- files('*', F).
+ |
+ |	F = ['als-prolog-manual.pdf','als-ref-manual.pdf','alsdev.exe', 
+ |	     'alsdev.exe.pst','alshelp.css','alspro.exe','alspro.exe.pst', 
+ |	     'als_help.html','libalspro.a','libalspro.dll','LICENSE.txt',
+ |	     'README.txt','tcl86.dll','tk86.dll','zlib1.dll'].
+ *!----------------------------------------------------------------*/
+files(Pattern, FileList)
+	:-
+	directory(Pattern, regular, FileList).
+
+/*!----------------------------------------------------------------
+ |	files/3
+ |	files(Directory, Pattern,FileList)
+ |	files(+,+,-)
+ |
+ |	- returns a list of files residing in Directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary files in the 
+ |	directory Directory which match Pattern, which can include
+ |	the usual '*' and '?' wildcard characters.
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |      ?- files('examples/more', '*', F).
+ |
+ |      F=['concurrent_interrupts.pro','core_concurrent.pro',
+ |         'finger.pro','freeze.pro','interrupts_coroutine.pro',
+ |         'mathserv1.pro','mathserv2.pro','primes_coroutine.pro',
+ |         'simple_coroutine.pro']
+ |
+ |      ?- files('examples/more', 'p*', F).
+ |
+ |      F=['primes_coroutine.pro']
+ *!----------------------------------------------------------------*/
+ 
+ files(Directory, Pattern, List) 
+	:-
+	getDirEntries(Directory, Pattern, FirstResult),
+	!,
+	fixFileType(regular, InternalFileType),
+	filterForFileType(FirstResult, Directory, InternalFileType, List).
+
+/*!----------------------------------------------------------------
+ |      move_file/2
+ |      move_file(Source, Target)
+ |      move_file(+, +)
+ |
+ |      - Change the name of a file from Source to Target
+ |
+ |      If both Source and Target are atoms which can be the
+ |      names of a file, and if Source is the name of a file
+ |      existing in the file system, then the name of that file
+ |      will be changed from Source to Target.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |	...\als-prolog> dir i*
+ |	...\als-prolog>
+ |	?- move_file('README.txt', 'intro-README.txt').
+ |	...\als-prolog> dir i*
+ |
+ |	Mode	LastWriteTime         Length   Name
+ |	----    -------------         ------   ----
+ |	-a----	4/13/2018  5:29 PM    3387     intro-README.txt
+ *!----------------------------------------------------------------*/
+move_file(Source, Target)
+	:-
+	sprintf(atom(Cmd),'rename %t %t', [Source, Target]),
+	system(Cmd).
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
@@ -150,39 +249,6 @@ make_subdir(NewDir,Permissions)
 	:-
 	rmdir(SubDir).
  
- /*!----------------------------------------------------------------
- |	files/2
- |	files(Pattern,FileList)
- |	files(+,-)
- |
- |	- returns a list of files in the current directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	current directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Pattern, FileList)
-	:-
-	directory(Pattern, regular, FileList).
-
-/*!----------------------------------------------------------------
- |	files/3
- |	files(Directory, Pattern,FileList)
- |	files(+,+,-)
- |
- |	- returns a list of files residing in Directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	directory Directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
- 
- files(Directory, Pattern, List) 
-	:-
-	getDirEntries(Directory, Pattern, FirstResult),
-	!,
-	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Directory, InternalFileType, List).
 
 /*!----------------------------------------------------------------
  |	subdirs/1
@@ -382,13 +448,6 @@ change_current_drive(DriveName) :-
 	name(ProperDriveName,ProperDriveList),
 	change_cwd(ProperDriveName).
 	
-/*!----------------------------------------------------------------
- *!----------------------------------------------------------------*/
-move_file(Source, Target)
-	:-
-	sprintf(atom(Cmd),'rename %t %t', [Source, Target]),
-	system(Cmd).
-
 
 endmod.
 
