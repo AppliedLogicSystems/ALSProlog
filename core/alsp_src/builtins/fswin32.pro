@@ -182,18 +182,6 @@ move_file(Source, Target)
 	sprintf(atom(Cmd),'rename %t %t', [Source, Target]),
 	system(Cmd).
 
-
-
-
-
-
-
-
-
-
-
-
-
 /*!--------------------------------------------------------------
  |	make_subdir/1
  |	make_subdir(NewDir)

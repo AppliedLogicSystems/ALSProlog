@@ -182,11 +182,6 @@ move_file(Source, Target)
 	sprintf(atom(Cmd),'mv %t %t', [Source, Target]),
 	system(Cmd).
 
-
-
-
-
-
 /*!--------------------------------------------------------------
  |	make_subdir/1
  |	make_subdir(NewDir)

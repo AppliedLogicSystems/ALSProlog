@@ -13,15 +13,10 @@ do_test_fs(OS)
 	    test_files3(OS),
 	    test_move_file(_),
 	    
-%	    test_make_subdir1,
-%	    test_make_subdir2,
-%	    test_recursive_dir_path,
-%	    test_recursive_dir_paths,
-        true]).
-
-do_test_fs(OS)
-        :-
-        test([
+%	    test_make_subdir1(OS),
+%	    test_make_subdir2(OS),
+%	    test_recursive_dir_path(OS),
+%	    test_recursive_dir_paths(OS),
         true]).
 
 test_file_status(mswin32) 
@@ -76,9 +71,11 @@ test_files2(unix)
 all_f2([], _).
 all_f2([F | Files], OS)
 	:-
-	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst')
+	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; libalspro.dll.pst')
 				;
-			(F == 'alsdev.pst' ; F == 'alspro.pst') ),
+			(F == 'alsdev.pst' ; F == 'alspro.pst';
+			 F == 'app_image0.pst'; F == 'app_image1.pst'; F == 'app_image2.pst';
+            		 F == 'libalspro.dylib.pst') ),
 	all_f2(Files, OS).
 
 test_files3(_)
@@ -88,11 +85,24 @@ test_files3(_)
  	     Files == ['primes_coroutine.pro']),
 	    true]).
 
-test_move_file(_)
+test_move_file(mswin32)
 	:-
+	system('del /f  barFile-beer.txt'),
+	system('echo foo > barFile.txt'),
 	test([
-	    (move_file('README.txt', 'intro-README.txt'),
-	     file_status('intro-README.txt', Status),
+	    (move_file('barFile.txt', 'barFile-beer.txt'),
+	     file_status('barFile-beer.txt', Status),
 		member(type = regular, Status)),
+	    system('del /f  barFile-beer.txt'),
+	    true]).
+test_move_file(unix)
+	:-
+	system('rm -rf barFile-beer.txt'),
+	system('echo foo > barFile.txt'),
+	test([
+	    (move_file('barFile.txt', 'barFile-beer.txt'),
+	     file_status('barFile-beer.txt', Status),
+		member(type = regular, Status)),
+	    system('rm -rf barFile-beer.txt'),
 	    true]).
 
