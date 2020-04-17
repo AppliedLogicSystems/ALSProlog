@@ -56,7 +56,7 @@ test_files2(mswin32)
 	    (files('*.pst', Files),
 		member('alsdev.exe.pst', Files),
 		member('alspro.exe.pst', Files),
-	    all_f(Files, mswin32) ),
+	    all_f2(Files, mswin32) ),
 	    true]).
 
 test_files2(unix)
@@ -71,14 +71,22 @@ test_files2(unix)
 all_f2([], _).
 all_f2([F | Files], OS)
 	:-
-	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; libalspro.dll.pst')
+	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; 'libalspro.dll.pst')
 				;
 			(F == 'alsdev.pst' ; F == 'alspro.pst';
 			 F == 'app_image0.pst'; F == 'app_image1.pst'; F == 'app_image2.pst';
-            		 F == 'libalspro.dylib.pst') ),
+            		 F == 'libalspro.dylib.pst') 
+	),
 	all_f2(Files, OS).
 
-test_files3(_)
+test_files3(mswin32)
+        :-
+        test([
+            (files('alsdir\builtins', 'j*', Files),
+             Files == ['julian.pro']),
+            true]).
+
+test_files3(unix)
 	:-
 	test([
 	    (files('examples/more', 'p*', Files),
