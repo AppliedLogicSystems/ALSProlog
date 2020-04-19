@@ -63,6 +63,7 @@ test_files2(unix)
 	:-
 	test([
 	    (files('*.pst', Files),
+pbi_write(files=Files),pbi_nl,
 		member('alsdev.pst', Files),
 		member('alspro.pst', Files),
 	    all_f2(Files, unix) ),
