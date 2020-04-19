@@ -52,9 +52,10 @@ all_eq([T | Status])
 
 test_files2(mswin32)
 	:-
+printf(user_output,'>>Enter test_files2(mswin32)\n',[]),
 	test([
 	    (files('*.pst', Files),
-pbi_write(files=Files),pbi_nl,
+printf(user_output,'>>file=%t)\n',[Files]),
 		member('alsdev.exe.pst', Files),
 		member('alspro.exe.pst', Files),
 	    all_f2(Files, mswin32) ),
