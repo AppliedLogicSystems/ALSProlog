@@ -73,7 +73,9 @@ test_files2(unix)
 all_f2([], _).
 all_f2([F | Files], OS)
 	:-
-	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; F == 'libalspro.dll.pst')
+	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; 
+			 F == 'app_image0.exe.pst'; F == 'app_image1.exe.pst'; 
+			 F == 'app_image2.exe.pst'; F == 'libalspro.dll.pst')
 				;
 			(F == 'alsdev.pst' ; F == 'alspro.pst';
 			 F == 'app_image0.pst'; F == 'app_image1.pst'; F == 'app_image2.pst';
