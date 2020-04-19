@@ -71,7 +71,7 @@ test_files2(unix)
 all_f2([], _).
 all_f2([F | Files], OS)
 	:-
-	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; 'libalspro.dll.pst')
+	(OS==mswin32 -> (F == 'alsdev.exe.pst' ; F == 'alspro.exe.pst'; F == 'libalspro.dll.pst')
 				;
 			(F == 'alsdev.pst' ; F == 'alspro.pst';
 			 F == 'app_image0.pst'; F == 'app_image1.pst'; F == 'app_image2.pst';
@@ -82,8 +82,8 @@ all_f2([F | Files], OS)
 test_files3(mswin32)
         :-
         test([
-            (files('alsdir\builtins', 'j*', Files),
-             Files == ['julian.pro']),
+            (files('alsdir\\builtins', 'c*', Files),
+             Files == ['comp_d10.pro', 'cutils.pro']),
             true]).
 
 test_files3(unix)
