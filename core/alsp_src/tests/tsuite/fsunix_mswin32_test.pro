@@ -76,7 +76,7 @@ all_f2([F | Files], OS)
 				;
 			(F == 'alsdev.pst' ; F == 'alspro.pst';
 			 F == 'app_image0.pst'; F == 'app_image1.pst'; F == 'app_image2.pst';
-            		 F == 'libalspro.dylib.pst') 
+            		 (F == 'libalspro.dylib.pst' ; F == 'libalspro.so.pst') )
 	),
 	all_f2(Files, OS).
 
