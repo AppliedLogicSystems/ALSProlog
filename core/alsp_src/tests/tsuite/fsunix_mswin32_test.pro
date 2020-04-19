@@ -11,7 +11,7 @@ do_test_fs(OS)
 	    test_file_status(OS),
 	    test_files2(OS),
 	    test_files3(OS),
-	    test_move_file(_),
+	    test_move_file(OS),
 	    
 %	    test_make_subdir1(OS),
 %	    test_make_subdir2(OS),
