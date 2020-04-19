@@ -54,6 +54,7 @@ test_files2(mswin32)
 	:-
 	test([
 	    (files('*.pst', Files),
+pbi_write(files=Files),pbi_nl,
 		member('alsdev.exe.pst', Files),
 		member('alspro.exe.pst', Files),
 	    all_f2(Files, mswin32) ),
@@ -63,7 +64,6 @@ test_files2(unix)
 	:-
 	test([
 	    (files('*.pst', Files),
-pbi_write(files=Files),pbi_nl,
 		member('alsdev.pst', Files),
 		member('alspro.pst', Files),
 	    all_f2(Files, unix) ),
