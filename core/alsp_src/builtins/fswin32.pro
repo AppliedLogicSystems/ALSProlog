@@ -208,11 +208,113 @@ move_file(Source, Target)
  |		[[read,write,execute],
  |		 [read,write],
  |		 [execute]  ]
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ | ?- make_subdir(myNewTestSubdir).
+ |
+ | yes.
+ | ?- halt.
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/19/2020  7:35 PM 	    myNewTestSubdir
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ |
  *!--------------------------------------------------------------*/
 
 make_subdir(NewDir)
 	:-
 	make_subdir(NewDir,511).
+
+/*!--------------------------------------------------------------
+ |      make_subdir/2
+ |      make_subdir(NewDir,Permissions)
+ |      make_subdir(+,+)
+ |
+ |      - creates a subdirectory in the current working directory
+ |      - with the indicated permissions
+ |
+ |      If NewDir is an atom, creates a subdirectory named NewDir in
+ |      the current working directory, if possible; if Permissions
+ |      is an integer of appropriate value, assigns the indicated
+ |      permissions to the directory.
+ |
+ |      Permissions can appear in one of three forms:
+ |
+ |      *  An appropriate  integer: 0 =< N =< 511
+ |      *  A list of approriate atoms, for example
+ |              [rwx,rx,x]
+ |      *  A list of lists of appropriate atoms, for example:
+ |              [[read,write,execute],
+ |               [read,write],
+ |               [execute]  ]
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ | ?- make_subdir(myNewTestSubdir, 457).
+ |
+ | yes.
+ | ?- halt.
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/19/2020  7:35 PM 	    myNewTestSubdir
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ *!----------------------------------------------------------------*/
 
 make_subdir(NewDir,Permissions)
 	:-

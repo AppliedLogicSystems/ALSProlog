@@ -13,8 +13,8 @@ do_test_fs(OS)
 	    test_files3(OS),
 	    test_move_file(OS),
 	    
-%	    test_make_subdir1(OS),
-%	    test_make_subdir2(OS),
+	    test_make_subdir1(OS),
+	    test_make_subdir2(OS),
 %	    test_recursive_dir_path(OS),
 %	    test_recursive_dir_paths(OS),
         true]).
@@ -115,4 +115,74 @@ test_move_file(unix)
 		member(type = regular, Status)),
 	    system('rm -rf barFile-beer.txt'),
 	    true]).
+
+test_make_subdir1(mswin32)
+	:-
+	system('RMDIR myNewTestSubdir'),
+        test([
+        (get_cwd(TestDir),
+            make_subdir(myNewTestSubdir),
+            path_directory_tail(SubdirPath, TestDir, myNewTestSubdir),
+            change_cwd(myNewTestSubdir),
+            get_cwd(ThisPath),
+            SubdirPath == ThisPath,
+            change_cwd('..')),
+                %% next make_subdir fails because myNewTestSubdir exists:
+        (not(make_subdir(myNewTestSubdir))),
+        true]),
+	system('RMDIR myNewTestSubdir').
+
+test_make_subdir1(unix)
+	:-
+        system('rm -rf myNewTestSubdir'),
+        test([
+        (get_cwd(TestDir),
+            make_subdir(myNewTestSubdir),
+            path_directory_tail(SubdirPath, TestDir, myNewTestSubdir),
+            change_cwd(myNewTestSubdir),
+            get_cwd(ThisPath),
+            SubdirPath == ThisPath,
+            change_cwd('..')),
+                %% next make_subdir fails because myNewTestSubdir exists:
+        (not(make_subdir(myNewTestSubdir))),
+        true]),
+        system('rm -rf myNewTestSubdir').
+
+
+
+test_make_subdir2(mswin32)
+	:-
+	system('RMDIR myNewTestSubdir'),
+        test([
+        (get_cwd(TestDir),
+            make_subdir(myNewTestSubdir,457),
+            file_status(myNewTestSubdir, Status),
+            member(permissions=Permissions, Status),
+            Permissions = [read,write,execute],
+            path_directory_tail(SubdirPath, TestDir, myNewTestSubdir),
+            change_cwd(myNewTestSubdir),
+            get_cwd(ThisPath),
+            SubdirPath == ThisPath,
+            change_cwd('..')),
+        (not(make_subdir(myNewTestSubdir))),
+        true]),
+	system('RMDIR myNewTestSubdir').
+
+test_make_subdir2(unix)
+	:-
+        system('rm -rf myNewTestSubdir'),
+        test([
+        (get_cwd(TestDir),
+            make_subdir(myNewTestSubdir,457),
+            file_status(myNewTestSubdir, Status),
+            member(permissions=Permissions, Status),
+            Permissions = [read,write,execute],
+            path_directory_tail(SubdirPath, TestDir, myNewTestSubdir),
+            change_cwd(myNewTestSubdir),
+            get_cwd(ThisPath),
+            SubdirPath == ThisPath,
+            change_cwd('..')),
+        (not(make_subdir(myNewTestSubdir))),
+        true]),
+        system('rm -rf myNewTestSubdir').
 

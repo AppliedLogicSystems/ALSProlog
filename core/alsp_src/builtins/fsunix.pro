@@ -187,6 +187,39 @@ move_file(Source, Target)
  |	make_subdir(NewDir)
  |	make_subdir(+)
  |
+ |	- creates a subdirectory in the current working directory
+ |	- with default permissions
+ |
+ |	If NewDir is an atom, creates a subdirectory named NewDir in 
+ |	the current working directory, if possible.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- make_subdir(myNewTestSubdir).
+ |
+ | yes.
+ | ?- halt.
+ | ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 libalspro.a
+ | README.txt              alspro*                 libalspro.dylib*
+ | als-prolog-manual.pdf   alspro.1                myNewTestSubdir/
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ *!--------------------------------------------------------------*/
+make_subdir(NewDir)
+	:-
+			%%[rwx,rwx,rwx]
+	make_subdir(NewDir,511).
+
+/*!--------------------------------------------------------------
  |	make_subdir/2
  |	make_subdir(NewDir,Permissions)
  |	make_subdir(+,+)
@@ -208,19 +241,39 @@ move_file(Source, Target)
  |		[[read,write,execute],
  |		 [read,write],
  |		 [execute]  ]
- *!--------------------------------------------------------------*/
-	%% This may go away later:
-make_subdir(NewDir)
-	:-
-	sys_env(unix,djgpp,_),
-	!,
-	mkdir(NewDir).
-
-make_subdir(NewDir)
-	:-
-			%%[rwx,rwx,rwx]
-	make_subdir(NewDir,511).
-
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- make_subdir(myNewTestSubdir,457).
+ | 
+ | yes.
+ | ?- halt.
+ | > ls -l
+ | total 26448
+ | drwxr-xr-x  6 user  staff      204 Apr 17 15:01 ALS_Prolog_Foreign_SDK/
+ | -rw-r--r--  1 user  staff     1101 Apr 17 15:01 LICENSE.txt
+ | -rw-r--r--  1 user  staff     2738 Apr  9 09:33 README.txt
+ | -rw-r--r--  1 user  staff  1938443 Apr  9 09:33 als-prolog-manual.pdf
+ | -rw-r--r--  1 user  staff  1136668 Apr  9 09:33 als-ref-manual.pdf
+ | -rwxr-xr-x  1 user  staff   482560 Apr 17 14:58 alsdev*
+ | -rw-r--r--  1 user  staff  4194488 Apr 17 14:58 alsdev.pst
+ | drwxr-xr-x  6 user  staff      204 Apr 17 14:57 alsdir/
+ | -rwxr-xr-x  1 user  staff   462720 Apr 17 14:58 alspro*
+ | -rw-r--r--  1 user  staff     8181 Apr  9 09:33 alspro.1
+ | -rw-r--r--  1 user  staff  4194488 Apr 17 14:58 alspro.pst
+ | drwxr-xr-x  7 user  staff      238 Apr 17 14:58 docs/
+ | drwxr-xr-x  9 user  staff      306 Apr 17 15:01 examples/
+ | -rw-r--r--  1 user  staff   634664 Apr 17 14:58 libalspro.a
+ | -rwxr-xr-x  1 user  staff   463764 Apr 17 14:58 libalspro.dylib*
+ | drwx--x--x  2 user  staff       68 Apr 19 19:03 myNewTestSubdir/
+ *!----------------------------------------------------------------*/
 make_subdir(NewDir,Permissions)
 	:-
 	integer(Permissions),
