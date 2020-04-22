@@ -204,7 +204,7 @@ test_subdirs(unix)
 	test([
 	    (subdirs(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir,darwin,examples]),
+	    SDList == [alsdir,examples,linux]),
         true]).
 
 test_subdirs_red(mswin32)
@@ -220,7 +220,7 @@ test_subdirs_red(unix)
 	test([
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir,darwin,examples]),
+	    SDList == [alsdir,examples,linux]),
         true]).
 
 test_remove_subdir(mswin32)
