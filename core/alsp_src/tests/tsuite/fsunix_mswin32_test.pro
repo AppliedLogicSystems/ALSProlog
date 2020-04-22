@@ -283,8 +283,10 @@ test_directory(mswin32,_)
 	:-
 	test([
 	    (directory('*', 1, FL0),
+printf(user_output, 'd1 = %t\n', [FL0]),
 	    FL0 == [alsdir,mswinnt],
 	    directory('*.pst', 4, FL1),
+printf(user_output, 'd4 = %t\n', [FL1]),
 	    FL1 == ['alsdev.exe.pst','alspro.exe.pst','libalspro.dll.pst']),
         true]).
 
