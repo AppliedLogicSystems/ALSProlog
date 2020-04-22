@@ -21,10 +21,10 @@ export files/3.
 export move_file/2.
 export make_subdir/1.
 export make_subdir/2.
-export remove_subdir/1.
-export kill_subdir/1.
 export subdirs/1.
 export subdirs_red/1.
+export remove_subdir/1.
+export kill_subdir/1.
 export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
@@ -319,31 +319,6 @@ indv_perm_code(read, 4).
 indv_perm_code(write, 2).
 indv_perm_code(execute, 1).
 
-
-
-
-
-
-/*!--------------------------------------------------------------
- |	remove_subdir/1
- |	remove_subdir(SubDir)
- |	remove_subdir(+)
- |
- |	- removes a subdirectory from the current working directory
- |
- |	If SubDir is an atom, remove the subdirectory named SubDir from 
- |	the current working directory, if it exists.
- *!--------------------------------------------------------------*/
-remove_subdir(SubDir)
-	:-
-	rmdir(SubDir).
-
-kill_subdir(SubDir)
-	:-
-	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
-	system(Cmd).
-
-
 /*!----------------------------------------------------------------
  |	subdirs/1
  |	subdirs(SubdirList)
@@ -352,7 +327,24 @@ kill_subdir(SubDir)
  |	- returns a list of subdirectories 
  |
  |	Returns the list of all subdirectories of the current 
- |	working directory.
+ |	working directory.  On unix, the system files '.' and '..'
+ |	are removed from the list; on mswin32, they are included.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- subdirs(SDs).
+ | 
+ | SDs=['ALS_Prolog_Foreign_SDK',alsdir,docs,examples] 
+ | 
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs(SubdirList)
 	:-
@@ -367,12 +359,107 @@ subdirs(SubdirList)
  |
  |	Returns the list of all subdirectories of the current 
  |	working directory, omitting '.' and '..'
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- subdirs(SDs).
+ | 
+ | SDs=['ALS_Prolog_Foreign_SDK',alsdir,docs,examples] 
+ | 
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs_red(SubdirList)
 	:-
 	directory('*',1,SubdirList0),
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
+
+/*!--------------------------------------------------------------
+ |	remove_subdir/1
+ |	remove_subdir(SubDir)
+ |	remove_subdir(+)
+ |
+ |	- removes a subdirectory from the current working directory
+ |
+ |	If SubDir is an atom, remove the subdirectory named SubDir from 
+ |	the current working directory, if it exists AND is empty.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > mkdir funnyFolder
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 funnyFolder/
+ | README.txt              alspro*                 libalspro.a
+ | als-prolog-manual.pdf   alspro.1                libalspro.dylib*
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ | .....
+ | ?- remove_subdir(funnyFolder).
+ |
+ | yes.
+ | .....
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ *!--------------------------------------------------------------*/
+remove_subdir(SubDir)
+	:-
+	rmdir(SubDir).
+
+/*!--------------------------------------------------------------
+ |	kill_subdir/1
+ |	kill_subdir(SubDir)
+ |	kill_subdir(+)
+ |
+ |	- removes a subdirectory from the current working directory
+ |
+ |	If SubDir is an atom, remove the subdirectory named SubDir from 
+ |	the current working directory, if it exists; SubDir may
+ |	contain files and other subdirs.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > mkdir funnyFolder
+ |  > echo hiThere > funnyFolder/AFile
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 funnyFolder/
+ | README.txt              alspro*                 libalspro.a
+ | als-prolog-manual.pdf   alspro.1                libalspro.dylib*
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ | > cat funnyFolder/AFile
+ | hiThere
+ | .....
+ | ?- kill_subdir(funnyFolder).
+ |
+ | yes.
+ | .....
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ *!--------------------------------------------------------------*/
+kill_subdir(SubDir)
+	:-
+	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
+	system(Cmd).
 
 
 /*!------------------------------------------------------------------

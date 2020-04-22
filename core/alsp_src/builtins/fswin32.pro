@@ -19,12 +19,12 @@ export files/3.
 export move_file/2.
 export make_subdir/1.
 export make_subdir/2.
+export subdirs/1.
+export subdirs_red/1.
 export remove_subdir/1.
 
 export kill_subdir/1.
 
-export subdirs/1.
-export subdirs_red/1.
 export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
@@ -245,8 +245,6 @@ move_file(Source, Target)
  | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
  | d-----	..... 	   .....   .....    .....
  | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
- |
- |
  *!--------------------------------------------------------------*/
 
 make_subdir(NewDir)
@@ -323,23 +321,6 @@ make_subdir(NewDir,Permissions)
 	0 =< Permissions, Permissions =< 512,
 	mkdir(NewDir,Permissions).
 
-
-/*!--------------------------------------------------------------
- |	remove_subdir/1
- |	remove_subdir(SubDir)
- |	remove_subdir(+)
- |
- |	- removes a subdirectory from the current working directory
- |
- |	If SubDir is an atom, remove the subdirectory named SubDir from 
- |	the current working directory, if it exists.
- *!--------------------------------------------------------------*/
- 
- remove_subdir(SubDir)
-	:-
-	rmdir(SubDir).
- 
-
 /*!----------------------------------------------------------------
  |	subdirs/1
  |	subdirs(SubdirList)
@@ -348,7 +329,32 @@ make_subdir(NewDir,Permissions)
  |	- returns a list of subdirectories 
  |
  |	Returns the list of all subdirectories of the current 
- |	working directory.
+ |	working directory.  On unix, the system files '.' and '..'
+ |      are removed from the list; on mswin32, they are included.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ | .....
+ | ?- subdirs(SDs).
+ |
+ | SDs=['.','..',alsdir,alshelp,'ALS_Prolog_Foreign_SDK',docs,examples,lib].
+ |
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs(SubdirList)
 	:-
@@ -363,6 +369,30 @@ subdirs(SubdirList)
  |
  |	Returns the list of all subdirectories of the current 
  |	working directory, omitting '.' and '..'
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ | .....
+ | ?- subdirs_red(SDs).
+ |
+ | SDs=[alsdir,alshelp,'ALS_Prolog_Foreign_SDK',docs,examples,lib].
+ |
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs_red(SubdirList)
 	:-
@@ -370,6 +400,75 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
  
+/*!--------------------------------------------------------------
+ |	remove_subdir/1
+ |	remove_subdir(SubDir)
+ |	remove_subdir(+)
+ |
+ |	- removes a subdirectory from the current working directory
+ |
+ |	If SubDir is an atom, remove the subdirectory named SubDir from 
+ |	the current working directory, if it exists AND is empty.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | mkdir funnyFolder
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/20/2020  5:29 PM 	    funnyFolder
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ | ?- remove_subdir(funnyFolder).
+ |
+ | yes.
+ |
+ | C:Users\user\ALSPrlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode		LastWriteTime	   Length   Name
+ | ----		-------------	   ------   ----
+ | d-----	4/13/2018  5:29 PM 	    alsdir
+ | d-----	4/13/2018  5:29 PM 	    alshelp
+ | d-----	4/13/2018  5:29 PM 	    ALS_Prolog_Foreign_SDK
+ | d-----	4/13/2018  5:29 PM 	    examples
+ | d-----	4/13/2018  5:29 PM 	    lib
+ | d-----	4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----	..... 	   .....   .....    .....
+ | d-----	4/13/2018  5:29 PM 84480    zlib1.dll
+ *!--------------------------------------------------------------*/
+ remove_subdir(SubDir)
+	:-
+	rmdir(SubDir).
+ 
+/*!--------------------------------------------------------------
+ |      kill_subdir/1
+ |      kill_subdir(SubDir)
+ |      kill_subdir(+)
+ |
+ |      - removes a subdirectory from the current working directory
+ |
+ |      If SubDir is an atom, remove the subdirectory named SubDir from
+ |      the current working directory, if it exists.
+ *!--------------------------------------------------------------*/
+kill_subdir(SubDir)
+        :-
+        sprintf(atom(Cmd),'Remove-Item -Recurse -Force %t',[SubDir]),
+        system(Cmd).
+
+
 
 /*!------------------------------------------------------------------
  |	directory/3
