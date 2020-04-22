@@ -191,6 +191,38 @@ test_make_subdir2(unix)
         true]),
         system('rm -rf myNewTestSubdir').
 
+test_subdirs(mswin32)
+	:-
+	test([
+	    (subdirs(SDList),
+printf(user_output, 'SDL=%t\n', [SDList]),
+	    SDList == ['.','..',alsdir]),
+        true]).
+
+test_subdirs(unix)
+	:-
+	test([
+	    (subdirs(SDList),
+printf(user_output, 'SDL=%t\n', [SDList]),
+	    SDList == [alsdir,darwin,examples]),
+        true]).
+
+test_subdirs_red(mswin32)
+	:-
+	test([
+	    (subdirs_red(SDList),
+printf(user_output, 'SDL=%t\n', [SDList]),
+	    SDList == [alsdir]),
+        true]).
+
+test_subdirs_red(unix)
+	:-
+	test([
+	    (subdirs_red(SDList),
+printf(user_output, 'SDL=%t\n', [SDList]),
+	    SDList == [alsdir,darwin,examples]),
+        true]).
+
 test_remove_subdir(mswin32)
 	:-
         system('rmdir myNewTestSubdir'),
@@ -242,35 +274,3 @@ test_kill_subdir(unix)
 	     not(member(myNewTestSubdir, List2)) ),
         true]),
         system('rmdir myNewTestSubdir').
-
-test_subdirs(mswin32)
-	:-
-	test([
-	    (subdirs(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == ['.','..',alsdir]),
-        true]).
-
-test_subdirs(unix)
-	:-
-	test([
-	    (subdirs_red(SDList),
-	    SDList == [alsdir,darwin,examples]),
-        true]).
-
-test_subdirs_red(mswin32)
-	:-
-	test([
-	    (subdirs_red(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir]),
-        true]).
-
-test_subdirs_red(unix)
-	:-
-	test([
-	    (subdirs_red(SDList),
-	    SDList == [alsdir,darwin,examples]),
-        true]).
-
-
