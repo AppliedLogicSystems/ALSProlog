@@ -465,7 +465,7 @@ subdirs_red(SubdirList)
  *!--------------------------------------------------------------*/
 kill_subdir(SubDir)
         :-
-        sprintf(atom(Cmd),'Remove-Item -Recurse -Force %t',[SubDir]),
+        sprintf(atom(Cmd),'rmdir %t',[SubDir]),
         system(Cmd).
 
 

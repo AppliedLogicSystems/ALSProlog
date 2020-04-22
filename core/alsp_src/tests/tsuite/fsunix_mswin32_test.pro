@@ -2,10 +2,10 @@
 
 test_fsunix_mswin32
         :-
-        sys_env(OS,_,_),
-        do_test_fs(OS).
+        sys_env(OS,OSVar,_),
+        do_test_fs(OS,OSVar).
 
-do_test_fs(OS)
+do_test_fs(OS,OSVar)
         :-
         test([
 	    test_file_status(OS),
@@ -15,8 +15,8 @@ do_test_fs(OS)
 	    
 	    test_make_subdir1(OS),
 	    test_make_subdir2(OS),
-	    test_subdirs(OS),
-	    test_subdirs_red(OS),
+	    test_subdirs(OS,OSVar),
+	    test_subdirs_red(OS,OSVar),
 
 	    test_remove_subdir(OS),
 	    test_kill_subdir(OS),
@@ -193,34 +193,42 @@ test_make_subdir2(unix)
 
 test_subdirs(mswin32)
 	:-
+printf(user_output, 'BEGIN test_subdirs\n', []),
 	test([
 	    (subdirs(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
 	    SDList == ['.','..',alsdir]),
         true]).
 
-test_subdirs(unix)
+test_subdirs(unix,OSVar)
 	:-
 	test([
 	    (subdirs(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir,examples,linux]),
+	    (OSVar == linux ->
+	        SDList == [alsdir,darwin,examples]
+		;
+	        SDList == [alsdir,darwin,examples]) ),
         true]).
 
 test_subdirs_red(mswin32)
 	:-
 	test([
+printf(user_output, 'BEGIN test_subdirs_red\n', []),
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
 	    SDList == [alsdir]),
         true]).
 
-test_subdirs_red(unix)
+test_subdirs_red(unix,OSVar)
 	:-
 	test([
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir,examples,linux]),
+	    (OSVar == linux ->
+	        SDList == [alsdir,examples,linux]
+		;
+	        SDList == [alsdir,examples,linux]) ),
         true]).
 
 test_remove_subdir(mswin32)
