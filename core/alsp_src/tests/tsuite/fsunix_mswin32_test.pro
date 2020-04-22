@@ -197,15 +197,13 @@ printf(user_output, 'BEGIN test_subdirs\n', []),
 	test([
 	    (subdirs(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == ['.','..',alsdir]),
+	    SDList == ['.','..',alsdir,mswinnt]),
         true]).
 
 test_subdirs(unix,OSVar)
 	:-
-printf(user_output, 'BEGIN test_subdirs - OSVar=%t\n', [OSVar]),
 	test([
 	    (subdirs(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
 		;
@@ -218,15 +216,13 @@ printf(user_output, 'BEGIN test_subdirs_red\n', []),
 	test([
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
-	    SDList == [alsdir]),
+	    SDList == [alsdir,mswinnt]),
         true]).
 
 test_subdirs_red(unix,OSVar)
 	:-
-printf(user_output, 'BEGIN test_subdirs_red - OSVar=%t\n', [OSVar]),
 	test([
 	    (subdirs_red(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
 		;
