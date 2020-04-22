@@ -22,9 +22,7 @@ export make_subdir/2.
 export subdirs/1.
 export subdirs_red/1.
 export remove_subdir/1.
-
 export kill_subdir/1.
-
 export directory/3.
 export get_current_drive/1.
 export change_current_drive/1.
@@ -212,7 +210,7 @@ move_file(Source, Target)
  | Examples
  |      Executed in the ALS Prolog distribution directory:
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -230,7 +228,7 @@ move_file(Source, Target)
  | yes.
  | ?- halt.
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -277,7 +275,7 @@ make_subdir(NewDir)
  | Examples
  |      Executed in the ALS Prolog distribution directory:
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -297,7 +295,7 @@ make_subdir(NewDir)
  | yes.
  | ?- halt.
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -335,7 +333,7 @@ make_subdir(NewDir,Permissions)
  | Examples
  |      Executed in the ALS Prolog distribution directory:
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -373,7 +371,7 @@ subdirs(SubdirList)
  | Examples
  |      Executed in the ALS Prolog distribution directory:
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -414,7 +412,7 @@ subdirs_red(SubdirList)
  |      Executed in the ALS Prolog distribution directory:
  |
  | mkdir funnyFolder
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -434,7 +432,7 @@ subdirs_red(SubdirList)
  |
  | yes.
  |
- | C:Users\user\ALSPrlog> dir
+ | C:Users\user\ALSProlog> dir
  |
  |     Directory: C:\Users\user\ALSProlog
  |
@@ -461,14 +459,52 @@ subdirs_red(SubdirList)
  |      - removes a subdirectory from the current working directory
  |
  |      If SubDir is an atom, remove the subdirectory named SubDir from
- |      the current working directory, if it exists.
+ |      the current working directory, if it exists;  SubDir may
+ |      contain files and other subdirs.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | mkdir funnyFolder
+ | C:Users\user\ALSProlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode         LastWriteTime      Length   Name
+ | ----         -------------      ------   ----
+ | d-----       4/13/2018  5:29 PM          alsdir
+ | d-----       4/13/2018  5:29 PM          alshelp
+ | d-----       4/13/2018  5:29 PM          ALS_Prolog_Foreign_SDK
+ | d-----       4/13/2018  5:29 PM          examples
+ | d-----       4/20/2020  5:29 PM          funnyFolder
+ | d-----       4/13/2018  5:29 PM          lib
+ | d-----       4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----       .....      .....   .....    .....
+ | d-----       4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ | ?- remove_subdir(funnyFolder).
+ |
+ | yes.
+ |
+ | C:Users\user\ALSProlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode         LastWriteTime      Length   Name
+ | ----         -------------      ------   ----
+ | d-----       4/13/2018  5:29 PM          alsdir
+ | d-----       4/13/2018  5:29 PM          alshelp
+ | d-----       4/13/2018  5:29 PM          ALS_Prolog_Foreign_SDK
+ | d-----       4/13/2018  5:29 PM          examples
+ | d-----       4/13/2018  5:29 PM          lib
+ | d-----       4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----       .....      .....   .....    .....
+ | d-----       4/13/2018  5:29 PM 84480    zlib1.dll
  *!--------------------------------------------------------------*/
 kill_subdir(SubDir)
         :-
         sprintf(atom(Cmd),'rmdir %t',[SubDir]),
         system(Cmd).
-
-
 
 /*!------------------------------------------------------------------
  |	directory/3
@@ -479,10 +515,40 @@ kill_subdir(SubDir)
  |	
  |	If Pattern is a file name pattern, including possible '*' and
  |	'?' wildcard characters, and FileType is a numeric (internal)
- |	file type or a symbolic (abstract) file type, directory/3	
- |	unifies List with a sorted list of atoms of names of file of
- |	type FileType, matching Pattern, and found in the 
+ |	file type or a symbolic (abstract) file type (see fileTypeCode/2
+ |	and ownerPermissionsCoding/2 following fileStatus above),
+ | 	directory/3 unifies List with a sorted list of atoms of names 
+ |	of files of type FileType, matching Pattern, and found in the 
  |	current directory. 
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ | C:Users\user\ALSProlog> dir
+ |
+ |     Directory: C:\Users\user\ALSProlog
+ |
+ | Mode         LastWriteTime      Length   Name
+ | ----         -------------      ------   ----
+ | d-----       4/13/2018  5:29 PM          alsdir
+ | d-----       4/13/2018  5:29 PM          alshelp
+ | d-----       4/13/2018  5:29 PM          ALS_Prolog_Foreign_SDK
+ | d-----       4/13/2018  5:29 PM          examples
+ | d-----       4/13/2018  5:29 PM          lib
+ | d-----       4/13/2018  5:29 PM 1938443  als-prolog-manual.pdf
+ | d-----       .....      .....   .....    .....
+ | d-----       4/13/2018  5:29 PM 84480    zlib1.dll
+ |
+ | ?- directory('*', 1, FL).
+ |
+ | FL=[alsdir,alshelp,'ALS_Prolog_Foreign_SDK',docs,examples,lib] 
+ |
+ | yes.
+ | ?- directory('*.pst', 4, FL).
+ |
+ | FL=['alsdev.exe.pst','alspro.exe.pst','libalspro.dll.pst'] 
+ |
+ | yes.
  *!------------------------------------------------------------------*/
 
 	% If no pattern has been give, assume a complete wildcard is wanted:

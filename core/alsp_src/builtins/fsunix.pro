@@ -370,7 +370,7 @@ subdirs(SubdirList)
  | als-prolog-manual.pdf   alspro*                 libalspro.a
  | als-ref-manual.pdf      alspro.1                libalspro.dylib*
  | .....
- | ?- subdirs(SDs).
+ | ?- subdirs_red(SDs).
  | 
  | SDs=['ALS_Prolog_Foreign_SDK',alsdir,docs,examples] 
  | 
@@ -471,10 +471,32 @@ kill_subdir(SubDir)
  |	
  |	If Pattern is a file name pattern, including possible '*' and
  |	'?' wildcard characters, and FileType is a numeric (internal)
- |	file type or a symbolic (abstract) file type, directory/3	
- |	unifies List with a sorted list of atoms of names of file of
- |	type FileType, matching Pattern, and found in the 
+ |	file type or a symbolic (abstract) file type, (see fileTypeCode/2
+ |      and ownerPermissionsCoding/2 following fileStatus above),
+ |	directory/3 unifies List with a sorted list of atoms of names 
+ |	of file of type FileType, matching Pattern, and found in the 
  |	current directory. 
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- directory('*', 1, X).
+ |
+ | X=['ALS_Prolog_Foreign_SDK',alsdir,darwin,docs,examples]
+ |
+ | yes.
+ | ?- directory('*.pst', 4, FL).
+ |
+ | FL=['alsdev.pst','alspro.pst']
+ |
+ | yes.
  *!------------------------------------------------------------------*/
 
 	% If no pattern has been give, assume a complete wildcard is wanted:

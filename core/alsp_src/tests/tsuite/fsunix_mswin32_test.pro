@@ -20,6 +20,8 @@ do_test_fs(OS,OSVar)
 
 	    test_remove_subdir(OS),
 	    test_kill_subdir(OS),
+
+	    test_directory(OS, OSVar),
 %	    test_recursive_dir_path(OS),
 %	    test_recursive_dir_paths(OS),
         true]).
@@ -200,7 +202,7 @@ test_subdirs(mswin32,_)
 
 test_subdirs(unix,OSVar)
 	:-
-  test([
+  	test([
 	    (subdirs(SDList),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
@@ -217,7 +219,7 @@ test_subdirs_red(mswin32,_)
 
 test_subdirs_red(unix,OSVar)
 	:-
-  test([
+  	test([
 	    (subdirs_red(SDList),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
@@ -275,4 +277,31 @@ test_kill_subdir(unix)
 	     subdirs(List2),
 	     not(member(myNewTestSubdir, List2)) ),
         true]),
-        system('rmdir myNewTestSubdir').
+        system('rm -rf myNewTestSubdir').
+
+test_directory(mswin32,_)
+	:-
+	test([
+	    (directory('*', 1, FL0),
+	    FL0 == [alsdir,mswinnt],
+	    directory('*.pst', 4, FL1),
+	    FL1 == ['alsdev.exe.pst','alspro.exe.pst','libalspro.dll.pst']),
+        true]).
+
+test_directory(unix,OSVar)
+	:-
+  	test([
+	    (directory('*', 1, FL0),
+	    (OSVar == linux ->
+	        FL0 == [alsdir,examples,linux]
+		;
+	        FL0 == [alsdir,darwin,examples]),
+	    directory('*.pst', 4, FL1),
+	    (OSVar == linux ->
+	    	FL1 == ['alsdev.pst','alspro.pst','app_image0.pst','app_image1.pst',
+			'app_image2.pst','libalspro.so.pst']
+		;
+	    	FL1 == ['alsdev.pst','alspro.pst','app_image0.pst','app_image1.pst',
+			'app_image2.pst','libalspro.dylib.pst'])),
+        true]).
+
