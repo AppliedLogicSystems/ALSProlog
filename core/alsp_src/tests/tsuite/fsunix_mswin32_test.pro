@@ -1,4 +1,4 @@
-y-[test].
+:-[test].
 
 test_fsunix_mswin32
         :-
