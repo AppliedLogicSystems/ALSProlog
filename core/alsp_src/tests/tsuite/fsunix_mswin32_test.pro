@@ -193,16 +193,14 @@ test_make_subdir2(unix)
 
 test_subdirs(mswin32,_)
 	:-
-printf(user_output, 'BEGIN test_subdirs\n', []),
 	test([
 	    (subdirs(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
 	    SDList == ['.','..',alsdir,mswinnt]),
         true]).
 
 test_subdirs(unix,OSVar)
 	:-
-	test([
+  test([
 	    (subdirs(SDList),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
@@ -212,16 +210,14 @@ test_subdirs(unix,OSVar)
 
 test_subdirs_red(mswin32,_)
 	:-
-printf(user_output, 'BEGIN test_subdirs_red\n', []),
 	test([
 	    (subdirs_red(SDList),
-printf(user_output, 'SDL=%t\n', [SDList]),
 	    SDList == [alsdir,mswinnt]),
         true]).
 
 test_subdirs_red(unix,OSVar)
 	:-
-	test([
+  test([
 	    (subdirs_red(SDList),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
