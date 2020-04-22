@@ -1,4 +1,4 @@
-:-[test].
+y-[test].
 
 test_fsunix_mswin32
         :-
@@ -191,7 +191,7 @@ test_make_subdir2(unix)
         true]),
         system('rm -rf myNewTestSubdir').
 
-test_subdirs(mswin32)
+test_subdirs(mswin32,_)
 	:-
 printf(user_output, 'BEGIN test_subdirs\n', []),
 	test([
@@ -202,19 +202,20 @@ printf(user_output, 'SDL=%t\n', [SDList]),
 
 test_subdirs(unix,OSVar)
 	:-
+printf(user_output, 'BEGIN test_subdirs - OSVar=%t\n', [OSVar]),
 	test([
 	    (subdirs(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
 	    (OSVar == linux ->
-	        SDList == [alsdir,darwin,examples]
+	        SDList == [alsdir,examples,linux]
 		;
 	        SDList == [alsdir,darwin,examples]) ),
         true]).
 
-test_subdirs_red(mswin32)
+test_subdirs_red(mswin32,_)
 	:-
-	test([
 printf(user_output, 'BEGIN test_subdirs_red\n', []),
+	test([
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
 	    SDList == [alsdir]),
@@ -222,13 +223,14 @@ printf(user_output, 'SDL=%t\n', [SDList]),
 
 test_subdirs_red(unix,OSVar)
 	:-
+printf(user_output, 'BEGIN test_subdirs_red - OSVar=%t\n', [OSVar]),
 	test([
 	    (subdirs_red(SDList),
 printf(user_output, 'SDL=%t\n', [SDList]),
 	    (OSVar == linux ->
 	        SDList == [alsdir,examples,linux]
 		;
-	        SDList == [alsdir,examples,linux]) ),
+	        SDList == [alsdir,darwin,examples]) ),
         true]).
 
 test_remove_subdir(mswin32)
