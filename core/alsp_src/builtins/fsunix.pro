@@ -408,21 +408,6 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
-/*!----------------------------------------------------------------
- |	file_size/2
- |	file_size(FileName,Size)
- |	file_size(+,-)
- |
- |	- returns the size of a file
- |
- |	If File is an atom (possibly quoted) which is the name of a
- |	file in the current working directory, Size is the size of
- |	that file in bytes.
- *!----------------------------------------------------------------*/
-file_size(_,0)
-	:-
-	prolog_system_error(nyi, ['file_size/2',unix]).
-
 /*
  *	The following are essentially no-ops on unix, but
  *	need to do something for portability.  In accordance 
