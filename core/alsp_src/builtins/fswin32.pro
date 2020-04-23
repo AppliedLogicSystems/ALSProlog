@@ -24,6 +24,8 @@ export subdirs_red/1.
 export remove_subdir/1.
 export kill_subdir/1.
 export directory/3.
+export recursive_dir_path/2.
+export recursive_dir_paths/2.
 export get_current_drive/1.
 export change_current_drive/1.
 
