@@ -660,22 +660,14 @@ file_size(_,0)
 	:-
 	prolog_system_error(nyi, ['file_size/2',unix]).
 
-/*
+/* ----
  *	The following are essentially no-ops on unix, but
- *	need to do something for portability.  In accordance 
- *	with the conventions in filepath.pro, the "drive"
- *	is taken to be: root.
- */
-
+ *	need to do something for portability to mswin32.  
+ *	In accordance with the conventions in filepath.pro, 
+ * 	the "drive" is taken to be: root.
+ *----*/
 get_current_drive(root).
 
 change_current_drive(_).
-
-/*!----------------------------------------------------------------
- *!----------------------------------------------------------------*/
-move_file(Source, Target)
-	:-
-	sprintf(atom(Cmd),'mv %t %t', [Source, Target]),
-	system(Cmd).
 
 endmod.

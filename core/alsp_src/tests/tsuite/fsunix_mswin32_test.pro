@@ -22,6 +22,9 @@ do_test_fs(OS,OSVar)
 	    test_kill_subdir(OS),
 
 	    test_directory(OS, OSVar),
+	    test_get_current_drive(OS),
+	    test_change_current_drive(OS),
+
 %	    test_recursive_dir_path(OS),
 %	    test_recursive_dir_paths(OS),
         true]).
@@ -306,3 +309,28 @@ test_directory(unix,OSVar)
 			'app_image2.pst','libalspro.dylib.pst'])),
         true]).
 
+	/* -----------------------------*
+	 | Only meaningful for mwwin32
+	 * -----------------------------*/
+
+	%% Assumes we're running on drive C: (on Appveyor).
+test_get_current_drive(mswin32)
+	:-
+  	test([
+	    (get_current_drive(Drive),
+	    atom_codes(Drive, DriveCs),
+	    reverse(DriveCs, RevCs),
+	    RevCs == "\\:C" ),
+        true]).
+
+test_get_current_drive(unix).
+	
+etest(Goal, Error) 
+	:-
+        catch((Goal, !, fail), error(Error, _), true).
+
+test_change_current_drive(mswin32)
+	:-
+	etest(change_current_drive('E'), system_error).
+
+test_change_current_drive(unix).

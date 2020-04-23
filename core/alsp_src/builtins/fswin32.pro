@@ -673,23 +673,57 @@ file_size(_,0)
 	:-
 	prolog_system_error(nyi, ['file_size/2',unix]).
 
-%--------------------------------------------------------------------
-%	get_current_drive/1
-%--------------------------------------------------------------------
+/*!----------------------------------------------------------------
+ |	get_current_drive/1
+ |	get_current_drive(Drive)
+ |	get_current_drive(-)
+ |
+ |	- returns the descriptor for the current drive
+ |
+ |	Returns the descriptor for the current drive in the form
+ |	Drive = 'XYZ:\\', where 'XYZ:' is a proper Windows drive
+ |	descriptor, and 'XYZ:\\' is an acceptable component for
+ |	expressing file path names in Windows.  Note that 
+ |	both 'C:' and 'C' are acceptable drive descriptors for
+ |	change_current_drive/1 below, but that 'C:\\' is not.
+ |
+ | Examples (Drive is currently C):
+ |	
+ | ?- get_current_drive(Drive).
+ | 
+ | Drive = 'C:\\'
+ *!----------------------------------------------------------------*/
 
 get_current_drive(Drive)
 	:-
 	getcwd(Path),
-%	rootPathFile(Drive,_,_,Path).
 	split_path(Path, [Drive | _]).
 
-%--------------------------------------------------------------------
-%	change_current_drive/1.
-%
-%		We check to make sure that the final character in the drive name
-%		is a colon, otherwise it is not a valid drive descriptor.
-%--------------------------------------------------------------------
+/*!----------------------------------------------------------------
+ |	change_current_drive/1.
+ |	change_current_drive(NewDrive)
+ |	change_current_drive(+)
+ |	
+ |	- Changes the current drive to NewDrive if it is valid.
+ |
+ |	If NewDrive is a valid drive descriptor, changes the
+ |	current OS drive to NewDrive.
+ |	  
+ | Examples (Drive is currently C, and is the only drive):
+ |	
+ | ?- change_current_drive('E:').
+ |	
+ | Error: System error: change_cwd('E:')
+ | - change_cwd: 	'E:'
+ | - Throw pattern: error(system_error, [change_cwd('E:')])
+ |
+ | ?- change_current_drive('C:').
+ |
+ | yes.
+ *!----------------------------------------------------------------*/
 
+	% We check to make sure that the final character in the drive name
+	% is a colon, otherwise it is not a valid drive descriptor.
 change_current_drive(DriveName)
 	:-
 	name(DriveName,DriveList),
@@ -702,7 +736,6 @@ change_current_drive(DriveName) :-
 	append(DriveList,[0':],ProperDriveList),
 	name(ProperDriveName,ProperDriveList),
 	change_cwd(ProperDriveName).
-	
 
 endmod.
 
