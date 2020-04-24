@@ -26,6 +26,8 @@ export subdirs_red/1.
 export remove_subdir/1.
 export kill_subdir/1.
 export directory/3.
+export recursive_dir_path/2.
+export recursive_dir_paths/2.
 export get_current_drive/1.
 export change_current_drive/1.
 
@@ -644,6 +646,136 @@ make_reg_exp([0'* | RestPattern],[0'., 0'* | RestRegex])
 make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
+
+/*!----------------------------------------------------------------
+ |      recursive_dir_path/2
+ |      recursive_dir_path(Path_List, Path)
+ |      recursive_dir_path(+, -)
+ |
+ |      Creates a nested directories path
+ |
+ |      If Path_List is a list of atoms which potentially describe
+ |      a nested path of directories in the filesystem, (and which may
+ |      need to be created), and if the last atom either describes a
+ |      directory or a file, then:
+ |      1) Path is an atom describing the path described by Path_List
+ |              (as created by join_path/2), and
+ |      2) That Path is created in the filesystem, if possible;
+ |      2a) Moreover, either Path is absolute,
+ |      2b) Or path is not absolute, and so is created relative to
+ |       the current working directory.
+ |      Fails if the mkdir command in the underlying filesystem (unix
+ |      or mswin32) throws an error.
+ |      If the underlying OS is mswin32, the first element of Path_List
+ |      is permitted to be a drive letter atom (e.g., 'C:').
+ |      If the underlying OS is mswin32,  enableextensions must be active.
+ |
+ | Examples
+ | 
+ | ?- recursive_dir_path([dir1,dir2,dir3], PL).
+ | 
+ | PL='dir1/dir2/dir3' 
+ | 
+ | yes.
+ | .....
+ | > ls -d dir1
+ | dir1/
+ |
+ | > ls -R dir1
+ | dir2/
+ | 
+ | dir1/dir2:
+ | dir3/
+ | 
+ | dir1/dir2/dir3:
+ *!----------------------------------------------------------------*/
+recursive_dir_path(Path_List, Path)
+        :-
+        join_path(Path_List, Path),
+        sprintf(atom(Cmd), 'mkdir -p -- %t\n', [Path]),
+        system(Cmd).
+
+/*!----------------------------------------------------------------
+ |      recursive_dir_paths/2
+ |      recursive_dir_paths(List_of_Path_Lists, Paths)
+ |      recursive_dir_paths(+, -)
+ |
+ |      Creates multiple nested directory paths
+ |
+ |      If List_of_Path_Lists is a list of lists of atoms each of which
+ |      potentially describe a nested path of directories in the
+ |      filesystem, (and which may need to be created), and if the
+ |      last atom of each list either describes a directory or a file,
+ |      then:
+ |      1) The length of Paths equals the length of List_of_Path_Lists,
+ |         and each element of Paths is an atom;
+ |      2) For each list Path_List on List_of_Path_Lists, Path is the
+ |         corresponding atom on Paths and
+ |              recursive_dir_path(Path_List, Path)
+ |         holds.
+ |
+ | Examples
+ |       Multiple paths forming a tree:
+ | 
+ |         rr/
+ |           qq/                  pp/
+ |             kk/ mm/    nn/       aa/
+ |                   jj/              bb/
+ | 
+ |         [[rr,qq,kk],[rr,qq,mm,jj],[rr,qq,nn],[rr,pp,aa,bb]]
+ | 
+ | ?- recursive_dir_paths([[rr,qq,kk],[rr,qq,mm,jj],[rr,qq,nn],[rr,pp,aa,bb]], PL).
+ | 
+ | PL=['rr/qq/kk','rr/qq/mm/jj','rr/qq/nn','rr/pp/aa/bb'] 
+ | 
+ | yes.
+ | .....
+ | > ls -d rr
+ | rr/
+ | 
+ | > ls -R rr
+ | pp/ qq/
+ | 
+ | rr/pp:
+ | aa/
+ | 
+ | rr/pp/aa:
+ | bb/
+ | 
+ | rr/pp/aa/bb:
+ | 
+ | rr/qq:
+ | kk/ mm/ nn/
+ | 
+ | rr/qq/kk:
+ | 
+ | rr/qq/mm:
+ | jj/
+ | 
+ | rr/qq/mm/jj:
+ | 
+ | rr/qq/nn:
+ |  > 
+ *!----------------------------------------------------------------*/
+recursive_dir_paths(List_of_Path_Lists, Paths)
+        :-
+        prepare_path_cmd_list(List_of_Path_Lists, Paths, Markers),
+        sys_env(OS, _, _),
+        (OS == unix ->
+                catenate(['mkdir -p -- ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+                ;
+                catenate(['mkdir ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+        ),
+        system(Cmd).
+
+prepare_path_cmd_list([], [], []).
+prepare_path_cmd_list([Path_List | RestList_of_Path_Lists],
+                        [Path | RestCmdList], ['%t ' | RestMarkers])
+        :-
+        join_path(Path_List, Path),
+        prepare_path_cmd_list(RestList_of_Path_Lists, RestCmdList, RestMarkers).
 
 
 /* ----
