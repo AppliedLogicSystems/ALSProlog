@@ -309,49 +309,65 @@ test_directory(unix,OSVar)
 			'app_image2.pst','libalspro.dylib.pst'])),
         true]).
 
-test_recursive_dir_path(_)
+test_recursive_dir_path(OS)
 	:-
         get_cwd(TestDir),
-        clean_dirs(TestDir, [dir1,dir2,dir3], _),
+        clean_dirs(TestDir, OS, [dir1,dir2,dir3], _),
 
         test([
             (Path_List = [dir1,dir2,dir3],
                 recursive_dir_path(Path_List, Path),
-                clean_dirs(TestDir, [dir1,dir2,dir3], Status),
+                clean_dirs(TestDir, OS, [dir1,dir2,dir3], Status),
                 Status == ok,
                 change_cwd(TestDir)),
             true ]).
 
-clean_dirs(TestDir, DirsList, Status) :-
-        do_clean_dirs([TestDir | DirsList], [], Status).
+clean_dirs(TestDir, OS, DirsList, Status) :-
+        do_clean_dirs([TestDir | DirsList], [], OS, Status).
 
-do_clean_dirs([], Stack, Status) :-
-        climb_and_clean(Stack, Status).
+do_clean_dirs([], Stack, OS, Status) :-
+        climb_and_clean(Stack, OS, Status).
 
-do_clean_dirs([Dir | DirsList], Stack, Status) :-
+do_clean_dirs([Dir | DirsList], Stack, OS, Status) :-
         (exists_file(Dir) ->
                 change_cwd(Dir),
-                do_clean_dirs(DirsList, [Dir | Stack], Status)
+                do_clean_dirs(DirsList, [Dir | Stack], OS, Status)
                 ;
                 Status = fail
         ).
 
-climb_and_clean([], ok).
-climb_and_clean([Top], ok) :- !,
+climb_and_clean([], OS, ok).
+climb_and_clean([Top], OS, ok) :- !,
         change_cwd('..').
-climb_and_clean([Dir | Stack], Status) :-
+climb_and_clean([Dir | Stack], OS, Status) :-
         change_cwd('..'),
-	(Dir == dir2 -> 
-		system('del dir3')
-		;
-		(Dir == dir1
-			system('del dir2')
+	(Dir == dir3 -> 
+		(OS == mswin32 ->
+			system('del /f dir3')
 			;
-			system('del dir1')
+			system('rm -rf dir3')
+		)
+		;
+		(Dir == dir2 ->
+			(OS == mswin32 ->
+				system('del /f dir2')
+				;
+				system('rm -rf dir2')
+			)
+			;
+			(Dir == dir1 ->
+				(OS == mswin32 ->
+					system('del /f dir1')
+					;
+					system('rm -rf dir1')
+				)
+				;
+				true
+			)
 		)
 	),
 %        remove_subdir(Dir),
-        climb_and_clean(Stack, Status).
+        climb_and_clean(Stack, OS, Status).
 
 
 climb_dirs([], TestDir, Status).
