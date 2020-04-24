@@ -343,21 +343,21 @@ climb_and_clean([Dir | Stack], OS, Status) :-
         change_cwd('..'),
 	(Dir == dir3 -> 
 		(OS == mswin32 ->
-			system('del /f dir3')
+			system('rmdir /f dir3')
 			;
 			system('rm -rf dir3')
 		)
 		;
 		(Dir == dir2 ->
 			(OS == mswin32 ->
-				system('del /f dir2')
+				system('rmdir /f dir2')
 				;
 				system('rm -rf dir2')
 			)
 			;
 			(Dir == dir1 ->
 				(OS == mswin32 ->
-					system('del /f dir1')
+					system('rmdir /f dir1')
 					;
 					system('rm -rf dir1')
 				)
