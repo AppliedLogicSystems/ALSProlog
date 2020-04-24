@@ -660,7 +660,6 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
-<<<<<<< HEAD
 /*!----------------------------------------------------------------
  |      recursive_dir_path/2
  |      recursive_dir_path(Path_List, Path)
@@ -756,30 +755,6 @@ prepare_path_cmd_list([Path_List | RestList_of_Path_Lists],
         :-
         join_path(Path_List, Path),
         prepare_path_cmd_list(RestList_of_Path_Lists, RestCmdList, RestMarkers).
-
-
-
-
-
-
-
-
-
-
-/*!----------------------------------------------------------------
- |	file_size/2
- |	file_size(FileName,Size)
- |	file_size(+,-)
- |
- |	- returns the size of a file
- |
- |	If File is an atom (possibly quoted) which is the name of a
- |	file in the current working directory, Size is the size of
- |	that file in bytes.
- *!----------------------------------------------------------------*/
-file_size(_,0)
-	:-
-	prolog_system_error(nyi, ['file_size/2',unix]).
 
 /*!----------------------------------------------------------------
  |	get_current_drive/1

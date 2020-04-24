@@ -341,6 +341,7 @@ climb_and_clean([Top], ok) :- !,
         change_cwd('..').
 climb_and_clean([Dir | Stack], Status) :-
         change_cwd('..'),
+	system('del *'),
         remove_subdir(Dir),
         climb_and_clean(Stack, Status).
 
