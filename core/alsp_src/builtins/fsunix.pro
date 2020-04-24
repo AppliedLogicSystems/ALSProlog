@@ -647,6 +647,7 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
+<<<<<<< HEAD
 /*!----------------------------------------------------------------
  |	file_size/2
  |	file_size(FileName,Size)

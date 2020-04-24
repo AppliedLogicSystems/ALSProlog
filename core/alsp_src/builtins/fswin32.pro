@@ -660,6 +660,7 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
+<<<<<<< HEAD
 /*!----------------------------------------------------------------
  |      recursive_dir_path/2
  |      recursive_dir_path(Path_List, Path)
@@ -800,7 +801,6 @@ file_size(_,0)
  | 
  | Drive = 'C:\\'
  *!----------------------------------------------------------------*/
-
 get_current_drive(Drive)
 	:-
 	getcwd(Path),

@@ -302,8 +302,8 @@ As mentioned previously, PI_INT is the only Prolog type that needs no further pr
 In ALS Prolog there are two types of symbols. Normally, symbols are placed in the
 ALS Prolog symbol table, and an index into that table is passed around as the symbol value. This approach to symbols works fine until the symbol table fills up, in
 which case you're in trouble. In order to keep the symbol table from filling up, symbols in Prolog with quotes around them are turned into a special type of symbol
-called an uninterned atom (UIA). UIA names are placed on the heap. {ADD LINK}See Section 7
-(Working with Uninterned Atoms) . The function PI_getsymname() is used to
+called an uninterned atom (UIA). UIA names are placed on the heap. See [Section 7
+(Working with Uninterned Atoms)](7-Working-with-Uninterned-Atoms.html). The function PI_getsymname() is used to
 get the C string associated with a symbol. The symbol must be of type PI_SYM. The
 function PI_getuianame() is used to get the C string associated with an uninterned atom. The symbol must be of type PI_UIA. The forms for these two functions are:
 
@@ -589,7 +589,7 @@ yes.
 
 The third goal above, ?- printlist([]), didn't succeed because [] is not a
 list, it is a symbol of type PI_SYM. We could have written the predicate printlist/1 so that it accepted [] as a list, but we haven't discussed all the tools for
-doing so yet. {ADD LINK}See Section 21.2.7 (Creating Prolog Data Objects) for an example of
+doing so yet. See [Section 21.2.7 (Creating Prolog Data Objects)](21-Using-the-ALS-Foreign-Interface.html#2127-creating-prolog-data-objects) for an example of
 checking for []. The fourth try didn't print the type of c. As the goal, display(a.b.c) shows, this list is not a normal list because it doesn't end with [].
 The predicate was written so that it always ignores the last thing in a list. This works
 out fine when the list is terminated with []. As remarked above, we could have specifically checked for [], but we haven't discussed the tools for doing so yet.

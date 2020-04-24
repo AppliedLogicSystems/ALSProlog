@@ -126,8 +126,8 @@ Finally, one can use the top-level list-as-reconsult construct:
 ```
 ?- [File1, File2,...].
 ```
-For more information on how to use the consulting predicates, see {ADD LINK}Section 9.2.1
-(Consulting Program Files) in the User Guide.
+For more information on how to use the consulting predicates, see [Section 2.2.1
+(Consulting Program Files)](2-Prolog-Source-Code.html#221-consulting-program-files) in the User Guide.
 
 ## 13.3 Stopping a Running Prolog Program
 If you wish to interrupt a running ALS Prolog program, simply press the interrupt
@@ -199,8 +199,8 @@ such as these can be placed in the ALS Prolog startup file (described below) to 
 ## 13.5 Controlling the Search Path
 If you want to be able to consult some of your files that are not in your current directory, and you don't want to use absolute pathnames, you can put the directories
 where those files reside on a path searchlist called ALSPATH. In addition, you can
-add directories using the command-line switch -S at start-up time ({ADD LINK}see Section 13.7
-(ALS Prolog Command Line Options) ). The following is an example use of the ALSPATH variable on Linux or DOS:
+add directories using the command-line switch -S at start-up time (see [Section 13.7
+(ALS Prolog Command Line Options)](13-Using-the-Prolog-Shell.html#137-als-prolog-command-line-options)). The following is an example use of the ALSPATH variable on Linux or DOS:
 
     setenv ALSPATH /usr/eddie/programs:/usr/sue/src/prolog
 

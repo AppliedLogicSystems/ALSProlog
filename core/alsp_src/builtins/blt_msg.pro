@@ -487,8 +487,6 @@ warning_code(lib_act,		'Error activating library: %t %t %t-%t\n').
 warning_code(lib_pth,		'Non-existent library path: %t\n').
 warning_code(loc_alslib, 	'Can\'t locate ALS library in ALSDIR: %t\n').
 
-warning_code(nyi, 			'%t not yet implemented on %t.\n').
-
 
 info_code(start_consult,	'Consulting %t ... ').
 info_code(end_consult,	'done.\n').
