@@ -342,30 +342,54 @@ climb_and_clean([Top], OS, ok) :- !,
 climb_and_clean([Dir | Stack], OS, Status) :-
         change_cwd('..'),
 	(Dir == dir3 -> 
+/*
 		(OS == mswin32 ->
 			system('rmdir /f dir3')
 			;
 			system('rm -rf dir3')
 		)
+*/
+		kill_subdir(dir3)
 		;
+/*
 		(Dir == dir2 ->
 			(OS == mswin32 ->
 				system('rmdir /f dir2')
 				;
 				system('rm -rf dir2')
 			)
+*/
+			kill_subdir(dir2)
 			;
+/*
 			(Dir == dir1 ->
 				(OS == mswin32 ->
 					system('rmdir /f dir1')
 					;
 					system('rm -rf dir1')
 				)
+*/				kill_subdir(dir1)
+				;
+				true
+%			)
+%		)
+	),
+
+	(Dir == dir3 -> 
+		kill_subdir(dir3)
+		;
+		(Dir == dir2 ->
+			kill_subdir(dir2)
+			;
+			(Dir == dir1 ->
+				kill_subdir(dir1)
 				;
 				true
 			)
 		)
-	),
+	),	
+
+
 %        remove_subdir(Dir),
         climb_and_clean(Stack, OS, Status).
 
