@@ -29,7 +29,8 @@ extern "C" {
 #else		/* ----------- NON-KERNAL --------------------------*/
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
-#define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
+// TODO LP64: For 64-bit testing without GC, increase heap by 0x100
+#define DEFAULT_HEAP_SIZE	0x04000000	/* long words (1 MBytes) */
 #define DEFAULT_STACK_SIZE	0x040000	/* long words (1 MBytes) */
 
 #define	MIN_ICBUFSIZE		0x010000	/* 64k code words */
