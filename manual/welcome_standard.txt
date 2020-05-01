@@ -78,5 +78,5 @@ in your browser.
 
 	Applied Logic Systems, Inc.
 	PO Box 468, Vanderwagen, NM 87326 USA
-	Web: http://www.applied-logic-systems.com
+	Web: https://www.applied-logic-systems.com
 
