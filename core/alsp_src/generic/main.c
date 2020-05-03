@@ -116,6 +116,12 @@ static char versionYear[] = VERSION_YEAR;	/* from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
 
+#ifdef __LP64__
+static int heapWordBytes = 8;
+#else
+static int heapWordBytes = 4;
+#endif
+
 static	void	panic_fail	( void );
 #ifdef arch_m88k
 static	void	panic_continue	( void );
@@ -124,7 +130,7 @@ static	void	abolish_predicate ( const char *, const char *, int );
 static	void	assert_sys_searchdir ( char * );
 static	void	assert_als_system (const char *, const char *,
 					  const char *, const char *,
-					  const char *, const char *);
+					  const char *, const char *, int);
 static	void	assert_atom_in_module ( const char*, const char * );
 
 
@@ -432,7 +438,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 
 #ifndef KERNAL
     assert_als_system(OSStr, MinorOSStr, ProcStr,
-		      SysManufacturer, versionNum, versionYear);
+		      SysManufacturer, versionNum, versionYear, heapWordBytes);
 
     /*-------------------------------------------*
      | Set up conditional configuration controls:
@@ -617,8 +623,8 @@ assert_atom_in_module(mod_name,atom_name)
  |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
-assert_als_system(os, os_var, proc, man, ver, year)
-    const char *os, *os_var, *proc, *man, *ver, *year;
+assert_als_system(os, os_var, proc, man, ver, year, hwb)
+    const char *os, *os_var, *proc, *man, *ver, *year; int hwb;
 {
     char  command[2048];
 
@@ -626,18 +632,18 @@ assert_als_system(os, os_var, proc, man, ver, year)
 		return;
 
     sprintf(command,
-	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',prologYear='%s']),_,0)",
+	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',prologYear='%s',heapWordBytes=%d]),_,0)",
 	    os,
 	    os_var,
 	    proc,
 	    man,
 	    ver,
-	    year);
+	    year,
+	    heapWordBytes);
     if (!exec_query_from_buf(command)) {
 		fatal_error(FE_ASSERT_SYS, 0);
     	}
 }
-
 
 /*-------------------------------------------------------------*
  | autoload will attempt to load the named file from

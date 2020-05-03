@@ -47,6 +47,18 @@ init_prolog_flags
 set_default_flags
 	:-
 	default_prolog_flag_value(Flag, Value),
+	(Flag == heap_word_bytes -> 
+		als_system(L), member(heapWordBytes = Value, L)
+		;
+		true
+	),
+	(Flag == address_bits -> 
+		als_system(L), 
+		member(heapWordBytes = VV, L), 
+		Value is VV * 8
+		;
+		true
+	),
 	set_PROLOG_flag(Flag, Value),
 	fail.
 set_default_flags.
@@ -165,6 +177,26 @@ changeable(double_quotes, yes).
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% ALS Extension Flags:
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%%---------------------------------
+	%%	heap_word_bytes
+	%%---------------------------------
+prolog_flag_value_check(heap_word_bytes, HWB) :-
+	als_system(L),
+	!,
+	member(heapWordBytes=HWB, L).
+default_prolog_flag_value(heap_word_bytes, _).
+changeable(heap_word_bytes, no).
+	
+
+	%%---------------------------------
+	%%	address_bits
+	%%---------------------------------
+prolog_flag_value_check(address_bits, ABits) :-
+	prolog_flag_value_check(heap_word_bytes, HWB),
+	ABits is HWB * 8.
+default_prolog_flag_value(address_bits, _).
+changeable(address_bits, no).
 
 	%%---------------------------------
 	%%	windows_system
