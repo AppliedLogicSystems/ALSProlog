@@ -173,8 +173,10 @@ gc()
     int   compactionbit;
 
 // TODO LP64: GC is not 64-bit yet
+#ifdef __LP64__
 printf("gc not 64-bit yet\n");
 return 1;
+#endif
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick = 0, finish_tick;
