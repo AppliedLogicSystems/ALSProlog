@@ -82,19 +82,15 @@ test_string_to_uia2 :-
 	UIA == '4fo#g'.	
 
 test_string_to_uia3 :-
-	Chars = "4fo#g",
+	Chars = "4fo#gxyz",
 	UIA = 'g7ruTHbndkYrieyr5',
 	Pos1 = 0,
 	string_to_uia(Chars, Pos1, UIA),
-	UIA == '4fo#gHbndkYrieyr5',
+	UIA == '4fo#gxyzdkYrieyr5',
 	Pos2 = 4,
 	string_to_uia(Chars, Pos2, UIA),
-	UIA == '4fo#4fo#gkYrieyr5',
-	(current_prolog_flag(address_bits, 32) ->
-		Pos3 = 16
-		;
-		Pos3 = 20
-	),
+	UIA == '4fo#4fo#gxyzieyr5',
+	Pos3 = 16,
 	not(string_to_uia(Chars, Pos3, UIA)).
 	
 test_string_to_sized_uia :-
@@ -104,42 +100,23 @@ test_string_to_sized_uia :-
 	UIA1 == 'abcde',
 	Size2 = 10,
 	string_to_sized_uia(Size2, Chars, UIA2),
-	'$uia_size'(UIA2, ThisSize2),
 	UIA2 == 'abcde',
-	(current_prolog_flag(address_bits, 32) ->
-		ThisSize2V = 12,
-		Chars2 = Chars
-		;
-		ThisSize2V = 32,
-		Chars2 = "ABCDEFGHIJKLMNLOPQRSTUVW"
-	),
-	ThisSize2 == ThisSize2V,
+	'$uia_clip'(UIA2,5),
+	UIA2=='abcde',
+	'$uia_size'(UIA2, ThisSize2),
+	ThisSize2 == 8,
 	Size3 = 2,
-	not(string_to_sized_uia(Size3, Chars2, UIA3)).
+	not(string_to_sized_uia(Size3, Chars, UIA2)).
 
-/* Note: Code for atomic_to_uia/2:
-	atomic_to_uia(Atom, UIABuf)
-        :-
-            atomic(Atom),
-            atom_codes(Atom, AtomCodes),
-            length(AtomCodes, BufLen),
-            '$uia_alloc'(BufLen,UIABuf),
-            string_to_uia(AtomCodes,0,UIABuf).
-In the test below, atom_length(ab23Tvu85p, 10), and then
-      '$uia_alloc'(BufLen,UIABuf), '$uia_size(UIABuf, 32) holds
-*/
 test_atomic_to_uia :-
 	Atom = ab23Tvu85p,
 	atomic_to_uia(Atom, UIABuf),
 	UIABuf == ab23Tvu85p,
-	'$uia_size'(UIABuf, BufSize),
-	(current_prolog_flag(address_bits, 32) ->
-		atom_length(Atom, AL),
-        	AL0 is AL+2,
-        	BufSize == AL0
-		;
-		BufSize == 32
-	).
+	'$uia_size'(UIABuf, BufSize1),
+	atom_length(Atom, AL),
+	'$uia_clip'(UIABuf,AL),
+	'$uia_size'(UIABuf,BufSize2),
+	BufSize1 == BufSize2.
 
 test_cnvrt_to_UIA :-
 	Term = p(g(7),fg(e4,23,j4,5),jd(9)),
