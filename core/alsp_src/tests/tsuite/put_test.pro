@@ -110,7 +110,7 @@ test_put_number_types :-
 	close(i).
 
 test_get_number_types :-
-	open(string("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), read, _, [alias(o)]),
+	open(string("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), read, _, [alias(o)]),
 
 	test([
 		(get_number(o, byte, N),   number(N)),
@@ -131,3 +131,43 @@ test_get_number_types :-
 
 	close(o).
 
+/*  Debugging code:
+tt :-
+%	Str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 
+	Str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 
+	length(Str, LenStr),
+	printf('Str_Len=%t\n', [ LenStr] ), 
+	open(string(Str), read, _, [alias(o)]),
+
+%%	test([
+	stream_position(o,P0_init),printf('InitPos=%t\n',[P0_init]),
+		get_number(o, byte, N0),   number(N0),
+	stream_position(o,Pbyte),printf('N0=%t Pbyte=%t\n',[N0,Pbyte]) ,
+		get_number(o, ubyte, N1),  number(N1),
+	stream_position(o,Pubyte),printf('N1=%t Pubyte=%t\n',[N1,Pubyte]) ,
+		get_number(o, char, N2),   number(N2),
+	stream_position(o,Pchar),printf('N2=%t Pchar=%t\n',[N2,Pchar]) ,
+		get_number(o, uchar, N3),  number(N3),
+	stream_position(o,Puchar),printf('N3=%t Puchar=%t\n',[N3,Puchar]) ,
+		get_number(o, short, N4),  number(N4),
+	stream_position(o,Pshort),printf('N4=%t Pshort=%t\n',[N4,Pshort]) ,
+		get_number(o, ushort, N5), number(N5),
+	stream_position(o,Pushort),printf('N5=%t Pushort=%t\n',[N5,Pushort]) ,
+		get_number(o, int, N6),    number(N6),
+	stream_position(o,Pint),printf('N6=%t Pint=%t\n',[N6,Pint]) ,
+		get_number(o, uint, N7),   number(N7),
+	stream_position(o,Puint),printf('N7=%t Puint=%t\n',[N7,Puint]) ,
+		get_number(o, long, N8),   number(N8),
+	stream_position(o,Plong),printf('N8=%t Plong=%t\n',[N8,Plong]) ,
+		get_number(o, ulong, N9),  number(N9),
+	stream_position(o,Pulong),printf('N9=%t Pulong=%t\n',[N9,Pulong]) ,
+		get_number(o, float, N10),  number(N10),
+	stream_position(o,Pfloat),printf('N10=%t Pfloat=%t\n',[N10,Pfloat]) ,
+		get_number(o, double, N11), number(N11),
+	stream_position(o,Pdouble),printf('N11=%t Pdouble=%t\n',[N11,Pdouble]) ,
+
+		true
+%%	]),
+
+	,close(o).
+*/
