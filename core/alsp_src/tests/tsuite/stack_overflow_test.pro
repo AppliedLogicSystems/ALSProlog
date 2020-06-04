@@ -6,7 +6,7 @@ test :-
 	stack_overflow_test, stack_overflow_test.
 
 stack_overflow_test :-
-	catch(ints_from(0,L), Error, (write(Error), nl, Error = stack_overflow(_))).
+	catch(ints_from(0,L), Error, (write(e=Error), nl, Error = stack_overflow(_))).
 
 ints_from(N,[N|T]) :-
      % write(p:N),nl,

@@ -42,8 +42,8 @@ test_info(ident, ident, user, test,
 
 test_info(put_test, put_test, user, test, 'test for put/get_*').
 
-% test_info(numio, numio, user, test,
-%			'tests for get_number/3 and put_number/3.').
+ test_info(numio, numio, user, test,
+			'tests for get_number/3 and put_number/3.').
 
 test_info(retract1, retract1, user, doit1,
 			'  test out retract.').
