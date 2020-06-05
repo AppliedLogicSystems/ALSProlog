@@ -5,6 +5,7 @@ language: C
 cache:
     directories:
      - /home/travis/.rvm/
+     - /Users/travis/.rvm/
 
 os:
   - linux
