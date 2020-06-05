@@ -13,7 +13,11 @@ module als_testing.
 test_info(stack_overflow_test, stack_overflow_test, user, test,
 	'test correct handling of stack-overflows').
 
+% TODO LP64: Restore freeze test once it no longer core dumps.
 %test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
+test_info(freeze_test, freeze, user,
+	(printf(error_stream, 'TODO: restore freeze_test\n', []),fail),
+	'tests for freeze.').
 
 test_info(bench, bench, user, main, 'The benchpress example.').
 
@@ -80,8 +84,6 @@ test_info(par4, par4, user, main,
 			'  Producers and consumers (for primes) with added buffering.').
 
 test_info(filepath_test, filepath_test, user, test_filepath, 'tests for file system paths.').
-
-%test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
 
 % test_info Format:
 % test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
