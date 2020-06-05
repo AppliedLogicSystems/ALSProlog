@@ -25,5 +25,5 @@ endif
 
 # -Wno-unused-result -Wno-unused-but-set-variable - Fix someday.
 
-CFLAGS += -MMD -Wall -Wextra \
+CFLAGS += -fPIC -MMD -Wall -Wextra \
 -Wno-unused-parameter
