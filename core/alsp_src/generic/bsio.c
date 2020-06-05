@@ -46,6 +46,7 @@
 #endif
 
 #include <limits.h>
+#include <stdint.h>
 
 #ifdef PURE_ANSI
 #define EINTR	0
