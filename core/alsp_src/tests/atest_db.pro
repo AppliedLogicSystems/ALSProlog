@@ -112,7 +112,14 @@ test_info(library_rows_cols_test, rows_cols_test, user, test_cols,
 
 % end--Library tests
 
-test_info(testeoln, testeoln, user, test,
+% TODO LP64: Restore eoln test once GC is fixed and it no longer core dumps.
+%test_info(testeoln, testeoln, user, test,
+%'test of all eoln modes for all builtin predicates\n\
+% involved with eolns and a test of stream buffer sizes.').
+test_info(testeoln, testeoln, user,
+	(current_prolog_flag(address_bits, 32)
+	 -> test
+	; printf(error_stream, 'TODO: restore testeoln\n', []), fail),
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').
 
