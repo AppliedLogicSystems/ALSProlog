@@ -16,7 +16,9 @@ test_info(stack_overflow_test, stack_overflow_test, user, test,
 % TODO LP64: Restore freeze test once it no longer core dumps.
 %test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
 test_info(freeze_test, freeze, user,
-	(printf(error_stream, 'TODO: restore freeze_test\n', []),fail),
+	(current_prolog_flag(address_bits, 32)
+	 -> test_freeze
+	 ; printf(error_stream, 'TODO: restore freeze_test\n', []),fail),
 	'tests for freeze.').
 
 test_info(bench, bench, user, main, 'The benchpress example.').
