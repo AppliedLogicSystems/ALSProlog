@@ -144,20 +144,20 @@ pn(Size,Val) :-
 	put_number(foo,Size,Val),
 	!.
 pn(Size,Val) :-
-	write(put_number(foo,Size,Val)), write(' failed.'),nl.
+	write(put_number(foo,Size,Val)), write(' failed.'),nl,fail.
 
 gn(Size,Val) :-
 	get_number(foo,Size,Val2),
 	!,
 	gneq(Size, Val, Val2).
 gn(Size,Val) :-
-	write(get_number(foo,Size,Val)), write(' failed.'),nl.
+	write(get_number(foo,Size,Val)), write(' failed.'),nl,fail.
 
 gneq(Size,Val,Val) :- !.
 gneq(Size,Val1,Val2) :-
 	write(getnumber(foo,Size,Val1)),
 	write(' got '), write(Val2), write(' instead'),
-	nl.
+	nl,fail.
 
 point(X) :- printf('\npoint %t\n',[X]).
 
