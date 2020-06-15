@@ -1982,7 +1982,7 @@ make_dbref(a, res, restype)
 	int   ct;
 
 	w_mk_term(res, restype, (PWord) TK_DBREF, 4);
-
+// TODO LP64: check use of short
 	w_install_argn(*res, 1, (PWord) (((long) a) & 0xffff), WTP_INTEGER);
 	w_install_argn(*res, 2, (PWord) (((long) a) >> 16), WTP_INTEGER);
 	w_install_argn(*res, 3, (PWord) (*(a + WCI_PROCIDX) & 0xffff),
