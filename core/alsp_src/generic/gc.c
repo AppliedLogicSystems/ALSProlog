@@ -78,9 +78,17 @@ static unsigned long *marks;
 #define ISPOINTER(h)   ((((long) (h)) & MTP_TAGMASK) != MTP_CONST)
 #define ISFENCE(v) (((v) & MTP_CONSTMASK) == MTP_FENCE)
 #define ISUIA(v)   (((v) & MTP_CONSTMASK) == MTP_UIA)
+#ifdef __LP64__
+#define UIAVAL(v)  ((MUIA(v)) >> 3)
+#else
 #define UIAVAL(v)  ((MUIA(v)) >> 2)
+#endif
 #define ISCONST(h) ((((long) (h)) & MTP_TAGMASK) == MTP_INT)
+#ifdef __LP64__
+#define REVBIT     0x8000000000000000
+#else
 #define REVBIT     0x80000000
+#endif
 #define BIAS       0
 
 #endif /* MTP_CONST */
@@ -90,8 +98,14 @@ static unsigned long *marks;
    either the lower or upper half of address space.
  */
 
+
+#ifdef __LP64__
+#define HIBIT_MASK 0x8000000000000000
+#define ADDR_MASK  0x7FFFFFFFFFFFFFFF
+#else
 #define HIBIT_MASK 0x80000000
 #define ADDR_MASK  0x7FFFFFFF
+#endif
 #define REVERSEIT(targ, v) (~((targ) | ADDR_MASK) | ((targ) & ADDR_MASK) | ((v) & MTP_TAGMASK))
 #define ISNORMAL(ptr, v) ((((unsigned long)ptr) & HIBIT_MASK) == ((v) & HIBIT_MASK))
 /*#define ISNORMAL(ptr, v) (!(~(((unsigned long)ptr) | ADDR_MASK) & v))*/
@@ -166,11 +180,11 @@ gc()
 #endif
     long *oldest_ap;
     Code *ra;			/* return address */
-    register int i;
+    register long i;
     register long *h;
     register unsigned long *mp;
     register unsigned long m;
-    int   compactionbit;
+    long   compactionbit;
 
 // TODO LP64: GC is not 64-bit yet
 #ifdef __LP64__
