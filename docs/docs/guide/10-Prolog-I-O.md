@@ -382,12 +382,12 @@ terms. Some of the options are applicable to all streams, while others apply onl
 streams connected to particular kinds or sources or sinks, or of particular modes or
 types.
 
-#### text vs binary
+#### Type: text vs binary
 
-At most one of text or binary can be present on the options list. When text is
-present, the stream is treated as a character stream. When binary is present, the
+At most one of type(text) or type(binary) can be present on the options list. When type(text) is
+present, the stream is treated as a character stream. When type(binary) is present, the
 stream is treated as a byte stream. If neither is present, the stream is treated as a
-character stream, so that the default is text.
+character stream, so that the default is type(text).
 
 #### aliases
 
