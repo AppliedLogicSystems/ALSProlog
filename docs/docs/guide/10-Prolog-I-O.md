@@ -677,9 +677,9 @@ is true if and only if Property holds of Stream. The possible values for
 Property include all of the expressions which may appear on the Options list
 passed to open/4, together with the following:
 
-    input, output, and mode(M),
+    input, output, mode(M), and position(P)
 
-where M is one of text, binary.
+where M is one of text, binary, and P is (usually) an uninstantiated variable.
 
 From a more procedural point of view, the action of stream_property is as
 follows. If both Stream is instantiated to the stream descriptor of a currently open
