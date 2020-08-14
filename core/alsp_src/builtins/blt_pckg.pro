@@ -478,6 +478,10 @@ process_image_option(libload(true))
 	:-!,
 	force_libload_all.
 
+process_image_option(libload(true,opts=Opts))
+	:-!,
+	force_libload_all(opts=Opts).
+
 process_image_option(libload(false))
 	:-!.
 
