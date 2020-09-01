@@ -1,8 +1,8 @@
-SDK_DIR = ../../../core/alsp_src
+SDK_DIR = ../../core/alsp_src
 
-VPATH=../common:../src:../../../core/alsp_src/generic
+VPATH=common:src:../../core/alsp_src/generic
 
-CPPFLAGS= -I ../common -I ../src -I ../../../core/alsp_src/generic
+CPPFLAGS= -I common -I src -I ../../core/alsp_src/generic
 
 CFLAGS=-fpic -MD
 
