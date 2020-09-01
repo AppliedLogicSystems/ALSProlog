@@ -75,8 +75,6 @@ printf_check_format(Var, _) :-
 	var(Var),
 	!,
 	instantiation_error(2).
-printf_check_format([], []) :-
-	!.
 printf_check_format(Atom, List) :-
 	atom(Atom),
 	!,
