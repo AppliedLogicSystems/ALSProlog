@@ -70,7 +70,7 @@ cp -p "$ALS_BUILD_SUPPORT"/bin/zlib1.dll "$DISTDIR"
 
 #MinGW64 Curl libs
 cp -p "$ALS_BUILD_SUPPORT"/bin/libcurl-4.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libnghttp2-14.dll "$DISTDIR"
+#cp -p "$ALS_BUILD_SUPPORT"/bin/libnghttp2-14.dll "$DISTDIR"
 #cp -p "$ALS_BUILD_SUPPORT"/bin/normaliz.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/libssh2-1.dll "$DISTDIR"
 #cp -p "$ALS_BUILD_SUPPORT"/bin/ws2_32.dll "$DISTDIR"
@@ -79,10 +79,11 @@ cp -p "$ALS_BUILD_SUPPORT"/bin/libssh2-1.dll "$DISTDIR"
 #cp -p "$ALS_BUILD_SUPPORT"/bin/z.dll "$DISTDIR"
 #cp -p "$ALS_BUILD_SUPPORT"/bin/ssl.dll "$DISTDIR"
 #cp -p "$ALS_BUILD_SUPPORT"/bin/crypto.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libeay32.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/ssleay32.dll "$DISTDIR"
+#cp -p "$ALS_BUILD_SUPPORT"/bin/libeay32.dll "$DISTDIR"
+#cp -p "$ALS_BUILD_SUPPORT"/bin/ssleay32.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_sjlj-1.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/libwinpthread-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libzstd-1.dll "$DISTDIR"
 
 mkdir "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tcl8.6 "$DISTDIR"/lib
