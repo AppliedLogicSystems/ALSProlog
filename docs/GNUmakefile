@@ -52,6 +52,7 @@ test : test-site test-local
 ## Test site
 test-site : site
 	$(BUNDLE) exec jekyll doctor
+	$(BUNDLE) exec github-pages health-check
 	$(BUNDLE) exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
