@@ -68,6 +68,12 @@ catenate(ListOfAtoms, Result)
 	atom_codes(Result, ResultString).
 
 list2strings([], []).
+list2strings([Num | ListOfItems], [NumString | ListOfItemStrings])
+        :-
+        number(Num),
+        !,
+        number_codes(Num, NumString),
+        list2strings(ListOfItems, ListOfItemStrings).
 list2strings([Atom | ListOfAtoms], [AtomString | ListOfAtomStrings])
 	:-
 	atom_codes(Atom, AtomString),
