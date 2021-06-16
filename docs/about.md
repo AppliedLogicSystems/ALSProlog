@@ -22,7 +22,7 @@ Applied Logic Systems, Inc. was formed in 1984 to carry this out.
 The initial version, for the IBM PC/DOS, appeared in 1985, and implemented the compiler/WAM byte-code interpreter design from the research group.
 This was followed by a version for the Macintosh/MacOS.
 A native code compiler optimizing the WAM was developed for the IBM PC/DOS, and partially built for the Macintosh/MacOS.
-At the time, the native code compiler for the 386 chip was quite fast, and temporarily won the "native reverse LIPS (Logical Inferences Per Second)" speed wars.
+At the time, the native code compiler for the 386 chip was quite fast, and temporarily won the "naive reverse LIPS (Logical Inferences Per Second)" speed wars.
 However, the difficulty of maintaining and porting these native code compilers led to the development of a respectably efficient portable threaded code system which was subsequently used on all platforms.
 These PC and Macintosh systems were followed relatively quickly (1987 onward) by versions for Unix workstations (Sun/SunOS/Solaris[m68000, later SPARC], Silcon Graphics/IRIX, HP/HPUX, IBM/AIX), VAX (a new version), NeXT/NeXTStep, and systems utilizing the Motorola 88k chip.
 An embeddable logic engine was developed under contract for Apple, but was never released.
