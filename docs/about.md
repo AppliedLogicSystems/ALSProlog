@@ -13,6 +13,7 @@ Command-line and GUI versions are available for modern Macintosh, Linux, and Win
 
 
 ## Brief History
+
 In the early 1980's, K. Bowen and the Logic Programming Research Group at Syracuse University (H. Bacha, K. Buettner, I. Cicekli, K. Hughes, A. Turk) were exploring meta-level extensions to Logic Programming systems, and to Prolog in particular. Desiring a Prolog implementation on which to experiment, they worked co-operatively with a group at Argonne National Laboratories (T. Lindholm, R. Lusk, R. Overbeek), and initially developed a Prolog byte-code interpreter running on a Data General MV/8000, and later on a VAX 780.
 They found the system performance disappointing, and in late 1984, set out to develop a portable compiler-based system utilizing a byte-code interpreter for D. Warren's WAM design, implemented over C.  This came on line by fall, 1985.
 It contained a resident incremental compiler (from Prolog to WAM), and supported a module system, garbage compaction, and implemented assert/retract using on-the-fly compilation and decompilation techniques, the latter also utilized in a four-port debugger. The system performance was markedly better than the original byte-code interpreter.  It was used as the starting point for two versions of a meta-prolog extension.
@@ -28,3 +29,7 @@ These PC and Macintosh systems were followed relatively quickly (1987 onward) by
 An embeddable logic engine was developed under contract for Apple, but was never released.
 Later, versions for Windows were built.
 The system has been converted to open source, and now is accessible on GitHub at https://github.com/AppliedLogicSystems/ALSProlog.
+
+## Ephemera
+
+- ["Infer Different." Parody Ad Campaign](/infer-different/)
