@@ -14,7 +14,7 @@ mathematical logic,
 [David Hilbert](https://en.wikipedia.org/wiki/David_Hilbert) and
 [Gottlob Frege](https://en.wikipedia.org/wiki/Gottlob_Frege).
 Going beyond mere "thinking", the poster exhort us to
-"Unify Different." and "Infer Different".
+"Unify Different." and "Infer Different."
 
 The Posters:
 
