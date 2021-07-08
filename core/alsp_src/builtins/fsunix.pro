@@ -9,29 +9,219 @@
  |	Date:	Begun 4/88
  |	Revision: Ken Bowen -- 11/88, 1/91 
  |		-- library version: 11/91
+ |
+ |	Note: Depends on core/alsp_src/unix/unix_makefile & friends
+ |	Note: Some examples below utilize ls/0 as defined in blt_sys.pro.
  *===========================================================================*/
 module builtins.
 
-export make_subdir/1.
-export make_subdir/2.
-export remove_subdir/1.
-export kill_subdir/1.
 export file_status/2.
 export files/2.
 export files/3.
+export move_file/2.
+export make_subdir/1.
+export make_subdir/2.
 export subdirs/1.
 export subdirs_red/1.
+export remove_subdir/1.
+export kill_subdir/1.
 export directory/3.
+export recursive_dir_path/2.
+export recursive_dir_paths/2.
 export get_current_drive/1.
 export change_current_drive/1.
-export move_file/2.
 
+/*!------------------------------------------------------------------
+ |	file_status/2
+ |	file_status(FileName, Status) 
+ |	file_status(+, -) 
+ |
+ |	- Returns OS information about a file named FileName
+ |
+ |	If FileName is the name associated with an entry in the
+ |	OS filesystem, returns OS information about that entry,
+ |	as in the following two examples:
+ |
+ | Examples
+ |	?- file_status(alspro, Status).
+ |
+ |	Status=[type = regular,permissions = [read,write,execute],
+ |	    mod_time = 1586731762.0,size = 462720] 
+ |
+ |	?- file_status(alsdir, Status).
+ |
+ |	Status=[type = directory,permissions = [read,write,execute],
+ |	    mod_time = 1586652989.0,size = 204]
+ *!-----------------------------------------------------------------*/
+file_status(FileName, Status) 
+	:-
+	'$getFileStatus'(FileName,
+			 fileStatus(FileTypeCode, ModTime, OwnerPermiss,
+					ByteSize,NBlocks)),
+	fileTypeCode(FileTypeCode,FileType),
+	ownerPermissionsCoding(OwnerPermiss, Permissions),
+	Status = [type=FileType, permissions=Permissions,
+			  mod_time=ModTime, size=ByteSize].
+
+/*---------------------------------------------------------------
+ |	File types/attributes -- at the abstract (Prolog) level:
+ |		regular -- an ordinary file
+ |		directory
+ *---------------------------------------------------------------*/
+
+/*----------------------------------------------------------------
+ | Unix file status/type codes:
+ |
+ |		0 = unknown
+ |		1 = directory
+ |		2 = character_special
+ |		3 = block_special
+ |		4 = regular
+ |		5 = symbolic_link
+ |		6 = socket
+ |		7 = fifo_pipe
+ *----------------------------------------------------------------*/
+
+fileTypeCode(0, unknown).
+fileTypeCode(1, directory).
+fileTypeCode(2, character_special).
+fileTypeCode(3, block_special).
+fileTypeCode(4, regular).
+fileTypeCode(5, symbolic_link).
+fileTypeCode(6, socket).
+fileTypeCode(7, fifo_pipe).
+
+ownerPermissionsCoding(0,[]).
+ownerPermissionsCoding(1,[execute]).
+ownerPermissionsCoding(2,[write]).
+ownerPermissionsCoding(3,[write,execute]).
+ownerPermissionsCoding(4,[read]).
+ownerPermissionsCoding(5,[read,execute]).
+ownerPermissionsCoding(6,[read,write]).
+ownerPermissionsCoding(7,[read,write,execute]).
+
+/*!----------------------------------------------------------------
+ |	files/2
+ |	files(Pattern,FileList)
+ |	files(+,-)
+ |
+ |	- returns a list of regular files in the current directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary (regular) files 
+ |	in the current directory which match Pattern, which can 
+ |	includethe usual '*' and '?' wildcard characters.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |      ?- files('*.pst', F).
+ |
+ |	F=['alsdev.pst','alspro.pst']
+ |
+ |	?-  files('*', F).
+ |
+ |	F=['LICENSE.txt','README.txt','als-prolog-manual.pdf',
+ |	'als-ref-manual.pdf',alsdev,'alsdev.pst',alspro,'alspro.1',
+ |	'alspro.pst','libalspro.a','libalspro.dylib','test.pro']
+ *!----------------------------------------------------------------*/
+files(Pattern, FileList)
+	:-
+	directory(Pattern, 4, FileList).
+
+/*!----------------------------------------------------------------
+ |	files/3
+ |	files(Directory, Pattern,FileList)
+ |	files(+,+,-)
+ |
+ |	- returns a list of regular files residing in Directory matching a pattern
+ |
+ |	Returns the list (FileList) of all ordinary files in the 
+ |	directory Directory which match Pattern, which can include
+ |	the usual '*' and '?' wildcard characters.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |	?- files('examples/more', '*', F).
+ |
+ |	F=['concurrent_interrupts.pro','core_concurrent.pro',
+ |	   'finger.pro','freeze.pro','interrupts_coroutine.pro',
+ |	   'mathserv1.pro','mathserv2.pro','primes_coroutine.pro',
+ |	   'simple_coroutine.pro'] 	
+ |
+ |	?- files('examples/more', 'p*', F).
+ |
+ |	F=['primes_coroutine.pro'] 
+ *!----------------------------------------------------------------*/
+files(Directory, Pattern, List) 
+	:-
+	getDirEntries(Directory, Pattern, FirstResult),
+	!,
+	fixFileType(regular, InternalFileType),
+	filterForFileType(FirstResult, Directory, InternalFileType, List).
+
+/*!----------------------------------------------------------------
+ |	move_file/2
+ |	move_file(Source, Target)
+ |	move_file(+, +)
+ |
+ |	- Change the name of a file from Source to Target
+ |
+ |	If both Source and Target are atoms which can be the
+ |	names of a file, and if Source is the name of a file
+ |	existing in the file system, then the name of that file
+ | 	will be changed from Source to Target.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |	ls i*
+ |	> ls i*
+ |	ls: i*: No such file or directory
+ |	?- move_file('README.txt', 'intro-README.txt').
+ |	> ls i*
+ |	intro-README.txt
+ *!----------------------------------------------------------------*/
+move_file(Source, Target)
+	:-
+	sprintf(atom(Cmd),'mv %t %t', [Source, Target]),
+	system(Cmd).
 
 /*!--------------------------------------------------------------
  |	make_subdir/1
  |	make_subdir(NewDir)
  |	make_subdir(+)
  |
+ |	- creates a subdirectory in the current working directory
+ |	- with default permissions
+ |
+ |	If NewDir is an atom, creates a subdirectory named NewDir in 
+ |	the current working directory, if possible.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- make_subdir(myNewTestSubdir).
+ |
+ | yes.
+ | ?- halt.
+ | ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 libalspro.a
+ | README.txt              alspro*                 libalspro.dylib*
+ | als-prolog-manual.pdf   alspro.1                myNewTestSubdir/
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ *!--------------------------------------------------------------*/
+make_subdir(NewDir)
+	:-
+			%%[rwx,rwx,rwx]
+	make_subdir(NewDir,511).
+
+/*!--------------------------------------------------------------
  |	make_subdir/2
  |	make_subdir(NewDir,Permissions)
  |	make_subdir(+,+)
@@ -53,19 +243,39 @@ export move_file/2.
  |		[[read,write,execute],
  |		 [read,write],
  |		 [execute]  ]
- *!--------------------------------------------------------------*/
-	%% This may go away later:
-make_subdir(NewDir)
-	:-
-	sys_env(unix,djgpp,_),
-	!,
-	mkdir(NewDir).
-
-make_subdir(NewDir)
-	:-
-			%%[rwx,rwx,rwx]
-	make_subdir(NewDir,511).
-
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- make_subdir(myNewTestSubdir,457).
+ | 
+ | yes.
+ | ?- halt.
+ | > ls -l
+ | total 26448
+ | drwxr-xr-x  6 user  staff      204 Apr 17 15:01 ALS_Prolog_Foreign_SDK/
+ | -rw-r--r--  1 user  staff     1101 Apr 17 15:01 LICENSE.txt
+ | -rw-r--r--  1 user  staff     2738 Apr  9 09:33 README.txt
+ | -rw-r--r--  1 user  staff  1938443 Apr  9 09:33 als-prolog-manual.pdf
+ | -rw-r--r--  1 user  staff  1136668 Apr  9 09:33 als-ref-manual.pdf
+ | -rwxr-xr-x  1 user  staff   482560 Apr 17 14:58 alsdev*
+ | -rw-r--r--  1 user  staff  4194488 Apr 17 14:58 alsdev.pst
+ | drwxr-xr-x  6 user  staff      204 Apr 17 14:57 alsdir/
+ | -rwxr-xr-x  1 user  staff   462720 Apr 17 14:58 alspro*
+ | -rw-r--r--  1 user  staff     8181 Apr  9 09:33 alspro.1
+ | -rw-r--r--  1 user  staff  4194488 Apr 17 14:58 alspro.pst
+ | drwxr-xr-x  7 user  staff      238 Apr 17 14:58 docs/
+ | drwxr-xr-x  9 user  staff      306 Apr 17 15:01 examples/
+ | -rw-r--r--  1 user  staff   634664 Apr 17 14:58 libalspro.a
+ | -rwxr-xr-x  1 user  staff   463764 Apr 17 14:58 libalspro.dylib*
+ | drwx--x--x  2 user  staff       68 Apr 19 19:03 myNewTestSubdir/
+ *!----------------------------------------------------------------*/
 make_subdir(NewDir,Permissions)
 	:-
 	integer(Permissions),
@@ -111,58 +321,6 @@ indv_perm_code(read, 4).
 indv_perm_code(write, 2).
 indv_perm_code(execute, 1).
 
-/*!--------------------------------------------------------------
- |	remove_subdir/1
- |	remove_subdir(SubDir)
- |	remove_subdir(+)
- |
- |	- removes a subdirectory from the current working directory
- |
- |	If SubDir is an atom, remove the subdirectory named SubDir from 
- |	the current working directory, if it exists.
- *!--------------------------------------------------------------*/
-remove_subdir(SubDir)
-	:-
-	rmdir(SubDir).
-
-kill_subdir(SubDir)
-	:-
-	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
-	system(Cmd).
-
-/*!----------------------------------------------------------------
- |	files/2
- |	files(Pattern,FileList)
- |	files(+,-)
- |
- |	- returns a list of files in the current directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	current directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Pattern, FileList)
-	:-
-	directory(Pattern, 4, FileList).
-
-/*!----------------------------------------------------------------
- |	files/3
- |	files(Directory, Pattern,FileList)
- |	files(+,+,-)
- |
- |	- returns a list of files residing in Directory matching a pattern
- |
- |	Returns the list (FileList) of all ordinary files in the 
- |	directory Directory which match Pattern, which can include
- |	the usual '*' and '?' wildcard characters.
- *!----------------------------------------------------------------*/
-files(Directory, Pattern, List) 
-	:-
-	getDirEntries(Directory, Pattern, FirstResult),
-	!,
-	fixFileType(regular, InternalFileType),
-	filterForFileType(FirstResult, Directory, InternalFileType, List).
-
 /*!----------------------------------------------------------------
  |	subdirs/1
  |	subdirs(SubdirList)
@@ -171,7 +329,24 @@ files(Directory, Pattern, List)
  |	- returns a list of subdirectories 
  |
  |	Returns the list of all subdirectories of the current 
- |	working directory.
+ |	working directory.  On unix, the system files '.' and '..'
+ |	are removed from the list; on mswin32, they are included.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- subdirs(SDs).
+ | 
+ | SDs=['ALS_Prolog_Foreign_SDK',alsdir,docs,examples] 
+ | 
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs(SubdirList)
 	:-
@@ -186,6 +361,22 @@ subdirs(SubdirList)
  |
  |	Returns the list of all subdirectories of the current 
  |	working directory, omitting '.' and '..'
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- subdirs_red(SDs).
+ | 
+ | SDs=['ALS_Prolog_Foreign_SDK',alsdir,docs,examples] 
+ | 
+ | yes.
  *!----------------------------------------------------------------*/
 subdirs_red(SubdirList)
 	:-
@@ -193,59 +384,85 @@ subdirs_red(SubdirList)
 	list_delete(SubdirList0, '.', SubdirList1),
 	list_delete(SubdirList1, '..', SubdirList).
 
-/*---------------------------------------------------------------
- |	File types/attributes:
- |		-- at the abstract (Prolog) level:
+/*!--------------------------------------------------------------
+ |	remove_subdir/1
+ |	remove_subdir(SubDir)
+ |	remove_subdir(+)
  |
- |		regular -- an ordinary file
- |		directory
- *---------------------------------------------------------------*/
-
-/*----------------------------------------------------------------
- | Unix file status/type codes:
+ |	- removes a subdirectory from the current working directory
  |
- |		0 = unknown
- |		1 = directory
- |		2 = character_special
- |		3 = block_special
- |		4 = regular
- |		5 = symbolic_link
- |		6 = socket
- |		7 = fifo_pipe
- *----------------------------------------------------------------*/
-
-fileTypeCode(0, unknown).
-fileTypeCode(1, directory).
-fileTypeCode(2, character_special).
-fileTypeCode(3, block_special).
-fileTypeCode(4, regular).
-fileTypeCode(5, symbolic_link).
-fileTypeCode(6, socket).
-fileTypeCode(7, fifo_pipe).
-
-ownerPermissionsCoding(0,[]).
-ownerPermissionsCoding(1,[execute]).
-ownerPermissionsCoding(2,[write]).
-ownerPermissionsCoding(3,[write,execute]).
-ownerPermissionsCoding(4,[read]).
-ownerPermissionsCoding(5,[read,execute]).
-ownerPermissionsCoding(6,[read,write]).
-ownerPermissionsCoding(7,[read,write,execute]).
-
-/*!------------------------------------------------------------------
- |	file_status/2
- |	file_status(FileName, Status) 
- |	file_status(+, -) 
- *!-----------------------------------------------------------------*/
-file_status(FileName, Status) 
+ |	If SubDir is an atom, remove the subdirectory named SubDir from 
+ |	the current working directory, if it exists AND is empty.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > mkdir funnyFolder
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 funnyFolder/
+ | README.txt              alspro*                 libalspro.a
+ | als-prolog-manual.pdf   alspro.1                libalspro.dylib*
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ | .....
+ | ?- remove_subdir(funnyFolder).
+ |
+ | yes.
+ | .....
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ *!--------------------------------------------------------------*/
+remove_subdir(SubDir)
 	:-
-	'$getFileStatus'(FileName,
-			 fileStatus(FileTypeCode, ModTime, OwnerPermiss,
-					ByteSize,NBlocks)),
-	fileTypeCode(FileTypeCode,FileType),
-	ownerPermissionsCoding(OwnerPermiss, Permissions),
-	Status = [type=FileType, permissions=Permissions,
-			  mod_time=ModTime, size=ByteSize].
+	rmdir(SubDir).
+
+/*!--------------------------------------------------------------
+ |	kill_subdir/1
+ |	kill_subdir(SubDir)
+ |	kill_subdir(+)
+ |
+ |	- removes a subdirectory from the current working directory
+ |
+ |	If SubDir is an atom, remove the subdirectory named SubDir from 
+ |	the current working directory, if it exists; SubDir may
+ |	contain files and other subdirs.
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > mkdir funnyFolder
+ |  > echo hiThere > funnyFolder/AFile
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev.pst              examples/
+ | LICENSE.txt             alsdir/                 funnyFolder/
+ | README.txt              alspro*                 libalspro.a
+ | als-prolog-manual.pdf   alspro.1                libalspro.dylib*
+ | als-ref-manual.pdf      alspro.pst
+ | alsdev*                 docs/
+ | > cat funnyFolder/AFile
+ | hiThere
+ | .....
+ | ?- kill_subdir(funnyFolder).
+ |
+ | yes.
+ | .....
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ *!--------------------------------------------------------------*/
+kill_subdir(SubDir)
+	:-
+	sprintf(atom(Cmd),'rm -r %t',[SubDir]),
+	system(Cmd).
+
 
 /*!------------------------------------------------------------------
  |	directory/3
@@ -256,10 +473,32 @@ file_status(FileName, Status)
  |	
  |	If Pattern is a file name pattern, including possible '*' and
  |	'?' wildcard characters, and FileType is a numeric (internal)
- |	file type or a symbolic (abstract) file type, directory/3	
- |	unifies List with a sorted list of atoms of names of file of
- |	type FileType, matching Pattern, and found in the 
+ |	file type or a symbolic (abstract) file type, (see fileTypeCode/2
+ |      and ownerPermissionsCoding/2 following fileStatus above),
+ |	directory/3 unifies List with a sorted list of atoms of names 
+ |	of file of type FileType, matching Pattern, and found in the 
  |	current directory. 
+ |
+ | Examples
+ |      Executed in the ALS Prolog distribution directory:
+ |
+ |  > ls
+ | ALS_Prolog_Foreign_SDK/ alsdev*                 alspro.pst
+ | LICENSE.txt             alsdev.pst              docs/
+ | README.txt              alsdir/                 examples/
+ | als-prolog-manual.pdf   alspro*                 libalspro.a
+ | als-ref-manual.pdf      alspro.1                libalspro.dylib*
+ | .....
+ | ?- directory('*', 1, X).
+ |
+ | X=['ALS_Prolog_Foreign_SDK',alsdir,darwin,docs,examples]
+ |
+ | yes.
+ | ?- directory('*.pst', 4, FL).
+ |
+ | FL=['alsdev.pst','alspro.pst']
+ |
+ | yes.
  *!------------------------------------------------------------------*/
 
 	% If no pattern has been give, assume a complete wildcard is wanted:
@@ -408,22 +647,145 @@ make_reg_exp([C | RestPattern],[C | RestRegex])
 	:-
 	make_reg_exp(RestPattern,RestRegex).
 
-/*
- *	The following are essentially no-ops on unix, but
- *	need to do something for portability.  In accordance 
- *	with the conventions in filepath.pro, the "drive"
- *	is taken to be: root.
- */
+/*!----------------------------------------------------------------
+ |      recursive_dir_path/2
+ |      recursive_dir_path(Path_List, Path)
+ |      recursive_dir_path(+, -)
+ |
+ |      Creates a nested directories path
+ |
+ |      If Path_List is a list of atoms which potentially describe
+ |      a nested path of directories in the filesystem, (and which may
+ |      need to be created), and if the last atom either describes a
+ |      directory or a file, then:
+ |      1) Path is an atom describing the path described by Path_List
+ |              (as created by join_path/2), and
+ |      2) That Path is created in the filesystem, if possible;
+ |      2a) Moreover, either Path is absolute,
+ |      2b) Or path is not absolute, and so is created relative to
+ |       the current working directory.
+ |      Fails if the mkdir command in the underlying filesystem (unix
+ |      or mswin32) throws an error.
+ |      If the underlying OS is mswin32, the first element of Path_List
+ |      is permitted to be a drive letter atom (e.g., 'C:').
+ |      If the underlying OS is mswin32,  enableextensions must be active.
+ |
+ | Examples
+ | 
+ | ?- recursive_dir_path([dir1,dir2,dir3], PL).
+ | 
+ | PL='dir1/dir2/dir3' 
+ | 
+ | yes.
+ | .....
+ | > ls -d dir1
+ | dir1/
+ |
+ | > ls -R dir1
+ | dir2/
+ | 
+ | dir1/dir2:
+ | dir3/
+ | 
+ | dir1/dir2/dir3:
+ *!----------------------------------------------------------------*/
+recursive_dir_path(Path_List, Path)
+        :-
+        join_path(Path_List, Path),
+        sprintf(atom(Cmd), 'mkdir -p -- %t\n', [Path]),
+        system(Cmd).
 
+/*!----------------------------------------------------------------
+ |      recursive_dir_paths/2
+ |      recursive_dir_paths(List_of_Path_Lists, Paths)
+ |      recursive_dir_paths(+, -)
+ |
+ |      Creates multiple nested directory paths
+ |
+ |      If List_of_Path_Lists is a list of lists of atoms each of which
+ |      potentially describe a nested path of directories in the
+ |      filesystem, (and which may need to be created), and if the
+ |      last atom of each list either describes a directory or a file,
+ |      then:
+ |      1) The length of Paths equals the length of List_of_Path_Lists,
+ |         and each element of Paths is an atom;
+ |      2) For each list Path_List on List_of_Path_Lists, Path is the
+ |         corresponding atom on Paths and
+ |              recursive_dir_path(Path_List, Path)
+ |         holds.
+ |
+ | Examples
+ |       Multiple paths forming a tree:
+ | 
+ |         rr/
+ |           qq/                  pp/
+ |             kk/ mm/    nn/       aa/
+ |                   jj/              bb/
+ | 
+ |         [[rr,qq,kk],[rr,qq,mm,jj],[rr,qq,nn],[rr,pp,aa,bb]]
+ | 
+ | ?- recursive_dir_paths([[rr,qq,kk],[rr,qq,mm,jj],[rr,qq,nn],[rr,pp,aa,bb]], PL).
+ | 
+ | PL=['rr/qq/kk','rr/qq/mm/jj','rr/qq/nn','rr/pp/aa/bb'] 
+ | 
+ | yes.
+ | .....
+ | > ls -d rr
+ | rr/
+ | 
+ | > ls -R rr
+ | pp/ qq/
+ | 
+ | rr/pp:
+ | aa/
+ | 
+ | rr/pp/aa:
+ | bb/
+ | 
+ | rr/pp/aa/bb:
+ | 
+ | rr/qq:
+ | kk/ mm/ nn/
+ | 
+ | rr/qq/kk:
+ | 
+ | rr/qq/mm:
+ | jj/
+ | 
+ | rr/qq/mm/jj:
+ | 
+ | rr/qq/nn:
+ |  > 
+ *!----------------------------------------------------------------*/
+recursive_dir_paths(List_of_Path_Lists, Paths)
+        :-
+        prepare_path_cmd_list(List_of_Path_Lists, Paths, Markers),
+        sys_env(OS, _, _),
+        (OS == unix ->
+                catenate(['mkdir -p -- ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+                ;
+                catenate(['mkdir ' | Markers], Pattern),
+                sprintf(atom(Cmd), Pattern, Paths)
+        ),
+        system(Cmd).
+
+prepare_path_cmd_list([], [], []).
+prepare_path_cmd_list([Path_List | RestList_of_Path_Lists],
+                        [Path | RestCmdList], ['%t ' | RestMarkers])
+        :-
+        join_path(Path_List, Path),
+        prepare_path_cmd_list(RestList_of_Path_Lists, RestCmdList, RestMarkers).
+
+
+/* ----
+ *	The following are essentially no-ops on unix, but
+ *	need to do something for portability to mswin32.  
+ *	In accordance with the conventions in filepath.pro, 
+ * 	the "drive" is taken to be: root.
+ *----*/
 get_current_drive(root).
 
 change_current_drive(_).
-
-/*!----------------------------------------------------------------
- *!----------------------------------------------------------------*/
-move_file(Source, Target)
-	:-
-	sprintf(atom(Cmd),'mv %t %t', [Source, Target]),
-	system(Cmd).
 
 endmod.
