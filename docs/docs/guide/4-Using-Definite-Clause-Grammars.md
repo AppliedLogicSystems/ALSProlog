@@ -1,7 +1,7 @@
 ---
 ---
 
-# 4 UsingDefinite Clause Grammars
+# 4 Using Definite Clause Grammars
 {:.no_toc}
 
 * TOC
