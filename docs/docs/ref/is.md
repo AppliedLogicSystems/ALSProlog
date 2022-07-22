@@ -60,7 +60,7 @@ _Arithmetic Functions_ can also be evaluated when their arguments can be evaluat
 | j1(X) | Bessel function of order 1 | 
 | log(X) | natural | 
 | log10(X) | base 10 logarithm | 
-| random | returns a | 
+| random | returns a random floating point number such that 0.0 ≤ X < 1.0 | 
 | realtime | actual | 
 | round(X) | integer rounding of X | 
 | sin(X) | sine | 
