@@ -1,0 +1,11 @@
+name: Build & Test
+on: [push]
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v3
+     - run: sudo gem install bundler
+     - run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386
+     - run: ./cibuild
+     

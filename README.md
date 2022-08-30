@@ -1,6 +1,7 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
+[![Build & Test](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml/badge.svg)](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml)
 [![Travis-CI Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/786esihnss6ksk7k/branch/master?svg=true)](https://ci.appveyor.com/project/AppliedLogicSystems/alsprolog/branch/master)
 
