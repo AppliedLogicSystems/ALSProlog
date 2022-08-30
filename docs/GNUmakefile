@@ -43,13 +43,15 @@ _local_site/index.html : Gemfile.lock $(source)
 ## Test all markup and links
 test : test-site test-local
 
+# TODO: Re-add --enforce-https someday...
+
 ## Test site
 test-site : site
 	bundle exec jekyll doctor
 	bundle exec github-pages health-check
 	bundle exec htmlproofer \
 	--internal-domains "alsprolog.com" \
-	--check-html --check-img-http --enforce-https --check-opengraph --check-sri \
+	--check-html --check-img-http --check-opengraph --check-sri \
 	--check-external-hash --empty-alt-ignore _site
 
 ## Test local docs
