@@ -1269,15 +1269,4 @@ assert_succ :-
    $icode(-2,succ,2,0),      % succ/2 is the procedure name
    $icode(-17,-1,0,0),       % reset the cut_needed flag
    $icode(-14,0,0,0).        % assert it
-
-
-
-
-
-
-
-
-
-
-
-
+```
