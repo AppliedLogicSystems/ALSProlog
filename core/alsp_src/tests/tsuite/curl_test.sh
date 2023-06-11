@@ -12,7 +12,7 @@ TESTDIR=$(dirname "$TSUITE")
 trap 'pkill -P $$ || true' EXIT
 
 "$TSUITE"/echo/serve &
-sleep 2
+sleep 4
 
 if (( $debug ))
 then
