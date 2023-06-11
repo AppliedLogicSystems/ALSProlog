@@ -10,6 +10,8 @@ set -eux
 
 : ${debug:=0}
 
+which ${PHP:-php} || (echo 'Error: PHP required for Curl Tests' 1>&2 ; exit 1)
+
 ALSPRO=$1
 
 TSUITE=$(dirname "$0")

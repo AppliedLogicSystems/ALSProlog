@@ -47,7 +47,9 @@ CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install ru
 
 ### Mac OS X
 
-[Xcode](https://developer.apple.com/xcode/) command line tools. For version before High Sierra (10.13), a recent version of Ruby is required. [Homebrew Ruby](https://jekyllrb.com/docs/installation/macos/#homebrew) is recommended.
+[Xcode](https://developer.apple.com/xcode/) command line tools.
+For version before High Sierra (10.13), a recent version of Ruby is required. [Homebrew Ruby](https://jekyllrb.com/docs/installation/macos/#homebrew) is recommended.
+For versions after Big Sur (11), PHP is required for testing. [Homebrew PHP](https://formulae.brew.sh/formula/php) is recommended.
 
 ### Windows
 
