@@ -89,7 +89,7 @@ binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
 all : default
 
 alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
-	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
@@ -108,7 +108,7 @@ libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAK
 	./alspro_b -q -b -obp -g "attach_image('libalspro.$(OS_SL_EXT)')"
 
 so_test : libalspro.$(OS_SL_EXT) $(MAKEFS)
-	$(CC) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
+	$(CC) $(CFLAGS) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
 
 
 TEST_DIR = $(SOURCE_DIR)/tests
