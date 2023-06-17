@@ -11,3 +11,9 @@ jobs:
      - run: sudo gem install bundler
      - run: sudo apt-get update && sudo apt-get install libcurl4-openssl-dev tk-dev
      - run: ./cibuild
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+     - uses: actions/checkout@v3
+     - run: ./cibuild
