@@ -244,7 +244,7 @@ curl_c_builtin(void)
 {
     PWord oplist, error, head, tail, arg1, arg2, result_var;
     int oplist_t, error_t, head_t, tail_t, arg1_t, arg2_t, result_var_t;
-    int i, have_result_var=1, have_result_file=1; 
+    int have_result_var=1, have_result_file=1; 
     PWord uia_var;
     int uia_var_t;
     int opt_action;
@@ -303,7 +303,7 @@ curl_c_builtin(void)
 	char a1buf[BUFSIZE];
 	char a2buf[BUFSIZE];
 
-	for (i=1; oplist_t==PI_LIST; i++)
+	for (; oplist_t==PI_LIST;)
 	{
 	    PI_gethead(&head,&head_t,oplist);
 	    PI_gettail(&tail,&tail_t,oplist);

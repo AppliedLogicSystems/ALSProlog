@@ -331,7 +331,7 @@ hashN(v, t, d)
 		}
 	    case WTP_SYMBOL:{
 		    register UCHAR *s = TOKNAME(v);
-		    int   shift, n;
+		    int   shift;
 		    unsigned long  acc;
 
 		    shift = (*s & 0x0f) + d;
@@ -339,7 +339,7 @@ hashN(v, t, d)
 		    if (acc) {
 			acc ^= (*(s + 1));
 		    }
-		    for (n = 0; *s; n++, shift += 4) {
+		    for (; *s; shift += 4) {
 			acc = acc + ((*s++) << shift);
 			if (shift >= 17)
 			    shift -= 17;
@@ -351,7 +351,7 @@ hashN(v, t, d)
 	    case WTP_UIA:{
 		    register UCHAR *s = 
 			(UCHAR *) M_FIRSTUIAWORD(v);
-		    int   shift, n;
+		    int   shift;
 		    long  acc;
 
 		    shift = (*s & 0x0f) + d;
@@ -359,7 +359,7 @@ hashN(v, t, d)
 		    if (acc) {
 			acc ^= (*(s + 1));
 		    }
-		    for (n = 0; *s; n++, shift += 4) {
+		    for (; *s; shift += 4) {
 			acc = acc + ((*s++) << shift);
 			if (shift >= 17)
 			    shift -= 17;

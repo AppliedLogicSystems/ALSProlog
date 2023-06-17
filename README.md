@@ -1,7 +1,7 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
-[![Travis-CI Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
+[![Build & Test](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml/badge.svg)](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/786esihnss6ksk7k/branch/master?svg=true)](https://ci.appveyor.com/project/AppliedLogicSystems/alsprolog/branch/master)
 
 The ALS Prolog source tree is divided into core and peripheral
@@ -51,12 +51,10 @@ CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install ru
 
 ### Windows
 
-[Cygwin](https://cygwin.com) 32-bit is used to build both Win32 and Cygwin, with packages:
+[MSYS2](https://www.msys2.org) tool-chain is used to build for Win32, with packages:
 
-- Devel (git make gcc-core mingw64-i686-gcc-core libcrypt-devel mingw64-i686-libgcrypt)
-- Tcl-Tk (tcl-tk-devel mingw64-i686-tcl mingw64-i686-tk)
-- Libcurl (mingw64-i686-curl php procps)
-- Archive (zip)
-- X11 (optional to run X11 alsdev)
+    pacman --sync git base-devel mingw-w64-i686-toolchain mingw-w64-i686-curl zip procps
 
-[Ruby](https://www.ruby-lang.org/en/) installed via [RubyInstaller](https://rubyinstaller.org) (use recommended Ruby+DevKit version). 
+[Ruby](https://www.ruby-lang.org/en/) installed via [RubyInstaller](https://rubyinstaller.org) (use recommended Ruby+DevKit version).
+
+[PHP](https://www.php.net) installed via [PHP Download](https://windows.php.net/download/) or elsewhere.

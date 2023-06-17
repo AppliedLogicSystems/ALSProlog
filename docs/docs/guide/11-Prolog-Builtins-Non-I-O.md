@@ -873,7 +873,7 @@ directory_self(unix, '.').
 directory_self(macos, ':').
 directory_self(mswin32, '.').
 ```
-```
+
 ## 11.12 File System
 The most important aspects of access to the file system are described in Chapter 11
 on Prolog I/O. However, there are a number of further useful operations which are
@@ -1269,15 +1269,4 @@ assert_succ :-
    $icode(-2,succ,2,0),      % succ/2 is the procedure name
    $icode(-17,-1,0,0),       % reset the cut_needed flag
    $icode(-14,0,0,0).        % assert it
-
-
-
-
-
-
-
-
-
-
-
-
+```

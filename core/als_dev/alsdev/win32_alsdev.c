@@ -221,26 +221,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return FALSE;
 	}
 	
-	{
-		char path[MAX_PATH], dir[MAX_PATH], env[2*MAX_PATH], *dir_end;
-		
-		if (GetModuleFileName(NULL, path, MAX_PATH) == 0)
-			panic("Couldn't get mod name");
-		
-		if (GetFullPathName(path, MAX_PATH, dir, &dir_end) == 0)
-			panic("Couldn't get full path");
-		
-		*dir_end = 0;
-
-		sprintf(env, "TCL_LIBRARY=%slib\\tcl" TCL_VERSION, dir);
-		if (Tcl_PutEnv(env) != TCL_OK)
-			panic("Couldn't set TCL_LIBRARY");
-
-		sprintf(env, "TK_LIBRARY=%slib\\tk" TCL_VERSION, dir);
-		if (Tcl_PutEnv(env) != TCL_OK)
-			panic("Couldn't set TK_LIBRARY");
-	}
-	
 	/* Make the OpenDocument package available to Tcl */
 	Tcl_StaticPackage(NULL, "Opendocument", Opendocument_Init, NULL);
 	

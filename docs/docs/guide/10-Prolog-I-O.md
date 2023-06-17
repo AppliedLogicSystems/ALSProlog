@@ -52,10 +52,7 @@ bank, thereby either viewing an earlier portion of the stream (the water) or adv
 
 A fundamental principle underlying the notion of stream is this:
 
-```
-    A program manipulating a stream need have no knowledge 
-    of what lies at the other end of the stream.
-```
+> A program manipulating a stream need have no knowledge of what lies at the other end of the stream.
 
 Thus, a program which is the source of a stream (is producing a stream) need have
 no knowledge of what is consuming the stream, and a program which is the sink for

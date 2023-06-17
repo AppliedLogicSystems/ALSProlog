@@ -12,7 +12,9 @@ TESTDIR=$(dirname "$TSUITE")
 trap 'pkill -P $$ || true' EXIT
 
 "$TSUITE"/echo/serve &
-sleep 2
+
+# Wait for server to respond
+curl --silent --retry-connrefused --retry 5 http://localhost:8888
 
 if (( $debug ))
 then
