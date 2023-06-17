@@ -180,11 +180,19 @@ gc()
 #endif
     long *oldest_ap;
     Code *ra;			/* return address */
+#ifdef __LP64__
     register long i;
+#else
+    register int i;
+#endif
     register long *h;
     register unsigned long *mp;
     register unsigned long m;
+#ifdef __LP64__
     long   compactionbit;
+#else
+    int   compactionbit;
+#endif
 
 // TODO LP64: GC is not 64-bit yet
 #ifdef __LP64__

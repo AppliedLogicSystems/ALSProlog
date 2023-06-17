@@ -491,7 +491,11 @@ w_alloccode(size)
 
 #ifdef MDEBUG
     if (size > WC_AREASIZE - WC_OVERHEAD)
+#ifdef __LP64__
 	printf("w_alloccode: Need block of size %d\n", sizeof(Code) * size);
+#else
+	printf("w_alloccode: Need block of size %d\n", 4 * size);
+#endif
 #endif
 
     p = w_freeptr;
@@ -505,11 +509,19 @@ w_alloccode(size)
 	    	long *new;
 	    	long  len = max(size + 2, WC_AREASIZE);
 
+#ifdef __LP64__
 #ifdef MDEBUG
 	    	if (len > WC_AREASIZE + sizeof(Code))
 			printf("w_alloccode: allocating block of size %ld\n", sizeof(Code) * len);
 #endif
 	    	new = (long *) code_alloc((size_t)(sizeof(Code) * len), FE_XMEM_CLAUSE);
+#else
+#ifdef MDEBUG
+	    	if (len > WC_AREASIZE + 4)
+			printf("w_alloccode: allocating block of size %ld\n", 4 * len);
+#endif
+	    	new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
+#endif
 
 	    		/* update record of total space */
 	    	w_totspace += len;
