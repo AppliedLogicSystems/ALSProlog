@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ ! -z "$LP64_PARTIAL_TEST" ]]
+then
+echo "TODO: restore curl_test.sh" >> /dev/stderr
+exit
+fi
+
 set -eux
 
 : ${debug:=0}

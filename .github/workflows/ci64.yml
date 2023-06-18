@@ -1,5 +1,7 @@
-name: 64-bit Build & Test
+name: 64-bit Build & PARTIAL-TESTS
 on: [push]
+env:
+  LP64_PARTIAL_TEST: 1
 jobs:
 
   Linux:

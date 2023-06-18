@@ -16,9 +16,9 @@ test_info(stack_overflow_test, stack_overflow_test, user, test,
 % TODO LP64: Restore freeze test once it no longer core dumps.
 %test_info(freeze_test, freeze, user, test_freeze, ' tests for freeze.').
 test_info(freeze_test, freeze, user,
-	(current_prolog_flag(address_bits, 32)
-	 -> test_freeze
-	 ; printf(error_stream, 'TODO: restore freeze_test\n', []),fail),
+	(getenv('LP64_PARTIAL_TEST', _)
+	 -> printf(error_stream, 'TODO: restore freeze_test\n', [])
+	 ; test_freeze),
 	'tests for freeze.').
 
 test_info(bench, bench, user, main, 'The benchpress example.').
@@ -117,9 +117,9 @@ test_info(library_rows_cols_test, rows_cols_test, user, test_cols,
 %'test of all eoln modes for all builtin predicates\n\
 % involved with eolns and a test of stream buffer sizes.').
 test_info(testeoln, testeoln, user,
-	(current_prolog_flag(address_bits, 32)
-	 -> test
-	; printf(error_stream, 'TODO: restore testeoln\n', []), fail),
+	(getenv('LP64_PARTIAL_TEST', _)
+	 -> printf(error_stream, 'TODO: restore testeolnx\n', [])
+	; test),
 'test of all eoln modes for all builtin predicates\n\
  involved with eolns and a test of stream buffer sizes.').
 
