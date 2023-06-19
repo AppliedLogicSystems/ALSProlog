@@ -149,7 +149,7 @@ done
 #    done
 #done
 
-if [[ ! -z "$LP64_PARTIAL_TEST" ]]
+if [ ! -z "$LP64_PARTIAL_TEST" ]
 then
 echo "TODO: restore test_command_line.sh" >> /dev/stderr
 exit
