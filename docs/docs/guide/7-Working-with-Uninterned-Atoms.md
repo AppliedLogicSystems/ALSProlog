@@ -92,7 +92,7 @@ arguments:
     '$uia_alloc'(BufLen,UIABuf)
 
 BufLen should be instantiated to a positive integer which represents the size (in
-bytes) of the UIA to allocate. The actual size of the buffer allocated will be a multiple of four greater than or equal to BufLen. UIABuf should be a variable. UIAs
+bytes) of the UIA to allocate.  The actual size of the buffer allocated will be a multiple of system word size greater than or equal to BufLen. UIABuf should be a variable. UIAs
 created with $uia_alloc are initially filled with zeros, and will unify with the null
 atom ('').
 

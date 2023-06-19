@@ -98,7 +98,12 @@
 #define SPY		1
 #define OBP		1 
 
+// TODO LP64: Indexing is not 64-bit yet
+#ifdef __LP64__
+//#define Indexing	1
+#else
 #define Indexing	1
+#endif
 #define BigStruct	1
 
 /*---------------------------------------------------------------------*

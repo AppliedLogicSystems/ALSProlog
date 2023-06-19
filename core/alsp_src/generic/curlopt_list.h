@@ -221,6 +221,7 @@ static struct {char *name; long value;} option_name_value_list[] = {
 	name2value(CURLOPT_STREAM_WEIGHT),
 	name2value(CURLOPT_STREAM_DEPENDS),
 	name2value(CURLOPT_STREAM_DEPENDS_E),
+#elif LIBCURL_VERSION_NUM >= 0x073000
 	name2value(CURLOPT_TFTP_NO_OPTIONS),
 	name2value(CURLOPT_CONNECT_TO),
 	name2value(CURLOPT_TCP_FASTOPEN),
@@ -272,6 +273,7 @@ static struct {char *name; long value;} option_name_value_list[] = {
 	name2value(CURLINFO_TLS_SESSION),
 #if LIBCURL_VERSION_NUM > 0x072400
 	name2value(CURLINFO_ACTIVESOCKET),
+#elif LIBCURL_VERSION_NUM >= 0x073000
 	name2value(CURLINFO_TLS_SSL_PTR),
 	name2value(CURLINFO_HTTP_VERSION)
 #endif

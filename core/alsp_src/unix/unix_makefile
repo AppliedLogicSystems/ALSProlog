@@ -6,7 +6,7 @@
 OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = so
-OS_SL_LINK = $(CC) -shared
+OS_SL_LINK = $(CC) $(CFLAGS) -shared
 LIBS = $(OS_LIBS)
 SL_LINK_LIBS = $(LIBS)
 

@@ -46,6 +46,9 @@
 #endif
 
 #include <limits.h>
+#ifdef __LP64__
+#include <stdint.h>
+#endif
 
 #ifdef PURE_ANSI
 #define EINTR	0
@@ -4058,46 +4061,54 @@ sio_seek()
 		FAIL;
     }
 
-    if (t2 != WTP_INTEGER && t2 != WTP_UNBOUND) 
-	{
-		if (t3 != WTP_STRUCTURE) {
-			SIO_ERRCODE(buf) = SIOE_INARG;
-			FAIL;
-		}
-    	else {
-			w_get_arity(&arity, v3);
-			w_get_functor(&functor, v3);
-			if (arity != 4 || functor != TK_DDOUBLE) {
-				SIO_ERRCODE(buf) = SIOE_INARG;
-				FAIL;
-			}
-		}
-    }
-    if (t3 != WTP_INTEGER) {
-		if (t3 != WTP_STRUCTURE) {
-			SIO_ERRCODE(buf) = SIOE_INARG;
-			FAIL;
-		}
-    	else {
-			w_get_arity(&arity, v3);
-			w_get_functor(&functor, v3);
-			if ((arity == 4 && functor == TK_DDOUBLE)) {
-				int i;
-				for (i = 0; i < 4; i++) {
-					w_get_argn(&v0, &t0, v3, i + 1);
-					*(((short *) &rv) + i) = v0;
-				}
-				v3 = (PWord)floor(rv);
-			}
-    		else {
-				SIO_ERRCODE(buf) = SIOE_INARG;
-				FAIL;
-			}
-		}
-    }
-    if (t4 != WTP_INTEGER) {
+    if (t2 != WTP_INTEGER && t2 != WTP_UNBOUND) // OldPos not int && not unbound
+    {
+		// is NewPos a double? (rep. by struct: TK_DDOUBLE/4 )
+	if (t3 != WTP_STRUCTURE) {
 		SIO_ERRCODE(buf) = SIOE_INARG;
 		FAIL;
+	}
+    	else {
+		w_get_arity(&arity, v3);
+		w_get_functor(&functor, v3);
+		if (arity != 4 || functor != TK_DDOUBLE) {
+			SIO_ERRCODE(buf) = SIOE_INARG;
+			FAIL;
+		}
+	}
+    }
+	// if here, OldPos is int or unbound, or
+	// OldPos not int && not unbound && NewPos is double
+
+    if (t3 != WTP_INTEGER)  	// NewPos not int
+    {
+		// is NewPos a double? (rep. by struct: TK_DDOUBLE/4 )
+	if (t3 != WTP_STRUCTURE) {
+		SIO_ERRCODE(buf) = SIOE_INARG;
+		FAIL;
+	}
+    	else {
+		w_get_arity(&arity, v3);
+		w_get_functor(&functor, v3);
+		if ((arity == 4 && functor == TK_DDOUBLE)) 
+		{
+			int i;
+			for (i = 0; i < 4; i++) {
+				w_get_argn(&v0, &t0, v3, i + 1);
+				*(((short *) &rv) + i) = v0;
+			}
+			v3 = (PWord)floor(rv);
+		}
+			// No, NewPos not a double
+    		else {
+			SIO_ERRCODE(buf) = SIOE_INARG;
+			FAIL;
+		}
+	}
+    }
+    if (t4 != WTP_INTEGER) {
+	SIO_ERRCODE(buf) = SIOE_INARG;
+	FAIL;
     }
 
     curpos = SIO_BUFPOS(buf) + SIO_CPOS(buf);
@@ -4117,6 +4128,7 @@ sio_seek()
 	    FAIL;
 	    break;
     }
+
 
     if (SIO_BUFPOS(buf) <= pos && pos < SIO_BUFPOS(buf) + SIO_LPOS(buf))
 	SIO_CPOS(buf) = pos - SIO_BUFPOS(buf);
@@ -5483,6 +5495,9 @@ sio_linenumber()
 
 /*
  * sio_get_number(Stream,InputType,Number)
+ * Using ILP64 data model (5/24/2020), int/long --> 32bit
+ *	https://en.wikipedia.org/wiki/64-bit_computing#64-bit_data_models 
+ *	https://docs.oracle.com/cd/E19620-01/805-3024/lp64-1/index.html
  */
 
 int
@@ -5494,8 +5509,13 @@ sio_get_number()
     UCHAR *lim, *endofval;
     register UCHAR *s, *p;
     UCHAR  byteval;
+#ifdef __LP64__
+    int16_t shortval;
+    int32_t intval;
+#else
     short shortval;
     long  longval;
+#endif
     float floatval;
     double doubleval;
 
@@ -5535,8 +5555,13 @@ sio_get_number()
 	case TK_ULONG:
 	case TK_INT:
 	case TK_UINT:
+#ifdef __LP64__
+	    s = (UCHAR *) &intval;
+	    endofval = s + sizeof (intval);
+#else
 	    s = (UCHAR *) &longval;
 	    endofval = s + sizeof (longval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    s = (UCHAR *) &floatval;
@@ -5599,11 +5624,19 @@ sio_get_number()
 	    break;
 	case TK_LONG:
 	case TK_INT:
+#ifdef __LP64__
+	    make_number(&vNum, &tNum, (double) intval);
+#else
 	    make_number(&vNum, &tNum, (double) longval);
+#endif
 	    break;
 	case TK_ULONG:
 	case TK_UINT:
+#ifdef __LP64__
+	    make_number(&vNum, &tNum, (double) (uint32_t) intval);
+#else
 	    make_number(&vNum, &tNum, (double) (unsigned long) longval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);
@@ -5718,6 +5751,9 @@ sio_put_atom()
 
 /*
  * sio_put_number(Stream,OutType,Number)
+ * Using ILP64 data model (5/24/2020), int/long --> 32bit
+ *	https://en.wikipedia.org/wiki/64-bit_computing#64-bit_data_models 
+ *	https://docs.oracle.com/cd/E19620-01/805-3024/lp64-1/index.html
  */
 
 int
@@ -5730,6 +5766,10 @@ sio_put_number()
 
     UCHAR  byteval;
     short shortval;
+#ifdef __LP64__
+    int  intval;
+    unsigned int  uintval;
+#endif
     long  longval;
     unsigned long ulongval;
     float floatval;
@@ -5794,7 +5834,11 @@ sio_put_number()
 		FAIL;
 	    }
 	    sval = (UCHAR *) &longval;
+#ifdef __LP64__
+	    endofval = sval + sizeof (intval);
+#else
 	    endofval = sval + sizeof (longval);
+#endif
 	    break;
 	case TK_ULONG:
 	case TK_UINT:
@@ -5804,7 +5848,11 @@ sio_put_number()
 	    }
 	    ulongval = (unsigned long) doubleval;
 	    sval = (UCHAR *) &ulongval;
+#ifdef __LP64__
+	    endofval = sval + sizeof (uintval);
+#else
 	    endofval = sval + sizeof (ulongval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    if (!getdouble(&doubleval, v3, t3)) {

@@ -484,13 +484,21 @@ w_uia_alloc(rval, rtag, size)
     size_t size;
 {
     register PWord *t;
-    register int i;
+#ifdef __LP64__
+    register size_t i;
+#else
+	register int i;
+#endif
 
     *rval = (PWord) MMK_UIAVAL(wm_H);
     *rtag = WTP_UIA;
 
     t = (PWord *) (wm_H + 1);
-    i = (size + sizeof (PWord)) >> 2;	/* uia size in long words */
+#ifdef __LP64__
+    i = (size + sizeof (PWord)) / sizeof(PWord);	/* uia size in long words */
+#else
+    i = (size + sizeof (PWord)) >> 2;
+#endif
     while (i--)
 	*t++ = (PWord) 0;
 

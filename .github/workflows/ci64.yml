@@ -1,0 +1,21 @@
+name: 64-bit Build & PARTIAL-TESTS
+on: [push]
+env:
+  LP64_PARTIAL_TEST: 1
+jobs:
+
+  Linux:
+    runs-on: ubuntu-20.04
+    env:
+      BUNDLE_PATH:  ~/.gem
+    steps:
+     - uses: actions/checkout@v3
+     - run: sudo gem install bundler
+     - run: sudo apt-get update && sudo apt-get install libcurl4-openssl-dev tk-dev
+     - run: ./cibuild
+
+  MacOS:
+    runs-on: macos-latest
+    steps:
+     - uses: actions/checkout@v3
+     - run: ./cibuild

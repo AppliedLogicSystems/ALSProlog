@@ -19,9 +19,10 @@ install:
 build_script:
   - C:\msys64\usr\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild
 
-on_finish:
-  - ps: |
-        if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
-          $blockRdp = $true
-          iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-        }
+# Uncomment to have AppVeyor pause for remote debugging on branch rebuilds
+# on_finish:
+#   - ps: |
+#         if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
+#           $blockRdp = $true
+#           iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#         }
