@@ -46,7 +46,9 @@
 #endif
 
 #include <limits.h>
+#ifdef __LP64__
 #include <stdint.h>
+#endif
 
 #ifdef PURE_ANSI
 #define EINTR	0
@@ -5507,8 +5509,13 @@ sio_get_number()
     UCHAR *lim, *endofval;
     register UCHAR *s, *p;
     UCHAR  byteval;
+#ifdef __LP64__
     int16_t shortval;
     int32_t intval;
+#else
+    short shortval;
+    long  longval;
+#endif
     float floatval;
     double doubleval;
 
@@ -5548,8 +5555,13 @@ sio_get_number()
 	case TK_ULONG:
 	case TK_INT:
 	case TK_UINT:
+#ifdef __LP64__
 	    s = (UCHAR *) &intval;
 	    endofval = s + sizeof (intval);
+#else
+	    s = (UCHAR *) &longval;
+	    endofval = s + sizeof (longval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    s = (UCHAR *) &floatval;
@@ -5612,11 +5624,19 @@ sio_get_number()
 	    break;
 	case TK_LONG:
 	case TK_INT:
+#ifdef __LP64__
 	    make_number(&vNum, &tNum, (double) intval);
+#else
+	    make_number(&vNum, &tNum, (double) longval);
+#endif
 	    break;
 	case TK_ULONG:
 	case TK_UINT:
+#ifdef __LP64__
 	    make_number(&vNum, &tNum, (double) (uint32_t) intval);
+#else
+	    make_number(&vNum, &tNum, (double) (unsigned long) longval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    make_numberx(&vNum, &tNum, (double) floatval, WTP_DOUBLE);
@@ -5746,8 +5766,10 @@ sio_put_number()
 
     UCHAR  byteval;
     short shortval;
+#ifdef __LP64__
     int  intval;
     unsigned int  uintval;
+#endif
     long  longval;
     unsigned long ulongval;
     float floatval;
@@ -5812,7 +5834,11 @@ sio_put_number()
 		FAIL;
 	    }
 	    sval = (UCHAR *) &longval;
+#ifdef __LP64__
 	    endofval = sval + sizeof (intval);
+#else
+	    endofval = sval + sizeof (longval);
+#endif
 	    break;
 	case TK_ULONG:
 	case TK_UINT:
@@ -5822,8 +5848,11 @@ sio_put_number()
 	    }
 	    ulongval = (unsigned long) doubleval;
 	    sval = (UCHAR *) &ulongval;
-//	    endofval = sval + sizeof (intval);
+#ifdef __LP64__
 	    endofval = sval + sizeof (uintval);
+#else
+	    endofval = sval + sizeof (ulongval);
+#endif
 	    break;
 	case TK_FLOAT:
 	    if (!getdouble(&doubleval, v3, t3)) {
