@@ -712,6 +712,7 @@ sio_fd()
 	PI_makedouble(&rval,&rtype,(double) SIO_FD(buf));
 	if (PI_unify(v2,t2,rval,rtype))
 		PI_SUCCEED;
+	else
 		PI_FAIL;
 
 
