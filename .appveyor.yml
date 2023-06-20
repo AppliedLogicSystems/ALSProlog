@@ -1,25 +1,28 @@
+image: Visual Studio 2019
+
 # TODO: Fix cygwin-unix build:    - OS: unix
 environment:
   matrix:
-    - OS: win32
+    - MSYSTEM: MINGW32
 
 cache:
-  - C:/cygwin/var/cache/setup -> .appveyor.yml
   - C:/bundle -> .appveyor.yml
 
 install:
-  - SET PATH=C:\Ruby26\bin;%PATH%
+  - choco install php -y
+  - refreshenv
+  - SET PATH=C:\Ruby27\bin;%PATH%
   - SET BUNDLE_PATH=C:\bundle
-  - "C:/cygwin/setup-x86.exe -qnNdO -R C:/cygwin -s http://cygwin.mirror.constant.com -l C:/cygwin/var/cache/setup 
--P 
-libcrypt-devel,mingw64-i686-libgcrypt,mingw64-i686-curl,tcl-tk-devel,mingw64-i686-tcl,mingw64-i686-tk,zip,php,procps"
+  - C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu"
+  - C:\msys64\usr\bin\bash -lc "pacman --noconfirm --needed --sync mingw-w64-i686-curl zip procps"
 
 build_script:
-  - C:\Cygwin\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild
+  - C:\msys64\usr\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild
 
-on_finish:
-  - ps: |
-        if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
-          $blockRdp = $true
-          iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-        }
+# Uncomment to have AppVeyor pause for remote debugging on branch rebuilds
+# on_finish:
+#   - ps: |
+#         if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
+#           $blockRdp = $true
+#           iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#         }

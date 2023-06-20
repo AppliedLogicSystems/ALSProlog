@@ -11,7 +11,9 @@ LICENSE
 =======
 ALS Prolog is an open source version of Prolog distributed by
 Applied Logic Systems, Inc. under the MIT License, which is
-contained in the file LICENSE.txt in this directory.
+contained in the file LICENSE.txt in this directory.  The 
+source files are located at
+	https://github.com/AppliedLogicSystems/ALSProlog
 
 WARRANTY
 ========
@@ -77,6 +79,5 @@ in your browser.
    = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 	Applied Logic Systems, Inc.
-	PO Box 468, Vanderwagen, NM 87326 USA
-	Web: http://www.applied-logic-systems.com
+	https://www.applied-logic-systems.com
 

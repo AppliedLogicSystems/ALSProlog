@@ -23,6 +23,15 @@ use sio.
 %:-	make_gv("_shell_prompts"), 	set_shell_prompts( [('?- ','?-_')] ).
 :-	make_gv("_shell_prompts", [('?- ','?-_')] ).
 
+path_separator(';').
+
+atom_split(Atom,Splitter,Part1,Part2)
+        :-
+        atom_codes(Atom,List),
+        asplit0(List,Splitter,String1,String2),
+        atom_codes(Part1,String1),
+        atom_codes(Part2,String2).
+
 /*-------------------------------------------------------------------------------*
  | start_shell/1
  | start_shell(DefaultShellCall)

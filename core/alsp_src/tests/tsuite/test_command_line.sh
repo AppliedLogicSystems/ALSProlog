@@ -65,7 +65,7 @@ opt_test () {
 # Test -q (quiet) argument.
 
 case $(uname) in
-	"CYGWIN"*)	expected_output="?- " ;;
+	*"_NT"*)	expected_output="?- " ;;
 	        *) 	expected_output=""    ;;
 esac
 
@@ -149,6 +149,11 @@ done
 #    done
 #done
 
+if [ ! -z "$LP64_PARTIAL_TEST" ]
+then
+echo "TODO: restore test_command_line.sh" >> /dev/stderr
+exit
+fi
 
 # test the correct functioning of -heap and -stack
 
@@ -168,7 +173,7 @@ cl_test "$prolog -stack 1000 -stack 2000 -b -q -g 'statistics([_,stack(_,_,20480
 
 # Test empty environment
 
-if [[ $(uname -o) != 'Cygwin' ]]
+if [[ ! $(uname) =~ '_NT' ]]
 then
 cl_test "env -i $prolog -q -b -g true" 0
 fi

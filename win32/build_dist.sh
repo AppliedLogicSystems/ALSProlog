@@ -8,14 +8,14 @@ case `uname -rs` in
     Linux*) 	ARCH=linux   ; SOEXT=so    ;;
     "HP-UX"*)	ARCH=hpux    ; SOEXT=sl    ;;
     "IRIX"*)	ARCH=irix    ; SOEXT=so    ;;
-    "CYGWIN"*)  ARCH=win32  ; SOEXT=dll   ;;
+    *"_NT"*)  ARCH=win32  ; SOEXT=dll   ;;
     "Darwin"*)	ARCH=darwin  ; SOEXT=dylib ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
 
 ALS_PROLOG=..
 BIN=$ALS_PROLOG/core/$ARCH
-ALS_BUILD_SUPPORT=/usr/i686-w64-mingw32/sys-root/mingw/
+ALS_BUILD_SUPPORT=/mingw32
 
 LIB=$ALS_PROLOG/core/alsp_src/library
 EXAMPLES=$ALS_PROLOG/examples
@@ -66,23 +66,28 @@ rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 # MinGW64 Tcl/Tk libs
 cp -p "$ALS_BUILD_SUPPORT"/bin/tcl86.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/tk86.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_dw2-1.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/zlib1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libwinpthread-1.dll "$DISTDIR"
 
 #MinGW64 Curl libs
 cp -p "$ALS_BUILD_SUPPORT"/bin/libcurl-4.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libnghttp2-14.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/normaliz.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libssh2-1.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/ws2_32.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/bcrypt.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/crypt32.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/z.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/ssl.dll "$DISTDIR"
-#cp -p "$ALS_BUILD_SUPPORT"/bin/crypto.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libeay32.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/ssleay32.dll "$DISTDIR"
-cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_sjlj-1.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/libwinpthread-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_dw2-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libbrotlicommon.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libbrotlidec.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libiconv-2.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libidn2-0.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libintl-8.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libunistring-5.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libcrypto-3.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libidn2-0.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libnghttp2-14.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libpsl-5.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libssh2-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libssl-3.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/zlib1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libzstd.dll "$DISTDIR"
 
 mkdir "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tcl8.6 "$DISTDIR"/lib

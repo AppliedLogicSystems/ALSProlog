@@ -52,10 +52,7 @@ bank, thereby either viewing an earlier portion of the stream (the water) or adv
 
 A fundamental principle underlying the notion of stream is this:
 
-```
-    A program manipulating a stream need have no knowledge 
-    of what lies at the other end of the stream.
-```
+> A program manipulating a stream need have no knowledge of what lies at the other end of the stream.
 
 Thus, a program which is the source of a stream (is producing a stream) need have
 no knowledge of what is consuming the stream, and a program which is the sink for
@@ -382,12 +379,12 @@ terms. Some of the options are applicable to all streams, while others apply onl
 streams connected to particular kinds or sources or sinks, or of particular modes or
 types.
 
-#### text vs binary
+#### Type: text vs binary
 
-At most one of text or binary can be present on the options list. When text is
-present, the stream is treated as a character stream. When binary is present, the
+At most one of type(text) or type(binary) can be present on the options list. When type(text) is
+present, the stream is treated as a character stream. When type(binary) is present, the
 stream is treated as a byte stream. If neither is present, the stream is treated as a
-character stream, so that the default is text.
+character stream, so that the default is type(text).
 
 #### aliases
 
@@ -677,9 +674,9 @@ is true if and only if Property holds of Stream. The possible values for
 Property include all of the expressions which may appear on the Options list
 passed to open/4, together with the following:
 
-    input, output, and mode(M),
+    input, output, mode(M), and position(P)
 
-where M is one of text, binary.
+where M is one of text, binary, and P is (usually) an uninstantiated variable.
 
 From a more procedural point of view, the action of stream_property is as
 follows. If both Stream is instantiated to the stream descriptor of a currently open

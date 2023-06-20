@@ -24,20 +24,20 @@ _Arithmetic Functions_ can also be evaluated when their arguments can be evaluat
 |---------|------------|
 | -X | unary minus | 
 | X div Y | integer division | 
-| X mod Y | X(integer) | 
-| X xor Y | X | 
+| X mod Y | X(integer) modulo Y | 
+| X xor Y | X exclusive or Y | 
 | X * Y | multiplication | 
 | X + Y | addition | 
 | X-Y | subtraction | 
 | X/Y | division | 
 | X//Y | integer division | 
-| X/\Y | integer bitwise | 
-| X &lt; &lt; Y | integer bitwise left | 
-| X &gt; &gt; Y | integer bitwise right shift of X by Y places | 
-| X\/Y | integer bitwise | 
-| X^Y | X to the | 
-| \X not(X) | integer bitwise | 
-| 0 ' Char | the | 
+| X/\Y | integer bitwise conjunction | 
+| X << Y | integer bitwise left of X by Y places | 
+| X >> Y | integer bitwise right shift of X by Y places | 
+| X\/Y | integer bitwise disjunction | 
+| X^Y | X to the power Y | 
+| \X not(X) | integer bitwise negation | 
+| 0 ' Char | the ASCII code of Char | 
 
 
 
@@ -52,16 +52,16 @@ _Arithmetic Functions_ can also be evaluated when their arguments can be evaluat
 | atan(X) | arc tangent | 
 | cos(X) | cosine | 
 | cputime | CPU time in seconds since ALS Prolog started. | 
-| exp(X) | natural | 
+| exp(X) | natural exponential function | 
 | exp10(X) | base 10 exponential function | 
 | floor(X) | the largest integer not greater than X | 
 | heapused | heap space in use, in bytes | 
 | j0(X) | Bessel function of order 0 | 
 | j1(X) | Bessel function of order 1 | 
-| log(X) | natural | 
+| log(X) | natural logarithm | 
 | log10(X) | base 10 logarithm | 
-| random | returns a | 
-| realtime | actual | 
+| random | returns a random floating point number such that 0.0 ≤ X < 1.0 | 
+| realtime | actual  time in seconds since ALS Prolog started | 
 | round(X) | integer rounding of X | 
 | sin(X) | sine | 
 | sqrt(X) | square root | 

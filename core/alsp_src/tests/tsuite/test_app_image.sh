@@ -6,7 +6,7 @@ set -Eeuxo pipefail
 export TESTDIR=$(dirname "$0")
 
 case "$(uname)" in
-    "CYGWIN"*)  EXT=.exe ;;
+    *"_NT"*)    EXT=.exe ;;
     *)          EXT=''   ;;
 esac
 

@@ -300,10 +300,11 @@ string_to_uia(String, UIA)
  |
  |	If Chars is a list of charater codes of length L, if UIA is a
  | 	uia, if Pos is a positive integer =< length(UIA), then:
- |	This predicate attempts to inserts the characters (in order) 
- |	corresponding to Chars into UIA beginning at position Pos 
- |	(counting from 0 at the beginning of UIA).  This succeeds if 
- |	length(UIA) - Pos >= L.  If length(UIA) - Pos < L, thisfails; 
+ |	if length(Chars) = N, this predicate attempts to replace the
+ |	N characters of UIA beginning at position Pos (counting from 0 
+ |	at the beginning of UIA), replacing each character of UIA,
+ |	in order, by the corresponding character of Chars.  This succeeds 
+ |	if length(UIA) - Pos >= L.  If length(UIA) - Pos < L, this fails; 
  |	however, note that this call will have descructively modified 
  |	UIA to insert the first length(UIA) - Pos Chars.
  *!--------------------------------------------------------------------*/
@@ -324,8 +325,8 @@ string_to_uia([Char | Chars], CurPos, UIA)
  |
  |	If Size is an integer, and if Chars is a list of character codes, 
  |	then:<br>
- |	a) if Size >= length(Chars), allocates a (new) UIA and 
- |	   copies Chars into UIA starting at position 0.<br>
+ |	a) if Size >= length(Chars), allocates a (new) UIA of length
+ |	   Size, and copies Chars into UIA starting at position 0.
  |	b) if Size < length(Chars), fails.  
  *!--------------------------------------------------------------------*/
 string_to_sized_uia(Size, Chars, UIA)

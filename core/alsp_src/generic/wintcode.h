@@ -258,6 +258,8 @@ struct codeblock {
  *-----------------------------------------------------------------*/
 
 #define CGI_WIDTH	9
+// TODO LP64: Check to see if this is needed for 64-bit:
+//#define CGI_OFFSET	(64-CGI_WIDTH)
 #define CGI_OFFSET	(32-CGI_WIDTH)
 #define CGI_MASK	((1<<CGI_WIDTH)-1)
 #define CGI_VMASK	((1<<CGI_OFFSET)-1)

@@ -484,9 +484,9 @@ int pbi_alarm(void)
     else
 	PI_FAIL;
 
-	os_set_timer(dval, dinterval);
-	
-	PI_SUCCEED;	
+    os_set_timer(dval, dinterval);
+
+    PI_SUCCEED;
 }
 
 #ifndef MSWin32

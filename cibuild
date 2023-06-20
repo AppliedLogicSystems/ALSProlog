@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 
 
 case "$(uname)" in
-    "CYGWIN"*)  OS=win32 ;;
+    *"_NT"*)  OS=win32 ;;
     *)          OS=unix
                 # Report common warnings as errors
                 export CFLAGS="${CFLAGS:-} -Werror=all"
@@ -15,11 +15,11 @@ esac
 
 pushd $OS
 make
+make --keep-going test
 if [[ $OS == 'unix' ]]
 then
-	make testdocs
+	make --keep-going testdocs
 fi
-make test
 
 if [[ ${APPVEYOR_RE_BUILD:-} == 'True' && ${APPVEYOR_REPO_BRANCH:-} != 'master' ]]
 then

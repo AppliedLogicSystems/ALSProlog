@@ -6,7 +6,7 @@
 	
 static const alspi_func_ptrs *alspi_funcs;
 extern void pi_init(void);
-char library_dir[1024], executable_path[1024];
+char library_dir[PATH_MAX], executable_path[PATH_MAX];
 #ifdef __MWERKS__
 #pragma export on
 #endif

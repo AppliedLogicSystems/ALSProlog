@@ -71,9 +71,13 @@
  | correct position in a full word integer representation.
  *-----------------------------------------------------------------------*/
 
+#ifdef __LP64__
+#define MTP_SIGNBIT	0x8000000000000000L
+#define MTP_SIGNEXT	0xf000000000000000L
+#else
 #define MTP_SIGNBIT	0x80000000L
 #define MTP_SIGNEXT	0xf0000000L
-
+#endif
 /*-----------------------------------------------------------------------
  | MBIAS and MUNBIAS are required on the 88k.  When possible, these macros
  | are not used except in the 88k mtypes file.  There are several places in

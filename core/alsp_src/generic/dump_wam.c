@@ -129,10 +129,10 @@ static void print_obj(const wam_task_state *s, PWord *c)
 		}
 		break;
 	case MTP_STRUCT:
-		printf("struct named %ld at %X", get_heap_loc_name(s, MSTRUCTADDR(*c)), MSTRUCTADDR(*c));
+		printf("struct named %ld at %p", get_heap_loc_name(s, MSTRUCTADDR(*c)), MSTRUCTADDR(*c));
 		break;
 	case MTP_LIST:
-		printf("list named %ld at %X", get_heap_loc_name(s, MLISTADDR(*c)), MLISTADDR(*c));
+		printf("list named %ld at %p", get_heap_loc_name(s, MLISTADDR(*c)), MLISTADDR(*c));
 		break;
 	case MTP_CONST:
 		switch (MTP_CONSTTAG(*c)) {
@@ -146,7 +146,7 @@ static void print_obj(const wam_task_state *s, PWord *c)
 			printf("fence");
 			break;
 		case MTP_UIA:
-			printf("UIA named %ld at %X",
+			printf("UIA named %ld at %p",
 					get_heap_loc_name(s, (PWord *)(MUIA(*c) + (size_t)s->heap_and_stack_base)),
 					(PWord *)(MUIA(*c) + (size_t)s->heap_and_stack_base));
 			break;
@@ -171,26 +171,26 @@ void dump_wam_task_state(const wam_task_state *s)
 	printf("ALS-WAM State\n");
 	
 	printf("Registers:\n");
-	printf("P   %8X\n", s->P);
-	printf("TR  %8X\n", s->TR);
-	printf("H   %8X\n", s->H);
-	printf("F   %8X\n", s->F);
-	printf("SPB %8X\n", s->SPB);
-	printf("HB  %8X\n", s->HB);
-	printf("B   %8X\n", s->B);
-	printf("E   %8X\n", s->E);
-	printf("SP  %8X\n", s->SP);
+	printf("P   %8lX\n", s->P);
+	printf("TR  %8lX\n", s->TR);
+	printf("H   %8lX\n", s->H);
+	printf("F   %8lX\n", s->F);
+	printf("SPB %8lX\n", s->SPB);
+	printf("HB  %8lX\n", s->HB);
+	printf("B   %8lX\n", s->B);
+	printf("E   %8lX\n", s->E);
+	printf("SP  %8lX\n", s->SP);
 
 	/* dump stack */
 	printf("\nStack\n");
 	for (sp = s->SP, count = 0; sp < (PWord)s->heap_and_stack_base && count < 100; sp += 4, count++) {
-		printf("%8X: %8X\n", sp, PWMEM(sp));
+		printf("%8lX: %8lX\n", sp, PWMEM(sp));
 	}
 
 	/* dump choice points */
 	printf("\nChoice Point Stack\n");
 	for (count = 0, b = s->B; count < 15 && b; count++, b = PWMEM(b+12)) {
-		printf("%8X: %8X %8X %8X %8X\n", b, PWMEM(b), PWMEM(b+4), PWMEM(b+8), PWMEM(b+12));
+		printf("%8lX: %8lX %8lX %8lX %8lX\n", b, PWMEM(b), PWMEM(b+4), PWMEM(b+8), PWMEM(b+12));
 	}
 
 	/* dump environment stack */
@@ -206,9 +206,9 @@ void dump_wam_task_state(const wam_task_state *s)
 			count++;
 			if (count < 7) {
 				Code *r;
-				printf ("%8X: ENV %8X %8X\n", e, PWMEM(e), PWMEM(e+4));
+				printf ("%8lX: ENV %8lX %8lX\n", e, PWMEM(e), PWMEM(e+4));
 				r = (Code *)PWMEM(e+4);
-				printf ("Code Mask %X nargs: %d\n",
+				printf ("Code Mask %lX nargs: %ld\n",
 					     *((long *) (r + GCMAGICVal(r)) + 1),
 					     (*(long *) (r + GCMAGICVal(r))) & 0xffff);
 			}
@@ -222,7 +222,7 @@ void dump_wam_task_state(const wam_task_state *s)
 				cutoff = nargs - 32;
 				for (arg = (PWord *)(e+8); nargs--; arg++, mask >>= 1) {
 					if ((mask & 1) || nargs < cutoff) {
-						if (count < 7) printf("%8X: ARG %8X", arg, *arg);
+						if (count < 7) printf("%8p: ARG %8lX", arg, *arg);
 						if (count < 7) name(s, arg);
 						if (count < 7) {
 							print_obj(s, arg);
@@ -232,7 +232,7 @@ void dump_wam_task_state(const wam_task_state *s)
 				}
 				
 				for (; arg < arg_end; arg++) {
-					if (count < 7) printf("%8X: ARG %8X", arg, *arg);
+					if (count < 7) printf("%8p: ARG %8lX", arg, *arg);
 					if (count < 7) name(s, arg);
 					if (count < 7) {
 						print_obj(s, arg);
@@ -241,7 +241,7 @@ void dump_wam_task_state(const wam_task_state *s)
 				}
 			} else {
 				for (arg = (PWord *)(e+8); arg < arg_end; arg++) {
-					if (count < 7) printf("%8X: ARG %8X", arg, *arg);
+					if (count < 7) printf("%8p: ARG %8lX", arg, *arg);
 					if (count < 7) name(s, arg);
 					if (count < 7) {
 						print_obj(s, arg);

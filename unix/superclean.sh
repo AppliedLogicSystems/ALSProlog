@@ -9,7 +9,7 @@ case `uname -rs` in
     Linux*) 	ARCH=linux ;;
     "HP-UX"*)	ARCH=hpux ;;
     "IRIX"*)	ARCH=irix ;;
-    "CYGWIN"*) 	ARCH=win32 ;;
+    *"_NT"*) 	ARCH=win32 ;;
     "Darwin"*)	ARCH=darwin ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac

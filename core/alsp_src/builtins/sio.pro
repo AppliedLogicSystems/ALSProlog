@@ -3789,10 +3789,11 @@ stream_position(Stream_or_alias, Position) :-
 /*-------------------------------------------------------------------*
  | stream_position(Stream_or_alias, Current_position, New_position)
  |
- |	Unifies Position with the current stream position of the stream
- |	denoted by Stream_or_alias.  As a side effect, also sets the
- |	stream position of said stream to the position represented by
- |	New_position.   New_position may be one of the following values:
+ |	Unifies Current_position with the current stream position of 
+ |	the stream denoted by Stream_or_alias.  As a side effect, also 
+ |	sets the stream position of said stream to the position 
+ |	represented by New_position.   
+ |	New_position may be one of the following values:
  |
  |	An absolute integer position into the stream.
  |	A whole number float position into the stream.

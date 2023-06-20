@@ -35,6 +35,7 @@ endmod.
 
 module builtins.
 
+
 /*------------------------------------------------------------------*
  * The following global variable access predicates are for use with the
  * shell and with the debugger.
@@ -629,50 +630,74 @@ export force_libload_all/1.
 export force_libload_all/2.
 export force_libload_all_lib/2.
 
-force_libload_all 
+force_libload_all
+	:-
+	force_libload_all(opts=[]).
+
+force_libload_all(opts=Opts)
 	:-
 	sys_searchdir(ALSDIR),
 	setof(File,
 			(Pred^builtins:pget_libinfo(Pred,File),
 				File\='builtins/debugger'),
 			Files),
-	force_libload_all(Files,ALSDIR).
+	force_libload_all(Files,ALSDIR,Opts).
+
 
 force_libload_all(Files) 
 	:-
 	sys_searchdir(ALSDIR),
-	force_libload_all(Files,ALSDIR).
+	force_libload_all(Files,ALSDIR,opts=[]).
+
+
+force_libload_all(Files, opts=Opts) 
+	:-
+	sys_searchdir(ALSDIR),
+	force_libload_all(Files,ALSDIR, Opts).
+
 
 force_libload_all_lib(Files,Library) 
+	:-
+	force_libload_all_lib(Files,Library, opts=[]).
+
+
+force_libload_all_lib(Files,Library, opts=Opts) 
 	:-
 	sys_searchdir(ALSDIR),
 	split_path(ALSDIR, ALSDIRElts),
 	dappend(ALSDIRElts, [Library], LPElts),
 	join_path(LPElts, LibPath),
-	force_libload_all(Files,LibPath).
+	force_libload_all(Files,LibPath, Opts).
 
-force_libload_all([],_).
-force_libload_all([File|Files],DirDC) 
+force_libload_all([],_,_).
+force_libload_all([File|Files],DirDC,Opts) 
 	:-
-	force_libload_file(File,DirDC),
-	force_libload_all(Files,DirDC).
+	force_libload_file(File,DirDC,Opts),
+	force_libload_all(Files,DirDC,Opts).
 
-force_libload_file(File,DirDC)
+force_libload_file(File,DirDC,Opts)
 	:-
 	split_path(DirDC, DirDCElts),
 	dappend(DirDCElts, [File], FNElts),
 	join_path(FNElts, FileName),
 
-	als_advise('Loading %s\n',[FileName]),
-    '$atom_concat'(FileName,'.pro',FilePathPro),
+	(member(show_msg, Opts) -> als_advise('Loading %s\n',[FileName])
+		;
+		true
+	),
+    	'$atom_concat'(FileName,'.pro',FilePathPro),
 	'$atom_concat'(FileName,'.obp',FilePathObp),
 %	(load(FileName,1,_,obp,_,_) ->
 	(cslt_lib_ld(File, FilePathPro,FilePathObp) ->
 		(pdel_libinfo(_,File), fail ; true),
-		als_advise('...loaded\n',[])
+		(member(show_msg, Opts) -> als_advise('...loaded\n',[])
+			;
+			true
+		)
 		;
 		als_advise('\n!!WARNING File %s NOT LOADED!\n',[FileName])
 	).
+
 
 %:-dynamic(lib_path_rec/2).
 

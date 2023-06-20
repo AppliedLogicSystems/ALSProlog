@@ -85,7 +85,7 @@ Set = [(bicycling,[andy]),(lifting,[chris,keith,kev]),
 yes.
 ```
 ```
-?- setof(Person, Sport^(Person likes Sport), SetOfPeople).
+?- setof(Person, Sport^(likes(Person, Sport)), SetOfPeople).
 Person = _1
 Sport = _2
 SetOfPeople = [andy,chris,sally,keith,ken,kev]
