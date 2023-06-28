@@ -20,7 +20,7 @@ extern int status;
       |   i_unequal 
       *----------------*/
 
- int	i_unequal		PARAMS((void));
+ int	i_unequal		(void);
 
 int
 i_unequal()
@@ -71,7 +71,7 @@ i_unequal()
       |   i_equal 
       *----------------*/
 
- int	i_equal		PARAMS((void));
+ int	i_equal		(void);
 
 int
 i_equal()
@@ -103,7 +103,7 @@ i_equal()
       |   i_greatereq 
       *----------------*/
 
- int	i_greatereq		PARAMS((void));
+ int	i_greatereq		(void);
 
 int
 i_greatereq()
@@ -129,7 +129,7 @@ i_greatereq()
       |   i_higher 
       *----------------*/
 
- int	i_higher		PARAMS((void));
+ int	i_higher		(void);
 
 int
 i_higher()
@@ -157,7 +157,7 @@ i_higher()
       |   i_add 
       *----------------*/
 
- int	i_add		PARAMS((void));
+ int	i_add		(void);
 
 int
 i_add()
@@ -204,7 +204,7 @@ i_add()
       |   i_begin_tog 
       *----------------*/
 
- int	i_begin_tog		PARAMS((void));
+ int	i_begin_tog		(void);
 
 int
 i_begin_tog()
@@ -226,7 +226,7 @@ i_begin_tog()
       |   i_cos 
       *----------------*/
 
- int	i_cos		PARAMS((void));
+ int	i_cos		(void);
 
 int
 i_cos()
@@ -289,7 +289,7 @@ i_cos()
       |   i_finish_tog 
       *----------------*/
 
- int	i_finish_tog		PARAMS((void));
+ int	i_finish_tog		(void);
 
 int
 i_finish_tog()
@@ -311,7 +311,7 @@ i_finish_tog()
       |   i_inf 
       *----------------*/
 
- int	i_inf		PARAMS((void));
+ int	i_inf		(void);
 
 int
 i_inf()
@@ -361,7 +361,7 @@ i_inf()
       |   i_j_less 
       *----------------*/
 
- int	i_j_less		PARAMS((void));
+ int	i_j_less		(void);
 
 int
 i_j_less()
@@ -421,7 +421,7 @@ i_j_less()
       |   i_k_equal 
       *----------------*/
 
- int	i_k_equal		PARAMS((void));
+ int	i_k_equal		(void);
 
 int
 i_k_equal()
@@ -512,7 +512,7 @@ i_k_equal()
       |   i_lub 
       *----------------*/
 
- int	i_lub		PARAMS((void));
+ int	i_lub		(void);
 
 int
 i_lub()
@@ -562,7 +562,7 @@ i_lub()
       |   i_mul 
       *----------------*/
 
- int	i_mul		PARAMS((void));
+ int	i_mul		(void);
 
 int
 i_mul()
@@ -774,7 +774,7 @@ i_mul()
       |   i_narrower 
       *----------------*/
 
- int	i_narrower		PARAMS((void));
+ int	i_narrower		(void);
 
 int
 i_narrower()
@@ -795,7 +795,7 @@ i_narrower()
       |   i_or 
       *----------------*/
 
- int	i_or		PARAMS((void));
+ int	i_or		(void);
 
 int
 i_or()
@@ -879,7 +879,7 @@ i_or()
       |   i_pow_odd 
       *----------------*/
 
- int	i_pow_odd		PARAMS((void));
+ int	i_pow_odd		(void);
 
 int
 i_pow_odd()
@@ -984,7 +984,7 @@ i_pow_odd()
       |   i_qpow_even 
       *----------------*/
 
- int	i_qpow_even		PARAMS((void));
+ int	i_qpow_even		(void);
 
 int
 i_qpow_even()
@@ -1080,7 +1080,7 @@ i_qpow_even()
       |   i_rootsquare 
       *----------------*/
 
- int	i_rootsquare		PARAMS((void));
+ int	i_rootsquare		(void);
 
 int
 i_rootsquare()
@@ -1169,7 +1169,7 @@ i_rootsquare()
       |   i_sin 
       *----------------*/
 
- int	i_sin		PARAMS((void));
+ int	i_sin		(void);
 
 int
 i_sin()
@@ -1263,7 +1263,7 @@ i_sin()
       |   i_tan 
       *----------------*/
 
- int	i_tan		PARAMS((void));
+ int	i_tan		(void);
 
 int
 i_tan()
@@ -1300,7 +1300,7 @@ i_tan()
       |   i_vabs 
       *----------------*/
 
- int	i_vabs		PARAMS((void));
+ int	i_vabs		(void);
 
 int
 i_vabs()
@@ -1374,7 +1374,7 @@ i_vabs()
       |   i_wrap 
       *----------------*/
 
- int	i_wrap		PARAMS((void));
+ int	i_wrap		(void);
 
 int
 i_wrap()
@@ -1430,7 +1430,7 @@ i_wrap()
       |   i_xp 
       *----------------*/
 
- int	i_xp		PARAMS((void));
+ int	i_xp		(void);
 
 int
 i_xp()

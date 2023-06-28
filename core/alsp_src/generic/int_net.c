@@ -15,12 +15,12 @@
 #ifdef INTCONSTR
 
 
-void setup_4_boole	PARAMS((double,double,int,long *));
+void setup_4_boole	(double,double,int,long *);
 
 #ifdef DEBUGSYS
 int debug_constr_flag = 0;
 
-void	debugconstr	PARAMS( (void) );
+void	debugconstr	(void);
 
 void	
 debugconstr()
@@ -40,23 +40,23 @@ debugconstr()
 #include "intrv_pr.h"
 
 	/*--- From intaux.c ---*/
-extern int	  extract_bds   PARAMS( (PWord *, int, fp *, fp *, int *) );
-int	  extract_bool_bds PARAMS( (PWord *, int, int, long *) ); 
-extern PWord  get_intvl_tm	PARAMS((PWord *, int));
+extern int	  extract_bds   (PWord *, int, fp *, fp *, int *);
+int	  extract_bool_bds (PWord *, int, int, long *); 
+extern PWord  get_intvl_tm	(PWord *, int);
 
 extern int op_anynot[], op_bothnot[], op_conjunction[];
 extern int op_disjunction[], op_exclusiveor[], op_negation[];
 
 	/*--- From bmeta.c ---*/
-extern int trailed_mangle0	PARAMS((PWord,PWord,int,PWord,int));
+extern int trailed_mangle0	(PWord,PWord,int,PWord,int);
 
-void update_propagate	PARAMS((double,double,PWord,int,int));
-int ilnk_net			PARAMS ((void));
+void update_propagate	(double,double,PWord,int,int);
+int ilnk_net			(void);
 
 	/*--- From wam.c ---*/
-extern void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
+extern void bind_point_unfreeze	(PWord *,int *,double,int);
 
-int ilinkq	PARAMS ((PWord,PWord,PWord,PWord,PWord,int,int,int,int));
+int ilinkq	(PWord,PWord,PWord,PWord,PWord,int,int,int,int);
 	/*----------------------------------------------------*
  	 |	GLOBAL VARIABLES
  	 *----------------------------------------------------*/
@@ -132,9 +132,9 @@ int itermax= MAXITERS;  /* max number of primops before failure; */
 	 	update_propagate(VL, VH, V, VT, IntrvTm, Goal, VPT);\
 	}
 
-int do_update_z	PARAMS((PWord, int));
-int do_update_x	PARAMS((PWord, int));
-int do_update_y	PARAMS((PWord, int));
+int do_update_z	(PWord, int);
+int do_update_x	(PWord, int);
+int do_update_y	(PWord, int);
 
 
 /***** GLOBALS:
@@ -256,9 +256,9 @@ do_update_y(Y,Yt)
 	SUCCEED;
 }
 
-void unflip_z	PARAMS((void));
-void unflip_x	PARAMS((void));
-void unflip_y	PARAMS((void));
+void unflip_z	(void);
+void unflip_x	(void);
+void unflip_y	(void);
 
 void
 unflip_z()
@@ -317,9 +317,9 @@ unflip_y()
 #define boolean_zchg    0x02        ---booleanOutput
  ----*/
 
-int update_boolean_z	PARAMS(( PWord, int, long *));
-int update_boolean_x	PARAMS(( PWord, int, long *));
-int update_boolean_y	PARAMS(( PWord, int, long *));
+int update_boolean_z	( PWord, int, long *);
+int update_boolean_x	( PWord, int, long *);
+int update_boolean_y	( PWord, int, long *);
 
 int
 update_boolean_z(Z,Zt,bO)
@@ -430,7 +430,7 @@ update_boolean_y(Y,Yt,bO)
  |	Note that Type and IKind are generally quite different.
  *-----------------------------------------------------------------*/
 
-extern void plain_bind PARAMS((PWord, PWord));
+extern void plain_bind (PWord, PWord);
 
 
 void
@@ -516,10 +516,10 @@ update_propagate(L,H,V,Vt,IKind)
 
 
 
-void disp_vv	PARAMS((PWord,int,double,double,int));
+void disp_vv	(PWord,int,double,double,int);
 void disp_infp
-PARAMS((int,PWord,PWord,int,double,double,int,PWord,int,double,double,int,PWord,int,double,double,int));
-void note_changes	PARAMS((void));
+(int,PWord,PWord,int,double,double,int,PWord,int,double,double,int,PWord,int,double,double,int);
+void note_changes	(void);
 
 void
 disp_infp(BA,OpCd,Z,Zt,dzl,dzh,dzpt,X,Xt,dxl,dxh,dxpt,Y,Yt,dyl,dyh,dypt)
@@ -760,7 +760,7 @@ void setup_4_boole(L,H,Which,bI)
 
 	/*--- Vars for constraint statistics: */
 
-int reset_cstr_ctrs PARAMS (( void ));
+int reset_cstr_ctrs ( void );
 
 int
 reset_cstr_ctrs()
@@ -771,7 +771,7 @@ reset_cstr_ctrs()
 	 SUCCEED;
 }
 
-int get_cstr_ctrs_vals PARAMS (( void ));
+int get_cstr_ctrs_vals ( void );
 
 int
 get_cstr_ctrs_vals()
@@ -789,7 +789,7 @@ get_cstr_ctrs_vals()
 		FAIL;
 }
 
-int set_max_iters_val PARAMS (( void ));
+int set_max_iters_val ( void );
 
 int
 set_max_iters_val()

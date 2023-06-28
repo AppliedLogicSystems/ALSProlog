@@ -46,9 +46,9 @@ void noop(void)
 
 
 extern double sym_f_cnst[];
-extern PWord	deref_2		PARAMS(( PWord ));
+extern PWord	deref_2( PWord );
 
-PWord get_intvl_tm		PARAMS((PWord *, int));
+PWord get_intvl_tm(PWord *, int);
 
 /*--------------------------------------------------------
  	PWord *get_intvl_tm(DelVar, DelVar_t)
@@ -109,7 +109,7 @@ PWord get_intvl_tm(DelVar, DelVar_t)
  *-------------------------------------------------------*/
 
 int
-extract_bds	PARAMS( (PWord *, int, fp *, fp *, int *) );
+extract_bds(PWord *, int, fp *, fp *, int *);
 
 int
 extract_bds(DelVar, DelVar_t, LB, UB, IKind)
@@ -202,12 +202,12 @@ extract_bds(DelVar, DelVar_t, LB, UB, IKind)
 
 } /* extract_bds */
 
-extern fp i_next  PARAMS((fp *));
-extern fp i_prev  PARAMS((fp *));
+extern fp i_next(fp *);
+extern fp i_prev(fp *);
 
 
 	/* Prototypes */
-int	pbi_fuzz	PARAMS((void));
+int	pbi_fuzz(void);
 
 	/*---------------------------------------------*
 	 | pbi_fuzz()
@@ -302,13 +302,13 @@ pbi_fuzz()
 
 /* -------------------- vv Dummy for now vv -------------------- */
 
-void iaerror	PARAMS( (void) );
+void iaerror(void);
 
 void iaerror()
 {
 }
 
-void deact	PARAMS( (void) );
+void deact(void);
 
 void deact()
 {
@@ -316,7 +316,7 @@ void deact()
 
 /* -------------------- ^^ Dummy for now ^^ -------------------- */
 
-fp int_round	PARAMS( (fp) );
+fp int_round(fp);
 
 	/* -- Round double to nearest longint -- */
 fp int_round(num)
