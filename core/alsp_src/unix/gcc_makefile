@@ -1,5 +1,11 @@
-# For the moment, generate 32-bit code. ALS Prolog is not yet 64-bit compatible.
-CC=gcc -m32
+CC=gcc
+
+# Disable Position-Independent-Executable linking to avoid ASLR,
+# because GCC-based threading requires fixed addresses for instruction dispatch.
+GCCVERSION=$(shell gcc -dumpversion)
+ifeq ($(shell expr $(GCCVERSION) \>= 5), 1)
+LDFLAGS=-no-pie
+endif
 
 # Unused warning options and why:
 
@@ -17,5 +23,5 @@ CC=gcc -m32
 
 # -Wno-unused-result -Wno-unused-but-set-variable - Fix someday.
 
-CFLAGS += -MMD -Wall -Wextra \
+CFLAGS += -fPIC -MMD -Wall -Wextra \
 -Wno-unused-parameter

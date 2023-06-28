@@ -20,7 +20,8 @@ get_command_line_info(DefaultShellCall,CommandLine,ResidualCommandLine,Mod,CLInf
 	pbi_get_command_line(RawCommandLine),
 
 	%% get the command line, but ignore the image name
-	(RawCommandLine = [Image | CommandLine] ; CommandLine = []),
+	(RawCommandLine = [ImageName | CommandLine] ; CommandLine = []),
+ 	arg(4,CLInfo,ImageName),
 	!,
 	ss_parse_command_line(CommandLine, ResidualCommandLine, Mod, CLInfo).
 
@@ -213,7 +214,7 @@ output_system_banner(CLInfo)
 	arg(2,CLInfo,ConsultNoise),
 	OutputStream = user_output,
 	als_system(SysList),
-	(ConsultNoise = true -> 
+	(ConsultNoise = true ->  % be quiet
 		true ; 
 		print_banner(OutputStream,SysList)
 	).
@@ -271,26 +272,54 @@ ss_cl_assert1(AX, Mod)
 
 show_help
 	:-
+not(alsdev_running),
+!,
 	write('    Help for alspro'),nl,
+	write('    ==============='),nl,
 	write('    alspro [options] [source [sources]]'),nl,
-	write('    [source:: <path/to/file>filename.ext]'),nl,
-	write('    [options]'),nl,
-	write('    -s <path>   Adds <path(/to/dir) to system search dirs'),nl,
-	write('    -g<goal>    <goal> an arbitrary prolog goal (no :-,?-)'),nl,
-	write('                Runs <goal> after startup') ,nl,
+	write('        [source:: <path/to/file>filename.ext]'),nl,
+	write('    [options::]'),nl,
+	write('    Prolog expressions and goals may need to be quoted (with OS '),nl,
+	write('        shell quotes) to avoid interpretation by the OS shell'),nl,
+	write('    -s <path>   Adds <path(/to/dir)> to system search dirs.'),nl,
+	write('    -g <goal>   <goal> is an arbitrary prolog goal (no :-,?-);'),nl,
+	write('                    Causes alspro to run <goal> after startup.') ,nl,
 	write('    -b          Prevents default shell from running, after'),nl,
-	write('                executing -g<goal> if present') ,nl,
-	write('    -q          Suppress all standard system loading messages'),nl,
-	write('    -v          Causes all standard system loading messages to be printed'),nl,
-	write('    -gic        Generate all *.obp files in current working dir'),nl,
-	write('    -gis        Generate *.obp files in same dir as source'),nl,
-	write('    -giac       Generate *.obp files in named subdir of current working dir'),nl,
-	write('    -gias       Generate *.obp files in named subdir of source dir'),nl,
-	write('    -a,-A<goal> <goal> an arbitrary prolog goal; causes <goal> to be asserted'),nl,
-	write('    -heap num   Sets heap to num * 1024 bytes'),nl,
-	write('    -stack num  Sets stack to num * 1024 bytes'),nl,
+	write('                    executing -g <goal> if present.') ,nl,
+	write('    -q          Suppress all standard system loading messages.'),nl,
+	write('    -v          Causes all standard system loading messages to be printed.'),nl,
+	write('    -a,-A <goal> <goal> an arbitrary prolog goal (incl. an atom); '),nl,
+	write('                    causes <goal> to be asserted;'),nl,
+	write('                    <goal> may also be: ''(<g1>,<g2>,...)'' '),nl,
+	write('                    -- all of the <gi> are asserted.'),nl,
+	write('    -heap num   For large num, sets initial heap size to num Kilobytes; '),nl,
+	write('                    For small num, sets the initial heap to the base value '),nl,
+	write('                    of heap incremented by num Kilobytes.  Cf. statistics/0.'),nl,
+	write('    -stack num  Sets stack size to num Kilobytes. Cf. statistics/0.'),nl,
+	write('    '),nl,
+	write('        Below note that consulting <path><file>.pro suppresses creation '),nl,
+	write('        of <file>.obp, while consulting <path><file> without ''.pro'' '),nl,
+	write('        requests creation of <file>.obp.'),nl,
+	write('    -obp        Generate all *.obp files in current working dir.'),nl,
+	write('    -gic        Generate all *.obp files in current working dir.'),nl,
+	write('    -gis        Generate *.obp files in same dir as source.'),nl,
+	write('    -giac       Generate *.obp files in subdir of current working dir '),nl,
+	write('                    named for architecture (e.g., darwin,win32).'),nl,
+	write('    -gias       Generate *.obp files in subdir of source dir named for '),nl,
+	write('                    architecture (e.g., darwin,win32).'),nl,
+	write('    -no_obp     Do not generate *.obp files.'),nl,
+	write('    -no_dot_alspro Do not load .alspro or alspro.pro.'),nl,
+	write('    -p          Start application portion of command line (left to right).'),nl,
+	write('    -P          Start application portion of command line (left to right), '),nl,
+	write('                    pushing on the image name to command_line/1.'),nl,
+	write('    -nwd        Debugger should only use system console for display (This '),nl,
+	write('                    is Only meaningful for alsdev).'),nl,
+	write('    -shell <shell> Use non-default <shell>(Only known one is alsdev).'),nl,
+	write('    -h          Print help info (this display).'),nl,
+	write('    See also Wiki Section 13.7 and the alspro man page.'),nl,
 	nl,nl,
 	halt.
+show_help.
 
 
 	%%%%%%%
@@ -307,19 +336,17 @@ setup_init_goal(CLInfo, ShellCall)
 			(CmdLineGoal, CLShellCall)
 	).
 
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%% General library setup (called when shell
-	%% starts up; blt_lib.pro is (to be) no 
-	%% longer loaded as part of builtins:
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% General library setup (called when shell starts up)
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 library_setup(CLInfo)
 	:-
 	arg(2,CLInfo,ConsultNoise),
 	OutputStream = user_output,
-	(ConsultNoise = true -> true ;
+	(ConsultNoise = true -> true ; % be quiet
 		als_advise(OutputStream, 'Setting up library indicies...may take a moment...',[])),
 	setup_libraries,
 	(ConsultNoise = true -> true ; 

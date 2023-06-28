@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1308834B1FFC6619006C260E /* linenoise.c in Sources */ = {isa = PBXBuildFile; fileRef = 1308834A1FFC6619006C260E /* linenoise.c */; };
+		134894C120BE302F00CAB728 /* bcurl.c in Sources */ = {isa = PBXBuildFile; fileRef = 134894C020BE302F00CAB728 /* bcurl.c */; };
 		13F1CB9A10569E1A005DEDB9 /* alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CADE10569E1A005DEDB9 /* alloc.c */; };
 		13F1CBA110569E1A005DEDB9 /* arith.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAEC10569E1A005DEDB9 /* arith.c */; };
 		13F1CBA210569E1A005DEDB9 /* bcinter.c in Sources */ = {isa = PBXBuildFile; fileRef = 13F1CAED10569E1A005DEDB9 /* bcinter.c */; };
@@ -89,6 +90,7 @@
 /* Begin PBXFileReference section */
 		130883491FFC6619006C260E /* linenoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linenoise.h; sourceTree = "<group>"; };
 		1308834A1FFC6619006C260E /* linenoise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = linenoise.c; sourceTree = "<group>"; };
+		134894C020BE302F00CAB728 /* bcurl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bcurl.c; sourceTree = "<group>"; };
 		13F1CADE10569E1A005DEDB9 /* alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alloc.c; sourceTree = "<group>"; };
 		13F1CAE010569E1A005DEDB9 /* alloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alloc.h; sourceTree = "<group>"; };
 		13F1CAE110569E1A005DEDB9 /* alsmem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alsmem.h; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 				13F1CAEA10569E1A005DEDB9 /* alstypes.h */,
 				13F1CAEC10569E1A005DEDB9 /* arith.c */,
 				13F1CAED10569E1A005DEDB9 /* bcinter.c */,
+				134894C020BE302F00CAB728 /* bcurl.c */,
 				13F1CAEE10569E1A005DEDB9 /* bdb.c */,
 				13F1CAEF10569E1A005DEDB9 /* bdbg.c */,
 				13F1CAF010569E1A005DEDB9 /* bgv.c */,
@@ -604,6 +607,7 @@
 				13F1CBC410569E1A005DEDB9 /* fsvms.c in Sources */,
 				13F1CBC510569E1A005DEDB9 /* fswin32.c in Sources */,
 				13F1CBC610569E1A005DEDB9 /* gc.c in Sources */,
+				134894C120BE302F00CAB728 /* bcurl.c in Sources */,
 				13F1CBCD10569E1A005DEDB9 /* gv.c in Sources */,
 				13F1CBCE10569E1A005DEDB9 /* index.c in Sources */,
 				13F1CBD210569E1A005DEDB9 /* lexan.c in Sources */,
@@ -661,6 +665,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lcurl";
 				PRODUCT_NAME = alspro_b;
 			};
 			name = Debug;
@@ -672,6 +677,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lcurl";
 				PRODUCT_NAME = alspro_b;
 			};
 			name = Release;

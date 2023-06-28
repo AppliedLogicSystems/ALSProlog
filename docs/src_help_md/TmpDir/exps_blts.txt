@@ -1,0 +1,768 @@
+bix_file='blt_als.pro'
+export list_asm/1.
+
+bix_file='blt_atom.pro'
+export atom_concat/3.
+export sub_atom/4.
+export sub_atom/5.
+export number_chars/2.
+export number_codes/2.
+export term_chars/2.
+export term_codes/2.
+
+bix_file='blt_brk.pro'
+
+
+bix_file='blt_cslt.pro'
+export multifile/1.
+export discontiguous/1.
+export include/1.
+export ensure_loaded/1.
+export consult/1.
+export reconsult/1.
+export consult/2.
+export path_to_try_from_desc/3.
+export path_to_try/3.
+export simple_load/2.
+export simple_load3/4.
+export load_file_source/9.
+export load_source0/6.
+export load_slib/1.
+
+bix_file='blt_ctl.pro'
+export once/1.
+export findall/3.
+export setof/3.
+export bagof/3.
+export copy_term/2.
+export quantifier_type/1.
+export set_quantifier_type/1.
+export get_vars/3.
+export keysort/2.
+export repeat/0.
+
+bix_file='blt_curl.pro'
+export http/3.
+export uppercase_unwind/2.
+export uc_unw/2.
+export delete_from/4.
+export grab_as_atom/2.
+export write_lines_to_string/2.
+export do_curl/1.
+export curl/1.
+export curl/2.
+export curl/3.
+
+bix_file='blt_db.pro'
+export abolish_module/1.
+export assert_each/2.
+export create_new_module/1.
+export doexport/1.
+export export_from/2.
+export_from(Mod, PredAs)
+export douse/1.
+export use_by_mod/2.
+export hash_create/1.
+export hash_insert/3.
+export hash_insert_multi/3.
+export hash_elements/3.
+export hash_lookup/3.
+export hash_delete/3.
+export hash_delete_multi/3.
+export hash_delete_pattern/3.
+export make_hash_framework/3.
+
+bix_file='blt_dvsh.pro'
+export halt/0.
+export start_alsdev/0.
+export disp_ide/0.
+export disp_dbg_mgr/0.
+export disp_src_mgr/1.
+export alsdev/0.
+export alsdev/1.
+export listener_prompt/0.
+export change_heartbeat/1.
+export change_ide_stream_depth/1.
+export change_ide_depth_type/1.
+export topals_settings_info/1.
+export set_topals_settings_info/1.
+export debug_settings_info/1.
+export set_debug_settings_info/1.
+export v_showGoalToUserWin/6.
+export debug_dump/1.
+export reset_all_spypoints/0.
+export col2/1.
+export access_dbstr/3.
+export set_dbstr/3.
+export make_dbstr/1.
+export make_dbstr/2.
+export xmake_dbstr/2.
+export ide_rt_err_report/2.
+export ide_prolog_system_error/2.
+export ide_prolog_system_warning/2.
+export als_advise/1.
+export als_advise/2.
+export als_advise/3.
+export showsm/1.
+export showsms/0.
+
+bix_file='blt_evt.pro'
+export set_event_handler/2.
+export propagate_event/3.
+export trigger_event/2.
+export break_on/3, break_off/3.
+export type_error/3.
+export instantiation_error/1.
+export domain_error/3.
+export existence_error/3.
+export permission_error/4.
+export resource_error/2.
+export system_error/1.
+export atom_ok/1.
+export var_or_atom_ok/1.
+export integer_ok/1.
+export var_or_integer_ok/1.
+export var_or_nonneg_integer_ok/1.
+export var_ok/1.
+export nonvar_ok/1.
+export var_or_number_ok/1.
+export number_ok/1.
+export char_list_ok/1.
+export code_list_ok/1.
+
+bix_file='blt_flgs.pro'
+export current_prolog_flag/2.
+export set_prolog_flag/2.
+export changable_flags_info/1.
+export static_flags_info/1.
+
+bix_file='blt_frez.pro'
+export freeze/3.
+export freeze_list_ground/3.
+export show_v_list/1.
+export show_v_list/2.
+export show_variable/2.
+export show_variable/1.
+export exhibit_var/1.
+export exhibit_var/2.
+export show_delay_binding/4.
+
+bix_file='blt_io.pro'
+export printf/1.
+export printf/2.
+export printf/3.
+export printf_opt/3.
+export printf/4.
+export sprintf/3.
+export sprintf/4.
+export bufwrite/2.
+export bufwriteq/2.
+export old_bufread/2.
+export bufread/2.
+export bufread/3.
+export atomread/2.
+export atomread/3.
+export varsubst/4.
+
+bix_file='blt_is.pro'
+export is/2.
+export '<'/2, '>'/2, '=<'/2, '>='/2, '=:='/2, '=\='/2.
+export extend_is/3.
+export unextend_is/3.
+
+bix_file='blt_misc.pro'
+export setup_cmd_line/0.
+
+bix_file='blt_msg.pro'
+export prolog_system_error/2.
+export prolog_system_warning/2.
+export expand_code/3.
+export prolog_system_error/3.
+export prolog_system_error/4.
+export prolog_system_warning/3.
+export prolog_system_warning/4.
+export als_advise/1.
+export als_advise/2.
+export als_advise/3.
+export decode_error/4.
+
+bix_file='blt_pckg.pro'
+export save_image/2.
+export save_image/1.
+export get_app_cmd_line/4.
+export pckg_init/0.
+export attach_image/2.
+export attach_image/1.
+export package/1.
+export package/2.
+export dugv/0.
+
+bix_file='blt_shl.pro'
+export init_prolog_shell/6.
+export als_exec/2.
+export shell_read_execute/4.
+export do_shell_query2/2.
+export abort/0.
+
+bix_file='blt_shlc.pro'
+export setup_libraries/0.
+export setup_lib/1.
+export als_advise/1.
+export als_advise/2.
+export als_advise/3.
+export get_examples_dir/1.
+export get_examples_write_dir/1.
+
+bix_file='blt_shlr.pro'
+
+
+bix_file='blt_std.pro'
+export dcg_phrase/3.
+export listing/0.
+export listing/1.
+export listing/2.
+export listing_to/1.
+export dblisting/1.
+export dblisting/0.
+export db_dump/1.
+export statistics/2.
+export instance/2.
+export '$getenv'/2.
+
+bix_file='blt_stk.pro'
+export stack_overflow/0.
+export stack_overflow/1.
+
+bix_file='blt_sys.pro'
+export setCall/1.
+export getCall/1.
+export setDepth/1.
+export getDepth/1.
+export setRetry/1.
+export getRetry/1.
+export getDebugInterrupt/1.
+export setDebugInterrupt/1.
+export halt/0.
+export corrected_sys_searchdir/1.
+export modules/2.
+export sys_modules/1.
+export non_sys_modules/1.
+export module_preds/2.
+export module_preds/3.
+export procedures/4.
+export all_procedures/3.
+export all_procedures/4.
+export all_ntbl_entries/4.
+export clauses/4.
+export exec_to/3.
+export vi/0.
+export vi/1.
+export edit/0.
+export edit/1.
+export editorchange/1.
+export ls/0.
+export ls/1.
+export cd/0.
+export cd/1.
+export dir/0.
+export dir/1.
+export os/0.
+export statistics/0.
+export display_stats/1.
+export heap_status/1.
+export force_libload_all/0.
+export force_libload_all/1.
+export force_libload_all/2.
+export force_libload_all_lib/2.
+export libactivate/4.
+export dbg_notrace/0.
+export notrace/0.
+export toggle_system_debug/1.
+
+bix_file='blt_term.pro'
+export append/3.
+export member/2.
+export reverse/2.
+export dreverse/2.
+export length/2.
+export list_delete/3.
+export @< /2.
+export @> /2.
+export @=< /2.
+export @>= /2.
+export '=='/2.
+export '\=='/2.
+export \= /2.
+export recorda/3, recordz/3, recorded/3.
+export sort/2.
+export '=..'/2.
+export asplit0/4.
+export asplit0_all/3.
+export all_to_atoms/2.
+
+bix_file='builtins.pro'
+export als_system/1.
+export command_line/1.
+export compiletime/0.
+export at_load_time/0.
+export module_closure/2.
+export module_closure/3.
+export auto_use/1.
+export newmodule/1.
+export endmodule/0.
+export exportpred/2.
+exportpred(P,A) :- '$icode'(-11,P,A,0,0).
+export setPrologInterrupt/1.
+export getPrologInterrupt/1.
+export catch/3.
+export throw/1.
+export dmember/2, dappend/3.
+export sys_env/3.
+export xform_command_or_query/2.
+export exists_file/1.
+export exists/1.
+
+bix_file='comp_d10.pro'
+export mode/1, public/1, multifile/1.
+export numbervars/3.
+export memberchk/2.
+
+bix_file='cutils.pro'
+export c_const/2.
+export c_rconst/2.
+export c_alloc/2.
+export c_alloc_abs/2.
+export c_allocn/3.
+export c_allocn_abs/3.
+export c_free/1.
+export c_free_abs/1.
+export c_set/3.
+export c_set_str/4.
+export c_set_raw/4.
+export c_setn/4.
+export c_examine/3.
+export c_examine_str/4.
+export c_examine_raw/4.
+export c_examinen/4.
+export c_create/3.
+export c_create_abs/3.
+export c_createn/4.
+export c_createn_abs/4.
+export c_create_arglist/2.
+export c_create_arglist/3.
+export c_free_arglist/1.
+export c_call/3.
+export cstr2uia/2.
+export pstr2uia/2.
+export cstr2str/2.
+export pstr2str/2.
+export cstr2pstr/1.
+export pstr2cstr/1.
+export c_bind_callback/3.
+export c_unbind_callback/3.
+export read_eval_results/2.
+export eval_results/2.
+
+bix_file='db_srctr.pro'
+export access_dbstr/3.
+export set_dbstr/3.
+export make_dbstr/1.
+export make_dbstr/2.
+export xmake_dbstr/2.
+
+bix_file='dbg_class.pro'
+
+
+bix_file='dcgs.pro'
+export dcg_expand/2.
+
+bix_file='debugger.pro'
+export trace/0.
+export trace/1.
+export trace/2.
+export noshow/2.
+export toggle_mod_show/1.
+export leash/1.
+export 'spy'/0.
+export 'spy'/1.
+export 'spy'/2.
+export 'spy_pat'/3.
+export spyWhen/1.
+export spyWhen/2.
+export nospy/3.
+export suppress_spying/0.
+export nospy/0.
+export spying/0.
+export nospy/1.
+export debugging/0.
+export list_spypoints/0.
+export setup_debug/2.
+export setup_debug/3.
+export toggle_debug_io/0.
+export set_debug_io/1.
+export debugger_abort/0.
+export '$dbg_apg'/3.
+export '$dbg_aph'/3.
+export '$dbg_apge'/3.
+export '$dbg_aphe'/3.
+export '$dbg_apf'/3.
+
+bix_file='filepath.pro'
+export file_extension/3.
+export path_elements/2.
+export path_directory_tail/3.
+export is_absolute_path/1.
+export path_type/2.
+export path_type/3.
+export split_path/2.
+export split_path/3.
+export join_path/2.
+export join_path/3.
+export tilda_expand/2.
+export directory_self/1.
+export directory_self/2.
+export parent_path/1.
+export parent_path/2.
+export pathPlusFile/3.
+export pathPlusFilesList/3.
+export make_change_cwd/1.
+
+bix_file='fs_cmn.pro'
+export date/1.
+export time/1.
+export datetime/2.
+export gm_datetime/2.
+export date_less/2.
+export date_pattern/4.
+export set_date_pattern/1.
+export valid_date/1.
+export valid_date/3.
+export time_less/2.
+export datetime_less/2.
+export canon_path/2.
+export get_cwd/1.
+export change_cwd/1.
+export remove_file/1.
+export filename_equal/2.
+export getDirEntries/3.
+export must_exist_file/1.
+
+bix_file='fsdos.pro'
+export date/1.
+export time/1.
+export make_subdir/1.
+export remove_subdir/1.
+export file_status/2.
+export files/2.
+export files/3.
+export subdirs/1.
+export subdirs_red/1.
+export collect_files/3.
+export directory/3.
+export get_current_drive/1.
+export change_current_drive/1.
+
+bix_file='fsmac.pro'
+export make_subdir/1.
+export make_subdir/2.
+export remove_subdir/1.
+export file_status/2.
+export files/2.
+export files/3.
+export subdirs/1.
+export subdirs_red/1.
+export directory/3.
+export get_current_drive/1.
+export change_current_drive/1.
+export disj_to_string/2.
+
+bix_file='fsunix.pro'
+export make_subdir/1.
+export make_subdir/2.
+export remove_subdir/1.
+export kill_subdir/1.
+export file_status/2.
+export files/2.
+export files/3.
+export subdirs/1.
+export subdirs_red/1.
+export directory/3.
+export get_current_drive/1.
+export change_current_drive/1.
+export move_file/2.
+export disj_to_string/2.
+
+bix_file='fswin32.pro'
+export make_subdir/1.
+export make_subdir/2.
+export remove_subdir/1.
+export file_status/2.
+export files/2.
+export files/3.
+export subdirs/1.
+export subdirs_red/1.
+export directory/3.
+export get_current_drive/1.
+export change_current_drive/1.
+export move_file/2.
+export disj_to_string/2.
+
+bix_file='math88k.pro'
+export make_rvector/2.
+export vr_arg/3.
+export vr_arg_first/3.
+export vr_arg_last/3.
+export vr_length/2.
+export vr_mag/2.
+export make_cvector/2.
+export vc_arg/3.
+export vc_arg_first/3.
+export vc_arg_last/3.
+export vc_length/2.
+export vc_mag2/2.
+export vc_mag/2.
+export vr_split/3.
+export vc_split/3.
+export lsplit/3.
+
+bix_file='module.pro'
+
+
+bix_file='objects.pro'
+export defineClass/2.
+export defineClass/3.
+
+bix_file='objs_run.pro'
+export get_object_handle/2.
+export set_object_handle/2.
+export object_handle/2.
+export send_self/2.
+export send_all/2.
+export send_each/2.
+export send_parent/2.
+export accessObjStruct/3.
+export setObjStruct/3.
+export all_setObjStruct/2.
+export (:=) / 2.
+export genericObjects/2.
+export set_all_args/4.
+
+bix_file='projects.pro'
+export launch_project/1.
+export build_project/0.
+export build_project/0.
+export choose_mult_files/3.
+export new_cref/0.
+export open_cref/0.
+
+bix_file='shlclass.pro'
+
+
+bix_file='simplio.pro'
+export query_user/3.
+export query_user/4.
+export query_user/5.
+export query_user/6.
+export simple_menu/3.
+export simple_menu/5.
+export output_prolog_list/1.
+export output_prolog_list/6.
+export output_prolog_list/7.
+export nth/3.
+export position/3.
+export position/4.
+export dca/2.
+export encode_list/3.
+
+bix_file='sio.pro'
+export stream_buffer/2.
+export stream_open_status/2.
+export stream_type/2.
+export stream_name/2.
+export stream_mode/2.
+export stream_repositionability/2.
+export stream_identifier/2.
+export stream_extra/2.
+export stream_addl1/2.
+export stream_addl2/2.
+export stream_addl3/2.
+export stream_pgoals/2.
+export stream_syntax_errors/2.
+export stream_wt_opts/2.
+export stream_wt_line_length/2.
+export stream_wt_maxdepth/2.
+export stream_wt_depth_computation/2.
+export stream_token_list/2.
+export stream_snr_action/2.
+export stream_stype/2.
+export stream_eof_action/2.
+export stream_blocking/2.
+export set_stream_buffer/2.
+export set_stream_open_status/2.
+export set_stream_type/2.
+export set_stream_name/2.
+export set_stream_mode/2.
+export set_stream_repositionability/2.
+export set_stream_identifier/2.
+export set_stream_extra/2.
+export set_stream_addl1/2.
+export set_stream_addl2/2.
+export set_stream_addl3/2.
+export set_stream_pgoals/2.
+export set_stream_syntax_errors/2.
+export set_stream_wt_opts/2.
+export set_stream_wt_line_length/2.
+export set_stream_wt_maxdepth/2.
+export set_stream_wt_depth_computation/2.
+export set_stream_token_list/2.
+export set_stream_snr_action/2.
+export set_stream_stype/2.
+export set_stream_eof_action/2.
+export set_stream_blocking/2.
+export is_stream/2.
+export stream_or_alias_ok/2.
+export assign_alias/2.
+export cancel_alias/1.
+export current_alias/2.
+export current_input/1.
+export current_output/1.
+export set_input/1.
+export set_output/1.
+export open/3.
+export open/4.
+export nsocket/4.
+export nsocket_connect/3.
+export nsocket_bind/2.
+export nsocket_listen/2.
+export nsocket_accept/3.
+export nsocket_close/1.
+export nsocket_select/7.
+export nsocketpair/2.
+export gethostbyname/2.
+export gethostbyaddr/2.
+export socket_stream_info/5.
+export is_server_socket/1.
+export accept_socket_connection/1.
+export accept_socket_connection/2.
+export poll/2.
+export simple_select/2.
+export fork/1.
+export rexec/2.
+export data_ready/1.
+export create_wait_var_name/2.
+export associated_output_alias/2.
+export set_associated_output_alias/2.
+export close/1.
+export close/2.
+export close_down_streams/1.
+export close_down_nonsystem_streams/0.
+export close_down_nonsystem_streams/0.
+export get_code/1.
+export get_code/2.
+export get_code/3.
+export get_char/1.
+export get_char/2.
+export peek_code/1.
+export peek_code/2.
+export peek_char/1.
+export peek_char/2.
+export get_atomic_nonblank_char/1.
+export get_atomic_nonblank_char/2.
+export push_prompt/1.
+export add_to_stream_buffer/2.
+export put_char/1.
+export put_char/2.
+export put_code/1.
+export put_code/2.
+export put_string/1.
+export put_string/2.
+export put_atom/1.
+export put_atom/2.
+export put_number/3.
+export flush_input/1.
+export flush_output/0.
+export flush_output/1.
+export at_end_of_stream/0.
+export at_end_of_stream/1.
+export at_end_of_line/0.
+export at_end_of_line/1.
+export skip_line/0.
+export skip_line/1.
+export nl/0.
+export nl/1.
+export set_stream_position/2.
+export stream_position/2.
+export stream_position/3.
+export get_token_list/2.
+export get_number/3.
+export get_line/1.
+export get_line/2.
+export put_line/1.
+export put_line/2.
+export get_maxdepth/2.
+export set_maxdepth/2.
+export get_line_length/2.
+export set_line_length/2.
+export get_depth_computation/2.
+export set_depth_computation/2.
+export stream_property/2.
+export sio_pckg_init/0.
+
+bix_file='sio_d10.pro'
+export see/1.
+export seeing/1.
+export seen/0.
+export tell/1.
+export telling/1.
+export told/0.
+export get0/1.
+export get0/2.
+export get/1.
+export get/2.
+export skip/1, skip/2.
+export put/1.
+export put/2.
+export tab/1.
+export ttyflush/0.
+export display/1.
+
+bix_file='sio_rt.pro'
+export read/1.
+export read_term/2.
+export read/2.
+export read_term/3.
+export op/3.
+export current_op/3.
+export pp_flatten/2.
+export pp_xform_clause/3.
+export tp_get_token_list/2.
+
+bix_file='sio_wt.pro'
+export write_term/2.
+export write_term/3.
+export write/1.
+export write/2.
+export writeq/1.
+export writeq/2.
+export write_canonical/1.
+export write_canonical/2.
+export print/1.
+export print/2.
+export tab/2.
+export set_eps_show/1.
+export show_substs_ext/3.
+
+bix_file='tc_base.pro'
+export do_type_comp/3.
+export do_type_comp/5.
+export do_type_comp/8.
+
+bix_file='xconsult.pro'
+export xconsult/2.
+export source_level_debugging/1.
+export change_source_level_debugging/1.
+export change_source_level_debugging/2.
+export xxconsult/5.
+export xconsult/2.
+export xconsult/3.
+

@@ -280,14 +280,14 @@
 #endif
 
 /* compile.c */
-extern	int	compile_clause	PARAMS(( pword, int ));
-extern	void	gccallinfo	PARAMS(( void ));
-extern	int	index_of	PARAMS(( int ));
-extern	int	disp_of		PARAMS(( int ));
-extern	int	find_temp	PARAMS(( void ));
+extern	int	compile_clause	( pword, int );
+extern	void	gccallinfo	( void );
+extern	int	index_of	( int );
+extern	int	disp_of		( int );
+extern	int	find_temp	( void );
 #ifdef NewMath
-extern	void	comp_math_struct PARAMS(( pword ));
+extern	void	comp_math_struct ( pword );
 #endif
 
 /* compmath.c */
-extern	void	comp_math	PARAMS(( pword, int, long, long ));
+extern	void	comp_math	( pword, int, long, long );

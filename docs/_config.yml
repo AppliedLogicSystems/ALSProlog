@@ -1,0 +1,63 @@
+# Site settings
+title: ALS Prolog
+url: https://alsprolog.com
+description: ALS Prolog Compiler & Development Environment
+author: Applied Logic Systems, Inc.
+email: support@applied-logic-systems.com
+logo: /apple-touch-icon.png
+
+# Analytics for production (Piwik/Matomo substituting for GA)
+google_analytics: 6
+
+# Build settings
+theme: minima
+
+markdown: kramdown
+
+kramdown:
+  syntax_highlighter_opts:
+    default_lang: prolog
+
+# Enable as many error-checks as possible
+safe                : true
+strict_front_matter : true
+liquid:
+  error_mode        : strict
+  strict_filters    : true
+  strict_variables  : false
+
+exclude:
+  - AboutDocs.txt
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - GNUmakefile
+  - src_help_md
+
+header_pages:
+  - docs/index.md
+  - about.md
+
+ref_packages:
+  - Core Prolog
+  - ALS Library
+  - C Interface
+  - ALSDev
+
+defaults:
+  -
+    scope:
+      path: "docs/ref"
+      type: "pages"
+    values:
+      reference: true
+      package: Core Prolog
+      group: Control
+      module: builtins
+      layout: "reference-page"
+  -
+    scope:
+      path: "docs/guide"
+      type: "pages"
+    values:
+      layout: "guide-page"

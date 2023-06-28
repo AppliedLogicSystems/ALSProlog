@@ -55,13 +55,13 @@ struct am_header {
 	/* Integrity information to make sure saved state matches image */
 
 	long **integ_als_mem;		/* address of als_mem variable */
-	int (*integ_als_mem_init) PARAMS((CONST char *, long));
+	int (*integ_als_mem_init) (const char *, long);
 					/* address of als_mem_init */
-	int (*integ_w_unify) PARAMS(( PWord, int, PWord, int ));
+	int (*integ_w_unify) ( PWord, int, PWord, int );
 					/* address of w_unify */
-	char integ_version_num[12];	/* version number information */
-	char integ_processor[12];	/* name of processor */
-	char integ_minor_os[12];	/* OS name */
+	char integ_version_num[128];	/* version number information */
+	char integ_processor[128];	/* name of processor */
+	char integ_minor_os[128];	/* OS name */
 
 	/* the block information */
 	struct {

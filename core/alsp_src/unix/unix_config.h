@@ -20,10 +20,6 @@
 #define HAVE_SOCKET	2
 #define HAVE_SRAND	2
 #define HAVE_SRAND48	2
-#define HAVE_STRCSPN	2
-#define HAVE_STRDUP	2
-#define HAVE_STRSPN	2
-#define HAVE_STRTOK	2
 #define HAVE_ST_BLKSIZE	2
 #define HAVE_ST_BLOCKS	2
 #define HAVE_ST_RDEV	2

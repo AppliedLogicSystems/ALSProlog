@@ -126,10 +126,10 @@ proc vTclWindow.dyn_flags {base} {
 	frame $base.buttons \
 		-borderwidth 1 -relief raised 
     button $base.buttons.dismiss \
-		-padx 2 -text Dismiss \
+		-padx 11 -text Dismiss \
         -command {wm withdraw .dyn_flags}
-    button $base.
-		-padx 2 -text {Save as Defaults} \
+    button $base.buttons.save \
+		-padx 11 -text {Save as Defaults} \
         -command {prolog call alsdev save_prolog_flags ; wm withdraw .dyn_flags}
 
     ###################
@@ -139,49 +139,18 @@ proc vTclWindow.dyn_flags {base} {
     pack $base.buttons \
         -anchor center -expand 0 -fill x -side bottom 
     pack $base.buttons.dismiss \
-        -anchor center -expand 0 -fill none -padx 2 -side left 
+        -anchor center -expand 0 -fill none -padx 11 -side left 
     pack $base.buttons.save \
-        -anchor center -expand 0 -fill none -padx 2 -side right 
+        -anchor center -expand 0 -fill none -padx 11 -side right 
 
 	prolog call builtins changable_flags_info -var InfoList
+# Find in alsdev.tcl:
 	foreach info $InfoList {
 		create_dyn_flag_entry $info
 	}
 	
 	# Make window visible
 	wm deiconify $base
-}
-
-proc create_dyn_flag_entry { info } {
-	global array proenv
-
-	set FlagName [lindex $info 0]
-	set PosVals [lindex $info 1]
-	set CurVal [lindex $info 2]
-
-	set ff [frame .dyn_flags.$FlagName -borderwidth 1 -relief sunken]
-	label $ff.label -borderwidth 0 \
-        -relief flat -width 18 -justify right \
-        -text $FlagName
-
-	set Cmd [concat tk_optionMenu "$ff.opts_menu" proenv($FlagName) $PosVals]
-	set proenv($FlagName) $CurVal  
-	set MM [eval $Cmd]
-
-	pack $ff  \
-        -anchor center -expand 0 -fill x -side top 
-	pack $ff.label  \
-        -anchor center -expand 0 -fill none -side left 
-	pack $ff.opts_menu  \
-        -anchor center -expand 0 -fill x -side left 
-
-	set Last [$MM index end]
-	for {set ii 0} {$ii <= $Last} {incr ii} {
-		set Cmd [list prolog call builtins \
-			set_prolog_flag -atom $FlagName -atom [lindex $PosVals $ii] ]
-		$MM entryconfigure $ii -command $Cmd
-	}
-
 }
 
 proc change_prolog_flags {} {
@@ -871,7 +840,7 @@ proc toggle_files_list {Win Which} {
 	global array proenv 
 
 	if {$proenv($Which) == "closed"} then {
-$Win.ctl_$Which.entry configure -state normal
+#$Win.ctl_$Which.entry configure -state normal
     	$Win.ctl_$Which.open_btn configure -image open_ptr
 		set proenv($Which) open
     	pack $Win.$Which  \
@@ -888,7 +857,7 @@ $Win.ctl_$Which.entry configure -state normal
 		append GG $Wd x $Ht + $XX + $YY
 		wm geometry $Win $GG
 	} else {
-$Win.ctl_$Which.entry configure -state disabled
+#$Win.ctl_$Which.entry configure -state disabled
     	$Win.ctl_$Which.open_btn configure -image closed_ptr
 		set proenv($Which) closed
     	pack forget $Win.$Which 
@@ -1069,7 +1038,8 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
     wm resizable $base 1 1
     wm deiconify $base
     wm title $base "Additional Project Information"
-    wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
+#    wm protocol $base WM_DELETE_WINDOW "wm iconify $base"
+    wm protocol $base WM_DELETE_WINDOW "addl_project_info_close $base"
 
     label $base.title_label \
         -borderwidth 1 -text {Project Title:} 
@@ -1223,6 +1193,14 @@ proc addl_project_info_win {base proj_title parent_base TextSlots SlotNames Addl
 	# Init document field
     set proenv($base,dirty) false
 
+}
+
+proc addl_project_info_close {w} {
+	global array proenv
+puts "addl_project_info_close: NEED TO ENSURE DATA CHANGES are captured into the project"
+
+
+	 wm withdraw $w
 }
 
 proc vTclWindow.ide_settings {base} {

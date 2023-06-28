@@ -15,7 +15,7 @@
  *=====================================================================*/
 #include "defs.h"
 
-static	void	hc	PARAMS(( PWord *, int *, pword ));
+static	void	hc	( PWord *, int *, pword );
 
 /*
  * heap_copy copies structure returned by the parser to the heap

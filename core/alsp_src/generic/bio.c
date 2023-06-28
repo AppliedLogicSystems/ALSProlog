@@ -65,7 +65,7 @@ pbi_save_state_to_file()		/* save_state_to_file */
 }
 #endif /* !defined(KERNAL) && !defined(PURE_ANSI) */
 
-static	int	pload_file	PARAMS(( UCHAR *, int ));
+static	int	pload_file	( UCHAR *, int );
 
 static int
 pload_file(name, reconbit)

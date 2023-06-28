@@ -251,21 +251,6 @@ fileTypeToAttr(volid,      8).
 fileTypeToAttr(directory, 16).
 fileTypeToAttr(archive,   32).
 
-/*!----------------------------------------------------------------
- |	file_size/2
- |	file_size(FileName,Size)
- |	file_size(+,-)
- |
- |	- returns the size of a file
- |
- |	If File is an atom (possibly quoted) which is the name of a
- |	file in the current working directory, Size is the size of
- |	that file in bytes.
- *!----------------------------------------------------------------*/
-file_size(_,0)
-	:-
-	prolog_system_error(nyi, ['file_size/2',dos_djgpp]).
-
 /*---------------------------------------------------------------------
  |	Determine current disk drive. Drive = constant (1=A, 2=B, etc).
  *---------------------------------------------------------------------*/

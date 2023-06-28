@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<STYLE>
+.eentry {
+margin-top:0px;
+margin-bottom:0px;
+margin-left:0.6em;
+}
+.hentry {
+font-size:1.1em;font-weight:bold;margin-left:1em;margin-top:0em;
+}
+.astyl { text-decoration: none; }
+ul {
+list-style-type: none;
+padding: 0;
+margin: 0;
+}
+</STYLE>
+  <script type="text/javascript" src="jquery-3.6.4.slim.min.js"></script>
+  <script type="text/javascript" src="searchhelp.js"></script>
+</HEAD>
+<BODY>
+<input id="mysearch" type="search" placeholder="Search" incremental>
+
+<ul>
+{%- assign groups = site.pages | where: "reference", true | where: "package", page.package | group_by: "group" %}
+
+{%- for g in groups %}
+
+<div class="hentry">{{g.name}}</div>
+
+	{%- assign predicates = "" | split: "" %}
+	{%- for r in g.items %}
+		{% for p in r.predicates %}
+			{% assign predicates = predicates | push: p %}
+		{% endfor %}
+	{%- endfor %}
+
+	{%- assign sorted_preds = predicates | sort: "sig" %}
+
+	{%- for p in sorted_preds %}
+		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+		<li class="eentry">
+			<a class="astyl" target="content" href="{{ppage.url}}"
+			title="{{p.sig}} -- {% if p.args -%}
+				{%- for a in p.args %}{{ a[1] }}{% unless forloop.last %}; {% endunless %}{% endfor %}
+			{%- else -%}
+				{{ p.desc }}
+			{%- endif -%}">
+			{{ p.sig | escape }}
+			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
+		</a>
+		</li>
+	{%- endfor %}
+
+{%- endfor %}
+</ul>
+</BODY>
+</HTML>

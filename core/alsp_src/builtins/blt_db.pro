@@ -20,7 +20,7 @@ module builtins.
  |	abolish(Mod, Pred, Arity)
  |
  | abolish/1
- | abolish(Pred, Arity)
+ | abolish(Pred/Arity)
  | 
  | Required by the standard.
  *------------------------------------------------------------------------*/

@@ -38,8 +38,8 @@ static struct _icode {
 };
 #undef ABMOP
 
-enum AbstractMachineOps decode_instr PARAMS(( Code ));
-int	display_instr	PARAMS( (enum AbstractMachineOps, Code *));
+enum AbstractMachineOps decode_instr ( Code );
+int	display_instr	(enum AbstractMachineOps, Code *);
 
 
 /*
@@ -199,7 +199,7 @@ display_instr(instr,ip)
 */
 
 #ifdef TRACEBWAM
-void tracewam	PARAMS(( Code * ));
+void tracewam	( Code * );
 
 int bwam_trace = 0;
 int bwam_trace_low = 0;

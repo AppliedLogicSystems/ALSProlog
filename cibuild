@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -eux -o pipefail
+
+cd "$(dirname "$0")"
+
+
+case "$(uname)" in
+    *"_NT"*)  OS=win32 ;;
+    *)          OS=unix
+                # Report common warnings as errors
+                export CFLAGS="${CFLAGS:-} -Werror=all"
+                ;;
+esac
+
+pushd $OS
+make
+make --keep-going test
+if [[ $OS == 'unix' ]]
+then
+	make --keep-going testdocs
+fi
+
+if [[ ${APPVEYOR_RE_BUILD:-} == 'True' && ${APPVEYOR_REPO_BRANCH:-} != 'master' ]]
+then
+	echo 'Skipping clean test to allow interactive debugging.'
+	exit
+fi
+
+# Test clean and check that no source files are modified
+make distclean
+[ -z "$(git status --short --ignored)" ]
+
+popd

@@ -1,6 +1,7 @@
 libactivate(builtins,[library,listutl3],
     [nobind_member/2,flatten/2,n_of/3,is_length/2,number_list/2,
-        number_list/3,struct_lookup_subst/4,check_default/4,
-        remove_tagged/3,merge_plists/3,merge_tagged_lists/3,
-        mangle_change_tagged/3,subst_tagged/4,merge_in_list/3],
+        number_list/3,encode_list/3,struct_lookup_subst/4,check_default/4,
+        check_default_del/5,remove_tagged/3,merge_plists/3,
+        merge_tagged_lists/3,mangle_change_tagged/3,subst_tagged/4,
+        merge_in_list/3,insert_item_in_list/3,insert_spaces/2],
     []).

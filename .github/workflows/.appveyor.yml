@@ -1,0 +1,28 @@
+image: Visual Studio 2019
+
+# TODO: Fix cygwin-unix build:    - OS: unix
+environment:
+  matrix:
+    - MSYSTEM: MINGW32
+
+cache:
+  - C:/bundle -> .appveyor.yml
+
+install:
+  - choco install php -y
+  - refreshenv
+  - SET PATH=C:\Ruby27\bin;%PATH%
+  - SET BUNDLE_PATH=C:\bundle
+  - C:\msys64\usr\bin\bash -lc "pacman --noconfirm -Syuu"
+  - C:\msys64\usr\bin\bash -lc "pacman --noconfirm --needed --sync mingw-w64-i686-curl zip procps"
+
+build_script:
+  - C:\msys64\usr\bin\bash -l %APPVEYOR_BUILD_FOLDER%\cibuild
+
+# Uncomment to have AppVeyor pause for remote debugging on branch rebuilds
+# on_finish:
+#   - ps: |
+#         if ( $env:APPVEYOR_RE_BUILD -eq $true -AND $env:APPVEYOR_REPO_BRANCH -ne 'master' ) {
+#           $blockRdp = $true
+#           iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#         }

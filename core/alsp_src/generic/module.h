@@ -61,37 +61,37 @@
 #pragma pointers_in_D0
 #endif
 
-extern	Code *	resolve_reference PARAMS( (ntbl_entry *) );
+extern	Code *	resolve_reference (ntbl_entry *);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
 
-extern	ntbl_entry * resolve_ref PARAMS( (PWord, PWord, int) );
+extern	ntbl_entry * resolve_ref (PWord, PWord, int);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
 
-extern	Code *	call_resolve_reference PARAMS( (PWord, PWord, int, int) );
+extern	Code *	call_resolve_reference (PWord, PWord, int, int);
 
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
 
-extern	int		next_module	PARAMS( (int, PWord *, int *, PWord *, int *) );
-extern	int		mod_id		PARAMS( (int) );
-extern	int		modprobe_id	PARAMS( (PWord) );
-extern	void	new_mod		PARAMS( (PWord) );
-extern	void	end_mod		PARAMS( (void) );
-extern	void	push_clausegroup PARAMS( (int) );
-extern	int		pop_clausegroup	PARAMS( (void) );
-extern	void	add_default_use	PARAMS( (int) );
-extern	void	add_default_proc PARAMS( (PWord, int) );
-extern	void	adduse		PARAMS( (int, int) );
-extern	void	export_pred	PARAMS( (PWord, PWord, int) );
-extern	void	createModuleClosureProcedure PARAMS( (PWord, int, PWord) );
-extern  int		createModCloseProc	PARAMS( (int, PWord, int, PWord) );
-extern	void	module_init	PARAMS( (void) );
+extern	int		next_module	(int, PWord *, int *, PWord *, int *);
+extern	int		mod_id		(int);
+extern	int		modprobe_id	(PWord);
+extern	void	new_mod		(PWord);
+extern	void	end_mod		(void);
+extern	void	push_clausegroup (int);
+extern	int		pop_clausegroup	(void);
+extern	void	add_default_use	(int);
+extern	void	add_default_proc (PWord, int);
+extern	void	adduse		(int, int);
+extern	void	export_pred	(PWord, PWord, int);
+extern	void	createModuleClosureProcedure (PWord, int, PWord);
+extern  int		createModCloseProc	(int, PWord, int, PWord);
+extern	void	module_init	(void);
 
 #endif /* _MODULE_H_INCLUDED_ */

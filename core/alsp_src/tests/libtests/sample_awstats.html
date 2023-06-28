@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC -//W3C//DTD HTML 4.01 Transitional//EN>
+<html>
+<head>
+<title>AWStats Totals</title>
+<style type="text/css">
+body { font: 11px verdana,arial,helvetica,sans-serif; background-color: white }
+td   { font: 11px verdana,arial,helvetica,sans-serif; text-align: center; color: black }
+.l { text-align: left }
+.b { background-color: #CCCCDD; padding: 2px; margin: 0 }
+.d { background-color: white }
+.f { font: 14px verdana,arial,helvetica }
+.border { border: #ECECEC 1px solid }
+a  { text-decoration: none }
+a:hover { text-decoration: underline }
+a.h  { color: black }
+</style>
+</head>
+<body>
+
+<form action="/awstats-dh/index.php">
+<table class="b" border="0" cellpadding="2" cellspacing="0" width="100%">
+<tr><td class="l">
+<table class="d" border="0" cellpadding="8" cellspacing="0" width="100%">
+<tr>
+<th>Reported period:</th>
+<td class="l">
+<select class="f" name="month">
+<option value="1" selected>Jan
+<option value="2">Feb
+<option value="3">Mar
+<option value="4">Apr
+<option value="5">May
+<option value="6">Jun
+<option value="7">Jul
+<option value="8">Aug
+<option value="9">Sep
+<option value="10">Oct
+<option value="11">Nov
+<option value="12">Dec
+<option value="all">-
+</select>
+<select class="f" name="year">
+<option value="2015">2015
+<option value="2016">2016
+<option value="2017">2017
+<option value="2018">2018
+<option value="2019" selected>2019
+</select>
+<input type="submit" class="f" value="OK">
+</td></tr>
+</table>
+</td></tr>
+</table>
+</form>
+
+<table align="center">
+<tr>
+<td>&nbsp;
+<td class="border" colspan="5">Viewed traffic<td class="border" colspan="3">Not viewed traffic<tr>
+<td bgcolor="#ECECEC" class="l" nowrap>&nbsp;<a href="/awstats-dh/index.php?month=1&year=2019&sort=config" class="h">Statistics for</a>
+<td width="80" bgcolor="#FFB055"><a href="/awstats-dh/index.php?month=1&year=2019&sort=unique" class="h">Unique visitors</a>
+<td width="80" bgcolor="#F8E880"><a href="/awstats-dh/index.php?month=1&year=2019&sort=visits" class="h">Number of visits</a>
+<td width="80" bgcolor="#4477DD"><a href="/awstats-dh/index.php?month=1&year=2019&sort=pages" class="h">Pages</a>
+<td width="80" bgcolor="#66F0FF"><a href="/awstats-dh/index.php?month=1&year=2019&sort=hits" class="h">Hits</a>
+<td width="80" bgcolor="#2EA495"><a href="/awstats-dh/index.php?month=1&year=2019&sort=bandwidth" class="h">Bandwidth</a>
+<td width="80" bgcolor="#4477DD"><a href="/awstats-dh/index.php?month=1&year=2019&sort=not_viewed_pages" class="h">Pages</a>
+<td width="80" bgcolor="#66F0FF"><a href="/awstats-dh/index.php?month=1&year=2019&sort=not_viewed_hits" class="h">Hits</a>
+<td width="80" bgcolor="#2EA495"><a href="/awstats-dh/index.php?month=1&year=2019&sort=not_viewed_bandwidth" class="h">Bandwidth</a>
+<tr><td class="l"><a href="cgi-bin/awstats.pl?month=1&year=2019&config=sample-site.com">sample-site.com</a><td>1,899<td>2,511<td>10,893<td>53,007<td>1.44 GB<td>14,028<td>25,583<td>790.61 MB
+<tr><td class="l"><a href="cgi-bin/awstats.pl?month=1&year=2019&config=sample-site.com-http">sample-site.com-http</a><td>0<td>0<td>0<td>0<td>0 Bytes<td>11,060<td>29,363<td>15.39 MB
+<tr><td class="l" bgcolor="#ECECEC">&nbsp;Total<td bgcolor="#ECECEC">1,899<td bgcolor="#ECECEC">2,511<td bgcolor="#ECECEC">10,893<td bgcolor="#ECECEC">53,007<td bgcolor="#ECECEC">1.44 GB<td bgcolor="#ECECEC">25,088<td bgcolor="#ECECEC">54,946<td bgcolor="#ECECEC">806.00 MB
+</table>
+
+<br><br><center><b>AWStats Totals 1.18</b> - <a
+href="http://www.telartis.nl/xcms/awstats">&copy; 2004-2010 Telartis BV</a></center><br><br>
+
+</body>
+</html>

@@ -638,12 +638,12 @@ obp_pop()
 
 #if (defined(__DJGPP__) || defined(__GO32__))
 
-static	long	get_file_modified_time	PARAMS(( CONST char * ));
-static	int	isdir			PARAMS((CONST char * ));
+static	long	get_file_modified_time	( const char * );
+static	int	isdir			(const char * );
 
 static long 
 get_file_modified_time(fname)
-    CONST char *fname;
+    const char *fname;
 {
 #if defined(DOS)
 
@@ -691,7 +691,7 @@ get_file_modified_time(fname)
  */
 static int
 isdir(fname)
-    CONST char *fname;
+    const char *fname;
 {
 #if defined(DOS)
 
@@ -773,7 +773,7 @@ load_file(fname, options)
     /*
      * Are we reconsulting?
      */
-    if (options)
+    if (options & RECONSULT)
 	w_reconstamp = w_timestamp;
 
     /*
@@ -890,12 +890,16 @@ load_file(fname, options)
 	 * Are we able to create .obp file?
 	 */
 #ifdef OBP
-	strcpy(ext, "obp");
-	if (obp_open(new_fname) == 0) {
-	    fprintf(stderr, "Warning: Unable to create %s \n", new_fname);
-	}
-	else {
-	    makeobp = 1;
+	// Suppress opening OBP and makobp=1, if suppress option enabled
+	if (! (options & SUPPRESS_OBP)) {
+	    strcpy(ext, "obp");
+
+	    if (obp_open(new_fname) == 0) {
+		fprintf(stderr, "Warning: Unable to create %s \n", new_fname);
+	    }
+	    else {
+		makeobp = 1;
+	    }
 	}
 #endif /* OBP */
 

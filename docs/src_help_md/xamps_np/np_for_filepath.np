@@ -1,0 +1,27 @@
+np(
+core_prolog, %Package
+file_system, %Group
+'file_extension/3',  %Title
+'fileextension3'   ,  %FileName
+builtins,  %Module
+     % Preds With Descriptions:
+   [
+p('file_extension/3', ''),
+p('path_elements/2', ''),
+p('path_directory_tail/3', ''),
+p('is_absolute_path/1', ''),
+p('path_type/2', ''),
+p('path_type/3', ''),
+p('split_path/2', ''),
+p('split_path/3', ''),
+p('join_path/2', ''),
+p('join_path/3', ''),
+p('tilda_expand/2', ''),
+p('directory_self/1', ''),
+p('directory_self/2', ''),
+p('parent_path/1', ''),
+p('parent_path/2', ''),
+p('pathPlusFile/3', ''),
+p('pathPlusFilesList/3', ''),
+p('make_change_cwd/1', '')]
+  ).

@@ -1,5 +1,5 @@
 libactivate(builtins,[library,listutl1],
-    [append/2, list_diff/3,list_diffs/4,symmetric_diff/3,intersect/3,
+    [append/2,list_diff/3,list_diffs/4,symmetric_diff/3,intersect/3,
         int_diff/4,intersect/2,union/3,sorted_merge/3,sorted_merge/2,
-        subset/2],
+        subset/2,init_seg_list/2],
     []).

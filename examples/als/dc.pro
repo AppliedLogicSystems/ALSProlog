@@ -38,7 +38,13 @@ module desk_calc.
     *			and evaluator.
     */
 
-   dc :- write('dc: '), 
+   dc :-
+	nl,write('Simple shell for a desk calculator'),nl,
+	write('    By Kevin Buettner'),nl,nl,
+	write('Type numeric expressions (no final . needed) plus return'),nl,
+	write('Type exit to exit from the calculator to Prolog'),nl,nl,
+	dc0.
+   dc0 :- write('dc: '), 
          readin(Line), 
 	 lexan(Line,Tokens), 
 	 parse(Tokens,Tree), 
@@ -46,10 +52,10 @@ module desk_calc.
 	 write(Answer), nl, 
 	!, 
 	dc_again(Answer).
-   dc :- write('??'), nl, dc.
+    dc0 :- write('??'), nl, dc0.
 
    dc_again(exit) :- !, seen.
-   dc_again(_) :- dc.
+   dc_again(_) :- dc0.
 
    source(File) :-
       seeing(OldF),
@@ -112,6 +118,7 @@ module desk_calc.
     */
 
    lexan([],[]) :- !.
+   lexan(".",[]) :- !.
    lexan(InL,[Tok | Toks]) :- 
       classify(InL,RestL,Tok),
       lexan(RestL,Toks).

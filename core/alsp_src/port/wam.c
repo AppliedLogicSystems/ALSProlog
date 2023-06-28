@@ -35,17 +35,17 @@
 /*#include "dump_wam.h" */
 
 #ifdef TRACEBWAM
-extern	int tracewam	PARAMS(( Code * ));
+extern	int tracewam	( Code * );
 #endif
 
-	int	run_wam		PARAMS(( Code * ));
-static	int	wam_unify	PARAMS(( PWord *, PWord * ));
+	int	run_wam		( Code * );
+static	int	wam_unify	( PWord *, PWord * );
 
 #ifdef	Threaded
 Code  wam_instrs[W_NUM_OPS];	/* map from instruction number to label */
 #endif	/* Threaded */
 
-extern int trailed_mangle0 PARAMS((PWord,PWord,int,PWord,int));
+extern int trailed_mangle0 (PWord,PWord,int,PWord,int);
 
 #ifdef	IProfile
 
@@ -179,7 +179,7 @@ PWord *gr_SPB, *gr_HB, *gr_TR;
 #define	MMTCH(f) printf("   match is delay [f=%x[_%lu]]\n", 				\
 						  (int)f,(long)(((PWord *) f) - wm_heapbase));	   
 
-int ck_intvl_punch   PARAMS((PWord, PWord, int));
+int ck_intvl_punch   (PWord, PWord, int);
 
     /*-------------------------------------------------*
 	 |	ck_intvl_punch - used during variable binding,
@@ -201,9 +201,8 @@ ck_intvl_punch(r, fv, ft)
 	PWord r3, mf;
 	int r3t, mfa;
 
-/*	w_get(&pr3, &ft, f); */
-
 	w_get_argn(&r3, &r3t, r, 4);
+	if (r3t == WTP_SYMBOL || r3t == WTP_UIA) return 0;
 	w_get_functor(&mf, r3);
 	w_get_arity(&mfa, r3);
 
@@ -239,7 +238,7 @@ ck_intvl_punch(r, fv, ft)
 	 *-------------------------------------------------*/
 
 	/*-------------------------------------------------*
-     | Code (in wam_unify)  where VVBIND is invoked:
+         | Code (in wam_unify)  where VVBIND is invoked:
 	 |   if (f1 < f2) {	;;;; swap f1 and f2
 	 |	temp = f1;
 	 |	f1 = f2;
@@ -1640,7 +1639,7 @@ CASE(W_OVJUMP):
 
 CASE(W_FOREIGN_JUMP):		/* foreign_jump dst */
 	    UNSHADOW_REGS;
-	    if (!((*(int (*)PARAMS((void))) *PWPTR(P + OPSIZE)) ())) {
+	    if (!((*(int (*)(void)) *PWPTR(P + OPSIZE)) ())) {
 		SHADOW_REGS;
 		DOFAIL;
 	    }
@@ -2400,7 +2399,7 @@ _w_unify(f1, f2)
  |
  |		installs a reference to G into R (R --> G)
  *---------------------------------------------------------------*/
-int     pbi_bind_vars           PARAMS(( void ));
+int     pbi_bind_vars           ( void );
 
 int
 pbi_bind_vars()
@@ -2429,7 +2428,7 @@ pbi_bind_vars()
 #if defined(INTCONSTR)
 #include "intrv.h"
 
-void plain_bind	PARAMS((PWord, PWord));
+void plain_bind	(PWord, PWord);
 
 void
 plain_bind(r, v)
@@ -2441,7 +2440,7 @@ plain_bind(r, v)
 
 
 
-void bind_point_unfreeze	PARAMS((PWord *,int *,double,int));
+void bind_point_unfreeze	(PWord *,int *,double,int);
 void
 bind_point_unfreeze(r,t,pv,k)
 	PWord *r;

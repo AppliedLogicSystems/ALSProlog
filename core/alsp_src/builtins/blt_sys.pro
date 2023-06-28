@@ -35,6 +35,7 @@ endmod.
 
 module builtins.
 
+
 /*------------------------------------------------------------------*
  * The following global variable access predicates are for use with the
  * shell and with the debugger.
@@ -46,22 +47,6 @@ module builtins.
 export halt/0.
 halt :-
 	pbi_halt.
-
-/*-------------------------------------------------------------------*
- | 	curmod/1          (returns the name of the current module)
- |	curmod(Mod)
- |	curmod(?)
- |
- |	- Mod is the current module context
- |
- |	The following icode command creates a module closure, which 
- |	unifies the module obtained from the module closure with the argument.
- *-------------------------------------------------------------------*/
-
-:-	compiletime,
-	module_closure(curmod,1,curmod).
-
-curmod(M,M).
 
 /*------------------------------------------------------------------*
  |	corrected_sys_searchdir/1
@@ -89,6 +74,21 @@ fin_corrected_sys_searchdir(_, SSDIRList, SSDIR)
 	:-
 	path_elements(SSDIR, SSDIRList).
 
+/*-------------------------------------------------------------------*
+ | 	curmod/1          (returns the name of the current module)
+ |	curmod(Mod)
+ |	curmod(?)
+ |
+ |	- Mod is the current module context
+ |
+ |	The following icode command creates a module closure, which 
+ |	unifies the module obtained from the module closure with the argument.
+ *-------------------------------------------------------------------*/
+
+:-	compiletime,
+	module_closure(curmod,1,curmod).
+
+curmod(M,M).
 
 /*------------------------------------------------------------------*
  |	modules/2
@@ -109,6 +109,97 @@ next_modules(N,_,_,Module,UseList)
 	:-
 	'$next_module'(N,NN,NextModule,NextUseList),
 	next_modules(NN,NextModule,NextUseList,Module,UseList).
+
+export sys_modules/1.
+sys_modules([
+	builtins,syscfg,rel_arith,xconsult,sio,
+	pgm_info,debugger,tcltk,windows,tk_alslib,alsdev,utilities,
+	alsshell,avl,cref,macroxp,shellmak,ttyshlmk
+	]).
+
+export non_sys_modules/1.
+non_sys_modules(Mods)
+	:-
+	findall(M, (modules(M,_), (debugger:not(noshow_module(M)))), Mods).
+
+export module_preds/2.
+export module_preds/3.
+
+module_preds(M,L)
+	:-
+	findall(PA, 
+		(all_procedures(M,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
+	(L0 = [] ->
+		catenate('No predicates defined in ',M,Msg),
+		L = [Msg] 
+		; 
+		sort(L0, L1),
+		L = L1
+	).
+
+module_preds(Mod,S,L)
+	:-
+	findall(PA, (debugger:spying_on(CallForm,Mod),
+					functor(CallForm,P,A),
+					catenate([P,'/',A],PA)  ),
+					S0),
+	sort(S0, S),
+
+	findall(PA, 
+		(all_procedures(Mod,P,A,R), R\=0,atom_codes(P,[PC0|_]),
+			PC0<129, catenate([P,'/',A],PA)
+		), 
+		L0),
+	(L0 = [] ->
+		catenate('No predicates defined in ',Mod,Msg),
+		L = [Msg] 
+		; 
+		sort(L0, L1),
+		remove(S, L1, L)
+	).
+
+remove([], L, L).
+remove([Item | S], L1, L)
+	:-
+	delete_sorted(L1, Item, L2),
+	remove(S, L2, L).
+
+delete_sorted([], Item, []).
+delete_sorted([Item | L], Item, L)
+	:-!.
+delete_sorted([H | L], Item, L)
+	:-
+	H @> Item,
+	!.
+
+delete_sorted([H | L1], Item, [H | L2])
+	:-
+	delete_sorted(L1, Item, L2).
+
+
+sys_mods_status(SMs)
+        :-
+        sys_modules(InitSysMs),
+        sort(InitSysMs, SysMs),
+        annotate_showing(SysMs, SMs).
+
+annotate_showing([], []).
+annotate_showing([M | SysMs], [[M, S] | SMs])
+        :-
+        ((debugger:noshow_module(M)) ->
+                S = 0
+                ;
+                S = 1
+        ),
+        annotate_showing(SysMs, SMs).
+
+
+
+
+
 
 /*------------------------------------------------------------------*
  | procedures/4
@@ -279,15 +370,13 @@ make_det_gv2(Mod,Name,InitVal) :-
 
 
 /*------------------------------------------------------------------*
- | exec_file_command appends a command onto a file string and calls
+ | exec_file_command appends a file string onto a command and calls
  | system on the result.
  *------------------------------------------------------------------*/
 
 exec_file_command(Command,FileStruct) 
 	:-
-	make_file_name(FileStruct,File,_),
-	atom_concat(Command,' ',CommandPlusSpace),
-	atom_concat(CommandPlusSpace,File,NewCommandName),
+	catenate([Command, ' ', FileStruct], NewCommandName),
 	system(NewCommandName).
 
 /*--------TO LIBRARY ??---------------------------------------------*
@@ -426,18 +515,22 @@ statistics :-
 display_stats(Stream) :-
 	statistics(Stat),		% C - builtin
 	dmember(stack(Sleft,Sused,Stotal),Stat),
+	KStotal is Stotal / 1024,
 	dmember(heap(Hleft,Hused,Tused,GValloced,Halloced),Stat),
+	KHused is Hused / 1024,
+	KHalloced is Halloced / 1024,
 	dmember(code_area(Cused,Ctotal),Stat),
+	KCtotal is Ctotal / 1024,
 	dmember(wm_regs(SP,E,SPB,HB,H,TR,B),Stat),
 	printf(Stream,'------------ statistics (in bytes) -----------------\n\n',[]),
-	printf(Stream,'Heap used    \t: %d\n',[Hused],[]),
-	printf(Stream,'Trail used   \t: %d\n',[Tused],[]),
-	printf(Stream,'Heap & Trail \t: %d / %d (remaining/total)\n',[Hleft,Halloced],[]),
-	printf(Stream,'Stack        \t: %d / %d / %d (used/remaining/total)\n',[Sused,Sleft,Stotal],[]),
-	printf(Stream,'Code         \t: %d / %d (used/total)\n',[Cused,Ctotal],[]),
-	printf(Stream,'Global Vars  \t: %d\n',[GValloced],[]),
-	printf(Stream,'WAM regs     \t: SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB],[]),
-	printf(Stream,'                 \t: HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B],[]),
+	printf(Stream,'Heap used    \t: %d [%dK]\n',[Hused,KHused]),
+	printf(Stream,'Trail used   \t: %d\n',[Tused]),
+	printf(Stream,'Heap & Trail \t: %d / %d [%dK] (remaining/total alloc)\n',[Hleft,Halloced,KHalloced]),
+	printf(Stream,'Stack        \t: %d / %d / %d [%dK] (used/remaining/total)\n',[Sused,Sleft,Stotal,KStotal]),
+	printf(Stream,'Code         \t: %d / %d [%dK] (used/total)\n',[Cused,Ctotal,KCtotal],[]),
+	printf(Stream,'Global Vars  \t: %d\n',[GValloced]),
+	printf(Stream,'WAM regs     \t: SP=%#x E=%#x SPB=%#x\n',[SP,E,SPB]),
+	printf(Stream,'                 \t: HB=%#x H=%#x TR=%#x B=%#x\n',[HB,H,TR,B]),
 	flush_output(Stream).
 
 export heap_status/1.
@@ -492,8 +585,13 @@ cslt_lib_ld(FileName, FilePathPro,FilePathObp)
 lib_load(Module,Call) 
 	:-
 	functor(Call,P,A),
+		% try to get info on Module:P/A from the libary hash table (_libinfo):
 	get_libinfo(Module:P/A,FileName),
 %functor(Call,CF,CA),write( lib_load(Module,CF/CA, FileName) ),nl,flush_output,
+		% Delete all _libinfo entries with value FileName:
+		% pdel_libinfo(_,FileName), fail keeps backtracking until all
+		% hits with value FileName have been removed; that is, all
+		% entries for predicates from FileName have been removed from _libinfo:
 	(pdel_libinfo(_,FileName), fail ; true),
 	lib_load(FileName, Module, P,A, Module,Call).
 
@@ -510,24 +608,18 @@ lib_load(FileName, Module, P,A, Module,Call)
 lib_load(FileName, Module, P,A, Module,Call)
 	:-
 	als_lib_lcn(ALSLibPathHead),
-%	extendPath(ALSLibPathHead, FileName, FullFileName),
 	split_path(ALSLibPathHead, PathHeadElts),
 	dappend(PathHeadElts, [FileName], FFNElts),
 	join_path(FFNElts, FullFileName),
-	sys_env(OS,_,_),
-	(   OS = macos, !, Sepr = ':'
-		;   OS = mswin32, !, Sepr = '\\'
-		;   Sepr = '/'
-	),
-    '$atom_concat'(FullFileName,'.pro',FilePathPro),
-    '$atom_concat'(FullFileName,'.obp',FilePathObp),
-	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
-		; 
-		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
-	),
-	!,
-	record_lib_load(FileName),
-	Module:call(Call).
+    	'$atom_concat'(FullFileName,'.pro',FilePathPro),
+    	'$atom_concat'(FullFileName,'.obp',FilePathObp),
+    	(cslt_lib_ld(FileName, FilePathPro,FilePathObp)
+    		; 
+    		existence_error(lib_procedure,lib(Module:P/A,FileName),(Module:Call)) 
+    	),
+    	!,
+    	record_lib_load(FileName),
+    	Module:call(Call).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%% Force one or more library files to be 
@@ -538,52 +630,74 @@ export force_libload_all/1.
 export force_libload_all/2.
 export force_libload_all_lib/2.
 
-force_libload_all 
+force_libload_all
+	:-
+	force_libload_all(opts=[]).
+
+force_libload_all(opts=Opts)
 	:-
 	sys_searchdir(ALSDIR),
 	setof(File,
 			(Pred^builtins:pget_libinfo(Pred,File),
 				File\='builtins/debugger'),
 			Files),
-	force_libload_all(Files,ALSDIR).
+	force_libload_all(Files,ALSDIR,Opts).
+
 
 force_libload_all(Files) 
 	:-
 	sys_searchdir(ALSDIR),
-	force_libload_all(Files,ALSDIR).
+	force_libload_all(Files,ALSDIR,opts=[]).
+
+
+force_libload_all(Files, opts=Opts) 
+	:-
+	sys_searchdir(ALSDIR),
+	force_libload_all(Files,ALSDIR, Opts).
+
 
 force_libload_all_lib(Files,Library) 
 	:-
+	force_libload_all_lib(Files,Library, opts=[]).
+
+
+force_libload_all_lib(Files,Library, opts=Opts) 
+	:-
 	sys_searchdir(ALSDIR),
-%	extendPath(ALSDIR,Library,LibPath),
 	split_path(ALSDIR, ALSDIRElts),
 	dappend(ALSDIRElts, [Library], LPElts),
 	join_path(LPElts, LibPath),
-	force_libload_all(Files,LibPath).
+	force_libload_all(Files,LibPath, Opts).
 
-force_libload_all([],_).
-force_libload_all([File|Files],DirDC) 
+force_libload_all([],_,_).
+force_libload_all([File|Files],DirDC,Opts) 
 	:-
-	force_libload_file(File,DirDC),
-	force_libload_all(Files,DirDC).
+	force_libload_file(File,DirDC,Opts),
+	force_libload_all(Files,DirDC,Opts).
 
-force_libload_file(File,DirDC)
+force_libload_file(File,DirDC,Opts)
 	:-
-%	extendPath(DirDC,File,FileName),
 	split_path(DirDC, DirDCElts),
 	dappend(DirDCElts, [File], FNElts),
 	join_path(FNElts, FileName),
 
-	als_advise('Loading %s\n',[FileName]),
-    '$atom_concat'(FileName,'.pro',FilePathPro),
+	(member(show_msg, Opts) -> als_advise('Loading %s\n',[FileName])
+		;
+		true
+	),
+    	'$atom_concat'(FileName,'.pro',FilePathPro),
 	'$atom_concat'(FileName,'.obp',FilePathObp),
 %	(load(FileName,1,_,obp,_,_) ->
 	(cslt_lib_ld(File, FilePathPro,FilePathObp) ->
 		(pdel_libinfo(_,File), fail ; true),
-		als_advise('...loaded\n',[])
+		(member(show_msg, Opts) -> als_advise('...loaded\n',[])
+			;
+			true
+		)
 		;
 		als_advise('\n!!WARNING File %s NOT LOADED!\n',[FileName])
 	).
+
 
 %:-dynamic(lib_path_rec/2).
 
@@ -596,7 +710,6 @@ force_libload_file(File,DirDC)
 export libactivate/4.
 libactivate(M,[LH|LT],PredList,ModClosures) 
 	:-
-%curmod(MMM),
 	libhide(M,[LH|LT],PredList),
 	mc_all(ModClosures, M, [LH | LT]),
 	!.
@@ -626,7 +739,6 @@ do_mc( module_closure(UserPredicate,Arity, Procedure), M, Procedure, Arity1)
 :-dynamic(lib_mod_list/1).
 libhide(M,List,PredList) 
 	:-
-%	subPath(List, LibFileName),
 	join_path(List, LibFileName),
 	libhide0(PredList,M,LibFileName).
 

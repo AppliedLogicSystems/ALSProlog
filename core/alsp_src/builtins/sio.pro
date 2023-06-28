@@ -15,6 +15,7 @@
 module sio.
 use windows.
 use tcltk.
+use curl.
 
 :- auto_use(sio).
 
@@ -722,6 +723,14 @@ check_source_sink_and_mode(tcl_transfer(_,_),Mode) :-
 	!,
 	check_mode(Mode,read_write_modes(Mode,_,_)).
 
+check_source_sink_and_mode(url(_),Mode) :-
+	!,
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+check_source_sink_and_mode(url(_,CurlOptions),Mode) :-
+	!,
+	check_curl_options(CurlOptions),
+	check_mode(Mode,read_write_modes(Mode,_,_)).
+
 check_source_sink_and_mode(Source_sink,Mode) :-
 	domain_error(source_sink, Source_sink, 2).
 
@@ -799,8 +808,36 @@ check_list_option(M,ML) :-
 	dmember(M,ML),
 	!.
 check_list_option(M,ML) :-
-	domain_error(stream_option,M,3).
+        domain_error(stream_option,M,3).
+	
+check_curl_options([]) :-!.
+check_curl_options([Opt | CurlOptions])
+	:-
+	check_curl_opt(Opt),
+	!,
+	check_curl_options(CurlOptions).
 
+check_curl_options(CurlOptions)
+	:-
+	type_error(list,CurlOptions,2).
+
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	member(UC_Tag, ['DATA', 'DATAFILE', 'EOL', 'EOLCODE', 'FIELDS', 'FIELDSFILE', 'RESULT', 'RESULTFILE', 'URL', 'POST']).
+
+check_curl_opt(Tag=_) 
+	:-
+	make_uc_sym(Tag, UC_Tag),
+	not lookup_opt_info(UC_Tag),
+	!,
+        domain_error(curl_option,Tag=_,4).
+
+check_curl_opt(Opt) 
+	:-
+	type_error('equation (_=_)', Opt,4).
+	
 
 /*----------------------------------------------------------*
  | check_alias/3
@@ -957,6 +994,14 @@ open_stream(console_error(Name), Mode, Options, Stream)
 open_stream(tcl_transfer(Interp,CmdTemplate),Mode,Options,Stream) 
 	:- !,
 	open_tcl_transfer_stream(CmdTemplate,Interp,Mode,Options,Stream).
+
+open_stream(url(URL),Mode,NonURLOptions,Stream) 
+	:- !,
+	open_stream(url(URL,[]),Mode,NonURLOptions,Stream).
+
+open_stream(url(URL,URLOptions),Mode,NonURLOptions,Stream) 
+	:- !,
+	open_url_stream(URL,Mode,NonURLOptions,URLOptions,Stream).
 
 %%
 %% This is the place to put in clauses for dealing with other types of streams
@@ -1631,7 +1676,7 @@ open_atom_stream(Atom,read,Options,Stream) :-
 	initialize_stream(atom,atom(Atom),Options,Stream),
 	set_stream_extra(Stream,Atom),
 	set_stream_addl1(Stream,0),
-	'$strlen'(Atom,ALen),
+	atom_length(Atom,ALen),
 	set_stream_addl2(Stream,ALen),
 	file_modes(read,NMode,SMode),
 	set_stream_mode(Stream,SMode),
@@ -1669,6 +1714,26 @@ open_console_stream(Source_sink, Mode, ErrorMode, Options, Stream)
 open_console_stream(Source_sink,Mode,ErrorMode,Options,Stream) :-
 	permission_error(open,source_sink,Source_sink,2).
 
+/* ------------------------------- *
+	URL Streams
+ * ------------------------------- */
+
+open_url_stream(Source_sink,read,NonURLOptions,URLOptions,Stream)
+	:-
+	uppercase_unwind(URLOptions, UCOptions),
+	delete_from(UCOptions, 'RESULT', RemURLOptions, Vals),
+	(Vals = [VV] -> WW = VV ; true),
+
+	http(get, Source_sink, ['RESULT'=WW | RemURLOptions]),
+	open(atom(WW), read, Stream, NonURLOptions).
+
+open_url_stream(URL,write,NonURLOptions,URLOptions,Stream)
+	:-
+	open(string(StreamString), write, Stream, NonURLOptions),
+	freeze(StreamString, 
+	    (atom_codes(StringAtom, StreamString),
+	     http(post, URL, [data=StringAtom | URLOptions])  )
+	).
 
 		/*-----------*
 		 |  WINDOWS  |
@@ -3013,6 +3078,7 @@ put_failure(3,Stream,Arg,Call) :-	%% SIOE_WRITE
 	!,
 	sio_aux(Stream,Aux),
 	put_failure_write(Aux,Call).
+
 put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ
 	stream_type(Stream,Type),
 	read_buffer(Type,Stream),
@@ -3022,9 +3088,17 @@ put_failure(5,Stream,Arg,Call) :-	%% SIOE_READ and read_buffer failure
 	sio_errcode(Stream,8),		%% SIOE_EOF
 	!,
 	call(Call).
+
+put_failure(0,Stream,Arg,Call) :-	%% SIOE_INARG for put_string
+	curmod(Mod),
+	functor(Call,_,LastArg),
+	arg(LastArg,Call,Culprit),
+	!,
+	type_error(list, Culprit, [Mod:Call]).
 put_failure(0,_,_,Call) :-		%% SIOE_NORMAL (should not happen)
 	!,
 	fail.
+
 put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
 	var(Arg),
 	!,
@@ -3035,7 +3109,8 @@ put_failure(2,Stream,Arg,Call) :-	%% SIOE_INARG
 	curmod(Mod),
 	functor(Call,_,LastArg),
 	arg(LastArg,Call,Culprit),
-	type_error(integer, Culprit, [Mod:Call]).
+	put_failure_inarg(Call, Arg, Culprit, Mod, Call).
+
 put_failure(_,Stream,Arg,Call) :-	%% catchall
 	!,
 	curmod(Mod),
@@ -3045,6 +3120,15 @@ put_failure(_,Stream,Arg,Call) :-	%% catchall
 put_failure_write(0,_) :- !.
 put_failure_write(_,Call) :- call(Call).
 
+
+put_failure_inarg(put_atom(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(atom, Culprit, [Mod:Call]).
+put_failure_inarg(put_code(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(code, Culprit, [Mod:Call]).
+put_failure_inarg(put_char(_, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(character, Culprit, [Mod:Call]).
+put_failure_inarg(put_number(_, KindNum, Arg), Arg, Culprit, Mod, Call) :- !,
+		type_error(KindNum, Culprit, [Mod:Call]).
 
 /*
  * put_char(Char)
@@ -3164,15 +3248,25 @@ put_string(String) :-
 export put_string/2.
 
 put_string(Stream_or_alias, String) :-
+	var(String),
+	!,
+	curmod(Mod),
+	instantiation_error(Mod:Call).
+put_string(Stream_or_alias, String) :-
 	is_stream(Stream_or_alias,Stream),
 	is_output_stream(Stream),
-	put_string0(String, Stream).
+	put_string0(String, Stream),
+	!.
+put_string(Stream_or_alias, String) :-
+	output_stream_or_alias_ok(Stream_or_alias,Stream),
+	sio_errcode(Stream,FailCode),
+	put_failure(FailCode,Stream,String,put_string(Stream_or_alias,String)).
 
 put_string0([], _).
 put_string0([C | String], Stream) :-
 	put_code(Stream,C),
 	put_string0(String, Stream).
-	
+
 
 /*
  * put_atom(Atom)
@@ -3216,26 +3310,52 @@ put_atom(Stream_or_alias,Atom) :-
  *
  *	OutputType may take on the following values:
  *		byte
+ *		ubyte
  *		short
+ *		ushort
  *		long
+ *		ulong
  *		float
  *		double
  */
 
+num_output_type(byte) :- !.
+num_output_type(ubyte) :- !.
+num_output_type(char) :- !.
+num_output_type(uchar) :- !.
+num_output_type(short) :- !.
+num_output_type(ushort) :- !.
+num_output_type(int) :- !.
+num_output_type(uint) :- !.
+num_output_type(long) :- !.
+num_output_type(ulong) :- !.
+num_output_type(float) :- !.
+num_output_type(double) :- !.
 
 export put_number/3.
 
-
 put_number(Stream,OutputType,Number) :-
+	var(OutputType),
+	!,
+	instantiation_error(2).
+put_number(Stream,OutputType,Number) :-
+	num_output_type(OutputType),
+	!,
+	put_number0(Stream,OutputType,Number).
+put_number(Stream,OutputType,Number) :-
+	domain_error(num_output_type,OutputType,2).
+
+
+put_number0(Stream,OutputType,Number) :-
 	sio_put_number(Stream,OutputType,Number),
 	!.
 %	tk_setmark(Stream).
-put_number(Alias, OutputType,Number) :-
+put_number0(Alias, OutputType,Number) :-
 	is_output_alias(Alias, Stream),
 	sio_put_number(Stream,OutputType,Number),
 	!.
 %	tk_setmark(Stream).
-put_number(Stream_or_alias,OutputType,Number) :-
+put_number0(Stream_or_alias,OutputType,Number) :-
 	output_stream_or_alias_ok(Stream_or_alias,Stream),
 	sio_errcode(Stream,FailCode),
 	put_failure(FailCode,Stream,Number,
@@ -3669,10 +3789,11 @@ stream_position(Stream_or_alias, Position) :-
 /*-------------------------------------------------------------------*
  | stream_position(Stream_or_alias, Current_position, New_position)
  |
- |	Unifies Position with the current stream position of the stream
- |	denoted by Stream_or_alias.  As a side effect, also sets the
- |	stream position of said stream to the position represented by
- |	New_position.   New_position may be one of the following values:
+ |	Unifies Current_position with the current stream position of 
+ |	the stream denoted by Stream_or_alias.  As a side effect, also 
+ |	sets the stream position of said stream to the position 
+ |	represented by New_position.   
+ |	New_position may be one of the following values:
  |
  |	An absolute integer position into the stream.
  |	A whole number float position into the stream.
@@ -3817,8 +3938,28 @@ skip_layout(Stream_or_alias) :-
  *	double		floating point (64 bit)
  */
 
-export get_number/3.
+num_input_type(byte) :-!.
+num_input_type(ubyte) :-!.
+num_input_type(char) :-!.
+num_input_type(uchar) :-!.
+num_input_type(short) :-!.
+num_input_type(ushort) :-!.
+num_input_type(int) :-!.
+num_input_type(uint) :-!.
+num_input_type(long) :-!.
+num_input_type(ulong) :-!.
+num_input_type(float) :-!.
+num_input_type(double) :-!.
 
+export get_number/3.
+get_number(Stream,InputType,Number) :-
+	var(InputType),
+	!,
+	instantiation_error(2).
+get_number(Stream,InputType,Number) :-
+	not(num_input_type(InputType)),
+	!,
+	domain_error(num_input_type,InputType,2).
 get_number(Stream,InputType,Number) :-
 	sio_get_number(Stream,InputType,Number),
 	!.
@@ -3893,8 +4034,7 @@ get_line0(Alias,Line,EndFlag) :-
 get_line0(Stream_or_alias,Line,EndFlag) :-
 	input_stream_or_alias_ok(Stream_or_alias, Stream),
 	sio_errcode(Stream, FailCode),
-	get_failure(FailCode,Stream,
-					get_line0(Stream_or_alias,Line,EndFlag)).
+	get_failure(FailCode,Stream, get_line0(Stream_or_alias,Line,EndFlag)).
 
 
 /*

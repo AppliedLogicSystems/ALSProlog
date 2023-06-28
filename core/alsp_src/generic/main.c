@@ -111,24 +111,31 @@ const char *version[2] = {
 #endif
 
 static char versionNum[] = VERSION_STRING;	/* from version.h */
+static char versionYear[] = VERSION_YEAR;	/* from version.h */
 /* static char systemName[] = SysName;		from version.h */
 static int exit_status = 0;
 static jmp_buf exit_return; 
 
-static	void	panic_fail	PARAMS(( void ));
-#ifdef arch_m88k
-static	void	panic_continue	PARAMS(( void ));
+#ifdef __LP64__
+static int heapWordBytes = 8;
+#else
+static int heapWordBytes = 4;
 #endif
-static	void	abolish_predicate PARAMS(( const char *, const char *, int ));
-static	void	assert_sys_searchdir PARAMS(( char * ));
-static	void	assert_als_system PARAMS((const char *, const char *,
+
+static	void	panic_fail	( void );
+#ifdef arch_m88k
+static	void	panic_continue	( void );
+#endif
+static	void	abolish_predicate ( const char *, const char *, int );
+static	void	assert_sys_searchdir ( char * );
+static	void	assert_als_system (const char *, const char *,
 					  const char *, const char *,
-					  const char *));
-static	void	assert_atom_in_module PARAMS(( const char*, const char * ));
+					  const char *, const char *, int);
+static	void	assert_atom_in_module ( const char*, const char * );
 
 
-static	void	autoload	PARAMS(( char * ));
-static	void	chpt_init	PARAMS(( void ));
+static	void	autoload	( char * );
+static	void	chpt_init	( void );
 
 static void
 panic_fail()
@@ -431,7 +438,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
 
 #ifndef KERNAL
     assert_als_system(OSStr, MinorOSStr, ProcStr,
-		      SysManufacturer, versionNum);
+		      SysManufacturer, versionNum, versionYear, heapWordBytes);
 
     /*-------------------------------------------*
      | Set up conditional configuration controls:
@@ -616,8 +623,8 @@ assert_atom_in_module(mod_name,atom_name)
  |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
-assert_als_system(os, os_var, proc, man, ver)
-    const char *os, *os_var, *proc, *man, *ver;
+assert_als_system(os, os_var, proc, man, ver, year, hwb)
+    const char *os, *os_var, *proc, *man, *ver, *year; int hwb;
 {
     char  command[2048];
 
@@ -625,17 +632,18 @@ assert_als_system(os, os_var, proc, man, ver)
 		return;
 
     sprintf(command,
-	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s']),_,0)",
+	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',prologYear='%s',heapWordBytes=%d]),_,0)",
 	    os,
 	    os_var,
 	    proc,
 	    man,
-	    ver);
+	    ver,
+	    year,
+	    heapWordBytes);
     if (!exec_query_from_buf(command)) {
 		fatal_error(FE_ASSERT_SYS, 0);
     	}
 }
-
 
 /*-------------------------------------------------------------*
  | autoload will attempt to load the named file from
@@ -662,7 +670,7 @@ autoload(f)
     status = obpres_load(fext);
     if (status != 1) status = load_file(fext, 0); 
 #else
-    status = load_file(fext, 0);  
+    status = load_file(fext, SUPPRESS_OBP);
 #endif
     if (!status) {
 /*
@@ -801,144 +809,12 @@ chpt_init()
 }
 
 /*-------------------------------------------------------------------*
- | string.h replacements for some of the functions which are not
- | universally available.
- *-------------------------------------------------------------------*/
-
-#ifndef HAVE_STRDUP
-/*-------------------------------------------------------------------*
- | strdup returns a pointer to a new string which is a duplicate of the
- | string pointed to by s1.  The space for the new string is obtained using
- | malloc.  If the new string can not be created, a NULL pointer is returned.
- *-------------------------------------------------------------------*/
-
-char *
-strdup(s1)
-    CONST char *s1;
-{
-    char *dup;
-
-    if (s1 == NULL)
-	return NULL;
-
-    dup = malloc(strlen(s1));
-    if (dup == NULL)
-	return NULL;
-
-    strcpy(dup, s1);
-    return dup;
-}
-#endif	/* HAVE_STRDUP */
-
-#ifndef HAVE_STRSPN
-/*-------------------------------------------------------------------*
- | strspn returns the length of the initial segment of string s1 which
- | consists entirely of characters from string s2.
- *-------------------------------------------------------------------*/
-
-size_t
-strspn(s1, s2)
-    CONST char *s1;
-    CONST char *s2;
-{
-    register size_t count;
-    register int c;
-    register CONST char *p;
-
-    count = 0;
-
-    while ( (c = *s1++) ) {
-	p = s2;
-	while (*p != c)
-	    if (*p++ == 0)
-		goto done;
-	count++;
-    }
-done:
-    return count;
-}
-#endif /* HAVE_STRSPN */
-
-#ifndef HAVE_STRCSPN
-/*-------------------------------------------------------------------*
- | strcspn returns the length of the initial segment of string s1 which
- | consists entirely of characters not from string s2.
- *-------------------------------------------------------------------*/
-
-size_t strcspn(s1, s2)
-    CONST char *s1;
-    CONST char *s2;
-{
-    register size_t count;
-    register int c;
-    register CONST char *p;
-
-    count = 0;
-
-    while ( (c = *s1++) ) {
-	p = s2;
-	while (*p)
-	    if (*p++ == c)
-		goto done;
-	count++;
-    }
-done:
-    return count;
-}
-#endif /* HAVE_STRCSPN */
-
-#ifndef HAVE_STRTOK
-/*-------------------------------------------------------------------*
- | strtok considers the string s1 to consist of a sequence of zero or more
- | text tokens separated by spans of one or more characters from the
- | separator string s2.  The first call (with pointer s1 specified) returns
- | a pointer to the first character of the first token, and will have written
- | a null character into s1 immediately following the returned token.  The
- | function keeps track of its position in the string between separate calls,
- | so that subsequent calls (which must be makde with the first argument a
- | NULL pointer) will work throught the string s1 immediately following that
- | token.  In this way subsequent calls will work through the string s1 until
- | no tokens remain.  The separator string s2 may be different from call to
- | call.  When no token remains in s1, a NULL pointer is returned.
- *-------------------------------------------------------------------*/
-
-char *
-strtok(s1,s2)
-    char *s1;
-    CONST char *s2;
-{
-    static char *oldpos = 0;
-    char *start, *end;
-
-    if (s1)
-	start = s1;
-    else
-	start = oldpos;
-    
-    if (start) {
-	start += strspn(start,s2);
-	end = start + strcspn(start,s2);
-	if (*end) {
-	    *end = 0;
-	    oldpos = end+1;
-	}
-	else
-	    oldpos = NULL;
-	if (*start == 0)
-	    start = NULL;
-    }
-    return start;
-}
-#endif	/* HAVE_STRTOK */
-
-
-/*-------------------------------------------------------------------*
  | copyright is not called anywhere, but defining it this way will put a
  | copyright string into the executable in addition to getting -Wall off our
  | backs.  Who knows, maybe someday we will want to call it.
  *-------------------------------------------------------------------*/
 
-extern	char *	copyright	PARAMS(( void ));
+extern	char *	copyright	( void );
 
 char *
 copyright()

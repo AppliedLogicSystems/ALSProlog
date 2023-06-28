@@ -1,0 +1,814 @@
+>>>> Exports from builtins files: <<<<
+
+
+ >>> File: blt_als.pro << 
+
+  list_asm/1
+
+ >>> File: blt_atom.pro << 
+
+  atom_concat/3
+  sub_atom/4
+  sub_atom/5
+  number_chars/2
+  number_codes/2
+  term_chars/2
+  term_codes/2
+
+ >>> File: blt_brk.pro << 
+
+
+ >>> File: blt_cslt.pro << 
+
+  multifile/1
+  discontiguous/1
+  include/1
+  ensure_loaded/1
+  consult/1
+  reconsult/1
+  consult/2
+  path_to_try_from_desc/3
+  path_to_try/3
+  simple_load/2
+  simple_load3/4
+  load_file_source/9
+  load_source0/6
+  load_slib/1
+
+ >>> File: blt_ctl.pro << 
+
+  once/1
+  findall/3
+  setof/3
+  bagof/3
+  copy_term/2
+  quantifier_type/1
+  set_quantifier_type/1
+  get_vars/3
+  keysort/2
+  repeat/0
+
+ >>> File: blt_curl.pro << 
+
+  http/3
+  uppercase_unwind/2
+  uc_unw/2
+  delete_from/4
+  grab_as_atom/2
+  write_lines_to_string/2
+  do_curl/1
+  curl/1
+  curl/2
+  curl/3
+
+ >>> File: blt_db.pro << 
+
+  abolish_module/1
+  assert_each/2
+  create_new_module/1
+  doexport/1
+  export_from/2
+  from(Mod, PredAs
+  douse/1
+  use_by_mod/2
+  hash_create/1
+  hash_insert/3
+  hash_insert_multi/3
+  hash_elements/3
+  hash_lookup/3
+  hash_delete/3
+  hash_delete_multi/3
+  hash_delete_pattern/3
+  make_hash_framework/3
+
+ >>> File: blt_dvsh.pro << 
+
+  halt/0
+  start_alsdev/0
+  disp_ide/0
+  disp_dbg_mgr/0
+  disp_src_mgr/1
+  alsdev/0
+  alsdev/1
+  listener_prompt/0
+  change_heartbeat/1
+  change_ide_stream_depth/1
+  change_ide_depth_type/1
+  topals_settings_info/1
+  set_topals_settings_info/1
+  debug_settings_info/1
+  set_debug_settings_info/1
+  v_showGoalToUserWin/6
+  debug_dump/1
+  reset_all_spypoints/0
+  col2/1
+  access_dbstr/3
+  set_dbstr/3
+  make_dbstr/1
+  make_dbstr/2
+  xmake_dbstr/2
+  ide_rt_err_report/2
+  ide_prolog_system_error/2
+  ide_prolog_system_warning/2
+  als_advise/1
+  als_advise/2
+  als_advise/3
+  showsm/1
+  showsms/0
+
+ >>> File: blt_evt.pro << 
+
+  set_event_handler/2
+  propagate_event/3
+  trigger_event/2
+  break_on/3, break_off/3
+  type_error/3
+  instantiation_error/1
+  domain_error/3
+  existence_error/3
+  permission_error/4
+  resource_error/2
+  system_error/1
+  atom_ok/1
+  var_or_atom_ok/1
+  integer_ok/1
+  var_or_integer_ok/1
+  var_or_nonneg_integer_ok/1
+  var_ok/1
+  nonvar_ok/1
+  var_or_number_ok/1
+  number_ok/1
+  char_list_ok/1
+  code_list_ok/1
+
+ >>> File: blt_flgs.pro << 
+
+  current_prolog_flag/2
+  set_prolog_flag/2
+  changable_flags_info/1
+  static_flags_info/1
+
+ >>> File: blt_frez.pro << 
+
+  freeze/3
+  freeze_list_ground/3
+  show_v_list/1
+  show_v_list/2
+  show_variable/2
+  show_variable/1
+  exhibit_var/1
+  exhibit_var/2
+  show_delay_binding/4
+
+ >>> File: blt_io.pro << 
+
+  printf/1
+  printf/2
+  printf/3
+  printf_opt/3
+  printf/4
+  sprintf/3
+  sprintf/4
+  bufwrite/2
+  bufwriteq/2
+  old_bufread/2
+  bufread/2
+  bufread/3
+  atomread/2
+  atomread/3
+  varsubst/4
+
+ >>> File: blt_is.pro << 
+
+  is/2
+  </2, >/2, =</2, >=/2, =:=/2, =\=/2
+  extend_is/3
+  unextend_is/3
+
+ >>> File: blt_misc.pro << 
+
+  setup_cmd_line/0
+
+ >>> File: blt_msg.pro << 
+
+  prolog_system_error/2
+  prolog_system_warning/2
+  expand_code/3
+  prolog_system_error/3
+  prolog_system_error/4
+  prolog_system_warning/3
+  prolog_system_warning/4
+  als_advise/1
+  als_advise/2
+  als_advise/3
+  decode_error/4
+
+ >>> File: blt_pckg.pro << 
+
+  save_image/2
+  save_image/1
+  get_app_cmd_line/4
+  pckg_init/0
+  attach_image/2
+  attach_image/1
+  package/1
+  package/2
+  dugv/0
+
+ >>> File: blt_shl.pro << 
+
+  init_prolog_shell/6
+  als_exec/2
+  shell_read_execute/4
+  do_shell_query2/2
+  abort/0
+
+ >>> File: blt_shlc.pro << 
+
+  setup_libraries/0
+  setup_lib/1
+  als_advise/1
+  als_advise/2
+  als_advise/3
+  get_examples_dir/1
+  get_examples_write_dir/1
+
+ >>> File: blt_shlr.pro << 
+
+
+ >>> File: blt_std.pro << 
+
+  dcg_phrase/3
+  listing/0
+  listing/1
+  listing/2
+  listing_to/1
+  dblisting/1
+  dblisting/0
+  db_dump/1
+  statistics/2
+  instance/2
+  $getenv/2
+
+ >>> File: blt_stk.pro << 
+
+  stack_overflow/0
+  stack_overflow/1
+
+ >>> File: blt_sys.pro << 
+
+  setCall/1
+  getCall/1
+  setDepth/1
+  getDepth/1
+  setRetry/1
+  getRetry/1
+  getDebugInterrupt/1
+  setDebugInterrupt/1
+  halt/0
+  corrected_sys_searchdir/1
+  modules/2
+  sys_modules/1
+  non_sys_modules/1
+  module_preds/2
+  module_preds/3
+  procedures/4
+  all_procedures/3
+  all_procedures/4
+  all_ntbl_entries/4
+  clauses/4
+  exec_to/3
+  vi/0
+  vi/1
+  edit/0
+  edit/1
+  editorchange/1
+  ls/0
+  ls/1
+  cd/0
+  cd/1
+  dir/0
+  dir/1
+  os/0
+  statistics/0
+  display_stats/1
+  heap_status/1
+  force_libload_all/0
+  force_libload_all/1
+  force_libload_all/2
+  force_libload_all_lib/2
+  libactivate/4
+  dbg_notrace/0
+  notrace/0
+  toggle_system_debug/1
+
+ >>> File: blt_term.pro << 
+
+  append/3
+  member/2
+  reverse/2
+  dreverse/2
+  length/2
+  list_delete/3
+  @</2
+  @>/2
+  @=</2
+  @>=/2
+  ==/2
+  \==/2
+  \=/2
+  recorda/3, recordz/3, recorded/3
+  sort/2
+  =../2
+  asplit0/4
+  asplit0_all/3
+  all_to_atoms/2
+
+ >>> File: builtins.pro << 
+
+  als_system/1
+  command_line/1
+  compiletime/0
+  at_load_time/0
+  module_closure/2
+  module_closure/3
+  auto_use/1
+  newmodule/1
+  endmodule/0
+  exportpred/2
+  red(P,A) :- $icode(-11,P,A,0,0)
+  setPrologInterrupt/1
+  getPrologInterrupt/1
+  catch/3
+  throw/1
+  dmember/2, dappend/3
+  sys_env/3
+  xform_command_or_query/2
+  exists_file/1
+  exists/1
+
+ >>> File: comp_d10.pro << 
+
+  mode/1, public/1, multifile/1
+  numbervars/3
+  memberchk/2
+
+ >>> File: cutils.pro << 
+
+  c_const/2
+  c_rconst/2
+  c_alloc/2
+  c_alloc_abs/2
+  c_allocn/3
+  c_allocn_abs/3
+  c_free/1
+  c_free_abs/1
+  c_set/3
+  c_set_str/4
+  c_set_raw/4
+  c_setn/4
+  c_examine/3
+  c_examine_str/4
+  c_examine_raw/4
+  c_examinen/4
+  c_create/3
+  c_create_abs/3
+  c_createn/4
+  c_createn_abs/4
+  c_create_arglist/2
+  c_create_arglist/3
+  c_free_arglist/1
+  c_call/3
+  cstr2uia/2
+  pstr2uia/2
+  cstr2str/2
+  pstr2str/2
+  cstr2pstr/1
+  pstr2cstr/1
+  c_bind_callback/3
+  c_unbind_callback/3
+  read_eval_results/2
+  eval_results/2
+
+ >>> File: db_srctr.pro << 
+
+  access_dbstr/3
+  set_dbstr/3
+  make_dbstr/1
+  make_dbstr/2
+  xmake_dbstr/2
+
+ >>> File: dbg_class.pro << 
+
+
+ >>> File: dcgs.pro << 
+
+  dcg_expand/2
+
+ >>> File: debugger.pro << 
+
+  trace/0
+  trace/1
+  trace/2
+  noshow/2
+  toggle_mod_show/1
+  leash/1
+  spy/0
+  spy/1
+  spy/2
+  spy_pat/3
+  spyWhen/1
+  spyWhen/2
+  nospy/3
+  suppress_spying/0
+  nospy/0
+  spying/0
+  nospy/1
+  debugging/0
+  list_spypoints/0
+  setup_debug/2
+  setup_debug/3
+  toggle_debug_io/0
+  set_debug_io/1
+  debugger_abort/0
+  $dbg_apg/3
+  $dbg_aph/3
+  $dbg_apge/3
+  $dbg_aphe/3
+  $dbg_apf/3
+
+ >>> File: filepath.pro << 
+
+  file_extension/3
+  path_elements/2
+  path_directory_tail/3
+  is_absolute_path/1
+  path_type/2
+  path_type/3
+  split_path/2
+  split_path/3
+  join_path/2
+  join_path/3
+  tilda_expand/2
+  directory_self/1
+  directory_self/2
+  parent_path/1
+  parent_path/2
+  pathPlusFile/3
+  pathPlusFilesList/3
+  make_change_cwd/1
+
+ >>> File: fs_cmn.pro << 
+
+  date/1
+  time/1
+  datetime/2
+  gm_datetime/2
+  date_less/2
+  date_pattern/4
+  set_date_pattern/1
+  valid_date/1
+  valid_date/3
+  time_less/2
+  datetime_less/2
+  canon_path/2
+  get_cwd/1
+  change_cwd/1
+  remove_file/1
+  filename_equal/2
+  getDirEntries/3
+  must_exist_file/1
+
+ >>> File: fsdos.pro << 
+
+  date/1
+  time/1
+  make_subdir/1
+  remove_subdir/1
+  file_status/2
+  files/2
+  files/3
+  subdirs/1
+  subdirs_red/1
+  collect_files/3
+  directory/3
+  get_current_drive/1
+  change_current_drive/1
+
+ >>> File: fsmac.pro << 
+
+  make_subdir/1
+  make_subdir/2
+  remove_subdir/1
+  file_status/2
+  files/2
+  files/3
+  subdirs/1
+  subdirs_red/1
+  directory/3
+  get_current_drive/1
+  change_current_drive/1
+  disj_to_string/2
+
+ >>> File: fsunix.pro << 
+
+  make_subdir/1
+  make_subdir/2
+  remove_subdir/1
+  kill_subdir/1
+  file_status/2
+  files/2
+  files/3
+  subdirs/1
+  subdirs_red/1
+  directory/3
+  get_current_drive/1
+  change_current_drive/1
+  move_file/2
+  disj_to_string/2
+
+ >>> File: fswin32.pro << 
+
+  make_subdir/1
+  make_subdir/2
+  remove_subdir/1
+  file_status/2
+  files/2
+  files/3
+  subdirs/1
+  subdirs_red/1
+  directory/3
+  get_current_drive/1
+  change_current_drive/1
+  move_file/2
+  disj_to_string/2
+
+ >>> File: math88k.pro << 
+
+  make_rvector/2
+  vr_arg/3
+  vr_arg_first/3
+  vr_arg_last/3
+  vr_length/2
+  vr_mag/2
+  make_cvector/2
+  vc_arg/3
+  vc_arg_first/3
+  vc_arg_last/3
+  vc_length/2
+  vc_mag2/2
+  vc_mag/2
+  vr_split/3
+  vc_split/3
+  lsplit/3
+
+ >>> File: module.pro << 
+
+
+ >>> File: objects.pro << 
+
+  defineClass/2
+  defineClass/3
+
+ >>> File: objs_run.pro << 
+
+  get_object_handle/2
+  set_object_handle/2
+  object_handle/2
+  send_self/2
+  send_all/2
+  send_each/2
+  send_parent/2
+  accessObjStruct/3
+  setObjStruct/3
+  all_setObjStruct/2
+  (:=)/ 2
+  genericObjects/2
+  set_all_args/4
+
+ >>> File: projects.pro << 
+
+  launch_project/1
+  build_project/0
+  build_project/0
+  choose_mult_files/3
+  new_cref/0
+  open_cref/0
+
+ >>> File: shlclass.pro << 
+
+
+ >>> File: simplio.pro << 
+
+  query_user/3
+  query_user/4
+  query_user/5
+  query_user/6
+  simple_menu/3
+  simple_menu/5
+  output_prolog_list/1
+  output_prolog_list/6
+  output_prolog_list/7
+  nth/3
+  position/3
+  position/4
+  dca/2
+  encode_list/3
+
+ >>> File: sio.pro << 
+
+  stream_buffer/2
+  stream_open_status/2
+  stream_type/2
+  stream_name/2
+  stream_mode/2
+  stream_repositionability/2
+  stream_identifier/2
+  stream_extra/2
+  stream_addl1/2
+  stream_addl2/2
+  stream_addl3/2
+  stream_pgoals/2
+  stream_syntax_errors/2
+  stream_wt_opts/2
+  stream_wt_line_length/2
+  stream_wt_maxdepth/2
+  stream_wt_depth_computation/2
+  stream_token_list/2
+  stream_snr_action/2
+  stream_stype/2
+  stream_eof_action/2
+  stream_blocking/2
+  set_stream_buffer/2
+  set_stream_open_status/2
+  set_stream_type/2
+  set_stream_name/2
+  set_stream_mode/2
+  set_stream_repositionability/2
+  set_stream_identifier/2
+  set_stream_extra/2
+  set_stream_addl1/2
+  set_stream_addl2/2
+  set_stream_addl3/2
+  set_stream_pgoals/2
+  set_stream_syntax_errors/2
+  set_stream_wt_opts/2
+  set_stream_wt_line_length/2
+  set_stream_wt_maxdepth/2
+  set_stream_wt_depth_computation/2
+  set_stream_token_list/2
+  set_stream_snr_action/2
+  set_stream_stype/2
+  set_stream_eof_action/2
+  set_stream_blocking/2
+  is_stream/2
+  stream_or_alias_ok/2
+  assign_alias/2
+  cancel_alias/1
+  current_alias/2
+  current_input/1
+  current_output/1
+  set_input/1
+  set_output/1
+  open/3
+  open/4
+  nsocket/4
+  nsocket_connect/3
+  nsocket_bind/2
+  nsocket_listen/2
+  nsocket_accept/3
+  nsocket_close/1
+  nsocket_select/7
+  nsocketpair/2
+  gethostbyname/2
+  gethostbyaddr/2
+  socket_stream_info/5
+  is_server_socket/1
+  accept_socket_connection/1
+  accept_socket_connection/2
+  poll/2
+  simple_select/2
+  fork/1
+  rexec/2
+  data_ready/1
+  create_wait_var_name/2
+  associated_output_alias/2
+  set_associated_output_alias/2
+  close/1
+  close/2
+  close_down_streams/1
+  close_down_nonsystem_streams/0
+  close_down_nonsystem_streams/0
+  get_code/1
+  get_code/2
+  get_code/3
+  get_char/1
+  get_char/2
+  peek_code/1
+  peek_code/2
+  peek_char/1
+  peek_char/2
+  get_atomic_nonblank_char/1
+  get_atomic_nonblank_char/2
+  push_prompt/1
+  add_to_stream_buffer/2
+  put_char/1
+  put_char/2
+  put_code/1
+  put_code/2
+  put_string/1
+  put_string/2
+  put_atom/1
+  put_atom/2
+  put_number/3
+  flush_input/1
+  flush_output/0
+  flush_output/1
+  at_end_of_stream/0
+  at_end_of_stream/1
+  at_end_of_line/0
+  at_end_of_line/1
+  skip_line/0
+  skip_line/1
+  nl/0
+  nl/1
+  set_stream_position/2
+  stream_position/2
+  stream_position/3
+  get_token_list/2
+  get_number/3
+  get_line/1
+  get_line/2
+  put_line/1
+  put_line/2
+  get_maxdepth/2
+  set_maxdepth/2
+  get_line_length/2
+  set_line_length/2
+  get_depth_computation/2
+  set_depth_computation/2
+  stream_property/2
+  sio_pckg_init/0
+
+ >>> File: sio_d10.pro << 
+
+  see/1
+  seeing/1
+  seen/0
+  tell/1
+  telling/1
+  told/0
+  get0/1
+  get0/2
+  get/1
+  get/2
+  skip/1, skip/2
+  put/1
+  put/2
+  tab/1
+  ttyflush/0
+  display/1
+
+ >>> File: sio_rt.pro << 
+
+  read/1
+  read_term/2
+  read/2
+  read_term/3
+  op/3
+  current_op/3
+  pp_flatten/2
+  pp_xform_clause/3
+  tp_get_token_list/2
+
+ >>> File: sio_wt.pro << 
+
+  write_term/2
+  write_term/3
+  write/1
+  write/2
+  writeq/1
+  writeq/2
+  write_canonical/1
+  write_canonical/2
+  print/1
+  print/2
+  tab/2
+  set_eps_show/1
+  show_substs_ext/3
+
+ >>> File: tc_base.pro << 
+
+  do_type_comp/3
+  do_type_comp/5
+  do_type_comp/8
+
+ >>> File: xconsult.pro << 
+
+  xconsult/2
+  source_level_debugging/1
+  change_source_level_debugging/1
+  change_source_level_debugging/2
+  xxconsult/5
+  xconsult/2
+  xconsult/3

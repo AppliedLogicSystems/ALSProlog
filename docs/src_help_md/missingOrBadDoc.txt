@@ -1,0 +1,70 @@
+
+*	[doc missing -- defined in generic/bparser.c]
+atom_length/2
+atom_concat/3
+
+*	[doc missing -- defined in builtins/builtins.pro]
+unwind_protect
+
+* [missing] The Development Env. > Tools page contains the following, which needs to be handled:
+
+    Selecting **Debugger** provides access to the GUI Debugger; this will be described     in detail in [Chapter 18(_[Using,the,ALS,IDE,Debugger]_)](href = start.htm).
+
+* There is a Visual Tcl button on the alsdev menu that does nothing: Find out ....
+
+* Also, add info about Cref; Also: when Cref is clicked, it is loaded, but there is a syntax error.
+
+* atendofstream01.md is a skeleton -- needs to be fleshed out.
+
+* Add info on sys_searchdir(Where) to alssystem.md ; if help/alshelp is added to builtins, also add to alssystem.md.
+
+* Determine whether the following Note from catch/3 is still true:
+catch/3 leaves a choicepoint....
+
+* calloc23.md needs both EXAMPLES and ERRORS
+* ccreate3.md needs both EXAMPLES and ERRORS
+
+* commandline1.md: ?-builtins:command_line(X). still returns X=[_A,zip].  Could only find 2 discussions labelled
+-P switch k->c (7/27/18) and c->k (7/28/18); thought there had been more. 
+
+* ----------------------------------
+
+In procinfo.[md/html] There are a number of shortcomings:
+
+A. No description or examples for 
+	'$nextproc'(N,F,NN), 
+	'$exported_proc'(Module,Pred,Arity)
+	'$resolve_module'(Mod, Pred, Arity, ResMod)
+
+	[I’ve got some simple examples, and some interesting not-quite-so-simple examples.]
+
+B. For the ProcedureType table, it should be explained that:
+	1. Builtin means “C (or other)-defined builtin“.
+
+	2. UNDEFINED means there are M/P/A entries but no clauses (e.g. no DBRef).
+	From bob.c:pbi_procinfo():
+	case NFLG_UNDEFINED:
+            proc_type = UNDEFINED_PROC;  (=3)
+            break;
+	From generic/Doc/nametable:NFLG_UNDEFINED:
+	The procedure has no clauses. The code portion contains only the overflow
+	check and a call to resolve_reference.
+
+        	Overflow check
+        	jmp resolve_reference
+
+	resolve_ref(modid, tokid, arity) returns (a pointer to) a ntbl_entry.
+	My understanding (imperfect) is that the default_procs set up for 
+	module_closures would behave this way.  What else??
+
+	3. LIBBREAK might have it’s explanation expanded slightly (i.e., it’s kind
+	of like UNDEFINED in the sense that initially, there isn’t “normal” executable code
+	attached to the nametable entry.  However, it’s different from UNDEFINED in that
+	the ntblentry for UNDEFINED doesn’t get changed (it’s a jmp), while a ntblentry for 
+	LIBBREAK gets changed into a regular predicate entry.
+ 
+* ----------------------------------
+
+commandline1.md:  ______	<< unfinished
+rexec2.md:  ______		<< buggy: Issue #134
+getcwd1.md:  ______

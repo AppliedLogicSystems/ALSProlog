@@ -1,5 +1,6 @@
 *~
 *.obp
+*.psl
 *.d
 *.o
 *.a
@@ -17,6 +18,7 @@
 foonew
 alspro
 core/unix/*/alsdev
+core/unix/*/app_image*
 alspro_b
 alsdev_b
 *.tgz
@@ -29,5 +31,11 @@ unix/linux
 unix/cygwin
 win32/win32
 foreign_sdk/*/ALS_Prolog_Foreign_SDK
-build-xcode
+docs/Gemfile.lock
+_site
+_local_site
+.jekyll-metadata
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadatabuild-xcode
 xcuserdata/

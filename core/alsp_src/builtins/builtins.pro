@@ -406,7 +406,7 @@ export getPrologInterrupt/1.
 	clct_tr(ActiveDelays),
 %pbi_write(active_delays=ActiveDelays), pbi_nl, pbi_ttyflush,
 	delay_handler(ActiveDelays),
-%pbi_write('--------$interrupt-3---delay_handler-DONE'), pbi_nl, pbi_ttyflush,
+%pbi_write('--------$interrupt-3---delay_handler-DONE-call'=(M:G)), pbi_nl, pbi_ttyflush,
 	M:G.
 
 		%% -------------------------------------
@@ -1050,7 +1050,7 @@ load_builtins(BDir, File)
 	'$atom_concat'(BDir,File, BltFile),
 	'$atom_concat'(Path,BltFile,FileAndPath),
 	obp_push_stop,
-	'$load'(FileAndPath, 0),
+	'$load'(FileAndPath, 2 /* SUPPRESS_OBP */),
 	obp_pop,
 	assertz_at_load_time(loaded_builtins_file(File,builtins)).
 
@@ -1164,6 +1164,8 @@ ld_fs(OS)
 	consult_builtins(BDir, blt_shlr),			
 	consult_builtins(BDir, blt_cslt),			
 	consult_builtins(BDir, blt_shl),
+
+	consult_builtins(BDir, blt_curl),
 
 %	consult_builtins(BDir, blt_dvsh),
 %	consult_builtins(BDir, dbg_class),

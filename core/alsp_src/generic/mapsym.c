@@ -102,7 +102,7 @@
  * on the to_free list.  The block returned will be longword aligned.
  */
 
-static long * alloc	PARAMS(( size_t, long ** ));
+static long * alloc	( size_t, long ** );
 static long *
 alloc(size, to_free_ptr)
     size_t size;
@@ -133,7 +133,7 @@ alloc(size, to_free_ptr)
  * free_em will free up the space allocated by successive calls to alloc.
  */
 
-static	void	free_em		PARAMS(( long * ));
+static	void	free_em		( long * );
 static void
 free_em(to_free)
     long *to_free;
@@ -252,7 +252,7 @@ pop_symmap()
  * new_bucket is called internally to get a new bucket block
  */
 
-static	struct bucket_block * new_bucket PARAMS(( void ));
+static	struct bucket_block * new_bucket ( void );
 
 static struct bucket_block *
 new_bucket()

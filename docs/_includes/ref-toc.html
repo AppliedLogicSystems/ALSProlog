@@ -1,0 +1,40 @@
+{%- for package in site.ref_packages %}
+
+<h2 id="{{package | slugify}}">{{package | escape}}</h2>
+
+{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
+
+{%- for g in groups %}
+
+<h3 id="{{g.name | slugify}}">{{g.name}}</h3>
+<table>
+	{%- assign predicates = "" | split: "" %}
+	{%- for r in g.items %}
+		{% for p in r.predicates %}
+			{% assign predicates = predicates | push: p %}
+		{% endfor %}
+	{%- endfor %}
+
+	{%- assign sorted_preds = predicates | sort: "sig" %}
+
+	{%- for p in sorted_preds %}
+		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+		<tr>
+		<td>
+			<a href="{{ppage.url}}">
+			{{ p.sig }}
+			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% endif %}
+		</a>
+		</td>
+		<td>
+		{% if p.args -%}
+		  {%- for a in p.args %}{{ a[1] }}{% unless forloop.last %}; {% endunless %}{% endfor %}
+		{%- else -%}
+		  {{ p.desc }}
+		{%- endif -%}
+		</td>
+		</tr>
+	{%- endfor %}
+</table>
+{%- endfor %}
+{%- endfor %}

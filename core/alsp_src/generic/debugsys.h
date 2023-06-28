@@ -42,7 +42,7 @@ typedef enum {
 
 extern int debug_system[];
 
-extern	int pbi_toggle_debug_system	PARAMS( ( void ) );
+extern	int pbi_toggle_debug_system	( void );
 
 
 #endif /* DEBUGSYS */

@@ -1,0 +1,5 @@
+libactivate(pxml,[library,parse_html],
+    [grab_pxml/2,grab_pxml_with_tagged/3,grab_pxml_with_paths/5,
+        parse_html_toks_to_pxml_vals/3,parse_html_toks_to_pxml/5,
+        read_pxml_term/7,read_pxml_comment/3,unary_tag/1],
+    []).

@@ -1,0 +1,443 @@
+
+blt_als.pro:
+==========
+      list_asm/1
+
+blt_cslt.pro:
+==========
+      discontiguous/1
+      ensure_loaded/1
+      include/1
+      load_file_source/9
+      load_slib/1
+      multifile/1
+      path_to_try/3
+      path_to_try_from_desc/3
+      simple_load/2
+      simple_load3/4
+
+blt_ctl.pro:
+==========
+      once/1
+      quantifier_type/1
+      set_quantifier_type/1
+
+blt_curl.pro:
+==========
+      do_curl/1
+      grab_as_atom/2
+      uc_unw/2
+      uppercase_unwind/2
+      write_lines_to_string/2
+
+blt_db.pro:
+==========
+      assert_each/2
+      create_new_module/1
+      doexport/1
+      douse/1
+      export_from/2
+      hash_create/1
+      hash_delete/3
+      hash_delete_multi/3
+      hash_delete_pattern/3
+      hash_elements/3
+      hash_insert/3
+      hash_insert_multi/3
+      hash_lookup/3
+      make_hash_framework/3
+      use_by_mod/2
+
+blt_dvsh.pro:
+==========
+      als_advise/2
+      als_advise/3
+
+blt_evt.pro:
+==========
+      char_list_ok/1
+      code_list_ok/1
+      domain_error/3
+      existence_error/3
+      instantiation_error/1
+      integer_ok/1
+      nonvar_ok/1
+      number_ok/1
+      permission_error/4
+      propagate_event/3
+      resource_error/2
+      set_event_handler/2
+      system_error/1
+      trigger_event/2
+      type_error/3
+      var_ok/1
+      var_or_atom_ok/1
+      var_or_integer_ok/1
+      var_or_nonneg_integer_ok/1
+      var_or_number_ok/1
+
+blt_flgs.pro:
+==========
+      static_flags_info/1
+
+blt_frez.pro:
+==========
+      exhibit_var/2
+      freeze/3
+      freeze_list_ground/3
+      show_delay_binding/4
+      show_v_list/1
+      show_v_list/2
+      show_variable/1
+      show_variable/2
+
+blt_io.pro:
+==========
+      atomread/3
+      sprintf/4
+      varsubst/4
+
+blt_msg.pro:
+==========
+      decode_error/4
+      expand_code/3
+      prolog_system_error/2
+      prolog_system_error/3
+      prolog_system_error/4
+      prolog_system_warning/2
+      prolog_system_warning/3
+      prolog_system_warning/4
+
+blt_pckg.pro:
+==========
+      attach_image/2
+      dugv/0
+      get_app_cmd_line/4
+      package/1
+      package/2
+      pckg_init/0
+      save_image/1
+
+blt_shl.pro:
+==========
+      init_prolog_shell/6
+      shell_read_execute/4
+
+blt_shlc.pro:
+==========
+      get_examples_write_dir/1
+      setup_lib/1
+      setup_libraries/0
+
+blt_std.pro:
+==========
+      db_dump/1
+      dblisting/0
+      dblisting/1
+      dcg_phrase/3
+      listing/2
+      listing_to/1
+
+blt_stk.pro:
+==========
+      stack_overflow/1
+
+blt_sys.pro:
+==========
+      cd/0
+      cd/1
+      clauses/4
+      corrected_sys_searchdir/1
+      dbg_notrace/0
+      dir/0
+      dir/1
+      display_stats/1
+      edit/0
+      edit/1
+      editorchange/1
+      exec_to/3
+      force_libload_all/0
+      force_libload_all/1
+      force_libload_all/2
+      force_libload_all_lib/2
+      getCall/1
+      getDebugInterrupt/1
+      getDepth/1
+      getRetry/1
+      heap_status/1
+      libactivate/4
+      ls/0
+      ls/1
+      module_preds/2
+      module_preds/3
+      non_sys_modules/1
+      os/0
+      setCall/1
+      setDebugInterrupt/1
+      setDepth/1
+      setRetry/1
+      sys_modules/1
+      toggle_system_debug/1
+      vi/0
+      vi/1
+
+blt_term.pro:
+==========
+      asplit0/4
+      asplit0_all/3
+      list_delete/3
+
+builtins.pro:
+==========
+      auto_use/1
+      endmodule/0
+      exists/1
+      exportpred/2
+      newmodule/1
+      xform_command_or_query/2
+
+cutils.pro:
+==========
+      c_create_arglist/2
+      c_create_arglist/3
+      c_unbind_callback/3
+      cstr2pstr/1
+      cstr2str/2
+      cstr2uia/2
+      eval_results/2
+      pstr2cstr/1
+      pstr2str/2
+      pstr2uia/2
+      read_eval_results/2
+
+debugger.pro:
+==========
+      $dbg_apf/3
+      $dbg_apg/3
+      $dbg_apge/3
+      $dbg_aph/3
+      $dbg_aphe/3
+      debugger_abort/0
+      debugging/0
+      list_spypoints/0
+      noshow/2
+      nospy/3
+      set_debug_io/1
+      setup_debug/2
+      setup_debug/3
+      spy/2
+      spyWhen/1
+      spyWhen/2
+      spy_pat/3
+      spying/0
+      suppress_spying/0
+      toggle_debug_io/0
+      toggle_mod_show/1
+      trace/2
+
+filepath.pro:
+==========
+      directory_self/2
+      file_extension/3
+      is_absolute_path/1
+      join_path/2
+      join_path/3
+      make_change_cwd/1
+      parent_path/1
+      parent_path/2
+      pathPlusFile/3
+      pathPlusFilesList/3
+      path_directory_tail/3
+      path_elements/2
+      path_type/2
+      path_type/3
+      split_path/2
+      split_path/3
+      tilda_expand/2
+
+fs_cmn.pro:
+==========
+      valid_date/3
+
+fsdos.pro:
+==========
+      directory/3
+      file_status/2
+      files/2
+      files/3
+      get_current_drive/1
+      make_subdir/1
+      remove_subdir/1
+      subdirs/1
+      subdirs_red/1
+
+fsmac.pro:
+==========
+      make_subdir/2
+
+fsunix.pro:
+==========
+      move_file/2
+
+objects.pro:
+==========
+      defineClass/3
+
+objs_run.pro:
+==========
+      genericObjects/2
+      get_object_handle/2
+      object_handle/2
+      send_all/2
+      send_each/2
+      send_parent/2
+      send_self/2
+      set_all_args/4
+      set_object_handle/2
+
+simplio.pro:
+==========
+      nth/3
+      output_prolog_list/1
+      output_prolog_list/6
+      output_prolog_list/7
+      position/3
+      position/4
+      query_user/3
+      query_user/4
+      query_user/5
+      query_user/6
+      simple_menu/3
+      simple_menu/5
+
+sio.pro:
+==========
+      accept_socket_connection/2
+      add_to_stream_buffer/2
+      assign_alias/2
+      associated_output_alias/2
+      at_end_of_line/0
+      at_end_of_line/1
+      cancel_alias/1
+      close_down_nonsystem_streams/0
+      close_down_streams/1
+      create_wait_var_name/2
+      current_alias/2
+      data_ready/1
+      fork/1
+      get_atomic_nonblank_char/1
+      get_atomic_nonblank_char/2
+      get_code/3
+      get_depth_computation/2
+      get_line/1
+      get_line/2
+      get_line_length/2
+      get_maxdepth/2
+      get_number/3
+      get_token_list/2
+      gethostbyaddr/2
+      gethostbyname/2
+      is_server_socket/1
+      is_stream/2
+      nl/0
+      nl/1
+      nsocket/4
+      nsocket_accept/3
+      nsocket_bind/2
+      nsocket_close/1
+      nsocket_connect/3
+      nsocket_listen/2
+      nsocket_select/7
+      nsocketpair/2
+      peek_char/1
+      peek_char/2
+      push_prompt/1
+      put_line/1
+      put_line/2
+      put_number/3
+      set_associated_output_alias/2
+      set_maxdepth/2
+      set_stream_addl1/2
+      set_stream_addl2/2
+      set_stream_addl3/2
+      set_stream_blocking/2
+      set_stream_buffer/2
+      set_stream_eof_action/2
+      set_stream_extra/2
+      set_stream_identifier/2
+      set_stream_mode/2
+      set_stream_name/2
+      set_stream_open_status/2
+      set_stream_pgoals/2
+      set_stream_repositionability/2
+      set_stream_snr_action/2
+      set_stream_stype/2
+      set_stream_syntax_errors/2
+      set_stream_token_list/2
+      set_stream_type/2
+      set_stream_wt_depth_computation/2
+      set_stream_wt_line_length/2
+      set_stream_wt_maxdepth/2
+      set_stream_wt_opts/2
+      simple_select/2
+      sio_pckg_init/0
+      skip_line/0
+      skip_line/1
+      socket_stream_info/5
+      stream_addl1/2
+      stream_addl2/2
+      stream_addl3/2
+      stream_blocking/2
+      stream_buffer/2
+      stream_eof_action/2
+      stream_extra/2
+      stream_identifier/2
+      stream_mode/2
+      stream_name/2
+      stream_open_status/2
+      stream_or_alias_ok/2
+      stream_pgoals/2
+      stream_position/2
+      stream_position/3
+      stream_repositionability/2
+      stream_snr_action/2
+      stream_stype/2
+      stream_syntax_errors/2
+      stream_token_list/2
+      stream_type/2
+      stream_wt_depth_computation/2
+      stream_wt_line_length/2
+      stream_wt_maxdepth/2
+      stream_wt_opts/2
+
+sio_d10.pro:
+==========
+      get0/2
+      put/2
+
+sio_rt.pro:
+==========
+      pp_xform_clause/3
+      tp_get_token_list/2
+
+sio_wt.pro:
+==========
+      print/2
+      set_eps_show/1
+      show_substs_ext/3
+      tab/2
+      writeq/1
+      writeq/2
+
+tc_base.pro:
+==========
+      do_type_comp/5
+      do_type_comp/8
+
+xconsult.pro:
+==========
+      change_source_level_debugging/2
+      source_level_debugging/1
+      xconsult/2
+      xconsult/3
+      xxconsult/5

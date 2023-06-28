@@ -37,16 +37,16 @@ test :-
 	gn(long, 0x12345678),	%% 43-46
 
 	point(a),
-
 	stream_position(foo, _, 14),
+
 	gn(long, 0x10203040),	%% 14-17
 	pn(byte, 21),		%% 18
 	gn(double, -44.99),	%% 19-26
 	gn(long, 0x11223344),	%% 27-30
 
 	point(b),
-
 	stream_position(foo, _, 10),
+
 	pn(ulong, 0x98765432),	%% 10-13
 	gn(long, 0x10203040),	%% 14-17
 	gn(byte, 21),		%% 18
@@ -54,8 +54,8 @@ test :-
 	gn(long, 0x11223344),	%% 27-30
 
 	point(c),
-
 	stream_position(foo, _, 0),
+
 	gn(double,19.3),	%% 0-7
 	gn(short, 20),		%% 8-9
 	gn(ulong, 0x98765432),	%% 10-13
@@ -77,8 +77,8 @@ test :-
 	pn(short, 16385),	%% 73-74
 
 	point(d),
-
 	stream_position(foo, _, 39),
+
 	pn(float, 33.75),	%% 39-42
 	pn(ulong, 0x87654321),	%% 43-46
 	gn(float, 3.25),	%% 47-50
@@ -91,8 +91,8 @@ test :-
 	gn(short, 16385),	%% 73-74
 
 	point(e),
-
 	stream_position(foo, _, 31),
+
 	gn(double, 123.456),	%% 31-38
 	gn(float, 33.75),	%% 39-42
 	gn(ulong, 0x87654321),	%% 43-46
@@ -101,8 +101,8 @@ test :-
 	pn(byte, 98),		%% 55
 
 	point(f),
-
 	stream_position(foo, _, 75),
+
 	pn(double, 12.5),	%% 75-82
 	pn(short, 987),		%% 83-84
 	pn(double, -9999999.5),	%% 85-92
@@ -112,8 +112,8 @@ test :-
 	pn(ulong, 0xacbacbaa),	%% 104-107
 
 	point(g),
-
 	stream_position(foo, _, 27),
+
 	gn(long, 0x11223344),	%% 27-30
 	gn(double, 123.456),	%% 31-38
 	gn(float, 33.75),	%% 39-42
@@ -134,28 +134,30 @@ test :-
 	gn(byte, 11),		%% 103
 	gn(ulong, 0xacbacbaa),	%% 104-107
 
-	point(f),
+	point(h),
 
 	close(foo),
-	write('Test completed successfully.'),nl.
+	remove_file('numio.tmp'),
+	write('Test numio.pro completed successfully.'),nl.
 
 pn(Size,Val) :-
 	put_number(foo,Size,Val),
 	!.
 pn(Size,Val) :-
-	write(put_number(foo,Size,Val)), write(' failed.'),nl.
+	write(put_number(foo,Size,Val)), write(' failed.'),nl,fail.
 
 gn(Size,Val) :-
 	get_number(foo,Size,Val2),
 	!,
 	gneq(Size, Val, Val2).
 gn(Size,Val) :-
-	write(get_number(foo,Size,Val)), write(' failed.'),nl.
+	write(get_number(foo,Size,Val)), write(' failed.'),nl,fail.
 
 gneq(Size,Val,Val) :- !.
 gneq(Size,Val1,Val2) :-
 	write(getnumber(foo,Size,Val1)),
 	write(' got '), write(Val2), write(' instead'),
-	nl.
+	nl,fail.
 
-point(X) :- write('point '),write(X),nl.
+point(X) :- printf('\npoint %t\n',[X]).
+

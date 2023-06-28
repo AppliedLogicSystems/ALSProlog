@@ -15,7 +15,7 @@
 /*#undef DynamicForeign */
 #ifdef DynamicForeign
 
-typedef void (*PFV) PARAMS(( void ));		/* A function pointer type */
+typedef void (*PFV) ( void );		/* A function pointer type */
 
 #if defined(HAVE_DLOPEN)
 
@@ -167,16 +167,13 @@ foreign_shutdown()
 #include <setjmp.h>
 #include <string.h>
 
-#ifdef MISSING_EXTERN_LDOPEN
-extern	LDFILE *ldopen		PARAMS(( CONST char *, LDFILE * ));
-#endif
-extern	int	ldclose		PARAMS(( LDFILE * ));
-extern	int	ldshread	PARAMS(( LDFILE *, unsigned int, SCNHDR * ));
-extern	int	ldtbread	PARAMS(( LDFILE *, long, SYMENT * ));
-extern	char *	ldgetname	PARAMS(( LDFILE *, CONST SYMENT * ));
-extern	int	ldnshread	PARAMS(( LDFILE *, CONST char *, SCNHDR * ));
-extern	char *	mktemp		PARAMS(( char * ));
-extern	int	unlink		PARAMS(( CONST char * ));
+extern	int	ldclose		( LDFILE * );
+extern	int	ldshread	( LDFILE *, unsigned int, SCNHDR * );
+extern	int	ldtbread	( LDFILE *, long, SYMENT * );
+extern	char *	ldgetname	( LDFILE *, const SYMENT * );
+extern	int	ldnshread	( LDFILE *, const char *, SCNHDR * );
+extern	char *	mktemp		( char * );
+extern	int	unlink		( const char * );
 
 /*  a symbol table file is an binary object */
 typedef struct {
@@ -206,18 +203,18 @@ typedef struct {
 } ENVIRONMENT;
 ENVIRONMENT Environment;	/* program environment */
 
-static	void	fatal		PARAMS(( char *, char * ));
-static	IMAGE *	CreateImage	PARAMS(( char * ));
-static	void	DestroyImage	PARAMS(( IMAGE * ));
-static	void	DestroyImages	PARAMS(( void ));
-static	void	TraverseSectionsImage PARAMS(( IMAGE * ));
-static	long	FindSymbolValue	PARAMS(( char * ));
-static	long	GetSectionStart	PARAMS(( char * ));
-static	char *	xtext_and_xdata_strings PARAMS(( long, long , char *, long ));
-static	char *	GenerateCoffFile PARAMS(( IMAGE *, IMAGE * ));
-static	IMAGE *	CreateSymbolTable PARAMS(( IMAGE *, IMAGE *, char * ));
-static	void	CreateEnvironment PARAMS(( void ));
-static	void	Load		PARAMS(( char *, char * ));
+static	void	fatal		( char *, char * );
+static	IMAGE *	CreateImage	( char * );
+static	void	DestroyImage	( IMAGE * );
+static	void	DestroyImages	( void );
+static	void	TraverseSectionsImage ( IMAGE * );
+static	long	FindSymbolValue	( char * );
+static	long	GetSectionStart	( char * );
+static	char *	xtext_and_xdata_strings ( long, long , char *, long );
+static	char *	GenerateCoffFile ( IMAGE *, IMAGE * );
+static	IMAGE *	CreateSymbolTable ( IMAGE *, IMAGE *, char * );
+static	void	CreateEnvironment ( void );
+static	void	Load		( char *, char * );
 
 jmp_buf fatalbuf;
 

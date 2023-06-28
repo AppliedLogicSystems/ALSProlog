@@ -293,7 +293,7 @@ int pbi_crypt(void)
          !getstring(&b2, v2, t2))
 	FAIL;
 
-	ss = crypt((char *)b1, (char *)b2);
+    ss = crypt((char *)b1, (char *)b2);
     w_mk_uia(&u, &ut, (UCHAR *)ss);
 
     if (w_unify(v3, t3, u, ut))

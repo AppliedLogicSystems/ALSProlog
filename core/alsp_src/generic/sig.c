@@ -48,9 +48,9 @@
  * Control/C handler and structure to store original handler.
  */
 
-extern int cntrlc_handler PARAMS((void));
-extern int endof_cntrlc_handler PARAMS((void));
-extern int set_prolog_interrupt PARAMS((void));
+extern int cntrlc_handler (void);
+extern int endof_cntrlc_handler (void);
+extern int set_prolog_interrupt (void);
 
 struct intvec_struc {
     long  prot_vec_addr;
@@ -101,7 +101,7 @@ void  signal_handler(AST_param)
     char  AST_param;
 #else
 #define NAIVE_SIGNAL_HANDLER 1
-extern int set_prolog_interrupt	PARAMS((void));
+extern int set_prolog_interrupt	(void);
 void  signal_handler(signum)
     int   signum;
 #endif 		/* defined(HAVE_UCONTEXT_H) */
@@ -484,9 +484,9 @@ int pbi_alarm(void)
     else
 	PI_FAIL;
 
-	os_set_timer(dval, dinterval);
-	
-	PI_SUCCEED;	
+    os_set_timer(dval, dinterval);
+
+    PI_SUCCEED;
 }
 
 #ifndef MSWin32
@@ -500,7 +500,7 @@ int pbi_alarm(void)
 #define SIGCHLD SIGCLD
 #endif
 
-static	void	burychild	PARAMS(( int ));
+static	void	burychild	( int );
 
 static void
 burychild(signo)

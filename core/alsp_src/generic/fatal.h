@@ -19,7 +19,7 @@
 #ifndef _FATAL_H_INCLUDED_
 #define _FATAL_H_INCLUDED_ 1
 
-extern	void	fatal_error	PARAMS( (int, long) );
+extern	void	fatal_error	(int, long);
 
 /* all error codes moved to alspi.h */
 

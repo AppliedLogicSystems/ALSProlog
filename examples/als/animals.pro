@@ -68,7 +68,10 @@ question(c20,'Does it swim').
 question(c21,'Is it a good flyer').
 
 animal :-
-abolish(fact/2),
+   nl,write('Simple shell for animal identification via questions'),nl,
+   write('From: How to Solve it in Prolog,'),nl,
+   write('        by Coelho, Cotta, Pereira, Lisbon, 1980'),nl,nl,
+   abolish(fact/2),
    write('Please describe the animal.'),nl,nl,
    recognition(_),
    nl,nl,

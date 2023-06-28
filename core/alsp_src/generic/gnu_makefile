@@ -3,7 +3,7 @@ ALSDEVDIR=$(CORE)/als_dev/alsdev
 CORE=$(SOURCE_DIR)/..
 VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE_DIR)/smath:$(SOURCE_DIR)/builtins:$(SOURCE_DIR)/library:$(ALSDEVDIR):$(CORE)/tcltk_interface/common
 
-VERSION_FLAGS := -DVERSION=$(shell $(SOURCE_DIR)/../../version)
+VERSION_FLAGS := $(or $(shell $(SOURCE_DIR)/../../version flags), $(error version error))
 
 default : binaries
 
@@ -32,7 +32,7 @@ ALSDEV_SOURCE = $(ALSDEV_OS_SOURCE) tcl_interface.c
 
 ALSDEV_OBJECTS = $(ALSDEV_SOURCE:.c=.o)
 
-GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
+GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bcurl.c bdb.c \
 	bdbg.c bgv.c bio.c bmeta.c \
 	bmisc.c bos.c bparser.c bpckg.c \
 	bsio.c bsystem.c built.c butil.c \
@@ -52,7 +52,7 @@ GENERIC_SOURCE = alloc.c arith.c random.c bcinter.c bdb.c \
 BUILTINS =       blt_frez.pro  blt_std.pro   filepath.pro  \
    blt_als.pro   blt_io.pro    blt_stk.pro   fs_cmn.pro    simplio.pro \
    blt_atom.pro  blt_is.pro    blt_sys.pro   fsdos.pro     sio.pro \
-   blt_brk.pro   blt_lib.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
+   blt_brk.pro   blt_term.pro  fsmac.pro     sio_d10.pro \
    blt_cslt.pro  blt_misc.pro  builtins.pro  fsunix.pro    sio_rt.pro \
    blt_ctl.pro   blt_msg.pro   comp_d10.pro  fswin32.pro   sio_wt.pro \
    blt_db.pro    blt_pckg.pro  cutils.pro    xconsult.pro \
@@ -89,7 +89,7 @@ binaries : alspro_b libalspro.a libalspro.$(OS_SL_EXT) alspro alsdev
 all : default
 
 alspro_b : alsdir $(MAIN_OBJECTS) libalspro.a $(MAKEFS)
-	$(CC) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) -o alspro_b $(MAIN_OBJECTS) libalspro.a $(LDFLAGS) $(LIBS)
 
 alspro :  alsdir alspro_b $(BUILTINS) $(MAKEFS)
 	rm -f alsdir/builtins/*.obp
@@ -108,23 +108,30 @@ libalspro.$(OS_SL_EXT) : alspro_b alsdir  $(SHARED_OBJECTS) $(LIB_OBJECTS) $(MAK
 	./alspro_b -q -b -obp -g "attach_image('libalspro.$(OS_SL_EXT)')"
 
 so_test : libalspro.$(OS_SL_EXT) $(MAKEFS)
-	$(CC) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
+	$(CC) $(CFLAGS) -o so_test $(MAIN_OBJECTS) libalspro.so $(LIB)
 
 
 TEST_DIR = $(SOURCE_DIR)/tests
 
 test: testrun
 
-testrun : command_line_test iso_test_suite test_suite
+testrun : curl_test test_app_image command_line_test iso_test_suite test_suite 
+
+curl_test: alspro
+	$(TEST_DIR)/tsuite/curl_test.sh ./alspro
 
 command_line_test: alspro
 	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
 
 test_suite: alspro
-	./alspro -giac -b $(TEST_DIR)/autotest.pro $(TEST_DIR)/atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
+	./alspro -no_obp -s $(TEST_DIR) -b autotest.pro atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
+
+test_app_image: alspro
+	$(TEST_DIR)/tsuite/test_app_image.sh
 
 iso_test_suite: alspro
-	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
+	./alspro -no_obp -q -b $(TEST_DIR)/iso_test_suite/valid_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests." | tee iso_test.out
+	diff --ignore-space-change $(TEST_DIR)/iso_test_suite/iso_test_result.txt iso_test.out
 
 #	./alspro -giac -b $(TEST_DIR)/iso_test_suite/valid_so.pro $(TEST_DIR)/iso_test_suite/utils_so.pro -g "cd('$(TEST_DIR)/iso_test_suite'), run_all_tests."
 
@@ -178,14 +185,13 @@ alsdev :  alsdev_b alsdir alsdir/images alsdir/shared $(BUILTINS) $(ALSDEVFILES)
 
 #	./alspro_b -q -b -obp $(ALSDEVDIR)/ldr_alspro_demo.pro -g 'save_image(alspro_demo,[])'
 
-
 clean :
 	rm -f *.o rm *.d
 
 distclean: superclean
 
 superclean : clean
-	rm -fr alsdir alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS)
+	rm -fr alsdir examples alspro* alspro_b* alsdev* studals* libalspro.a libalspro.$(OS_SL_EXT)* *.obp $(SUBOS) app_image*
 	rm -rf $(SOURCE_DIR)/tests/iso_test_suite/*.tmp $(SOURCE_DIR)/tests/iso_test_suite/*.out *.log *.out foo* *.tmp
 
 -include *.d

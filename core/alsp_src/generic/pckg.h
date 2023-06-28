@@ -9,7 +9,7 @@
 
 
 extern long *system_pckg; 		/* currently loaded package */
-extern	void	pckg_run_init_goal	PARAMS(( void ));
+extern	void	pckg_run_init_goal	( void );
 
 #ifdef PACKAGE
 

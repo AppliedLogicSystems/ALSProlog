@@ -23,7 +23,10 @@ LABEL maintainer Chuck Houpt <chuck@habilis.net>
 
 # Install standard dev tools and 32-bit libraries
 RUN yum -y groupinstall 'Development Tools'
-RUN yum -y install glibc-devel.i686 libgcc.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686
+RUN yum -y install ruby ruby-dev php glibc-devel.i686 libgcc.i686 \
+  tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686 \
+  libcurl-devel.i686
+RUN gem install bundler
 
 # Oddly, these fonts are needed to run as client
 RUN yum -y install dejavu-sans-fonts

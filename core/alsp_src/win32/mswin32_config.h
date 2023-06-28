@@ -23,7 +23,6 @@
 #define HAVE_STDARG_H	1
 #define HAVE_STDLIB_H	1
 #define HAVE_FCNTL_H	1
-#define HAVE_STRING_H	1
 #define HAVE_SRAND		1
 
 #define HAVE_TIME		1
@@ -34,10 +33,6 @@
 #define MISSING_UNIX_DOMAIN_SOCKETS 1
 
 #define APP_PRINTF_CALLBACK	1
-
-#define HAVE_STRCSPN	1
-#define HAVE_STRSPN	1
-#define HAVE_STRTOK	1
 
 #define REVERSE_ENDIAN 1
 

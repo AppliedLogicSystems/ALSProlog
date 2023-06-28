@@ -11,6 +11,7 @@ module als_testing.
 
 export run_tests/0.
 
+:- dynamic(failed/1).
 
 run_tests :-
 	open('autotest.log',write,LOGStream,[alias(autotestlog)]),
@@ -25,9 +26,10 @@ run_tests :-
 	printf(autotestlog,'    OS=%t-%t  Proc=%t  Ver=%t\n',[OS,OSVar,Proc,PVer]),
 	printf(autotestlog,'*********************************************\n',[]),
 	configure_testing,
+	(getenv('ID', ID) ; true),
 	!,
 	tell(autotestlog),
-	run_tests0,
+	run_tests0(ID),
 	bagOf(TestID, failed(TestID), FailedTests),
 	final_message(FailedTests,autotestlog, _),
 	flush_output(LOGStream),
@@ -44,7 +46,6 @@ run_tests :-
 
 configure_testing
 	:-
-set_prolog_flag(unknown, fail),
 	get_cmdline_vals(CmdLineVs),
 	bagOf(TD, member(['-td',TD], CmdLineVs), TDs),
 	configure_testing(TDs, CmdLineVs).
@@ -60,7 +61,8 @@ configure_testing(TDs, CmdLineVs)
 	dmember(['-srcdir',SrcDir], CmdLineVs),
 	join_path([SrcDir,'../../',examples,als], EXAMP_ALS_Path),
 	join_path([SrcDir,tests,tsuite], TSUITE_Path),
-	add_search_dirs([EXAMP_ALS_Path,TSUITE_Path]).
+	join_path([SrcDir,tests,libtests], LIBTESTS_Path),
+	add_search_dirs([EXAMP_ALS_Path,TSUITE_Path, LIBTESTS_Path]).
 
 configure_testing(_, _)
 	:-
@@ -72,12 +74,12 @@ add_search_dirs([D | Ds])
 	builtins:assert(searchdir(D)),
 	add_search_dirs(Ds).
 
-run_tests0 :-
+run_tests0(TestID) :-
 	test_info(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
 	conduct_test(TestID, TestFile, TestMod, TestStartCall, TestDescrip),
 	flush_output(autotestlog),
 	fail.
-run_tests0.
+run_tests0(_).
 
 conduct_test(TestID, TestFile, TestMod, TestStartCall, TestDescrip)
 	:-
@@ -125,7 +127,7 @@ kill_off([(P,A) | PL],Mod)
 
 final_message([], OutStream, true)
 	:-!,
-	printf(OutStream,'All Tests Were Successful !!\n',[]).
+	printf(OutStream,'All autotest Tests (Standard ALS examples & tsuite tests) Were Successful !!\n',[]).
 final_message(FailedTests, OutStream, fail)
 	:-
 	printf(OutStream, 'The following tests failed:\n\t%t\n', FailedTests).

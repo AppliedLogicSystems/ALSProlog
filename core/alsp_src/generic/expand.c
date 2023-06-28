@@ -23,13 +23,13 @@
 #include "icodegen.h"
 #include "main.h"
 
-static	void	rxpbod			PARAMS(( pword ));
-static	pword	expand_pred		PARAMS(( pword ));
-static	pword	expand_fact		PARAMS(( int, pword ));
-static	pword	expand_rule		PARAMS(( int, pword ));
-static	pword	expand_query	PARAMS(( int, pword ));
-static	pword	expand_command	PARAMS(( int, pword ));
-static  pword	expand_expand	PARAMS(( int, pword ));
+static	void	rxpbod			( pword );
+static	pword	expand_pred		( pword );
+static	pword	expand_fact		( int, pword );
+static	pword	expand_rule		( int, pword );
+static	pword	expand_query	( int, pword );
+static	pword	expand_command	( int, pword );
+static  pword	expand_expand	( int, pword );
 
 /*
  * DCG and Rule Expansion:
@@ -282,19 +282,19 @@ static long vtable[4096];
 static int vtp;
 
 
-static	pword	cvt_walk_term	PARAMS(( PWord ));
-static	pword	cvt_walk_list	PARAMS(( PWord ));
-static	pword	cvt_walk_sym	PARAMS(( PWord ));
-static	pword	cvt_walk_int	PARAMS(( PWord ));
-static	pword	cvt_walk_var	PARAMS(( PWord ));
-static	pword	cvt_walk_uia	PARAMS(( PWord ));
+static	pword	cvt_walk_term	( PWord );
+static	pword	cvt_walk_list	( PWord );
+static	pword	cvt_walk_sym	( PWord );
+static	pword	cvt_walk_int	( PWord );
+static	pword	cvt_walk_var	( PWord );
+static	pword	cvt_walk_uia	( PWord );
 
 #ifdef DoubleType
-static	pword	cvt_walk_dbl	PARAMS(( PWord ));
+static	pword	cvt_walk_dbl	( PWord );
 #endif
 
 
-static pword (*cvt_walk_tbl[])PARAMS(( PWord )) = {
+static pword (*cvt_walk_tbl[])( PWord ) = {
     	cvt_walk_var,
 	cvt_walk_list,
 	cvt_walk_term,

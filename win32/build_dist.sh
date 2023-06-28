@@ -8,18 +8,19 @@ case `uname -rs` in
     Linux*) 	ARCH=linux   ; SOEXT=so    ;;
     "HP-UX"*)	ARCH=hpux    ; SOEXT=sl    ;;
     "IRIX"*)	ARCH=irix    ; SOEXT=so    ;;
-    "CYGWIN"*)  ARCH=win32  ; SOEXT=dll   ;;
+    *"_NT"*)  ARCH=win32  ; SOEXT=dll   ;;
     "Darwin"*)	ARCH=darwin  ; SOEXT=dylib ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
 
 ALS_PROLOG=..
 BIN=$ALS_PROLOG/core/$ARCH
-ALS_BUILD_SUPPORT=/usr/i686-w64-mingw32/sys-root/mingw/
+ALS_BUILD_SUPPORT=/mingw32
 
 LIB=$ALS_PROLOG/core/alsp_src/library
 EXAMPLES=$ALS_PROLOG/examples
 MAN=$ALS_PROLOG/manual
+DOCS=$ALS_PROLOG/docs/_local_site
 
 if test $# -ne 1
 then
@@ -40,7 +41,6 @@ MANUAL=als_man.pdf ; # standard manual is missing.
 REFMANUAL=ref_man.pdf ; 
 MANUALNAME=als-prolog-manual.pdf ;
 REFMANUALNAME=als-ref-manual.pdf ;
-HELP="alshelp" ;
 ;;
 esac
 
@@ -63,10 +63,32 @@ rm -f "$DISTDIR/alsdir/builtins/blt_dvsh.pro"
 rm -f "$DISTDIR/alsdir/builtins/ra_basis.pro"
 rm -f "$DISTDIR/alsdir/builtins/int_cstr.pro"
 
-# MinGW64 libs
+# MinGW64 Tcl/Tk libs
 cp -p "$ALS_BUILD_SUPPORT"/bin/tcl86.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/tk86.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_dw2-1.dll "$DISTDIR"
 cp -p "$ALS_BUILD_SUPPORT"/bin/zlib1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libwinpthread-1.dll "$DISTDIR"
+
+#MinGW64 Curl libs
+cp -p "$ALS_BUILD_SUPPORT"/bin/libcurl-4.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libwinpthread-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libgcc_s_dw2-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libbrotlicommon.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libbrotlidec.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libiconv-2.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libidn2-0.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libintl-8.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libunistring-5.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libcrypto-3.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libidn2-0.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libnghttp2-14.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libpsl-5.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libssh2-1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libssl-3.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/zlib1.dll "$DISTDIR"
+cp -p "$ALS_BUILD_SUPPORT"/bin/libzstd.dll "$DISTDIR"
+
 mkdir "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tcl8.6 "$DISTDIR"/lib
 cp -pr "$ALS_BUILD_SUPPORT"/lib/tk8.6 "$DISTDIR"/lib
@@ -76,16 +98,11 @@ for E in $EXAMPLE_SET ; do
 	cp -pr "$EXAMPLES/$E" "$DISTDIR/examples"
 done
 
-cp "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
+../format-subst "$ALS_PROLOG/LICENSE.txt" "$DISTDIR/LICENSE.txt"
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
-mkdir "$DISTDIR/alshelp"
-cp -pr $MAN/$HELP/* "$DISTDIR/alshelp"
-cp -p $MAN/als_help.html "$DISTDIR/als_help.html"
-cp -p $MAN/alshelp.css "$DISTDIR/alshelp.css"
-cp -p $MAN/package_nav.html "$DISTDIR/package_nav.html"
-
+cp -pr $DOCS "$DISTDIR/docs"
 
 #mkdir "$DISTDIR/alsdir/library"
 #cp -p $LIB/*.pro "$DISTDIR/alsdir/library"
@@ -109,5 +126,5 @@ fi
 
 rm -f $DISTNAME-$ARCH.zip
 pushd $ARCH
-zip -r ../$DISTNAME-$ARCH.zip $DISTNAME
+zip --quiet --recurse-paths ../$DISTNAME-$ARCH.zip $DISTNAME
 popd

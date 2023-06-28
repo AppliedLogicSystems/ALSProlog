@@ -186,19 +186,19 @@ extern pwrd nil_val;
 #define MK_UIA(s) mk_uia(s)
 #define UIA_NAME(v) ((char *) ((pword) (v)+1))
 
-extern	void	prs_area_init	PARAMS(( unsigned long ));
-extern	void	alc_rst		PARAMS(( void ));
-extern	int	is_double	PARAMS(( double *, pword ));
-extern	pword	mk_term		PARAMS(( long ));
-extern	pword	mk_functor	PARAMS(( long, long ));
-extern	pword	mk_list		PARAMS(( pword, pword ));
-extern	pword	mk_int		PARAMS(( long ));
-extern	pword	mk_vo		PARAMS(( long ));
-extern	pword	mk_rule		PARAMS(( long ));
-extern	pword	mk_double	PARAMS(( double ));
-extern	double	double_val	PARAMS(( pword ));
-extern	long	functor_id_of_term PARAMS(( pword ));
-extern	long	arity_of_term	PARAMS(( pword ));
-extern	pword	mk_uia		PARAMS(( char * ));
+extern	void	prs_area_init	( unsigned long );
+extern	void	alc_rst		( void );
+extern	int	is_double	( double *, pword );
+extern	pword	mk_term		( long );
+extern	pword	mk_functor	( long, long );
+extern	pword	mk_list		( pword, pword );
+extern	pword	mk_int		( long );
+extern	pword	mk_vo		( long );
+extern	pword	mk_rule		( long );
+extern	pword	mk_double	( double );
+extern	double	double_val	( pword );
+extern	long	functor_id_of_term ( pword );
+extern	long	arity_of_term	( pword );
+extern	pword	mk_uia		( char * );
 
 #endif /* ALLOC_I */

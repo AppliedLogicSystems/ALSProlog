@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+<nav>
+<a href="../">Docs</a>
+&gt; <a href="./">Reference</a>
+&gt; <a href="./#{{ page.package | slugify }}">{{ page.package | escape }}</a>
+&gt; <a href="./#{{ page.group | slugify }}">{{ page.group | escape }}</a>
+{% if jekyll.environment == "production" %}{% include edit-source.html %}{% endif %}
+</nav>
+
+<h1>{{ page.title | escape }}</h1>
+<h3>Module: {{ page.module | escape }}</h3>
+
+<p>
+{%- for p in page.predicates %}
+	{%- if p.args %}
+		{%- for a in p.args %}
+<code>{{ p.sig | escape}}/{{ a[0] }}</code> — {{ a[1] | escape }}<br>
+		{%- endfor %}
+	{%- else %}
+<code>{{ p.sig | escape}}</code> — {{ p.desc | escape }}<br>
+	{%- endif %}
+{%- endfor %}
+</p>
+
+{% if page.iso -%}
+<p><a href="https://www.deransart.fr/prolog/bips.html#{{page.iso}}">ISO Standard Predicate</a></p>
+
+{% endif -%}
+
+{{ content }}

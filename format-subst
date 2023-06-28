@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# format-subst <infile> [ <outfile> ]
+
+# Expands git's export-subst formatting placeholders in infile to outfile,
+# thus producing the same result as if infile had been git-archived.
+
+# Example:
+# $ ./format-subst LICENSE.txt
+# The MIT License (MIT)
+# Copyright (c) 1985-2019...Applied Logic Systems, Inc.
+# ...
+
+set -Eeuo pipefail
+
+INFILE=$1
+OUTFILE=${2:-/dev/stdout}
+
+# Only attempt substitution in a git tree, otherwise just cat-copy
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1
+then
+
+  # Extract text from infile, striped of export-subt $Format:...$ syntax
+  TEXT=$(sed 's/\$Format:\(.*\)\$/\1/g' "$INFILE")
+  # Use text as git-log formatting template to produce outfile
+  git log -1 --format="$TEXT" > "$OUTFILE"
+
+else
+
+  cat "$INFILE" > "$OUTFILE"
+
+fi

@@ -72,7 +72,7 @@ long *Fail;
 
 #define round(x,s) ((((x)-1) & ~(long)((s)-1)) + (s))
 
-PWord	deref		PARAMS(( PWord ));
+PWord	deref		( PWord );
 
 #ifdef DEBUG
 static int valid_pword(PWord p)
@@ -149,7 +149,6 @@ w_get(vp, tp, in)
 		    break;
 #ifdef MTP_CONST
 		default:
-printf("w_get:incoming(in)=%x\n",(int)in);
 		    fatal_error(FE_IN_WGET1, MTP_CONSTTAG(in));
 		    break;
 	    }
@@ -485,13 +484,21 @@ w_uia_alloc(rval, rtag, size)
     size_t size;
 {
     register PWord *t;
-    register int i;
+#ifdef __LP64__
+    register size_t i;
+#else
+	register int i;
+#endif
 
     *rval = (PWord) MMK_UIAVAL(wm_H);
     *rtag = WTP_UIA;
 
     t = (PWord *) (wm_H + 1);
-    i = (size + sizeof (PWord)) >> 2;	/* uia size in long words */
+#ifdef __LP64__
+    i = (size + sizeof (PWord)) / sizeof(PWord);	/* uia size in long words */
+#else
+    i = (size + sizeof (PWord)) >> 2;
+#endif
     while (i--)
 	*t++ = (PWord) 0;
 

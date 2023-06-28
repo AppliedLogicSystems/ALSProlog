@@ -12,6 +12,7 @@
  |
  | Author : Kevin Buettner - Version B
  | Date:    06/01/93
+ |      cf. ~core/alsp_src/doc/als-mics.faq in the source tree.
  *=====================================================================*/
 
 module builtins.
@@ -20,15 +21,34 @@ module builtins.
 	%%%%   Version B
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+export save_image/2.
+export save_image/1.
+export get_app_cmd_line/4.
+
+    % invoked by main.c:
+export pckg_init/0.
+    % Used at commandline in generic/gnu_makefile:
 export attach_image/2.
 export attach_image/1.
 
-export save_image/2.
-export save_image/1.
+/*--------------------------------------------------------------*
+ |	save_image/1
+ |	save_image(ImageName)
+ |	save_image(+)
+ |
+ |	- Create saved code state merged with current image 
+ |
+ |	Creates a saved code state and merges it with the current 
+ |	(executing) image to make a new extended executable image,
+ |	named ImageName; uses defaults for all options.
+ *---------------------------------------------------------------*/
 
-export pckg_init/0.
+save_image(ImageName) 
+	:-
+	save_image(ImageName, []).
+	
 
-/*!--------------------------------------------------------------*
+/*--------------------------------------------------------------*
  |	save_image/2
  |	save_image(ImageName, Options)
  |	save_image(+, +)
@@ -36,10 +56,33 @@ export pckg_init/0.
  |	- Create saved code state merged with current image, with options
  |
  |	Creates a saved code state and merges it with the current 
- |	(executing) image to make a new extended executable image,
+ |	(executing) image to create a new extended executable image,
  |	named ImageName (per Options); Applies Options.
  *---------------------------------------------------------------*/
 
+save_image(ImageName, Options) 
+	:-
+	(member(verbose(true), Options) -> 
+		Verbose = true,
+		printf(user,'Begin packaging application %t\n', [ImageName])
+		;
+		Verbose = false
+ 	),
+	get_base_image_path(Options,ThisImage),
+	fix_image_name(ImageName, FixedImageName),
+	process_image_options(Options, FixedImageName, OptionedName),
+	pbi_copy_file(ThisImage, OptionedName),
+	(dmember(preserve(all), Options) -> 
+		DevelopFlag=develop 
+		; 
+		DevelopFlag=production),
+	attach_image(OptionedName, DevelopFlag),
+	(Verbose = true ->
+		printf(user,'Packaged application %t [ %t ] saved\n', [ImageName, FixedImageName])
+		;
+		true
+ 	).
+	
 fix_image_name(Name, FixedName) :-
 	als_system(SystemList),
 	dmember(os = OS, SystemList),
@@ -55,23 +98,6 @@ fix_image_name(Name, FixedName) :-
 		FixedName = Name
 	).
 
-save_image(ImageName) 
-	:-
-	save_image(ImageName, []).
-	
-save_image(ImageName, Options) 
-	:-
-%	get_current_image(ThisImage),
-	get_base_image_path(Options,ThisImage),
-	fix_image_name(ImageName, FixedImageName),
-	process_image_options(Options, FixedImageName, OptionedName),
-	pbi_copy_file(ThisImage, OptionedName),
-	(dmember(preserve(all), Options) -> 
-		DevelopFlag=develop 
-		; 
-		DevelopFlag=production),
-	attach_image(OptionedName, DevelopFlag).
-	
 get_base_image_path(Options,BaseImage)
 	:-
 	dmember(console_app, Options),
@@ -113,38 +139,56 @@ attach_image(ImageName, DevelopFlag)
 
 :- dynamic(dvf/0).
 
-/*
-save_image0(ImageName, Options)
-	:-
-	process_image_options(Options, ImageName, FinalImageName),
-	(dmember(preserve(all), Options) ->
-		save_image_develop(FinalImageName)
-		;
-		save_image(FinalImageName)
-	).
-*/
-
-/*!--------------------------------------------------------------*
- |	save_image/1
- |	save_image(ImageName)
- |	save_image(+)
- |
- |	- Create saved code state merged with current image 
- |
- |	Creates a saved code state and merges it with the current 
- |	(executing) image to make a new extended executable image,
- |	named ImageName.
- *---------------------------------------------------------------*/
-
 :- dynamic(alsdev_ini_path/1).
 :- dynamic(save_clinfo/1).
+
+check_for_als(ImageName)
+	:-
+	als_system(SystemList),
+	dmember(os = OS, SystemList),
+	dmember(os_variation = OSVar, SystemList),
+	(check_for_als_by_os(OS, ImageName), ! ;
+		check_for_als_by_os(OSVar, ImageName) ).
+
+check_for_als_by_os(mswin32, _, ImageName)
+	:-!,
+	sub_atom(ImageName, _,10,0,Last10),
+	( (Last10 == 'alspro.exe' ; Last10 == 'alsdev.exe') -->
+		true
+		;
+		make_uc_sym(Last10, UCLast10),
+		(Last10 == 'ALSPRO.EXE' ; Last10 == 'ALSDEV.EXE')
+	).
+check_for_als_by_os(cygwin32, ImageName)
+	:-!,
+	sub_atom(ImageName, _,10,0,Last10),
+	( (Last10 == 'alspro.exe' ; Last10 == 'alsdev.exe') -->
+		true
+		;
+		make_uc_sym(Last10, UCLast10),
+		(Last10 == 'ALSPRO.EXE' ; Last10 == 'ALSDEV.EXE')
+	).
+check_for_als_by_os(_, ImageName)
+	:-
+	sub_atom(ImageName, _,6,0,Last6),
+	(Last6 == alspro ; Last6 == alsdev).
+
 
 attach_image0(NewImageName, DevelopFlag)
 	:-
 	adjust_sys_search_for_save(ALSDIR, OrigALSDIR),
 
-	command_line(CmdLine),
-	abolish(command_line,1),
+	pbi_get_command_line(RawCommandLine),
+	RawCommandLine = [ImageName | CommandLine],
+
+	(check_for_als(ImageName) -> 
+		command_line(CmdLine),
+		abolish(command_line,1),
+		IS_ALS = true
+		;
+		IS_ALS = false
+	),
+
 		%% From alsdev::
 	(alsdev_ini_path(ADIP) ->
 		abolish(alsdev_ini_path,1) ; ADIP=no_path),
@@ -191,7 +235,11 @@ attach_image0(NewImageName, DevelopFlag)
 		true   	%% DevelopFlag = develop
 	),
 	(ALSMgr \= nil -> set_primary_manager(ALSMgr) ; true),
-	assert(command_line(CmdLine)).
+	(IS_ALS == true ->
+		assert(command_line(CmdLine))
+		;
+		true
+	).
 
 save_image_develop(NewImageName)
 	:-
@@ -253,7 +301,7 @@ adjust_sys_search_for_save(ALSDIR,OrigALSDIR)
 	builtins:dynamic(sys_searchdir/1).
 
 
-/*!--------------------------------------------------------------*
+/*--------------------------------------------------------------*
  |	save_state/1.
  |	save_state(FileName)
  |	save_state(+)
@@ -271,7 +319,7 @@ save_state(FileName)
 		%% Defined at C level:
 	save_state_to_file(FileName).
 
-/*!--------------------------------------------------------------*
+/*--------------------------------------------------------------*
  *---------------------------------------------------------------*/
 attach_state(NewImageName)
 	:-
@@ -298,7 +346,8 @@ save_image_with_state(NewImageName)
  |	pckg_init 
  |	pckg_init 
  |
- |	This goal must be run as a start goal when the package is loaded.
+ |	This goal is run from main.c as a start goal when a package 
+ |	is loaded.
  *-------------------------------------------------------------------*/
 pckg_init 
 	:-
@@ -429,6 +478,10 @@ process_image_option(libload(true))
 	:-!,
 	force_libload_all.
 
+process_image_option(libload(true,opts=Opts))
+	:-!,
+	force_libload_all(opts=Opts).
+
 process_image_option(libload(false))
 	:-!.
 
@@ -441,6 +494,9 @@ process_image_option(select_lib(Library,FilesList))
 	:-!,
 	add_lib_qual(FilesList,Library,QualFilesList),
 	force_libload_all(QualFilesList).
+
+process_image_option(verbose(_))
+	:-!.
 
 %% FIXME:  When encountering an unknown option, we should give an error
 %%	message and attempt to restore the previous state of $start/0 and
@@ -466,6 +522,64 @@ add_lib_qual(File,Library,[QualFile])
 	atom(File),
 	join_path([Library,File],QualFile).
 
+/*---------------------------------------------------------------*
+ |	get_app_cmd_line/4
+ |	get_app_cmd_line(BinList, UniList, BinVals, UniFound)
+ |	get_app_cmd_line(+, +, -, -)
+ |	
+ |	- framework for parsing an application's commandline
+ |	
+ |	BinList is a list of atoms representing commandline
+ |	switches which take a value, and UniList is a list of
+ |	atoms representing switches not taking a value.
+ |	get_app_cmd_line/4 will obtain the OS shell commandline
+ |	used to start the application, and:
+ |	1) will return Item=ItemVal in BinVals for each switch
+ |	   Item found on BinList, where the pair
+ |		Item, ItemVal
+ |	   is found appropriately on the raw commandline, and
+ |	2) will return Item in UniFound for each switch Item
+ |	   found on UniList which is also found on the
+ |	   raw commandline.
+ |	3) Items encoundered on the raw commandline which are not
+ |	   found on either BinList or UniList are skipped.
+ |	Example: 
+ |	   Raw commandline:   
+ |	     myapp -f -t -mm foobar
+ |	   Call: 
+ |	     get_app_cmd_line(['-mm'], ['-t','-f'], BinVals, UniFound)
+ |	   Result:
+ |	     BinVals=['-mm' = foobar] 
+ |	     UniFound=['-f','-t'] 
+ *---------------------------------------------------------------*/
+
+get_app_cmd_line(BinList, UniList, BinVals, UniFound)
+        :-
+        pbi_get_command_line(RawCommandLine),
+        do_parse_cmd_line(RawCommandLine, BinList, UniList, BinVals, UniFound).
+
+do_parse_cmd_line([ImageName | CL], BinList, UniList, BinVals, UniFound)
+        :-
+        parse_cmd_line(CL, BinList, UniList, BinVals, UniFound).
+
+parse_cmd_line([], _, _, [], []).
+
+parse_cmd_line([Item, ItemVal | RestCL], BinList, UniList, [Item=ItemVal |  BinVals], UniFound)
+        :-
+        dmember(Item, BinList),
+        !,
+        parse_cmd_line(RestCL, BinList, UniList, BinVals, UniFound).
+
+parse_cmd_line([Item | RestCL], BinList, UniList, BinVals, [Item | UniFound])
+        :-
+        dmember(Item, UniList),
+        !,
+        parse_cmd_line(RestCL, BinList, UniList, BinVals, UniFound).
+
+parse_cmd_line([Item | RestCL], BinList, UniList, BinVals, UniFound)
+        :-
+        printf('Skipping unknown commandline switch: %t\n', [Item]),
+        parse_cmd_line(RestCL, BinList, UniList, BinVals, UniFound).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

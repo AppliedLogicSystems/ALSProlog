@@ -1,0 +1,144 @@
+Files in this folder:
+====================
+
+About.txt     - this file
+bi_listing.pro - creates master table(s) of exported builtin predicates.
+bltlib_run_samples.sh - script to run all samples in xamps_np/
+checklist.txt - temp: used to manage the cleanup process.
+cleanup_runs.sh	 - deletes sample generated ~ref/*.md files and samples copied to 
+		   alsp_src/[builtins/library]
+doctools.pro  - contains two tools for working with the *.md ref files.
+	They both have reasonable commandline access:
+	* Process stylized libary and builtins *.pro files to create *.md files:
+
+	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
+
+	* Create a skeletal new *.md page to be completed manually:
+
+	alspro doctools.pro -g do_np -b -p <seed np file>.np
+	
+	Details are contained in comments in doctools.pro.
+
+final_pred_info.pro 	- list of info terms corresponding to rows of primary_pred_info.txt 
+
+insert_iso.pro		- reads ISO/master_iso.pro & uses the info to make ISO insertions
+			  in ~ref/*.md files; insert is a link into deransart.fr/prolog/docs.html
+make_inserts.pro	- writes the links inserted by insert_iso.pro to a file (iso_inserts.txt)
+			  for possible manual use
+
+lib_undocd_files.pro	- writes a file (ResultDir/Library_Files_Status.txt) describing
+			  which library files have been documented and which remain undcumented.
+
+md_yml_proces.pro	- processes YML segement of mdFiles in ~/ref; used by bi_listing.pro
+missingOrBadDoc.txt	- Notes about problems
+mods_blts.pro		- list of modules appearingin builtlins files
+nnp.np        		- bare empty framework for a *.np seed file for a new *.md file; 
+			  can be created by doctools.pro: mknnp/0.
+
+primary_pred_info.txt	- table of predicate info for exported builtin predicates
+
+run_np_samples.sh	- runs all scripts in xamps_np/
+
+xxp.sh			- commandline applied by system() in bi_listing.pro; 
+			  applies "grep ^export" to all builtilns files
+
+lib_blt_xamps/		- scripts and sample files for doctools.pro:file_doc
+xamps_np/		- scripts and sample files for doctools.pro:do_np
+
+ISO/
+    ISO-Deransart-Hodgson.html - download of http://www.deransart.fr/prolog/docs.html
+    h4_ISO.txt - lines obtained from ISO-D-H using 'grep h4'
+    iso_list_raw.pro - transformed h4_ISO using vi
+    iso.pro - in bi_listing.pro: reads iso_list_raw, swaps order of indiv elements, & sorts list.
+    iso_plus_md.pro - List of items from primary_pred_info.txt/final_pred_info.pro which
+	are marked as 'ISO' and shows *.md file, if existing.
+    iso_status_info.txt - Two lists of iso.pro-resulting elements, one with P/A matching an
+	element of primary_pred_info.txt/final_pred_info.pro, and one list with P/A not matching;
+	many of the latter are false due to synonyms on both sides (e.g., '!/0' vs 'cut').
+    master_iso.pro - list of elements obtained from iso_checklist.txt;
+	manually commented out those not matching an item in primary_pred_info.txt due to
+	synonyms; essentially is a "good" iso list.  Used by insert_iso.pro.
+
+Generated files:
+    ---
+primary_pred_info.txt - table of predicate info for exported builtin predicates
+final_pred_info.pro - list of info terms corresponding to rows of primary_pred_info.txt
+ResultDir/grindNtbl.txt - intermediate predicate file derived from nametable
+TmpDir/blt_exported_grep.txt - file of builtins listed by builtins file; obtained by grep
+iso_status_info.txt - intermediate: 
+ISO/iso_matched_list.pro
+iso_plus_md.pro
+
+=====================================
+Workflow for updating documentation:
+0. In terminal B, in the ALSProlog/docs dir, execute: make run
+1. In terminal A, either edit a file in ALSProlog/docs/docs/ref, or
+	generate a new *.md file in ALSProlog/docs/docs/ref using a command in doctools.pro.
+2. In a browser, examine edited or new page from the 'make run' of jekyll (#0) {jekyll 
+	auto-updates when any of the ~/docs/docs/* pages are updated.
+3. Cycle back to step 1
+
+---------------
+How to add a new alshelp *.md page:
+1.  If nnp.np has been corrupted or deleted, run doctools.pro: mknnp/0 to write a new copy;
+2.  Rename the empty nnp.np, and use an editor to insert all the necessary info 
+	(cf.xamps_np/np_for_curl.np);
+3.  If <xx>.np is the renamed and fleshed out nnp.np, run 
+	alspro doctools.pro -g do_np -b -p <xx>.np
+
+    Or start alspro doctools.pro, and then run	new_page(<xx>.np)
+    At this point, the partially skeletal *.md for <xx>.np has been created.
+4.  Change to ../ and execute make all followed by make run.
+
+---------------
+How to create doc for stylized builtins or library pages:
+1.  See alsp_src/library/lib_skeleton.txt for a description of the stylization;
+    See alsp_src/library/listutl[1-4].pro for examples of stylized files (examples missing)
+    See alsp_src/library/miscatom.pro for an example of a stylized file with examples
+2.  To create doc for a stylized library file, execute:
+	alspro doctools.pro -g file_doc -b -p -lib <file>.pro [-ow]
+    To create doc for a stylized builtins file, execute:
+	alspro doctools.pro -g file_doc -b -p -blt <file>.pro [-ow]
+    If the -ow switch is present, the existing ~ref/<file>.md doc file will be overwritten;
+    If -ow is not present, the existing ~ref/<file>.md doc file will not be overwritten;
+    This is true for both library (-lib) and builtins(-blt) files.
+    Multiple files of the same type (-lib or -blt) can be processed at once, using:
+	alspro doctools.pro -g file_doc -b -p [-lib/-blt] <list of files> [-ow]
+
+---------------
+How to update the list showing the status of documentation of library files:o
+Execute
+alspro lib_undocd_files.pro -g check_lib_undocd
+
+Writes the statuses into ResultDir/Library_Files_Status.txt`
+
+---------------
+
+Getting tables of documented/undocumented builtins, and library files:
+1.  Execute exprtd_blts.sh 
+2.  The various tables are in ResultDir:
+Undocumented builtins predicates which are exported:
+	undocd_exported_by_pred.txt
+	undocd_exported_by_bi_file.txt
+Documented builtins predicates which are exported:
+	docd_blts_by_pred.txt           
+	docd_blts_by_bi_file.txt        
+	docd_blts_by_md_file.txt        
+Documented vs Undocumented vs Inactive Library files:
+	Library_Files_Status.txt        
+---------------
+Concerning insert_iso.pro, make_inserts.pro, iso_inserts.txt
+-- make_inserts.pro creates a file (iso_inserts.txt) of "ISO links" to be added to the files in ~/docs/docs/ref/ which correspond to ISO standard predicates.  The lines of this file look like this:
+        arg.md (arg/3)  [ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+where the predicate in question is arg/3, ~/docs/docs/ref/arg.md is the file in which to insert the link, and the links look like this:
+        [ISO Standard Predicate](http://www.deransart.fr/prolog/bips.html#arg)
+-- insert_iso.pro creates these links on the fly and automatically inserts them into the appropriate *.md file; the link is inserted immediately following the top YAML data; the modified ~/docs/docs/ref/*.md are the files in which these ISO links were added.
+---------------
+Workflow for updating documentation:
+0. In terminal B, in the ALSProlog/docs dir, execute: make run
+1. In terminal A, either edit a file in ALSProlog/docs/docs/ref, or
+	generate a new *.md file in ALSProlog/docs/docs/ref using a command in doctools.pro.
+2. In a browser, examine edited or new page from the 'make run' of jekyll (#0) {jekyll 
+	auto-updates when any of the ~/docs/docs/* pages are updated.
+3. Cycle back to step 1
+---------------

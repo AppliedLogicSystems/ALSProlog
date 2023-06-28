@@ -1,4 +1,4 @@
-libactivate(builtins,[library,'arithx1'],
-				[max/3,min/3,greater/3,least/3,maximum/2,minimum/2,
- 				 sumlist/2, prodlist/2, sum_squares/2,sum_square_diffs/3
-				],[]).
+libactivate(builtins,[library,arithx1],
+    [max/3,min/3,maximum/2,minimum/2,sumlist/2,prodlist/2,sum_squares/2,
+        sum_square_diffs/3,max_vector/3,min_vector/3],
+    []).

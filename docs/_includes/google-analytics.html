@@ -1,0 +1,25 @@
+{% comment %}
+
+# Analytics Overide
+
+This include overrides the theme's include in order to replace Google-Analytics
+with Matomo/Piwik analytics.
+
+The `site.google_analytics` variable should be set to the Matomo/Piwik site ID
+in _config.yml.
+
+{% endcomment %}
+<!-- Piwik -->
+<script>
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://piwik.strong-brain.com/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', {{ site.google_analytics }}]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Piwik Code -->

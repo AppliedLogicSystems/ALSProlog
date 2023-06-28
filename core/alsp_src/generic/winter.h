@@ -29,7 +29,12 @@ extern "C" {
 #else		/* ----------- NON-KERNAL --------------------------*/
 #define DEFAULT_SAFETY		98304		/* bytes	*/
 
+// TODO LP64: For 64-bit testing without GC, increase heap by 0x100
+#ifdef __LP64__
+#define DEFAULT_HEAP_SIZE	0x04000000	/* long words (1 MBytes) */
+#else
 #define DEFAULT_HEAP_SIZE	0x040000	/* long words (1 MBytes) */
+#endif
 #define DEFAULT_STACK_SIZE	0x040000	/* long words (1 MBytes) */
 
 #define	MIN_ICBUFSIZE		0x010000	/* 64k code words */
@@ -135,8 +140,8 @@ extern PWord wm_spying;
 /*//extern Code *wm_trust_fail;*/
 /*//extern Code *wm_panic;*/
 #else
-extern	int	wm_fail		PARAMS(( void ));
-extern	int	wm_trust_fail	PARAMS(( void ));
+extern	int	wm_fail		( void );
+extern	int	wm_trust_fail	( void );
 #endif /* Portable */
 
 /*@[3.1]@------------------------------------------------------------------
@@ -179,49 +184,49 @@ extern	int	wm_trust_fail	PARAMS(( void ));
  * Declarations and prototypes for functions defined in winter.c
  */
 
-extern	void	w_get PARAMS(( PWord *, int *, PWord ));
-extern	void	w_install PARAMS(( PWord *, PWord, int ));
-extern	void	w_install_argn PARAMS(( PWord s, int n, PWord v, int t ));
-extern	void	w_install_unbound_argn PARAMS(( PWord, int ));
-extern	void	w_get_argn PARAMS(( PWord *, int *, PWord, int ));
-extern	void	w_mk_term PARAMS(( PWord *, int *, PWord, int ));
-extern	void	w_get_functor PARAMS(( PWord *, PWord ));
-extern	void	w_get_arity PARAMS(( int *, PWord ));
-extern	void	w_mk_list PARAMS(( PWord *, int * ));
-extern	void	w_mk_unbound PARAMS(( PWord *, int * ));
-extern	void	w_get_An PARAMS(( PWord *, int *, int ));
-extern	UCHAR *	w_get_uianame PARAMS(( UCHAR *, PWord, int ));
-extern	void	w_mk_uia PARAMS(( PWord *, int *, UCHAR * ));
-extern	void	w_mk_len_uia PARAMS(( PWord *, int *, UCHAR * , size_t));
-extern	void	w_mk_uia_in_place PARAMS(( PWord *, int *, UCHAR * ));
-extern	void	w_uia_alloc PARAMS(( PWord *, int *, size_t ));
-extern	int	w_uia_clip PARAMS(( PWord, int) );
-extern	int	w_uia_peek PARAMS(( PWord, int, UCHAR *, int ));
-extern	int	w_uia_poke PARAMS(( PWord, int, UCHAR *, int ));
-extern	int	w_uia_peeks PARAMS(( PWord, int, UCHAR *, int ));
-extern	int	w_uia_pokes PARAMS(( PWord, int, UCHAR * ));
-extern	void	w_mk_double PARAMS(( PWord *, int *, double ));
-extern	void	w_get_double PARAMS(( double *, PWord ));
-extern	int	w_unify PARAMS(( PWord, int, PWord, int ));
-extern	int	w_rungoal PARAMS(( PWord, PWord, int ));
+extern	void	w_get ( PWord *, int *, PWord );
+extern	void	w_install ( PWord *, PWord, int );
+extern	void	w_install_argn ( PWord s, int n, PWord v, int t );
+extern	void	w_install_unbound_argn ( PWord, int );
+extern	void	w_get_argn ( PWord *, int *, PWord, int );
+extern	void	w_mk_term ( PWord *, int *, PWord, int );
+extern	void	w_get_functor ( PWord *, PWord );
+extern	void	w_get_arity ( int *, PWord );
+extern	void	w_mk_list ( PWord *, int * );
+extern	void	w_mk_unbound ( PWord *, int * );
+extern	void	w_get_An ( PWord *, int *, int );
+extern	UCHAR *	w_get_uianame ( UCHAR *, PWord, int );
+extern	void	w_mk_uia ( PWord *, int *, UCHAR * );
+extern	void	w_mk_len_uia ( PWord *, int *, UCHAR * , size_t);
+extern	void	w_mk_uia_in_place ( PWord *, int *, UCHAR * );
+extern	void	w_uia_alloc ( PWord *, int *, size_t );
+extern	int	w_uia_clip ( PWord, int);
+extern	int	w_uia_peek ( PWord, int, UCHAR *, int );
+extern	int	w_uia_poke ( PWord, int, UCHAR *, int );
+extern	int	w_uia_peeks ( PWord, int, UCHAR *, int );
+extern	int	w_uia_pokes ( PWord, int, UCHAR * );
+extern	void	w_mk_double ( PWord *, int *, double );
+extern	void	w_get_double ( double *, PWord );
+extern	int	w_unify ( PWord, int, PWord, int );
+extern	int	w_rungoal ( PWord, PWord, int );
 
 /*
  * Declarations and prototypes for other related functions.
  */
 
 	/* from arith.c */
-extern	void	make_number		PARAMS( (PWord *, int *, double) );
-extern	void	make_numberx	PARAMS( (PWord *, int *, double, int) );
+extern	void	make_number		(PWord *, int *, double);
+extern	void	make_numberx	(PWord *, int *, double, int);
 	/* from gv.c */
-extern	PWord	gv_alloc	PARAMS( (void) );
-extern	int	gv_alloc_gvnum	PARAMS( (int) );
-extern	int	gv_isfree	PARAMS( (int) );
-extern	void	gv_free		PARAMS( (PWord) );
-extern	void	gv_get		PARAMS( (PWord *, int *, PWord) );
-extern	void	gv_set		PARAMS( (PWord, int, PWord) );
+extern	PWord	gv_alloc	(void);
+extern	int	gv_alloc_gvnum	(int);
+extern	int	gv_isfree	(int);
+extern	void	gv_free		(PWord);
+extern	void	gv_get		(PWord *, int *, PWord);
+extern	void	gv_set		(PWord, int, PWord);
 
 /* from assembly language (perhaps) */
-extern	int	_w_unify	PARAMS( (PWord, PWord) );
+extern	int	_w_unify	(PWord, PWord);
 
 
 /*
@@ -236,7 +241,7 @@ extern	int	_w_unify	PARAMS( (PWord, PWord) );
  * Heap and stack allocation function (see mem.c)
  */
 
-PWord *allocate_prolog_heap_and_stack PARAMS(( size_t ));
+PWord *allocate_prolog_heap_and_stack ( size_t );
 
 #ifdef __cplusplus
 }

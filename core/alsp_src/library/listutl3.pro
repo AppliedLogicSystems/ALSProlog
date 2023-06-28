@@ -1,8 +1,9 @@
 /*======================================================================
  |			listutl3.pro
- |	Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Miscellaneous list predicates
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
+ |		Group: Lists
+ |		DocTitle: number_list/3
+ |		-- Miscellaneous list predicates
  *=====================================================================*/
 module builtins.
 
@@ -19,6 +20,11 @@ export remove_tagged/3.
 export merge_plists/3.
 export mangle_change_tagged/3.
 export subst_tagged/4.
+export struct_lookup_subst/4.
+export merge_tagged_lists/3.
+export merge_in_list/3.
+export insert_item_in_list/3.
+export insert_spaces/2.
 
 /*!---------------------------------------------------------------------
  |	nobind_member/2
@@ -27,8 +33,8 @@ export subst_tagged/4.
  |
  |	- tests list membership without binding any variables
  |
- |	nobind_member(X, List) holds and only if X is a member of List;
- |	if the test is successful, no variables in either input are bound.
+ |	Logically, nobind_member(X, List) holds and only if X is a member 
+ |	of List; if the test is successful, no variables in either input are bound.
  *!--------------------------------------------------------------------*/
 nobind_member(X, [Y | _])
 	:-
@@ -64,8 +70,7 @@ flatten(Item, [Item]).
  |	
  |	- creates a list of N copies of an item	
  |	
- |	Result is a list of length N all of whose elements are the entity
- |	Item.
+ |	Result is a list of length N all of whose elements are the entity Item.
  *!--------------------------------------------------------------------*/
 n_of(0, _, []) :-!.
 n_of(N, Item, [Item | RestItems])
@@ -80,7 +85,9 @@ n_of(N, Item, [Item | RestItems])
  |	
  |	- invertible length predicate
  |	
- |	List is of length N - works in both directions.
+ |	List is of length N - works in both directions in the sense
+ |	that either List or N can be uninstantiated with the other
+ |	variable of correct type, and is_length(List, N) will succeed.
  *!--------------------------------------------------------------------*/
 is_length([], 0) :-!.
 is_length([_ | Tail], N)
@@ -106,8 +113,8 @@ is_length([_ | Tail], N)
  |	
  |	If List is a list, NumberedList is a list of terms of the form
  |	N-Item, where the Item components are simply the elements of List
- |	in order, and N is a integer, sequentially numbered the elements
- |	of List.
+ |	in order, and N is a integer, sequentially numbering the elements
+ |	of List, beginning with 1.
  *!--------------------------------------------------------------------*/
 number_list(List, NumberedList)
 	:-
@@ -122,7 +129,8 @@ number_list(List, NumberedList)
  |
  |	If Items is a list, and StartNum is an integer, NumberedItems is
  |	the list obtained by replacing each element X in Items by N-X,
- |	where N is the number of the position of X in Items.
+ |	where N is the number of the position of X in Items; i.e., the
+ |	list is numbered beginning with StartNum.
  *!--------------------------------------------------------------------*/
 number_list([], _, []).
 number_list([Item | Items], CurNum, [CurNum-Item | NumberedItems])
@@ -154,15 +162,16 @@ encode_list([Item | Items], [CurCode | RestCodes], [CurCode-Item | CodedItems])
  |
  |	 - performs substs for structs package constructors
  |
- |	OrderedTags and DefArgs are lists of the same length; so will be ArgsList.
- |	ArgSpecs is a list of equations of the form
- |		Tag = Value
+ |	OrderedTags and DefArgs are lists of the same length.
+ |	The output ArgsList will be the same length as OrderedTags.
+ |	ArgSpecs is a list of equations of the form<br>
+ |		Tag = Value<br>
  |	where each of the Tags in such an equation must be on the list
  |	OrderedTags (but not all OrderedTags elements must occur on ArgSpecs);
  |	in fact, ArgSpecs can be empty.  The elements X of ArgsList are defined
- |	as follows:  if X corresponds to Tag on OrderedTags, then: if Tag=Val
- |	occurs on ArgSpecs, X is Val; otherwise, X is the element of DefArgs
- |	corresponding to Tag.
+ |	as follows:  if X corresponds to Tag on OrderedTags, then:<br>
+ |	if Tag=Val occurs on ArgSpecs, X is Val;<br> 
+ |	otherwise, X is the element of DefArgs corresponding to Tag.
  *!--------------------------------------------------------------------*/
 
 struct_lookup_subst([], [], _, []).
@@ -178,20 +187,22 @@ struct_lookup_subst([Tag | OrderedTags], [DefVal | DefArgs],
 	struct_lookup_subst(OrderedTags, DefArgs, ArgSpecs, ArgsList).
 
 /*!------------------------------------------------------
- |  check_default/4.
+ |  check_default/4
  |  check_default(PList, Tag, Default, Value)
  |  check_default(+, +, +, -)
  |
- |  - looks up an equation on a list, with default
+ |  - looks up an equation on a list, with a default
  |
- |  PList is a list of equations of the form
+ |  PList is a list of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
- |  check_default(PList, Tag, Default, Value) succeeds if:
- |  i)	 Tag=Value belongs to PList; or,
- |  ii)	 if Default is of the form Value^DC and call(DC) succeeds, or
- |  iii) if Default=Value
+ |  check_default(PList, Tag, Default, Value) succeeds if:<br>
+ |  i)	 Tag=Value belongs to PList; or,<br>
+ |  ii)	 if Default is of the form Value^DC and call(DC) succeeds, or<br>
+ |  iii) if Default=Value<br>
+ |  iv)  in cases ii,iii) it is assumed that there is at
+ |       most one equation on PList with left side Tag
  *!-----------------------------------------------------*/
 check_default(PList, Tag, Default, Value)
     :-
@@ -201,6 +212,26 @@ check_default(PList, Tag, Value^DefaultCall, Value)
 	call(DefaultCall).
 check_default(PList, Tag, Default, Default).
 
+/*!------------------------------------------------------
+ |  check_default_del/5
+ |  check_default_del(PList,Tag,Default,Value,ReducedPList)
+ |  check_default_del(+,+,+,+,-)
+ |
+ |  - looks up a tagged equation on a List, and deletes it
+ |
+ |  PList is a list of equations of the form<br>
+ |
+ |      tag = value<br>
+ |
+ |  check_default_del(PList, Tag, Default, Value,ReducedPList) 
+ |  succeeds if:<br>
+ |  i)	 Tag=Value does not belong to PList; or,<br>
+ |  ii)	 Tag=Value belongs to PList, and the difference
+ |	 between PList and ReducedPList is the removal
+ |	 of the Tag=Value equation.<br>
+ |  iii) it is assumed that there is at most one equation on 
+ |       PList with left side Tag
+ *!-----------------------------------------------------*/
 check_default_del([],Tag,Default,Default,[]).
 check_default_del([Tag=Value | Tail],Tag,Default,Value,Tail)
     :-!.
@@ -214,11 +245,11 @@ check_default_del([OTag=OVal | RestPList],Tag,Default,Value,
  |	remove_tagged(EqnList, TagsToRemove, ReducedEqnList)
  |	remove_tagged(+, +, -).
  |
- |	-	removes tagged equations from a list
+ |	- removes tagged equations from a list
  |
- |	EqnList is a list of equations of the form
+ |	EqnList is a list of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	and TagsToRemove is a list of atoms which are candidates
  |	to occur as tags in these equations.  ReducedEqnList is
@@ -240,26 +271,26 @@ remove_tagged([Tag=Value | PList], TagsToRemove, [Tag = Value | RedPList])
  |	merge_plists(LeftEqnList, RightEqnList, MergedLists)
  |	merge_plists(+, +, -).
  |
- |	-	(recursively) merges two tagged equation lists
+ |	- recursively merges two tagged equation lists
  |
- |	LeftEqnList and RightEqnList are lists of equations of the form
+ |	LeftEqnList and RightEqnList are lists of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	MergedLists consists of all equations occurring in either
- |	LeftEqnList or RightEqnList, where if the equations
+ |	LeftEqnList or RightEqnList, where if the equations<br>
  |	
- |		Tag=LVal    and Tag = RVal
+ |		Tag=LVal    and Tag = RVal<br>
  |
  |	occur in LeftEqnList and RightEqnList, respectively, 
- |	MergedLists will contain the equation
+ |	MergedLists will contain the equation<br>
  |
- |		Tag = MVal
+ |		Tag = MVal<br>
  |
- |	where:
+ |	where:<br>
  |	a)	If both of LVal and RVal are lists, then MVal is obtained by
  |		recursively calling merge_plists(LVal, RVal, MVal), or if
- |		that fails, checking that they are identical;
+ |		that fails, checking that they are identical;<br>
  |	b)	Otherwise, MVal is LVal.
  *!-----------------------------------------------------*/
 merge_plists(Left, [], Left) :-!.
@@ -284,21 +315,21 @@ merge_plists([Tag=LVal | RestLeft], Right, [Tag=MergeVal | RestResult])
  |	merge_tagged_lists(LeftEqnList, RightEqnList, MergedLists)
  |	merge_tagged_lists(+, +, -).
  |
- |	-	(recursively) merges two tagged equation lists
+ |	- recursively merges two tagged equation lists
  |
- |	LeftEqnList and RightEqnList are lists of equations of the form
+ |	LeftEqnList and RightEqnList are lists of equations of the form<br>
  |
- |      tag = value
+ |      tag = value<br>
  |
  |	MergedLists consists of all equations occurring in either
- |	LeftEqnList or RightEqnList, where if the equations
+ |	LeftEqnList or RightEqnList, where if the equations<br>
  |	
- |		Tag=LVal    and Tag = RVal
+ |		Tag=LVal    and Tag = RVal<br>
  |
  |	occur in LeftEqnList and RightEqnList, respectively, 
- |	MergedLists will contain the equation
+ |	MergedLists will contain the equation<br>
  |
- |		Tag = LVal
+ |		Tag = LVal<br>
  *!-----------------------------------------------------*/
 merge_tagged_lists(Left, [], Left) :-!.
 merge_tagged_lists([], Right, Right) :-!.
@@ -313,12 +344,12 @@ merge_tagged_lists([Tag=LVal | RestLeft], Right, [Tag=LVal | RestResult])
  |	mangle_change_tagged(PList,Tag,NewValue)
  |	mangle_change_tagged(+,+,+)
  |
- |	-- destructively changes the value of a tagged eqn
+ |	- destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
- |	and NewValue is an arbitrary prolog term, then:
+ |	and NewValue is an arbitrary prolog term, then:<br>
  |	i)	If an equation Tag=OldVal occurs on PList,
- |		destructively alters that eqn to become Tag=NewValue;
+ |		destructively alters that eqn to become Tag=NewValue;<br>
  |	ii)	Has no effect otherwise.
  *!-----------------------------------------------------*/
 mangle_change_tagged([],_,_).
@@ -336,13 +367,13 @@ mangle_change_tagged([_ | WkngPList],Tag,NewValue)
  |	subst_tagged(PList,Tag,NewValue,NewPList)
  |	subst_tagged(+,+,+,-)
  |
- |	-- NON-destructively changes the value of a tagged eqn
+ |	- NON-destructively changes the value of a tagged eqn
  |
  |	If Plist is a list of tagged equations, Tag is a tag, 
- |	and NewValue is an arbitrary prolog term, then:
+ |	and NewValue is an arbitrary prolog term, then:<br>
  |	i)	If an equation Tag=OldVal occurs on PList,
  |		then NewPList is the result of altering that eqn 
- |		to become Tag=NewValue;
+ |		to become Tag=NewValue;<br>
  |	ii)	Otherwise, NewPList = OldPList.
  *!-----------------------------------------------------*/
 subst_tagged([],_,_, []).
@@ -372,5 +403,38 @@ merge_in_list([Item | Left], Right, Result)
 merge_in_list([Item | Left], Right, [Item | Result])
 	:-
 	merge_in_list(Left, Right, Result).
+
+/*!---------------------------------------------------------------------
+ |	insert_item_in_list/3
+ |	insert_item_in_list(In_List, Item, Out_List)
+ |	insert_item_in_list(+, +, -).
+ |
+ | 	- interleaves an arbitrary term  between elements of a list
+ |
+ |	If In_List is a list of arbitrary terms, and Item is a term,
+ |	then Out_List is that list obtained from In_List by interleaving
+ |	Item between each pair of items of In_List.
+ *!--------------------------------------------------------------------*/
+insert_item_in_list([], _, []).
+insert_item_in_list([Element], Item, [Element])
+	:-!.
+insert_item_in_list([Element | RestIn_List], Item, [Element, Item | RestOut_List])
+	:-
+	insert_item_in_list(RestIn_List, Item, RestOut_List).
+
+/*!---------------------------------------------------------------------
+ |	insert_spaces/2
+ |	insert_spaces(In_List, Out_List)
+ |	insert_spaces(+, -).
+ |
+ | 	- interleaves a quoted blank between elements of a list
+ |
+ |	If In_List is a list of arbitrary terms, then Out_List is that 
+ |	list obtained from In_List by interleaving ' '  between each 
+ |	pair of items of In_List.
+ *!--------------------------------------------------------------------*/
+insert_spaces(In_List, Out_List)
+	:-
+	insert_item_in_list(In_List, ' ', Out_List).
 
 endmod.

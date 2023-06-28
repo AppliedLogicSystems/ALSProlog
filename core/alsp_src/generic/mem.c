@@ -106,12 +106,12 @@
 
 /*//static long *als_mem;*/
 
-long *	alloc_big_block		PARAMS(( size_t, int ));
-static	long *	ss_malloc0		PARAMS(( size_t, int, int, long * ));
+long *	alloc_big_block		( size_t, int );
+static	long *	ss_malloc0		( size_t, int, int, long * );
 #ifndef PURE_ANSI
-static	void	ss_restore_state	PARAMS(( const char *, long ));
+static	void	ss_restore_state	( const char *, long );
 #endif /* PURE_ANSI */
-static	int	ss_saved_state_present	PARAMS(( void ));
+static	int	ss_saved_state_present	( void );
 
 #define amheader (* (struct am_header *) als_mem)
 

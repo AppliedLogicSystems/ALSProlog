@@ -9,10 +9,10 @@ case `uname -rs` in
     Linux*) 	ARCH=linux ;;
     "HP-UX"*)	ARCH=hpux ;;
     "IRIX"*)	ARCH=irix ;;
-    "CYGWIN"*) 	ARCH=cygwin32 ;;
+    *"_NT"*) 	ARCH=win32 ;;
     "Darwin"*)	ARCH=darwin ;;
     *) 		echo "Unknown machine type..."; exit 1 ;;
 esac
-	rm -rf *.tgz $ARCH
-
+	rm -rf *.tgz *.zip $ARCH
+	rm -rf ../foreign_sdk/*/ALS_Prolog_Foreign_SDK
 

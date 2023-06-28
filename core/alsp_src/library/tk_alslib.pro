@@ -124,7 +124,7 @@ export destroy_all_tcl_interpreters/0.
 destroy_all_tcl_interpreters
 	:-
 	findall(Interp, (tcl_interp_created(Interp),
-						Interp \= shl_tcli),		Interps),
+						Interp \= tcli),		Interps),
 	destroy_all_tcl_interpreters(Interps),
 	abolish(tcl_interp_created,1),
 	dynamic(tcl_interp_created/1).
@@ -729,7 +729,7 @@ display_image(Interp, ImageDir, ImageFile, ImageWidth, ImageHeight)
  *------------------------------------------------------------*/
 extend_main_menubar(Label, MenuEntriesList)
 	:-
-	extend_menubar('.topals.mmenb', Label, MenuEntriesList, shl_tcli).
+	extend_menubar('.topals.mmenb', Label, MenuEntriesList, tcli).
 
 extend_menubar(MenubarPath, Label, MenuEntriesList, Interp)
 	:-
@@ -857,7 +857,7 @@ export path_to_main_menu_entry/2.
 
 path_to_main_menu_entry(Index, SubMenuPath)
 	:-
-	path_to_menu_entry(shl_tcli, '.topals.mmenb', Index, SubMenuPath).
+	path_to_menu_entry(tcli, '.topals.mmenb', Index, SubMenuPath).
 
 export path_to_menu_entry/3.
 export path_to_menu_entry/4.
@@ -876,6 +876,6 @@ path_to_menu_entry(Interp, MenuPath, Index, SubMenuPath)
 add_to_main_menu_entry(Index, Entry)
 	:-
 	path_to_main_menu_entry(Index, MenuPath),
-	extend_cascade(Entry, MenuPath, shl_tcli).
+	extend_cascade(Entry, MenuPath, tcli).
 
 endmod.

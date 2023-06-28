@@ -93,40 +93,40 @@ static int cd_gmod;		/* Goal module; i.e, module to place next goal in	 */
 static int model_SP;
 static int model_E;
 
-static	int		comp_rule				PARAMS(( pword ));
-static	void	deallocate_environment	PARAMS(( pword, int, int, int ));
-static	void	initialize_environment_variables PARAMS(( void ));
+static	int		comp_rule				( pword );
+static	void	deallocate_environment	( pword, int, int, int );
+static	void	initialize_environment_variables ( void );
 #if defined(InMath) && !defined(NewMath)
-static	long	regfreemap				PARAMS(( void ));
+static	long	regfreemap				( void );
 #endif
 #ifdef NewMath
-static	long	regusemap				PARAMS(( void ));
-static	void	arith_temp_homes		PARAMS(( void ));
+static	long	regusemap				( void );
+static	void	arith_temp_homes		( void );
 #endif
-static	int		do_macro				PARAMS(( pword, int ));
-static	int		goalsize				PARAMS(( pword ));
-static	void	incr_usecnt				PARAMS(( int ));
-static	void	init_model				PARAMS(( pword, pword ));
-static	void	init_targets			PARAMS(( pword ));
-static	void	init_only_targets		PARAMS(( pword ));
-static	void	reassign_homes			PARAMS(( pword ));
-static	void	comp_head				PARAMS(( pword ));
-static	void	record_first_argument	PARAMS(( int, pword ));
-static	void	comp_head_structure		PARAMS(( int ));
-static	void	comp_hstruct_argument	PARAMS(( pword, int ));
-static	void	move					PARAMS(( int, int ));
-static	int		find_home				PARAMS(( int ));
-static	int		find_temp_in_reg		PARAMS(( int ));
-static	int		free_target				PARAMS(( int ));
-static	void	move_perms				PARAMS(( int ));
-static	void	move_to_temp			PARAMS(( int ));
-static	void	comp_goal				PARAMS(( pword ));
-static	int		comp_goal_structure		PARAMS(( pword, int ));
-static	int		comp_struct_arg1		PARAMS(( pword ));
-static	void	comp_struct_arg2		PARAMS(( pword, int, int ));
-static	pword	get_compiler_directives	PARAMS(( pword ));
-static	void	compiler_directives 	PARAMS(( void ));
-static	void	emit_cd_cutpt			PARAMS(( void ));
+static	int		do_macro				( pword, int );
+static	int		goalsize				( pword );
+static	void	incr_usecnt				( int );
+static	void	init_model				( pword, pword );
+static	void	init_targets			( pword );
+static	void	init_only_targets		( pword );
+static	void	reassign_homes			( pword );
+static	void	comp_head				( pword );
+static	void	record_first_argument	( int, pword );
+static	void	comp_head_structure		( int );
+static	void	comp_hstruct_argument	( pword, int );
+static	void	move					( int, int );
+static	int		find_home				( int );
+static	int		find_temp_in_reg		( int );
+static	int		free_target				( int );
+static	void	move_perms				( int );
+static	void	move_to_temp			( int );
+static	void	comp_goal				( pword );
+static	int		comp_goal_structure		( pword, int );
+static	int		comp_struct_arg1		( pword );
+static	void	comp_struct_arg2		( pword, int, int );
+static	pword	get_compiler_directives	( pword );
+static	void	compiler_directives 	( void );
+static	void	emit_cd_cutpt			( void );
 
 #if 0
 #ifdef MaxFunc

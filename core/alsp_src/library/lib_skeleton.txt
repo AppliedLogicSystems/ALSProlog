@@ -1,0 +1,29 @@
+/*======================================================================
+ |			<libfile>.pro
+ |	Maybe copyright....
+ |		Group: <Group for libfile: Start it with uppercase>
+ |		DocTitle: <Select one of the exported predicates>
+ |		-- <Brief: could be: Miscellaneous .... predicates>
+ *=====================================================================*/
+module <Module name; many are "builtins", but this is not required>.
+
+<Collection of export .... statements for all preds exported from the file>
+export P0/A0.
+export P1/A1.
+....
+
+Each exported predicate should begin with a comment in the following form:
+{Notice the ! in the top & bottom boundary lines -- that makes it lib-documenting}
+/*!---------------------------------------------------------------------
+ |	P0/A0				<same as export statement>
+ |	Form				<Form, as in FORMS in alshelp>
+ |	+/- form			<Not required, but good to have>
+ |					<Blank line>
+ |	- .....				<Summary desc, as in top of page in alshelp
+ |					<Blank line>
+ |	Description ....		<Full descr., as in DESCRIPTION in alshelp>
+ *!--------------------------------------------------------------------*/
+
+There can be other, non-lib-documenting comments in the file.
+
+endmod.

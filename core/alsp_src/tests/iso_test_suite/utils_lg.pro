@@ -250,6 +250,6 @@ end_log :-   close(log).
 %
 
 log(Text) :-
-	write(log, Text).
+	write_term(log, Text, [lettervars(true)]).
 
 log_nl :-  nl(log).

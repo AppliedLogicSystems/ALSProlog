@@ -1,0 +1,2168 @@
+<!-- https://www.deransart.fr/prolog/docs.html -->
+<!-- https://www.deransart.fr/prolog/bips.html#abolish -->
+<html>
+<meta Prolog The ISO standard: Directives, Control constructs and BIPS Author J.P.E. Hodgson >
+<head>
+<title>
+The ISO directives, control constructs and builtins.
+</title>
+</head>
+
+<body  bgcolor="#F8F8FF">
+<center>
+<h1>The ISO directives, control constructs and builtins.</h1>
+</center>
+<h3><a href="#directives">Directives</a>|<a href="#control_constructs">Control Constructs</a>|<a href="#flags">Prolog Flags </a>|<a href="#builtins"> Builtins </a></h3>
+<P>
+The builtins are listed here in the order in which they appear
+in the ISO standard. This is preceded by a table which is in a somewhat
+ alphabetic order.
+<p>
+<center>
+<table border =1>
+<tr>
+
+<td><a href="#abolish"> abolish/1</a>
+<td><a href="#allsolutions">All Solutions</a>
+<td><a href="#arg">arg/3</a>
+<td><a href="#arithmeticcomparison">Arithmetic Comparison</a>
+<tr>
+</tr>
+<td><a href="#arithmeticevaluation">Arithmetic Evaluation</a>
+<td><a href="#asserta"> asserta/1</a>
+<td><a href="#assertz"> assertz/1</a>
+<td><a href="#atom">atom/1</a>
+<tr>
+</tr>
+<td><a href="#atomchars">atom_chars</a></td>
+<td><a href="#atomcodes">atom_codes/2</a></td>
+<td><a href="#atomconcat">atom_concat/3</a></td>
+<td><a href="#atomic">atomic/1</a>
+<tr>
+</tr>
+<td><a href="#atomlength">atom_length/2</a></td>
+<td><a href="#atomprocessing">Atom Processing</a>
+<td><a href="#bagof">bagof/3</a>
+<td><a href="#catch">catch/3 and throw/1</a>
+<tr>
+</tr>
+<td><a href="#charcode">char_code/2</a></td>
+<td><a href="#charconversion">char_conversion/2 and current_char_conversion/2</a></td>
+<td><a href="#clause">clause/2</a>
+<td><a href="#close"> Closing a stream: close/1 and close/2</a>
+<tr>
+</tr>
+<td><a href="#compound">compound/1</a>
+<td><a href="#copyterm">copy_term/2</a>
+<td><a href="#current_predicate">current_predicate/1</a>
+<td><a href="#current_prolog_flag"> current_prolog_flag/2</a>
+<tr>
+</tr>
+<td><a href="#currentinput">current_input/1</a>
+<td><a href="#currentoutput">current_output/1</a>
+<td><a href="#evaluable">Evaluable Functors</a>
+<td><a href="#findall">findall/3</a>
+<tr>
+</tr>
+<td><a href="#flags"> Prolog Flags</a>
+<td><a href="#float">float/1</a>
+<td><a href="#flush"> flush_output/1, flush_output/0</a>
+<td><a href="#functor">functor/3</a>
+<tr>
+</tr>
+<td><a href="#getbyte"> get_byte/2, get_byte/1</a></td>
+<td><a href="#getchar"> get_char/2, get_char/1</a>
+<td><a href="#getcode"> get_code/2, get_code/1</a>
+<td><a href="#halt">halt/0 and halt/1</a>
+<tr>
+</tr>
+<td><a href="#hooks"> Implementation defined hooks</a>
+<td><a href="#integer">integer/1</a>
+<td><a href="#io"> Input and Output</a>
+<td><a href="#logiccontrol">Logic and Control</a></td>
+<tr>
+</tr>
+<td><a href="#nonvar">nonvar/1</a>
+<td><a href="#notprovable"> (\+)/1 - not provable</a></td>
+<td><a href="#number">number/1</a>
+<td><a href="#numberchars">number_chars/2</a></td>
+<tr>
+</tr>
+<td><a href="#numbercodes">number_codes/2</a></td>
+<td><a href="#once">once/1</a></td>
+<td><a href="#open"> Opening a Stream: open/4</a>
+<td><a href="#operators"> op/3 and current_op/3</a></td>
+<tr>
+</tr>
+<td><a href="#otherbitwise">Other arithmetic and Bitwise functors</a>
+<td><a href="#peekbyte">peek_byte/2, peek_byte/1</a></td>
+<td><a href="#peekchar"> peek_char/2, peek_char/1</a>
+<td><a href="#peekcode"> peek_code/2, peek_code/1</a>
+<tr>
+</tr>
+<td><a href="#putbyte">put_byte/2, put_byte/1</a></td>
+<td><a href="#putchar"> put_char/2, put_char/1, put_code/2, put_code/1, nl/0,nl/1</a>
+<td><a href="#readbinary"> Reading from Binary streams</a>
+<td><a href="#readchar"> Character Input Output</a>
+<tr>
+</tr>
+<td><a href="#readchar"> Reading from text streams</a>
+<td><a href="#readterm"> read_term/2 read_term/3, read/1, read/2</a>
+<td><a href="#repeat">repeat/0</td>
+<td><a href="#retract"> retract/1</a>
+<tr>
+</tr>
+<td><a href="#setinput">set_input/1</a>
+<td><a href="#setof">setof/3</a>
+<td><a href="#setoutput">set_output/1</a>
+<td><a href="#setstreamposition">set_stream_position/2</a>
+<tr>
+</tr>
+<td><a href="#streamproperty"> stream_property/2</a>
+<td><a href="#streamproperty"> at_end_of_stream/0,1</a>
+<td><a href="#streamselection">Stream Selection and Control</a>
+<td><a href="#subatom">sub_atom/5</a></td>
+<tr>
+</tr>
+<td><a href="#termcomp">Term Comparison</a>
+<td><a href="#termcreatedecomp">Term Creation and Decomposition</a>
+<td><a href="#termio"> Term Input and Output</a>
+<td><a href="#unify"> Prolog Unification =/2</a>
+<tr>
+</tr>
+<td><a href="#unifywithoccurscheck">unify_with_occurs_check/2</a>
+<td><a href="#univ">(=../2) -- univ </a>
+<td><a href="#var">var/1</a>
+<td><a href="#writeterm"> Writing terms </a>
+</tr>
+</table>
+</center>
+<h2><a name="directives"> Directives</a></h2>
+Directives in  Prolog text specify
+<dl>
+<dt> Properties of procedures,
+<dd> <a href="#dynamic"> dynamic/1</a>, <a href="#multifile">multifile/1</a>,
+<a href="#discontiguous">discontiguous/1</a>, <a href="#flagdirective">set_prolog_flag/1</a>
+<dt> format and syntax of read-terms
+<dd> <a href="#opdirective">op/3</a>, <a href="#charconversiondirective"> char_conversion/2</a>
+<dt> A goal to be executed after the Prolog text has been prepared for 
+execution,
+<dd> <a href="#initialization">initialization/1</a>
+<dt> Another unit of Prolog text to be prepared for execution.
+<dd><a href="#include">include/1</a>, 
+<a href="#ensureloaded">ensure_loaded/1</a>
+</dl>
+
+<P>
+<tt><a name="dynamic">:- dynamic(PI).</a></tt>
+<P>
+<tt>PI</tt> is a predicate indicator, predicate indicator sequence, or predicate indicator list. Each procedure identified by <tt>PI</tt> is dynamic.
+The predicates <a href="#abolish">abolish/1</a>,
+ <a href="#clause">clause/2</a>, <a href="#asserta">asserta/1</a>,
+ <a href="#assertz">assertz/1</a> and <a href="#retract">retract/1</a>
+may be applied to these predicates without raising a
+ <a href="exceptions.html#permission_error"><tt>permission_error</tt></a>. 
+<P>
+<tt><a name="multifile">:- multifile(PI).</a></tt>
+<P>
+<tt>PI</tt> is a predicate indicator, predicate indicator sequence, or predicate indicator list. Each procedure identified by <tt>PI</tt> may be defined by clauses that are contained in more than one Prolog text. 
+<P>
+<tt><a name="discontiguous">:- discontiguous(PI).</a></tt>
+<P>
+<tt>PI</tt> is a predicate indicator, predicate indicator sequence, or predicate indicator list. Each procedure identified by <tt>PI</tt> may be defined by
+clauses which are not consecutive in the Prolog text.
+<p>
+<tt><a name="opdirective"> :- op(Priority, OpSpecifier, Operator).</a></tt>
+<p>
+The arguments <tt>Priority, OpSpecifier,</tt> and <tt>Operator</tt> are as the corresponding arguments of the builtin predicate 
+<tt><a href="#operators">op/3</a></tt>. The effect on the operator table is to be the same. 
+<P>
+<tt><a name="charconversiondirective">:- char_conversion(InChar,OutChar).</a>
+</tt>
+<P>
+The arguments <tt>InChar</tt> and <tt>OutChar</tt> are as for the builtin 
+predicate <tt><a href="#charconversion">char_conversion/2</a></tt>, the effect on the character conversion table is the same. 
+<P> <a href="charconv.html">A live example using this directive.</a>
+
+
+<P>
+<tt><a name="initialization">:- initialization(Goal).</a></tt>
+<P>
+The goal <tt>Goal</tt> is to be executed immediately after the Prolog text 
+has been prepared for execution. If there are several such directives the 
+order in which the goals is executed is implementation defined.
+<P>
+<tt><a name="include">:- include(PrologText).</a></tt>
+<P>
+The Prolog text identified by <tt>PrologText</tt> is to be textually included
+at this point of the current Prolog text.
+
+<P>
+<tt><a name="ensureloaded">:- ensure_loaded(PrologText)</a></tt>
+<P>
+The Prolog text identified by <tt>PrologText</tt> must be prepared for 
+execution (exactly once) with the current Prolog text. 
+This directive is idempotent.
+<P>
+<tt><a name="flagdirective">:- set_prolog_flag(Flag, Value)</a></tt>
+<P>
+The <a href="#flags">Prolog flag</a> <tt>Flag</tt> shall have is value set to
+<tt>Value</tt>.
+
+
+<h2><a name="control_constructs">Control Constructs</a></h2>
+<P>
+Certain constructions, more or less difficult to achieve in pure Prolog
+are defined in the standard to be "control constructs".
+<h4><a name="true"> true/0</a></h4>
+<P>
+<tt> true</tt> is true.
+<h4><a name="fail">fail/0</a></h4>
+<P>
+<tt> fail</tt> is false.
+<h4><a name="call">call/1</a></h4>
+<P>
+<tt>call(G)</tt> is true if and only if <tt>G</tt> represents a goal
+which is true.
+<P>
+<em>Template</em> <tt> call(+callable_term)</tt>
+<P>
+Cuts in the argument <tt>G</tt> of  call are local to  <tt>G</tt>.
+<P>
+<tt>call/1</tt> may raise an <a href="exceptions.html#instantiation_error">
+instantiation_error</a>, or a <a href="exceptions.html#type_error"> type_error</a> when its argument cannot be converted to a goal.
+<h4><a name="cut">!/0, cut</a></h4>
+<P>
+<tt> !</tt> is true. All choice ponts between the cut and the parent goal are removed. The effect is commit to use of both the current clause and the 
+substitutions found at the point of the cut.
+<P>
+Ironically, and perhaps somewhat counter intuitively cut can (in the presence of <tt><a href="#notprovable">(\+)/1</a></tt>
+ <em>increase</em> the number of solutions.
+As the following example (from the <a href="prolog_refs.html#prologthestandard">book of Deransart, Ed-Dbali and Cervoni</a>) shows:
+<xmp>
+p1 :- \+ q1.
+q1 :- fail.
+q1 :- true.
+
+p2:- \+ q2.
+q2 :- !, fail.
+q2 :- true.
+
+p1.   Fails
+p2.   Succeeds.
+</xmp>
+<h4><a name="and">Conjunction (,)/2</a></h4>
+<p>
+<tt> ','(First, Second)</tt> is true if and only if <tt>First</tt>
+is true and <tt>Second</tt> is true.
+<h4><a name="or">Disjunction (;)/2</a></h4>
+<P>
+<tt> ';'(Either, Or)</tt> is true iff and either <tt>Either</tt> or
+<tt>Or</tt> is true.
+<h4><a name="ifthen"> if-then (-&gt)/2</a></h4>
+<tt>'-&gt'(If, Then)</tt> is true if and only if <tt>If</tt> is true and
+<tt>Then</tt> is true for the <em>first</em> solution of <tt>If</tt>
+<P>
+The semantics is the same as <tt>If,!, Then.</tt> 
+
+<h4><a name="ifthenelse"> if-then else</a></h4>
+<p>
+<tt> ';'('-&gt'(If, Then), Else)</tt> is true iff and only if
+(1) <tt>If</tt> is true  and <tt>Then</tt> is true for the <em>first</em> solution of 
+<tt>If</tt> or (2) <tt>If </tt> is false and <tt>Else</tt> is true.
+
+<h4><a name ="catch">catch/3 and throw/1</a></H4>
+The control constructs <tt>catch/3</tt> and <tt>throw/1</tt>
+enable recovery from <a href="exceptions.html">exceptions</a>.
+<P>
+A goal <tt>catch(Goal, Catcher, Handler)</tt> is true if
+<ol>
+<li> <tt>call(Goal)</tt> is true, or
+<li> An exception is raised which throws a <tt>Ball</tt> that is caught by
+<tt>Catcher</tt> and <tt>Handler</tt> then succeeds
+</ol>
+<P>
+The following examples illustrate the use of catch and throw.
+See also 
+<a href="error_progs.html"> further examples of exception handling</a>.
+<P.
+Assume the database
+<xmp>
+p:- true.
+p:- throw(b).
+
+q:- catch(p, B, write('hellop')), r(c).
+
+r(X) :- throw(X).
+</xmp>
+<P>
+Then the goal:<br>
+<xmp>
+catch(p, X, (write('error from p'), nl)).
+</xmp>
+<P>
+Succeeds twice, 
+<ol>
+<li> With the empty substitution,
+<li> With X &lt- b after writing<br>
+error from p.
+</ol>
+<P>
+The goal: <br>
+<xmp>
+catch(q, C, write(helloq)).
+</xmp>
+<P>
+succeeds after writing helloq.
+
+
+
+<h2><a name="flags"> Prolog Flags</a></h2>
+The definition of each flag indicates whether it is changeable or not.
+<dl>
+<dt> bounded
+<dd>
+Possible value: <tt>true, false</tt><br>
+Default Value: Implementation defined<br>
+Changeable: No</br>
+<dt>max_integer
+<dd>
+Possible value: the default value</br>
+Default value: implementation defined<br>
+Changeable: No<br>
+<dt>min_integer
+<dd>
+Possible value: the default value</br>
+Default value: implementation defined<br>
+Changeable: No
+<dt> integer_rounding_function
+<dd>
+Possible values: <tt>down, toward_zero</tt><br>
+Default value: implementation defined<br>
+Changeable: No<br>
+<dt> char_conversion
+<dd>
+Possible values: <tt>on, off</tt><br>
+Default value:  <tt>on</tt><br>
+Changeable: Yes<br>
+<dt>debug
+<dd>
+Possible values: <tt>on, off</tt><br>
+Default value:  <tt>off</tt><br>
+Changeable: Yes<br>
+<dt> max_arity
+<dd>
+Possible value: the default value</br>
+Default value: implementation defined<br>
+Changeable: No<br>
+<dt>unknown
+<dd>
+Possible values: <tt>error, fail, warning</tt><br>
+Default value:  <tt>error</tt>
+Changeable: Yes<br>
+<P>
+Determines the behaviour of the processor upon attempting to execute a 
+procedure which does not exist.
+<dt>double_quotes
+<dd>
+Possible values: <tt>chars, codes, atom</tt>
+Default value: implementation defined<br>
+Changeable: Yes<br>
+<P>
+Determines the syntax of a double quoted list.
+
+
+</dl>
+<h2><a name="builtins">Builtins</a></h2>
+
+<a href="modes.html">Templates and modes</a> are given for each builtin.
+ 
+<h3>Term Unification</h3>
+<h4><a name="unify"> Prolog Unification =/2</a></h4>
+<P>
+If <tt>X</tt> and <tt>Y</tt> are 
+<a href="unification.html#NSTO">Not Subject to Occurs check</a>
+then <tt>X = Y</tt> is true iff <tt>X</tt> and <tt>Y</tt> are unifiable.
+
+<P>
+<em>Template</em> <tt>'='(?term,?term)</tt>
+<h4><a name="unifywithoccurscheck">unify_with_occurs_check/2</a></h4>
+<P>
+<tt>unify_with_occurs_check(X,Y)</tt> is true if and only if
+<tt>X</tt> and <tt>Y</tt> are unifiable.
+<P>
+<em>Template</em> <tt> unify_with_occurs_check(?term,?term)</tt>
+<h4><a name="notunifiable">(\=)/2 not Prolog Unifiable.</a></h4>
+<P>
+If <tt>X</tt> and <tt>Y</tt> are 
+<a href="unification.html#NSTO">Not Subject to Occurs check</a>
+then <tt>X \= Y</tt> is true iff <tt>X</tt> and <tt>Y</tt> are not unifiable.
+<P>
+<em>Template</em> <tt>'\\='(?term,?term)</tt>
+<h3> Type Testing</h3>
+<h4><a name="var">var/1</a></h4>
+<P>
+<tt>var(X)</tt> is true if and only if <tt>X</tt> is a variable.
+<P>
+<em>Template</em> <tt>var(@term)</tt>
+<h4><a name="atom">atom/1</a></h4>
+<P>
+<tt>atom(X)</tt> is true if and only if  <tt>X</tt> is an atom.
+<P>
+<em>Template</em> <tt>atom(@term)</tt>
+<h4><a name="integer">integer/1</a></h4>
+<P>
+<tt>integer(X)</tt> is true if and only if  <tt>X</tt> is an integer.
+<P>
+<em>Template</em> <tt>integer(@term)</tt>
+<h4><a name="float">float/1</a></h4>
+<P>
+<tt>float(X)</tt> is true if and only if  <tt>X</tt> is a float.
+<P>
+<em>Template</em> <tt>float(@term)</tt>
+<h4><a name="atomic">atomic/1</a></h4>
+<P>
+<tt>atomic(X)</tt> is true if and only if  <tt>X</tt> is  atomic (that is
+an atom, an integer or a float).
+<P>
+<em>Template</em> <tt>atomic(@term)</tt>
+<h4><a name="compound">compound/1</a></h4>
+<P>
+<tt>compound(X)</tt> is true if and only if  <tt>X</tt> is a compound term,
+that is neither atomic nor a variable.
+<P>
+<em>Template</em> <tt>compound(@term)</tt>
+<h4><a name="nonvar">nonvar/1</a></h4>
+<P>
+<tt>nonvar(X)</tt> is true if and only if  <tt>X</tt> is not a variable.
+<P>
+<em>Template</em> <tt>nonvar(@term)</tt>
+<h4><a name="number">number/1</a></h4>
+<P>
+<tt>number(X)</tt> is true if and only if  <tt>X</tt> is an integer or a float.
+<P>
+<em>Template</em> <tt>number(@term)</tt>
+
+<h3><a name="termcomp">Term Comparison</a></h3>
+<P>
+There is an ordering on Prolog terms obtained as follows:
+<P>
+<tt> variables </tt> term precede <tt> floats</tt> which term precede
+<tt> integers </tt> which term precede <tt> atoms </tt> which term
+precede <tt> compound</tt>.
+<P>
+Within each term the ordering is the obvious one except that
+<ol>
+<li> For variables the order is implementation dependent.
+<li> for compound terms: <tt>X</tt> term precedes<tt> Y</tt> if
+arity(<tt>X</tt>) &lt arity(<tt>Y</tt>,
+if the arities are the same then <tt>X</tt> term precedes<tt> Y</tt> if
+functor name <tt>X</tt> term precedes the functor name of <tt>Y</tt>,
+If arity and functor names are the same then the left most differing
+arguments determine  the term precedence.
+</ol>
+<P>
+<dl>
+<dt> <tt>(@=&lt)/2</tt>
+<dd> Term less than or equal to.
+<dt> <tt> (==)/2</tt>
+<dd> Term identical
+<dt> <tt>((\==)/2</tt>
+<dd> Term not identical
+<dt> <tt>(@&lt)/2</tt>
+<dd> Term less than
+<dt> <tt> (@&gt)/2</tt>
+<dd> Term greater than
+<dt> <tt> (@&gt=)/2</tt>
+<dd> Term greater than or equal to.
+</dl>
+<P>
+<em>Templates</em><br>
+<tt>'@=&lt'(@term,@term)</tt><br>
+<tt>'=='(@term,@term)</tt><br>
+<tt>'\=='(@term,@term)</tt><br>
+<tt>'@&lt'(@term,@term)</tt><br>
+<tt>'@&gt'(@term,@term)</tt><br>
+<tt>'@&gt='(@term,@term)</tt><br>
+
+
+
+<h3><a name="termcreatedecomp">Term Creation and Decomposition</a></h3>
+<h4><a name="functor">functor/3</a></h4>
+<tt>functor(Term, Name, Arity)</tt> is true if and only if:
+<ul>
+<li> <tt>Term</tt> is a compound term with functor name 
+<tt> Name</tt> and arity <tt>Arity</tt> or
+<li> <tt>Term</tt> is an atomic term equal to 
+<tt>Name</tt> and <tt> Arity</tt> is 0.
+</ul>
+<P>
+It is the second of these possibilities that explains why in the two
+templates for 
+<tt>functor/3</tt>
+<ul>
+<li> <tt> functor(-nonvar, +atomic, +integer)</tt>
+<li> <tt> functor(+nonvar, ?atomic, ?integer)</tt>
+</ul>
+
+the second parameter is atomic and not an atom.
+<P>
+<tt> functor(Term <Name, Arity)</tt> throws <a href="exceptions.html#representation_error">representation_error</a> if <tt>Arity</tt> exceeds max_arity.
+
+<h4><a name="arg">arg/3</a></h4>
+<P>
+<tt>arg(N,Term, Arg)</tt> is true if nad only if the <tt>N</tt>th argument
+of <tt>Term</tt> is <tt>Arg</tt>
+
+<P>
+Template: <tt>arg(+integer, +compound_term, ?term)
+
+<P>
+Note that <tt>arg(N, Term, Arg)</tt> throws a 
+<a href="exceptions.html#domain_error">domain_error</a> if <tt>N</tt> is less than zero.
+
+<h4><a name="univ">(=../2) -- univ </a></h4>
+<P>
+<tt>Term =.. List</tt> is true if and only if
+<ul>
+<li> <tt>Term</tt> is an atomic term and <tt>List</tt> is the list whose only element is <tt>Term</tt>, or
+<li> <tt>Term</tt> is a compound term and <tt>List</tt> is the list whose
+head is the functor name of <tt>Term</tt> and whose tail is the list of the arguments of <tt>Term</tt>.
+</ul>
+
+<P>
+<em>Templates:</em>
+<ul>
+<li> <tt> '=..'(+nonvar, ?list)</tt>
+<li> <tt> '=..'(-nonvar, +list) </tt>
+</ul>
+
+
+<h4><a name="copyterm">copy_term/2</a></h4>
+
+<P>
+<tt> copy_term(X,Y)</tt> is true if and only if <tt>Y</tt> unifies with a term <tt>T</tt> which is a renamed copy of <tt>X</tt>.
+
+<P>
+<em>Template:</em> <tt>copy_term(?term, ?term).
+
+
+<h3><a name="arithmeticevaluation">Arithmetic Evaluation</a></h3>
+
+<P>
+<tt> 'is'(Result, Expression)</tt> is true if and only if the value 
+of evaluating <tt>Expression</tt> as an expression is <tt>Result</tt>
+
+<P>
+<em>Template:</em> <tt> is(?term, @evaluable)</tt>
+
+<P>
+If <tt>Expression </tt> is a variable is/2 throws <a href="exceptions.html#instantiation_error"> an instantiation_error</a>
+
+
+<h3><a name="arithmeticcomparison">Arithmetic Comparison</a></h3>
+<table>
+<tr>
+<td><tt>'=:='/2</tt><td> Arithmetic Equal
+</tr>
+<tr>
+<td><tt>'=\\='/2</tt><td> Arithmetic Not equal
+</tr>
+<tr>
+<td><tt>'&lt'/2</tt><td> Arithmetic less than
+</tr>
+<tr>
+<td><tt>'=&lt'/2</tt><td> Arithmetic less than or equal to
+</tr>
+<tr>
+<td><tt>'&gt'/2</tt><td> Arithmetic greater than
+</tr>
+<tr>
+<td><tt>'&gt='/2</tt><td> Arithmetic greater than or equal to
+</tr>
+</table>
+<br>
+<em>Templates:</em><br>
+<br>
+<tt>'=:='(@evaluable, @evaluable)</tt><br>
+<tt>'=\\='(@evaluable, @evaluable)</tt><br>
+<tt>'&lt'(@evaluable, @evaluable)</tt><br>
+<tt>'=&lt'(@evaluable, @evaluable)</tt><br>
+<tt>'&gt'(@evaluable, @evaluable)</tt><br>
+<tt>'&gt='(@evaluable, @evaluable)</tt><br>
+
+<P>
+If either argument is a variable the arithmetic comparison functors
+throw <a href="exceptions.html#instantiation_error"> an instantiation_error</a> 
+
+<h3>Clause Retrieval and Information</h3>
+<P>
+These predicates allow the contents of the database to be
+inspected.
+
+<h4><a name="clause">clause/2</a></h4>
+<P>
+<tt>clause(Head, Body)</tt> is true if and only if
+<ul>
+<li> The predicate of <tt>Head</tt> is public (the standard does not specify
+how a predicate is declared public but <a href="#dynamic"> dynamic</a>
+predicates are public, and
+<li> There is a clause in the database which corresponds to a term
+<tt>H:- B</tt> which unifies with <tt>Head :- Body</tt>.
+</ul>
+<P>
+<em> Template:</em> <tt>clause(+head, ?callable_term)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Head</tt> is a variable -- <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Head</tt> is neither a variable nor a predication --
+<a href="exceptions.html#type_error">type_error(callable, Head)</a>
+<li> The predicate indicator  <tt>Pred</tt> of <tt>Head</tt> is that of
+a private (ie. Not public) procedure -- 
+<a href="exceptions.html#permission_error">permission_error(access, 
+private_procedure, Pred)</a>
+<li> <tt> body</tt> is neither a variable nor a callable term
+<a href="exceptions.html#type_error">type_error(callable, Body)</a>.
+</ol>
+
+
+
+<h4><a name="current_predicate">current_predicate/1</a></h4>
+<tt>current_predicate(PI)</tt> is true if and only if
+<tt>PI</tt> is a predicate indicator for one of the <em>user-defined</em>
+procedures in the database.
+<P>
+By backtracking <tt> current_predicate(X/Y)</tt> finds all the user defined
+predicates in the current database.
+<P>
+<em>Template:</em> <tt>current_predicate(?predicate_indicator)</tt><br>
+<P>
+<em>Errors:</em> If <tt>PI<tt> is neither a variable nor a predicate
+indicator throws <a href="exceptions.html#type_error">type_error(predicate_indicator, PI)</a>.
+
+<h3>Clause Creation and Destruction</h3>
+<P>
+These predicates allow the database to be altered during the course of
+ execution. Note however that their effect is subject to the
+<a href="db_update.html">logical view</a> of the database. 
+The database is &quot frozen &quot at the start of a query.
+
+<h4><a name="asserta"> asserta/1</a></h4>
+<p>
+<tt> asserta(Clause)</tt> is true.
+<P>
+It has for side effect the addition of the clause <tt>H :-B</tt> to the
+database before all other clauses for the predicate associated to <tt>H</tt>.
+<tt>H :- B</tt> is determined as follows.
+<ol>
+<li> Either <tt> Clause</tt> unifies with <tt>H :-B</tt>, or
+<li> <tt> Clause</tt> unifies with <tt>H</tt> and
+<tt> B</tt> with true.
+</ol>
+
+<P>
+<em>Template:</em> <tt> asserta(@clause)</tt>
+<P>
+<em>Errors:</em> 
+<ol>
+<li> <tt> H</tt> is a variable -- <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>H</tt> is neither a variable nor does it correspond to a predication-- <a href="exceptions.html#type_error">type_error(callable, H)</a>
+<li> <tt>B</tt> does not correspond to a callable term --
+<a href="exceptions.html#type_error">type_error(callable, B)</a>
+<li> The predicate indicator <tt>Pred</tt> of <tt>H</tt> is that of
+a static (ie. not <a href="#dynamic">dynamic</a>)  procedure --
+<a href="exceptions.html#permission_error">permission_error(modify, 
+static_procedure, Pred)</a>
+</ol>
+
+
+
+
+
+<h4><a name="assertz"> assertz/1</a></h4>
+<p>
+<tt> assertz(Clause)</tt> is true.
+<P>
+It has for side effect the addition of the clause <tt>H :-B</tt> to the
+database after all other clauses for the predicate associated to <tt>H</tt>.
+<tt>H :- B</tt> is determined as follows.
+<ol>
+<li> Either <tt> Clause</tt> unifies with <tt>H :-B</tt>, or
+<li> <tt> Clause</tt> unifies with <tt>H</tt> and
+<tt> B</tt> with true.
+</ol>
+
+<P>
+<em>Template:</em> <tt> assertz(@clause)</tt>
+<P>
+<em>Errors:</em> 
+<ol>
+<li> <tt> H</tt> is a variable -- <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>H</tt> is neither a variable nor does it correspond to a predication-- <a href="exceptions.html#type_error">type_error(callable, H)</a>
+<li> <tt>B</tt> does not correspond to a callable term --
+<a href="exceptions.html#type_error">type_error(callable, B)</a>
+<li> The predicate indicator <tt>Pred</tt> of <tt>H</tt> is that of
+a static (ie. not <a href="#dynamic">dynamic</a>)  procedure --
+<a href="exceptions.html#permission_error">permission_error(modify, 
+static_procedure, Pred)</a>
+</ol>
+
+<h4><a name="retract"> retract/1</a></h4>
+<P>
+<tt>retract(Clause)</tt> is true if the database contains at least one
+dynamic procedure with a clause <tt>Clause</tt> which unifies with
+<tt>Head :- Body</tt> determined as follows:
+
+<ol>
+<li> Either <tt> Clause</tt> unifies with <tt>Head :-Body</tt>, or
+<li> <tt> Clause</tt> unifies with <tt>Head</tt> and
+<tt> Body</tt> unifies with true.
+</ol>
+
+As a side effect the clause is removed from the database.
+<em> A Predicate all of whose clauses have been removed from the database
+by a sequence or retracts is still found by <tt>current_predicate</tt></em>
+
+<P>
+<em>Template:</em> <tt>retract(+clause)</tt>
+<P>
+<em>Errors:</em> 
+<ol>
+<li>  <tt> Head</tt> is a variable -- <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li>  <tt>Head</tt> is neither a variable nor does it correspond to a predication -- <a href="exceptions.html#type_error">type_error(callable, Head)</a>
+<li> The predicate indicator <tt>Pred</tt> of <tt>Head</tt> is that of
+a static (ie. not <a href="#dynamic">dynamic</a>)  procedure --
+<a href="exceptions.html#permission_error">permission_error(modify, 
+static_procedure, Pred)</a> <b>Note</b> The standard document says access at
+this point this is clearly an error!.
+
+</ol>
+
+
+<h4><a name="abolish"> abolish/1</a></h4>
+<P>
+<tt>abolish(Pred)</tt> is true. It has for side effect the removal of all
+clauses of the predicate indicated by <tt>Pred</tt>. After abolish/1 the predicate is not found by <tt>current_predicate</tt>.
+<P>
+<em>Template:</em> <tt>abolish(@predicate_indicator)</tt>
+<P>
+<em>Errors:</em>
+<li> <tt>Pred</tt> is a variable --  <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Pred</tt> is a term <tt>Name/Arity</tt> and either <tt>Name</tt> or
+<tt>Arity</tt> is a variable --  <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Pred</tt> is neither a variable nor a predicate indicator
+-- <a href="exceptions.html#type_error">type_error(predicate_indicator, Pred)</a>
+<li> <tt>Pred</tt> is a term <tt>Name/Arity</tt> and <tt>Name</tt> is
+neither a variable nor an atom 
+- <a href="exceptions.html#type_error">type_error(atom, Name)</a>
+<li> <tt> Pred</tt> is a term <tt>Name/Arity</tt> and <tt>Arity</tt> is an integer less than zero -- <a href="exceptions.html#domain_error">
+domain_error(not_less_than_zero, Arity)</a>
+<li>  <tt>Pred</tt> is a term <tt>Name/Arity</tt> and <tt>Arity</tt> is an integer greater than the implementation defined integer <a href="#flags">max_arity</a> 
+-- <a href="exceptions.html#representation_error">representation_error(max_arity)</a>
+<li> The predicate indicator <tt>Pred</tt> is that of
+a static  procedure --
+<a href="exceptions.html#permission_error">permission_error(modify, 
+static_procedure, Pred)</a>  
+</ol>
+
+
+<h3><a name="allsolutions">All Solutions</a></h3>
+<P> 
+These predicates are convenient for collecting solutions to a given goal.
+It should be noted that <tt> bagof/3</tt> and <tt> setof/3</tt> fail when 
+there are no solutions to the goal, whereas <tt>findall/3</tt> succeeds 
+setting the collection to empty.
+
+<h4><a name="findall">findall/3</a></h4>
+<tt> findall(Template, Goal, Instances)</tt> is true if and only if
+<tt>Instances</tt> unifies with the list of values to which a variable 
+<tt>X</tt> not occurring in <tt> Template</tt> or <tt>Goal</tt> 
+would be instantiated by successive re-executions of <br>
+<blockquote>
+<tt> call(Goal), X = Template</tt>
+</blockquote>
+after systematic replacement of all variables in <tt>X</tt> by new 
+variables.
+<P>
+<em>Template:</em> <tt>findall(?term, +callable_term, ?list)
+<P>
+If the first argument appears in the last argument it can be instantiated
+ by findall.
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Goal</tt> is a variable --  <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Goal</tt> is neither a variable nor a callable term -- 
+<a href="exceptions.html#type_error">type_error(callable, Goal)</a>
+<li> <tt>Instances is neither a partial list nor a  list --
+<a href="exceptions.html#type_error">type_error(list, Instances)</a>
+</ol>
+
+
+<h4><a name="bagof">bagof/3</a></h4>
+
+<tt>bagof(Template, Goal, Instances)</tt> is true if <tt>Instances</tt> is a 
+non-empty list of all terms such that each 
+unifies with <tt>Template</tt> for a
+fixed instance <tt>W</tt> of the variables of <tt>Goal</tt> that are free 
+with respect to <tt>Template</tt>. The ordering of the elements of
+<tt>Instances</tt> is the order in which the solutions are found.
+<P>
+On backtracking bagof is resatisfiable with a different instance of <tt>W</tt>
+<P>
+<em>Template:</em> <tt>bagof(?term, +callable_term, ?list)</tt>
+<P>
+If the first argument appears in the last argument it can be instantiated
+ by bagof.
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>Goal</tt> is a variable --  <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Goal</tt> is neither a variable nor a callable term -- 
+<a href="exceptions.html#type_error">type_error(callable, Goal)</a>
+<li> <tt>Instances is neither a partial list nor a  list --
+<a href="exceptions.html#type_error">type_error(list, Instances)</a>
+</ol>
+
+<h4><a name="setof">setof/3</a></h4>
+<tt>setof(Template, Goal, Instances)</tt> is true if <tt>Instances</tt> is a 
+sorted
+non-empty list of all terms such that each 
+unifies with <tt>Template</tt> for a
+fixed instance <tt>W</tt> of the variables of <tt>Goal</tt> that are free 
+with respect to <tt>Template</tt>. 
+<P>
+On backtracking setof is resatisfiable with a different instance of <tt>W</tt>
+<P>
+<em>Template:</em> <tt>setof(?term, +callable_term, ?list)</tt>
+<P>
+If the first argument appears in the last argument it can be instantiated
+ by setof.
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>Goal</tt> is a variable --  <a href="exceptions.html#instantiation_error"> instantiation_error</a>
+<li> <tt>Goal</tt> is neither a variable nor a callable term -- 
+<a href="exceptions.html#type_error">type_error(callable, Goal)</a>
+<li> <tt>Instances is neither a partial list nor a  list --
+<a href="exceptions.html#type_error">type_error(list, Instances)</a>
+</ol>
+
+<h2><a name="io"> Input and Output</a></h2>
+<P>
+A summary of the I/O predicates is given on a special 
+<a href="io.html">page on IO</a>.
+
+<h3><a name="streamselection">Stream Selection and Control</a></h3>
+<P>
+These predicates link an external source/sink with a Prolog stream.
+Note that the standard does not prescribe the form of a Stream term.
+An open stream may also be referred to by a <a href="io.html#alias">alias</a>
+assigned when the stream is opened.
+
+<h4><a name="currentinput">current_input/1</a></h4>
+<tt>current_input(Stream)</tt> is true if the stream term <tt>Stream</tt>
+identifies the current input stream.
+<P>
+<em>Template:</em> <tt> current_input(?stream)</tt>.
+<P>
+<em>Errors.</em>
+<ol>
+<li> <tt> Stream</tt> is neither a variable nor a stream --
+<a href="exceptions.html#domain_error"> domain_error(stream, Stream)</a>
+</ol>
+<h4><a name="currentoutput">current_output/1</a></h4>
+<tt>current_output(Stream)</tt> is true if the stream term <tt>Stream</tt>
+identifies the current output stream.
+<P>
+<em>Template:</em> <tt> current_output(?stream)</tt>.
+<P>
+<em>Errors.</em>
+<ol>
+<li> <tt> Stream</tt> is neither a variable nor a stream --
+<a href="exceptions.html#domain_error"> domain_error(stream, Stream)</a>
+</ol>
+
+<h4><a name="setinput">set_input/1</a></h4>
+<tt> set_input(Stream_or_Alias)</tt> is <tt>true</tt>. As a side effect
+sets the current input to the Stream identified by <tt>Stream_or_Alias</tt>
+<P>
+<em>Template</em> <tt>set_input(@stream_or_alias)</tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>Stream_or_Alias</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Stream_or_Alias</tt> is neither a variable, nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, Stream_or_Alias)</a>
+<li> <tt>Stream_or_Alias</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, 
+Stream_or_Alias)</a>
+<li> <tt>Stream_or_Alias</tt> is an output stream --
+<a href="exceptions.html#permission_error"> permission_error(input, stream,
+Stream_or_Alias)</a>
+</ol>
+
+ 
+<h4><a name="setoutput">set_output/1</a></h4>
+<tt> set_output(Stream_or_Alias)</tt> is <tt>true</tt>. As a side effect
+sets the current output to the Stream identified by <tt>Stream_or_Alias</tt>
+<P>
+<em>Template</em> <tt>set_output(@stream_or_alias)</tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>Stream_or_Alias</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Stream_or_Alias</tt> is neither a variable, nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, Stream_or_Alias)</a>
+<li> <tt>Stream_or_Alias</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, 
+Stream_or_Alias)</a>
+<li> <tt>Stream_or_Alias</tt> is an input stream --
+<a href="exceptions.html#permission_error"> permission_error(output, stream,
+Stream_or_Alias)</a>
+</ol>
+<h4><a name="open"> Opening a Stream: open/4, open/3</a></h4>
+<tt>open(Source_Sink, Mode, Stream, Options) </tt> is true, and has for side 
+effect the opening of Source/sink <tt>Source_Sink</tt> in <a href="io.html#mode">mode</a> <tt> Mode</tt>, the term <tt> Stream</tt> is a implementation 
+dependent term serving to identify the stream associated to the source/sink by the invocation of open.
+<tt>Options</tt> is a list of  <a href="io.html#open_options">open options</a>
+with which the stream is opened.
+<P>
+<tt> open/3</tt> is like <tt>open/4</tt> except that no open options
+are supplied. 
+<P>
+<em>Template: </em><tt>open(@source_sink, @io_mode, -stream, @stream_options)</tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>Source_Sink</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Mode</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Options</tt> is a partial list or a list with an element <tt>E</tt> 
+which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt> Mode</tt> is neither a variable nor an atom
+-- <a href="exceptions.html#type_error">type_error(atom, Mode)</a>
+<li> <tt>Options</tt> is neither a partial list nor a list
+-- <a href="exceptions.html#type_error">type_error(list, Options)</a>
+<li> <tt> Stream</tt> is not a variable --
+<a href="exceptions.html#type_error">type_error(variable, Stream)</a>
+<li> <tt> Source_Sink</tt> is neither a variable nor a source/sink
+-- <a href="exceptions.html#domain_error">domain_error(source_sink, Source_Sink)</a>
+<li> <tt> Mode</tt> is an atom but not an input/output mode --
+<a href="exceptions.html#domain_error">domain_error(io_mode, Mode)</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is neither a variable nor a stream-option --
+<a href="exceptions.html#domain_error">domain_error(stream_option, E)</a>
+<li> The source/sink specified by <tt>Source_Sink</tt> does not exist
+-- <a href="exceptions.html#existence_error">existence_error(source_sink, Source_Sink)</a>
+<li> The source/sink specified by <tt>Source_Sink</tt> cannot be opened --
+<a href="exceptions.html#permission_error"> permission_error(open, source_sink, Source_Sink)</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is <tt>alias<A)</tt> 
+and <tt>A</tt> is already associated with an open stream
+-- <a href="exceptions.html#permission_error"> permission_error(open, source_sink, alias(A))</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is <tt>reposition(true)</tt> and it is not possible to reposition this stream.
+-- <a href="exceptions.html#permission_error"> permission_error(open, source_sink, reposition(true))</a>
+</ol>
+
+
+
+<h4><a name="close"> Closing a stream: close/1 and close/2</a></h4>
+<tt>close(S_or_a, Options)</tt> is true, with side effect that it closes
+the stream associated to <tt>S_or_a</tt>. The <tt>Options</tt> argument determines the <a href="io.html#stream_closure">close options</a> for the operation.
+<P>
+<tt>close(S_or_a)<tt> is like close/2 except that no close 
+options are supplied.
+<P>
+<em>Template: </em> <tt> close(@stream_or_alias, @close_options)</tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Options</tt> is a partial list or a list with an element <tt>E</tt> 
+which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Options</tt> is neither a partial list nor a list
+-- <a href="exceptions.html#type_error">type_error(list, Options)</a>
+<li> <tt>S_or_a</tt> is neither a variable nor a stream-term or alias
+-- <a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is neither a variable nor a stream-option --
+<a href="exceptions.html#domain_error">domain_error(stream_option, E)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+</ol>
+
+
+<h4><a name="streamproperty"> stream_property/2, at_end_of_stream/1, at_end_of_stream/0</a></h4>
+<tt>stream_property(stream, Property</tt> is true if and only if the stream associated with the stream-term <tt>Stream</tt> has the <a href="io.html#stream_properties">stream property</a> <tt> Property</tt>. On backtracking all properties of all open streams are discovered.
+
+<P>
+The predicates <tt>at_end_of_stream/0</tt> and 
+<tt>at_end_of_stream/1</tt> are defined as if as follows:
+
+<dl>
+<dt><tt>at_end_of_stream:-</tt>
+<dd>
+<tt> current_input(S),<br>
+stream_property(S, end_of_stream(E)),<br>
+!, <br>
+(E = at; E = past)
+</tt>
+<dt><tt> at_end_of_stream(S_or_a) :- </tt>
+<dd>
+<tt>
+( atom(S_or-a) -&gt<br>
+  stream_property(S, alias(S_or_a))<br>
+;<br>
+S = S_or_a<br>
+),<br>
+stream_property(S, end_of_stream(E)),<br>
+!, <br>
+(E = at; E = past)
+</tt>
+</dl>
+
+
+<P>
+<em>Templates:</em><br>
+<tt> stream_property(?stream,?property)</tt><br>
+<tt> at_end_of_stream</tt><br>
+<tt> at_end_of_stream(@stream_or_alias)</tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Stream</tt> is neither a variable nor a stream-term --
+<a href="exceptions.html#domain_error">domain_error(stream, Stream)</a>
+<li> <tt>Property</tt> is neither a variable nor a stream property
+-- <a href="exceptions.html#domain_error">domain_error(stream_property,Propertrty)</a>
+<li> <tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+</ol>
+<h4><a name="setstreamposition">set_stream_position/2</a></h4>
+<tt>set_stream_position(S_or_a, Position)</tt> is true, with the side effect 
+of setting the <a href="io.html#stream_position">stream_position</a> to 
+<tt> Position</tt>. Normally, <tt>Position</tt> will have been obtained via the <tt> position/1</tt> property of the stream.
+<P>
+<em>Template: </em>
+<tt> set_stream_position(@stream_or_alias, @stream_position) </tt>
+<P>
+<em>Errors</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Position</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+<li><tt>S_or_a</tt> has stream property <tt>reposition(false)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(reposition, stream, S_or_a)</a>
+</ol>
+<h3><a name="readchar"> Character Input Output</a></h3>
+These predicates allow a single character or code to be input
+from or output to a text stream.
+<h4><a name="getchar"> get_char/2, get_char/1</a></h4>
+<h4><a name="getcode"> get_code/2, get_code/1</a></h4>
+
+<tt>get_char(S_or_a,Char)</tt> is true if and only if
+<tt>Char</tt> unifies with the next character to be input from the target 
+stream identified by <tt>S_or_a</tt>, the character is input. <tt>get_char(Char)</tt> applies to the
+current input stream.
+<P>
+<tt>get_code/2</tt> and get_code/1</tt> are defined as if
+<dl>
+<dt><tt>get_code(Code):-</tt>
+<dd><tt>current_input(S),<br>
+get_char(S,Char),<br>
+(Char = end_of_file -&gt <br>
+Code = -1<br>
+;<br>
+char_code(Char, Code)<br>
+).
+</tt>
+<dt><tt>get_code(S, Code) :- </tt>
+<dd>get_char(S,Char),<br>
+(Char = end_of_file -&gt <br>
+Code = -1<br>
+;<br>
+char_code(Char, Code)<br>
+).
+</dl>
+
+<P>
+<em>Templates:</em><br>
+ <tt> get_char(?in_character)</tt><br>
+<tt>get_char(@stream_or_alias, ?in_character)</tt></br>
+<tt>get_code(?in_character_code)</tt><br>
+<tt>get_code(@stream_or_alias, ?in_character_code)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Char</tt> is neither a variable nor an in-character
+-- <a href="exceptions.html#type_error">type_error(in_character, Char)</a>
+<li> <tt>Code</tt> is neither a variable nor an integer
+-- <a href="exceptions.html#type_error">type_error(integer, Char)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an output stream --
+<a href="exceptions.html#permission_error">permission_error(input, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a binary stream --
+<a href="exceptions.html#permission_error">permission_error(input, binary_stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> has stream properties <tt> end_of_stream(past)</tt> and
+<tt>eof_action(error)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(input, past_end_of_stream, S_or_a)</a>
+<li> The entity input from the stream is not a character --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+<li><tt>Code</tt> is an integer but not an in-character code
+<a href="exceptions.html#representation_error">representation_error(in_character_code)</a>
+
+
+</ol>
+
+<h4><a name="peekchar"> peek_char/2, peek_char/1</a></h4>
+<h4><a name="peekcode"> peek_code/2, peek_code/1</a></h4>
+<tt>peek_char(S_or_a,Char)</tt> is true if and only if
+<tt>Char</tt> unifies with the next character that would be input from the target 
+stream identified by <tt>S_or_a</tt>, the character is not input. <tt>peek_char(Char)</tt> applies to the
+current input stream.
+<P>
+<tt>peek_code/2</tt> and peek_code/1</tt> are defined as if
+<dl>
+<dt><tt>peek_code(Code):-</tt>
+<dd><tt>current_input(S),<br>
+peek_char(S,Char),<br>
+(Char = end_of_file -&gt <br>
+Code = -1<br>
+;<br>
+char_code(Char, Code)<br>
+).
+</tt>
+<dt><tt>peek_code(S, Code) :- </tt>
+<dd>peek_char(S,Char),<br>
+(Char = end_of_file -&gt <br>
+Code = -1<br>
+;<br>
+char_code(Char, Code)<br>
+).
+</dl>
+
+<P>
+<em>Templates:</em><br>
+ <tt> peek_char(?in_character)</tt><br>
+<tt>peek_char(@stream_or_alias, ?in_character)</tt></br>
+<tt>peek_code(?in_character_code)</tt><br>
+<tt>peek_code(@stream_or_alias, ?in_character_code)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Char</tt> is neither a variable nor an in-character
+-- <a href="exceptions.html#type_error">type_error(in_character, Char)</a>
+<li> <tt>Code</tt> is neither a variable nor an integer
+-- <a href="exceptions.html#type_error">type_error(integer, Char)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an output stream --
+<a href="exceptions.html#permission_error">permission_error(input, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a binary stream --
+<a href="exceptions.html#permission_error">permission_error(input, binary_stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> has stream properties <tt> end_of_stream(past)</tt> and
+<tt>eof_action(error)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(input, past_end_of_stream, S_or_a)</a>
+<li> The entity input from the stream is not a character --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+<li><tt>Code</tt> is an integer but not an in-character code
+<a href="exceptions.html#representation_error">representation_error(in_character_code)</a>
+
+
+</ol>
+
+
+<h4><a name="putchar"> put_char/2, put_char/1, put_code/2, put_code/1, nl/0,nl/1</a></h4>
+
+<tt>put_char(S_or_a, Char)</tt> is true, with the side effect that <tt>Char</tt> is output to the stream associated with <tt>S_or_a</tt>.
+<tt>put_char(Char)</tt> applies to the current output stream.
+<P>
+The predicates <tt> put_code/2, put_code/1, nl/1</tt> and <tt>nl/0</tt>
+are defined as if
+<tt>
+<dl>
+<dt>put_code(Code) :-
+<dd>current_output(S),<br>
+char_code(Char, Code), <br>
+put_char(S, Char).
+<dt>put_code(S,Code) :-
+<dd>char_code(Char, Code), <br>
+put_char(S, Char).
+<dt> nl :-
+<dd>current_output(S),<br>
+put_char(S, '\n').
+<dt> nl(S) :-
+<dd>put_char(S, '\n').
+</dl>
+</tt>
+<P>
+<em>Templates</em><br>
+<tt>
+put_char(+character)<br>
+put_char(@stream_or_alias, +character)<br>
+put_code(+character_code)<br>
+put_code(@stream_or_alias, +character_code)<br>
+nl<br>
+nl(@stream_or_alias)
+</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Char</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Code</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Char</tt> is neither a variable nor a one character atom --
+<a href="exceptions.html#type_error">type_error(character, Char)</a>
+<li><tt>Code</tt> is neither a variable nor an integer
+-- <a href="exceptions.html#type_error">type_error(integer, Char)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an input stream --
+<a href="exceptions.html#permission_error">permission_error(output, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a binary stream --
+<a href="exceptions.html#permission_error">permission_error(output, binary_stream, S_or_a)</a>
+<li> <tt>Char</tt> is not a character --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+<li><tt>Code</tt> is an integer but not an character code
+<a href="exceptions.html#representation_error">representation_error(character_code)</a>
+</ol>
+
+
+<h3><a name="readbinary"> Reading from Binary streams</a></h3>
+These builtin predicates enable a single byte to be input from or output to 
+a binary stream.
+
+<h4><a name="getbyte"> get_byte/2, get_byte/1</a></h4>
+<tt>get_byte(S_or_a,Byte)</tt> is true if and only if
+<tt>Byte</tt> unifies with the next byte to be input from the target 
+stream identified by <tt>S_or_a</tt>, the byte is input. <tt>get_byte(Byte)</tt> applies to the
+current input stream.
+<P>
+<em>Template: </em><tt> get_byte(@stream_or_alias, ?in_byte)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Byte</tt> is neither a variable nor an in-byte --
+<a href="exceptions.html#type_error">type_error(in_byte, Byte)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an output stream --
+<a href="exceptions.html#permission_error">permission_error(input, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a text stream --
+<a href="exceptions.html#permission_error">permission_error(input, text_stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> has stream properties <tt> end_of_stream(past)</tt> and
+<tt>eof_action(error)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(input, past_end_of_stream, S_or_a)</a>
+
+</ol>
+
+<h4><a name="peekbyte">peek_byte/2, peek_byte/1</a></h4>
+<tt>peek_byte(S_or_a,Byte)</tt> is true if and only if
+<tt>Byte</tt> unifies with the next byte to be input from the target 
+stream identified by <tt>S_or_a</tt>, the byte is not  input. <tt>peek_byte(Byte)</tt> applies to the
+current input stream.
+<P>
+<em>Template: </em><tt> peek_byte(@stream_or_alias, ?in_byte)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Byte</tt> is neither a variable nor an in-byte --
+<a href="exceptions.html#type_error">type_error(in_byte, Byte)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an output stream --
+<a href="exceptions.html#permission_error">permission_error(input, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a text stream --
+<a href="exceptions.html#permission_error">permission_error(input, text_stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> has stream properties <tt> end_of_stream(past)</tt> and
+<tt>eof_action(error)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(input, past_end_of_stream, S_or_a)</a>
+</ol>
+
+
+<h4><a name="putbyte">put_byte/2, put_byte/1</a></h4>
+
+<tt>put_byte(S_or_a, Byte)</tt> is true, with the side effect that <tt>Byte</tt> is output to the stream associated with <tt>S_or_a</tt>.
+<tt>put_byte(Byte)</tt> applies to the current output stream.
+<P>
+<em>Template:</em> <tt>put_byte(@stream_or_alias, +byte)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+
+
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Byte</tt> is  a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Byte</tt> is neither a variable nor an byte
+-- <a href="exceptions.html#type_error">type_error(byte, Byte)</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an input stream --
+<a href="exceptions.html#permission_error">permission_error(output, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a text stream --
+<a href="exceptions.html#permission_error">permission_error(output, text_stream, S_or_a)</a>
+
+</ol>
+
+
+
+<h3><a name="termio"> Term Input and Output</a></h3>
+These predicates enable a Prolog term to input from or output to a 
+text stream. The syntax of such terms is affected by the <a href="#operators">operator table</a>, the value of certain <a href="#flags">Prolog flags</a>
+and whether or not 
+<a href="#charconversion">character conversion is in effect</a>.
+
+<h4><a name="readterm"> read_term/2,  read_term/3, read/1, read/2</a></h4>
+<tt>read_term(S_or_a, Term, Options)</t> is true if and only if <tt>Term</tt>
+unifies with <tt>T</tt> where <tt>T.</tt> is a read-term which has been
+constructed by inputting and parsing characters from the target stream.
+The argument <tt>Options</tt> determines the <a href="io.html#read_options">
+value of the read options in effect</a> for the read.
+<P>
+ The predicates <tt>read/1, read/2</tt> and <tt> read_term/2</tt> are defined as if:
+<tt>
+<dl>
+<dt>read_term(Term, Options) :-
+<dd> current_input(S),<br>
+read_term(S, Term, Options).
+<dt>read(S, Term):-
+<dd>read_term(S, Term, []).
+<dt>read(Term) :-
+<dd>current_input(S),<br>
+read_term(S, Term, []).
+
+</dl>
+</tt>
+<P>
+<em>Template:</em><tt>read_term(@stream_or_alias, ?term, +read_options_list)
+</tt>
+<P>
+<em>Errors:</em>
+<ol>
+
+
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Options</tt> is a partial list or a list with an element which is 
+a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li><tt>Options</tt> is neither a partial list nor a list --
+<a href="exceptions.html#type_error">type_error(list, Options)</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is neither a variable nor a valid read-option --
+<a href="exceptions.html#domain_error">domain_error(read_option, E)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an output stream --
+<a href="exceptions.html#permission_error">permission_error(input, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a binary stream --
+<a href="exceptions.html#permission_error">permission_error(input, binary_stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> has stream properties <tt> end_of_stream(past)</tt> and
+<tt>eof_action(error)</tt>
+-- <a href="exceptions.html#permission_error">permission_error(input, past_end_of_stream, S_or_a)</a>
+<li> One or more characters were input, but they cannot be parsed as a sequence of tokens --
+<a href="exceptions.html#syntax_error">syntax_error(implementation_dependent_atom)</a>
+<li> The sequence of tokens cannot be parsed as a term using the current
+set of operator definitions --
+<a href="exceptions.html#syntax_error">syntax_error(implementation_dependent_atom)</a>
+
+</ol>
+
+<h3><a name="writeterm"> Writing terms </a></h3>
+<h4><a name="write_term">write_term/3, write_term/2, write/1, write/2,
+writeq/1, writeq/2, write_canonical/1, write_canonical/2</h4>
+<tt>write_term(S_or_a, Term, Options)</tt> is true, with for side effect
+the output of <tt>Term</tt> to the target stream according to the <a href="#operators">operator table</a> and the <a href="io.html#write_options">write-options</a>.
+<P>
+The predicates <tt> write_term/2, write/1, write/2,
+writeq/1, writeq/2, write_canonical/1,</tt> and <tt>write_canonical/2</tt>
+are defined as if:
+<tt>
+<dl>
+<dt>write_term(Term, Options):-
+<dd> current_output(S),<br>
+write_term(S, Term, Options).
+<dt>write(Term):-
+<dd>current_output(S),<br>
+write_term(S, Term, [numbervars(true)]).
+<dt>write_term(S, Term) :-
+<dd>write_term(S, Term, [numbervars(true)]).
+<dt>writeq(Term):-
+<dd>current_output(S),<br>
+write_term(S, Term, [quoted(true),numbervars(true)]).
+<dt>writeq(S,Term):-
+<dd> write_term(S, Term, [quoted(true),numbervars(true)]).
+<dt> write_canonical(T) :-
+<dd>current_output(S),<br>
+write_term(S, Term, [quoted(true),ignore_ops(true)]).
+<dt> write_canonical(S,T) :-
+<dd>write_term(S, Term, [quoted(true),ignore_ops(true)]).
+
+</dl>
+</tt> 
+<P>
+<em>Template</em><tt> write(@stream_or_alias, @Term, @write_options_list) 
+<P>
+<em>Errors:</em>
+<li> <tt>S_or_a</tt> is a variable --  
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>Options</tt> is a partial list or a list with an element which is 
+a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li><tt>S_or_a</tt> is neither a variable nor a stream term or alias --
+<a href="exceptions.html#domain_error">domain_error(stream_or_alias, S_or_a)</a>
+<li><tt>Options</tt> is neither a partial list nor a list --
+<a href="exceptions.html#type_error">type_error(list, Options)</a>
+<li> An element <tt>E</tt> of the <tt>Options</tt> list is neither a variable nor a valid write-option --
+<a href="exceptions.html#domain_error">domain_error(write_option, E)</a>
+<li><tt>S_or_a</tt> is not associated with an open stream --
+<a href="exceptions.html#existence_error">existence_error(stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is an input stream --
+<a href="exceptions.html#permission_error">permission_error(output, stream, S_or_a)</a>
+<li> <tt>S_or_a</tt> is associated with a binary stream --
+<a href="exceptions.html#permission_error">permission_error(output, binary_stream, S_or_a)</a>
+</ol>
+<h4><a name="operators"> op/3 and current_op/3</a></h4>
+These predicates allow the operator table to be altered or inspected.
+<P>
+<tt><a name="op3">op(Priority, Op_Specifier, Operator)</a></tt> is true, with the side effect that
+ <ol>
+<li>if <tt>Priority</tt> is 0 then <tt>Operator</tt> is removed from the
+operator table, else
+<li> <tt> Operator</tt> is added to the Operator table, with priority (lower binds tighter) <tt> Priority</tt> and associativity determined by 
+<tt>Op_Specifier</tt> according to the rules:
+<P>
+<table border=1 cellspacing=1>
+<tr>
+<td>Specifier<td>Type<td>Associativity
+</tr>
+<tr>
+<td>fx<td>prefix<td>no
+</tr>
+<tr>
+<td>fy<td>prefix<td>yes
+</tr>
+<tr>
+<td>xf<td>postfix<td>no
+</tr>
+<tr>
+<td>yf<td>postfix<td>yes
+</tr>
+<tr>
+<td>xfx<td>infix<td>no
+</tr>
+<tr>
+<td>yfx<td>infix<td>left
+</tr>
+<tr>
+<td>xfy<td>infix<td>right
+</tr>
+</table>
+</ol>
+<P>
+It is forbidden to alter the priority or type of ','. <a name="op_forbid">
+It is  forbidden to have an infix and a postfix operator with the same name,
+ or two operators with the same class and name</a>.  
+<P>
+The initial operator table is given by
+<P>
+<table align=center border=1 cellspacing=1>
+<tr>
+</tr>
+<tr>
+<td>Priority<td>Specifier<td> Operator(s)
+</tr>
+<tr>
+<td>1200<td> xfx <td> :- --&gt
+</tr>
+<tr>
+<td>1200<td>fx<td> :- ?-
+</tr>
+<tr>
+<td>1100<td> xfy<td> ;
+</tr>
+<tr>
+<td>1050<td> xfy <td> -&gt
+</tr>
+<tr>
+<td>1000 <td> xfy <td> ','
+</tr>
+<tr>
+<td> 900 <td> fy <td> \+
+</tr>
+<tr>
+<td> 700 <td> xfx <td> = \=
+</tr>
+<tr>
+<td> 700 <td> xfx <td> == \== @&lt @=&lt @&gt @&gt=
+</tr>
+<tr>
+<td> 700 <td> xfx <td> =..
+</tr>
+<tr>
+<td> 700 <td> xfx <td> is =:= =\= &lt =&lt &gt &gt=
+</tr>
+<tr>
+<td> 500 <td> yfx <td> + - /\ \/
+</tr>
+<tr>
+<td> 400 <td> yfx <td> * / // rem mod &lt&lt &gt&gt
+</tr>
+<tr>
+<td>200 <td> xfx <td> **
+</tr>
+<tr>
+<td> 200 <td> xfy <td> ^
+</tr>
+<tr> 
+<td> 200 <td> fy <td> - \
+</tr>
+
+</table>
+<P>
+<em>Template:</em><tt>op(+integer,+operator_specifier, @atom_or_atom_list)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt> Priority</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Op_Specifier</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Operator</tt> is a partial list or a list with an element
+<tt>E</tt> which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt> Priority is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, Priority)</a>
+<li> <tt>Op_Specifier</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Op_specifier)</a>
+<li> <tt> Operator</tt> is neither a partial list nor a list nor an atom --
+<a href="exceptions.html#type_error">type_error(list, Operator)</a>
+<li> An element <tt>E</tt> of the <tt>Operator</tt> list is not an atom --
+<a href="exceptions.html#type_error">type_error(atom, E)</a>
+<li> <tt>Priority</tt> is not between 0 and 1200 inclusive --
+<a href="exceptions.html#domain_error">domain_error(operator_priority, Priority)</a>
+<li><tt>Op_specifier</tt> is not a valid operator specifier --
+<a href="exceptions.html#domain_error">domain_error(operator_specifier, Op_specifier)</a>
+
+<li> <tt>Operator</tt> is ',' --
+<a href="exceptions.html#permission_error">permission_error(modify, operator, ',')</a>
+<li> An element of the <tt>Operator</tt> list is ',' --
+ <a href="exceptions.html#permission_error">permission_error(modify, operator, ',')</a>
+<li> <tt>Op_specifier</tt. is such that <tt>Operator</tt> would violate the
+<a href="#op_forbid">prohibitions on multiple types</a> --
+<a href="exceptions.html#permission_error">permission_error(create, operator, Operator)</a>
+</ol>
+<h3><a name="current_op/3">current_op/3</a></h3>
+<tt>current_op(Priority, Op_specifier, Operator)</tt> is true if  
+and only if <tt>Operator</tt> is an operator with properties given by <tt> Op_specifier</tt> and <tt>Priority</tt>
+<P>
+<em>Template:</em><tt>current_op(?integer, ?operator_specifier, ?atom)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Priority</tt> is neither a variable nor an operator priority  --
+<a href="exceptions.html#domain_error">domain_error(operator_priority, Priority)</a>
+<li><tt>Op_specifier</tt> is neither a variable nor an operator specifier --
+<a href="exceptions.html#domain_error">domain_error(operator_specifier, Op_specifier)</a>
+<li> <tt>Operator</tt> is neither a variable  nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Operator)</a>
+</ol>
+
+<h4><a name="charconversion">char_conversion/2 and current_char_conversion/2</a></h4>
+<tt>char_conversion(In_char, Out_char)</tt> is true, with the side effect of adding the pair <tt>(In_char, Out_char)</tt> to the <a href="#char_conversion">character conversion table</a> if <tt>In_char</tt> is not equal to <tt>Out_char</tt> and removing any pair
+<tt>(In_char, _)</tt> from the table if <tt>In_char</tt> is equal to
+ <tt>
+ Out_char
+</tt>.
+<P>
+When the flag <tt> char_conversion</tt> has the value true, the <tt>In_char</tt>
+will be replaced by <tt>Out_char</tt> when a term is read using read_term/3.
+<P>
+<em>Template:</em> char_conversion(+character, +character).
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>In_char</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Out_char</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>In_char</tt> is neither  a variable nor a one character atom --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+<li> <tt>Out_char</tt> is neither  a variable nor a one character atom --
+<a href="exceptions.html#representation_error">representation_error(character)
+</a>
+</ol>
+<P>
+<tt>current_char_conversion(In_char,Out_char)</tt> is true if and only if
+<ol>
+<li> <tt>In_char</tt> is not equal to <tt>Out_char</tt>, and
+<li> there is an entry in the character conversion table corresponding to the pair <tt>(In_char,Out_char)</tt>
+</ol>
+<P>
+<em>Template:</em> current_char_conversion(?character, ?character)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>In_char</tt> is neither  a variable nor a one character atom --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+<li> <tt>Out_char</tt> is neither  a variable nor a one character atom --
+<a href="exceptions.html#representation_error">representation_error(character)</a>
+</ol>
+
+<h3><a name="logiccontrol">Logic and Control</a></h3>
+<h4><a name="notprovable"> (\+)/1 - not provable</a></h4>
+<tt>\+(Term)</tt> is true iff and only if <tt>call(Term)</tt> is false.
+<P>
+<em>Template:</em><tt>\+(@callable_term)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Term</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Term</tt> is neither a variable nor a callable term --
+<a href="exceptions.html#type_error">type_error(callable, Term)</a>
+</ol>
+
+<h4><a name="once">once/1</a></h4>
+<tt>once(Term)</tt> is true. <tt>once/1</tt> is not re-executable.
+<P>
+<em>Template:</em><tt>once(@callable_term)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Term</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Term</tt> is neither a variable nor a callable term --
+<a href="exceptions.html#type_error">type_error(callable, Term)</a>
+</ol>
+
+<h4><a name="repeat">repeat/0</h4>
+<tt> repeat</tt> is true. It is defined as if:
+<dl>
+<dt>repeat.
+<dd>
+<dt>repeat:-
+<dd>repeat.
+</dl>
+<P>
+<em>Template:</em> <tt>repeat</tt>
+<P>
+<em>Errors:</em> None.
+<h3><a name="atomprocessing">Atom Processing</a></h3>
+These predicates allow atomic terms to be processed as a string of characters or codes.
+
+<h4><a name="atomlength">atom_length/2</a></h4>
+<tt>atom_length(Atom, Length)</tt> is true if and only if the integer 
+<tt>Length</tt> equals the number of characters in the name of the atom <tt>Atom</tt>.
+<p>
+<em>Template:</em><tt> atom_length(+atom, ?integer)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Atom</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Atom</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Atom)</a>
+<li> <tt>Length</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, Length)</a>
+<li> <tt>Length</tt> is an integer less than zero --
+<a href="exceptions.html#domain_error">domain_error(not_less_than_zero, Length))</a>
+</ol>
+<h4><a name="atomconcat">atom_concat/3</a></h4>
+<tt>atom_concat(Start, End, Whole) </tt>  is true if and only if <tt> Whole</tt>
+is the atom obtained by concatenating the characters of <tt>End</tt> to those of <tt>First</tt>. If <tt>Whole </tt> is instantiated then all decompositions of <tt>Whole</tt> can be obtained by back-tracking.
+<P>
+<em>Templates:</em><br>
+<tt>
+atom_concat(?atom, ?atom +atom)<br>
+atom-concat(+atom, +atom, -atom)
+</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Start</tt> and <tt>Whole</tt> are variables --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>End</tt> and <tt>Whole</tt> are variables --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Start</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Start)</a> 
+<li> <tt>End</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, End)</a>
+<li> <tt>Whole</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Whole)</a>
+</ol>
+
+<h4><a name="subatom">sub_atom/5</a></h4>
+<tt>sub_atom(Atom, Before, Length, After, Sub_atom)</tt> is true 
+if and only if <tt>Sub_atom</tt> is the sub atomof <tt>Atom</tt>
+of length <tt>Length</tt> that appears 
+with <tt>Before</tt> characters preceding it and <tt> After</tt> characters 
+following. It is re-executable.
+<p>
+<em>Template:</em>
+<tt> sub_atom(+atom, ?integer, ?integer, ?integer, ?atom)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Atom</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Atom</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Atom)</a>
+<li> <tt>Sub_atom</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Sub_atom)</a>
+<li> <tt>Before</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, Before)</a>
+<li> <tt>Length</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, Length)</a>
+<li> <tt>After</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, After)</a>
+<li> <tt>Before</tt> is an integer less than zero --
+<a href="exceptions.html#domain_error">domain_error(not_less_than_zero, Before))</a>
+<li> <tt>Length</tt> is an integer less than zero --
+<a href="exceptions.html#domain_error">domain_error(not_less_than_zero, Length))</a>
+<li> <tt>After</tt> is an integer less than zero --
+<a href="exceptions.html#domain_error">domain_error(not_less_than_zero, After))</a>
+</ol>
+
+<h4><a name="atomchars">atom_chars</a></h4>
+<tt>atom_chars(Atom, List)</tt> succeeds if and only if <tt>List</tt> is a list whose elements are the one character atoms that in order make up <tt> Atom</tt>.
+
+<P>
+<em>Templates:</em><br>
+atom_chars(+atom, ?character_list) <br>
+atom_chars(-atom, +character_list)
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Atom</tt> is a variable and <tt>List</tt> is a list or partial
+list with an element which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Atom</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Atom)</a>
+<li> <tt>Atom</tt> is a variable and <tt>List</tt> is neither a list nor
+a partial list --
+<a href="exceptions.html#type_error">type_error(list, List)</a>
+<li> <tt>Atom</tt> is a variable and an element <tt>E</tt> of the list
+ <tt>List</tt> is neither a variable nor a one-character atom.
+a partial list --
+<a href="exceptions.html#type_error">type_error(character, E)</a>
+</ol>
+
+
+<h4><a name="atomcodes">atom_codes/2</a></h4>
+<tt>atom_codes(Atom, List)</tt> succeeds if and only if <tt>List</tt> is a list whose elements are the character codes that in order correspond to the characters that make up <tt> Atom</tt>.
+
+<P>
+<em>Templates:</em><br>
+atom_codes(+atom, ?character_code_list) <br>
+atom_codes(-atom, +character_code_list)
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Atom</tt> is a variable and <tt>List</tt> is a list or partial
+list with an element which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Atom</tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Atom)</a>
+<li> <tt>Atom</tt> is a variable and <tt>List</tt> is neither a list nor
+a partial list --
+<a href="exceptions.html#type_error">type_error(list, List)</a>
+<li> <tt>Atom</tt> is a variable and an element <tt>E</tt> of the list
+ <tt>List</tt> is neither a variable nor a character-code.
+a partial list --
+<a href="exceptions.html#representation_error">representation_error(character_code)</a>
+</ol>
+
+<h4><a name="charcode">char_code/2</a></h4>
+<tt>char_code(Char, Code)</tt> succeeds if and only if <tt>Code</tt> is the 
+character code that corresponds to the character <tt> Char</tt>.
+
+<P>
+<em>Templates:</em><br>
+char_code(+character, ?character_code) <br>
+char_code(-character, +character_code)
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Char</tt> and <tt>Code</tt> are variables --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Char</tt> is neither a variable nor a one
+character atom atom --
+<a href="exceptions.html#type_error">type_error(character, Char)</a>
+ <li> <tt>Code</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, Code)</a>
+<tt>Code</tt> is neither a variable nor a character-code.
+
+<a href="exceptions.html#representation_error">representation_error(character_code)</a>
+</ol>
+<h4><a name="numberchars">number_chars/2</a></h4>
+<tt>number_chars(Number, List)</tt> succeeds if and only if <tt>List</tt> is a list whose elements are the one character atoms that in order make up <tt> Number</tt>.
+
+<P>
+<em>Templates:</em><br>
+number_chars(+number, ?character_list) <br>
+number_chars(-number, +character_list)
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Number</tt> is a variable and <tt>List</tt> is a list or partial
+list with an element which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Number</tt> is neither a variable nor a number --
+<a href="exceptions.html#type_error">type_error(number, Number)</a>
+<li> <tt>Number</tt> is a variable and <tt>List</tt> is neither a list nor
+partial list --
+<a href="exceptions.html#type_error">type_error(list, List)</a>
+<li> An element <tt>E</tt> of the list
+ <tt>List</tt> is neither a variable nor a one-character atom.
+--
+<a href="exceptions.html#type_error">type_error(character, E)</a>
+<li> <tt> List</tt> is a list of one-char atoms but is not parseable as a number.  --
+<a href="exceptions.html#syntax_error">syntax_error(implementation_dependent_atom)</a>
+</ol>
+<h4><a name="numbercodes">number_codes/2</a></h4>
+<tt>number_codes(Number, CodeList)</tt> succeeds if and only if <tt>CodeList</tt> is a list whose elements are the codes for the one character atoms that in order make up <tt> Number</tt>.
+
+<P>
+<em>Templates:</em><br>
+number_codes(+number, ?character_list) <br>
+number_codes(-number, +character_list)
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Number</tt> is a variable and <tt>CodeList</tt> is a list or partial
+list with an element which is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Number</tt> is neither a variable nor a number --
+<a href="exceptions.html#type_error">type_error(number, Number)</a>
+<li> <tt>Number</tt> is a variable and <tt>CodeList</tt> is neither a list nor
+a partial list --
+<a href="exceptions.html#type_error">type_error(list, CodeList)</a>
+<li> An element <tt>E</tt> of the list
+ <tt>CodeList</tt> is neither a variable nor a character code.
+ --
+<a href="exceptions.html#representation_error">representation_error(character_code)</a>
+<li> <tt> CodeList</tt> is a list of character codes  but is not pearseable as a number.  --
+<a href="exceptions.html#syntax_error">syntax_error(implementation_dependent_atom)</a>
+</ol>
+<h3><a name="hooks"> Implementation defined hooks</a></h3>
+<P>
+Conforming Prolog processors are required to support <a href="#flags">flags</a> whose value can be set or determined by the following predicates.
+
+<H4><a name="set_prolog_flag"> set_prolog_flag/2</a></h4>
+<tt>set_prolog_flag(Flag, Value)</tt> sets the Prolog flag <tt>Flag</tt>
+to the value <tt>Value</tt>. The goal either succeeds or raises an exception.
+<P>
+<em>Template:</em> <tt>set_prolog_flag(+flag, @nonvar)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Flag</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Value</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>Flag/tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Flag)</a>
+<li> <tt>Flag</tt> is an atom but an invalid flag for the processor --
+<a href="exceptions.html#domain_error">domain_error(prolog_flag, Flag)</a>
+<li> <tt> Value</tt> is inadmissible for <tt>Flag</tt> --
+<a href="exceptions.html#domain_error">domain_error(flag_value, Flag + Value)</a>
+<li> <tt> Value</tt> is admissible for <tt>Flag</tt> but the flag <tt>Flag</tt> is not modifiable --
+<a href="exceptions.html#permission_error">permission_error(modify, flag, Flag)</a>
+</ol>
+
+<H4><a name="current_prolog_flag"> current_prolog_flag/2</a></h4>
+<tt> current_prolog_flag(Flag,Value)</tt> is true if and only if <tt>Flag</tt> is a supported flag and <tt>Value</tt> is its value. On backtracking the values of all supported flags can be determined.
+<P>
+<em>Template:</em><tt>current_prolog_flag(?flag, ?term)</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>Flag/tt> is neither a variable nor an atom --
+<a href="exceptions.html#type_error">type_error(atom, Flag)</a>
+<li> <tt>Flag</tt> is an atom but an invalid flag for the processor --
+<a href="exceptions.html#domain_error">domain_error(prolog_flag, Flag)</a>
+</ol>
+<h4><a name="halt">halt/0 and halt/1</a></h4>
+<P> These predicates provide means for terminating a Prolog processor.
+<P>
+<tt> halt</tt> exits the processor and returns to the system that invoked the processor.
+<P>
+<em>Template</em><tt>halt.</tt>
+<P>
+<em>Errors:</em> None.
+<P>
+<tt> halt(X)</tt> exits the processor and returns to the system that invoked the processor passing  the value of <tt>X</tt> as a message. 
+<P>
+<em>Template</em><tt>halt(+int).</tt>
+<P>
+<em>Errors:</em>
+<ol>
+<li> <tt>X</tt> is a variable --
+<a href="exceptions.html#instantiation_error">instantiation_error</a>
+<li> <tt>X</tt> is neither a variable nor an integer --
+<a href="exceptions.html#type_error">type_error(integer, X)</a>
+</ol> 
+
+<h3><a name="evaluable">Evaluable Functors</a></h3>
+A conforming processor is required to support the arithmetic operations specified by the following tables. They conform to the <a href="http://www.iso.ch/"> ISO/IEC 10967-1 Language Independent Arithmetic</a> standard.
+<center>
+<h4>Types used for the signatures</h4>
+</center>
+<dl>
+<dt> <strong>I</strong>
+<dd> Integer
+<dt><strong>IF</strong>
+<dd> Integer or float
+<dt><strong>F</strong>
+<dd>Float
+</dl>
+<table border=1 cellspacing=1>
+<tr> 
+<td>Functor<td> Signature<td>Operation
+</tr>
+<tr>
+<td> (+)/2 <td> <strong> I x I --&gt I</strong> <td> Addition
+</tr>
+<tr>
+<td> (+)/2 <td> <strong> F x F --&gt F</strong> <td> Addition
+</tr>
+<tr>
+<td> (+)/2 <td> <strong> F x I --&gt F</strong> <td> Addition
+</tr>
+<tr>
+<td> (+)/2 <td> <strong> I x F --&gt F</strong> <td> Addition
+</tr>
+<tr>
+<td> (-)/2 <td> <strong> I x I --&gt I</strong> <td> Subtraction
+</tr>
+<tr>
+<td> (-)/2 <td> <strong> F x F --&gt F</strong> <td> Subtraction
+</tr>
+<tr>
+<td> (-)/2 <td> <strong> F x I --&gt F</strong> <td> Subtraction
+</tr>
+<tr>
+<td> (-)/2 <td> <strong> I x F --&gt F</strong> <td> Subtraction
+</tr>
+<tr>
+<td> (*)/2 <td> <strong> I x I --&gt I</strong> <td> Multiplication
+</tr>
+<tr>
+<td> (*)/2 <td> <strong> F x F --&gt F</strong> <td> Multiplication
+</tr>
+<tr>
+<td> (*)/2 <td> <strong> F x I --&gt F</strong> <td> Multiplication
+</tr>
+<tr>
+<td> (*)/2 <td> <strong> I x F --&gt F</strong> <td> Multiplication
+</tr>
+<tr>
+<td> (//)/2 <td> <strong> I x I --&gt I</strong> <td> Integer Division
+</tr>
+<tr>
+<td> (/)/2 <td> <strong> I x I --&gt F</strong> <td> Division
+</tr>
+<tr>
+<td> (/)/2 <td> <strong> F x F --&gt F</strong> <td> Division
+</tr>
+<tr>
+<td> (/)/2 <td> <strong> F x I --&gt F</strong> <td> Division
+</tr>
+<tr>
+<td> (/)/2 <td> <strong> I x F --&gt F</strong> <td> Division
+</tr>
+<tr>
+<td> (rem)/2 <td> <strong> I x I --&gt I</strong> <td> Remainder
+</tr>
+
+<tr>
+<td> (mod)/2 <td> <strong> I x I --&gt I</strong> <td> Modulus
+</tr>
+<tr>
+<td> (-)/1 <td> <strong> I --&gt I</strong> <td> Negation
+</tr>
+<tr>
+<td> (-)/1 <td> <strong> F --&gt F</strong> <td> Negation
+</tr>
+<tr>
+<td> (abs)/1 <td> <strong> I --&gt I</strong> <td> Absolute Value
+</tr>
+<tr>
+<td> (abs)/1 <td> <strong> F --&gt F</strong> <td> Absolute Value
+</tr>
+<tr>
+<td> (sign)/1 <td> <strong> I --&gt I</strong> <td> Sign
+</tr>
+<tr>
+<td> (sign)/1 <td> <strong> F --&gt F</strong> <td> SIGN
+</tr>
+<tr>
+<td> (float_integer_part)/1 <td> <strong> F --&gt I</strong> <td> integer part
+</tr>
+<tr>
+<td> (float_fractional_part)/1 <td> <strong> F --&gt F</strong> 
+<td> fractional part
+</tr>
+<tr>
+<td> (float)/1 <td> <strong> I --&gt F</strong> <td> float coercion.
+</tr>
+<tr>
+<td> (float)/1 <td> <strong> F --&gt F</strong> <td> float coercion.
+</tr>
+<tr>
+<td> (floor)/1 <td> <strong> F --&gt I</strong> <td> floor.
+</tr>
+<tr>
+<td> (truncate)/1 <td> <strong> F --&gt I</strong> <td> truncate.
+</tr>
+<tr>
+<td> (round)/1 <td> <strong> F --&gt I</strong> <td> round.
+</tr>
+<tr>
+<td> (ceiling)/1 <td> <strong> F --&gt I</strong> <td> ceiling.
+</tr>
+</table>  
+<P>
+<em>Errors:</em> It is an <tt> <a href="exceptions.html#evaluation_error">
+evaluation_error(E)</a></tt> if the value of an expression <tt>E</tt> is an exceptional value -- <tt> float_overflow, int_overflow, underflow, zero_divisor, </tt> or <tt> undefined</tt>
+
+<h4><a name="otherbitwise">Other arithmetic and Bitwise functors</a></h4>
+<P>
+A conforming processor must in addition support the following evaluable functors:
+<table border=1 cellspacing=1>
+<tr>
+<td>Functor<td>Template(s)<td> Name
+</tr>
+<tr>
+<td> (**)/2 <td>
+'**'(int-exp, int-exp) = float<br>
+'**'(float-exp, int-exp) = float<br>
+'**'(int-exp, float-exp) = float<br>
+'**'(float-exp, float-exp) = float
+<td> Power
+<tr>
+<td> sin/1<td>
+sin(float_exp) = float<br>
+sin(int_exp) = float
+<td> sine
+</tr>
+<tr>
+<td> cos/1<td>
+cos(float_exp) = float<br>
+cos(int_exp) = float
+<td> cosine
+</tr>
+<tr>
+<td> atan/1<td>
+atan(float_exp) = float<br>
+atan(int_exp) = float
+<td> arc tangent
+</tr>
+<tr>
+<td> exp/1<td>
+exp(float_exp) = float<br>
+exp(int_exp) = float
+<td> exponentiation
+<tr>
+<td> log/1<td>
+log(float_exp) = float<br>
+log(int_exp) = float
+<td> log
+</tr>
+<tr>
+<td> sqrt/1<td>
+sqrt(float_exp) = float<br>
+sqrt(int_exp) = float
+<td> square root
+</tr>
+<tr>
+<td> (&gt&gt)/2
+<td> '&gt&gt'(int_exp, int_exp) = integer
+<td> bitwise right shift
+</tr>
+<tr>
+<td> (&lt&lt)/2
+<td> '&lt&lt'(int_exp, int_exp) = integer
+<td> bitwise left shift
+</tr>
+<tr>
+<td>(/\)/2
+<td> '/\\'(int-exp, int-exp) = integer
+<td> bit-wise and
+</tr>
+<tr>
+<td>(\/)/2
+<td> '\\/'(int-exp, int-exp) = integer
+<td> bit-wise or
+</tr>
+<tr>
+<td>(\)/1
+<td> '\\'(int-exp) = integer
+<td> bitwise complement
+</td>
+
+</table>
+<P>
+All of these throw 
+<a href="exceptions.html#instantiation_error"> instantiation_error</a> 
+when any of their arguments are variables. They throw 
+<a href="exceptions.html#type_error">type_error(number, VX) (  or type_error(integer, VX)</a> 
+when an argument <tt>X</tt> evaluates to an expression which is not a number (resp. an integer). In addition <tt>exp/1</tt> can throw <a href="exceptions.html#evaluation_error"> <tt>evaluation_error(float_overflow)</tt>, or <tt>evaluation_error(underflow)</tt></a>, and <tt> log/1</tt> can throw  
+<a href="exceptions.html#evaluation_error"> <tt>evaluation_error(undefined)</tt></a>
+<br><br>
+
+<hr>
+<a href="http://pauillac.inria.fr/~hodgson/prolog">Return to Home Page of the INRIA ISO Prolog Web</a>
+<br>
+<hr>
+
+<author>
+Author: J.P.E. Hodgson <br>
+</author>
+<address>
+Inria Rocquencourt <br>
+78153 Le Chesnay Cedex<br>
+France<br>
+<br>
+Saint Joseph's University<br>
+Philadelphia PA 19131<br>
+USA<br>
+</address>
+<br>
+<br>
+<date>
+Last Changed: 1999/04/12 (ISO Date)<br>
+</date>
+</body>
+</html>

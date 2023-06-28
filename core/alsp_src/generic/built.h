@@ -75,364 +75,366 @@
 	} while (0)
 
 /* bparser.c */
-extern	int	get_number	PARAMS( (PWord, int, double *) );
+extern	int	get_number	(PWord, int, double *);
 
 /* butil.c */
-extern	void	heap_copy		PARAMS( (PWord *, int *, pword) );
-extern	int	xform_uia			PARAMS( (PWord *, int *) );
-extern	int	force_uia			PARAMS( (PWord *, int *) );
-extern	void	string_to_list	PARAMS( (PWord *, int *, UCHAR *) );
-extern	int	list_to_string		PARAMS( (UCHAR *, PWord, int) );
-extern	int	getstring			PARAMS( (UCHAR **, PWord, int) );
-extern	int	getlong				PARAMS( (long *, PWord, int) );
-extern	int	get_gv_number		PARAMS( (UCHAR *) );
-extern	void set_prolog_error	PARAMS( (PWord, int, PWord, int, PWord, PWord, int, PWord, int) );
-extern	int	getdouble			PARAMS( (double *, PWord, int) );
+extern	void	heap_copy		(PWord *, int *, pword);
+extern	int	xform_uia			(PWord *, int *);
+extern	int	force_uia			(PWord *, int *);
+extern	void	string_to_list	(PWord *, int *, UCHAR *);
+extern	int	list_to_string		(UCHAR *, PWord, int);
+extern	int	getstring			(UCHAR **, PWord, int);
+extern	int	getlong				(long *, PWord, int);
+extern	int	get_gv_number		(UCHAR *);
+extern	void set_prolog_error	(PWord, int, PWord, int, PWord, PWord, int, PWord, int);
+extern	int	getdouble			(double *, PWord, int);
 
 /* wdisp.c */
-extern	void	prolog_write	PARAMS( (PWord, int) );
-extern	void	prolog_writeq	PARAMS( (PWord, int) );
-extern	void	prolog_display	PARAMS( (PWord, int) );
+extern	void	prolog_write	(PWord, int);
+extern	void	prolog_writeq	(PWord, int);
+extern	void	prolog_display	(PWord, int);
 
 /* built.c */
-extern	void	builtin_init			PARAMS( (void) );
-extern	void	time_cut_interrupt_init	PARAMS( (void) );
-extern	int	pbi_set_interrupt_vector	PARAMS((void));
-extern  int     pbi_uncaught_interrupt 	PARAMS( (void) );
+extern	void	builtin_init			(void);
+extern	void	time_cut_interrupt_init	(void);
+extern	int	pbi_set_interrupt_vector	(void);
+extern  int     pbi_uncaught_interrupt 	(void);
 
 /* bmisc.c */
 #ifdef CMeta
-extern	int	wm_identical	PARAMS(( PWord, int, PWord, int ));
+extern	int	wm_identical	( PWord, int, PWord, int );
 #endif
 
 /* arith.c */
-extern	int	pbi_time			PARAMS(( void ));
-extern	int	pbi_less			PARAMS(( void ));
-extern	int	pbi_greater			PARAMS(( void ));
-extern	int	pbi_equalorless		PARAMS(( void ));
-extern	int	pbi_greaterorequal 	PARAMS(( void ));
-extern	int	pbi_arithequal		PARAMS(( void ));
-extern	int	pbi_arithnotequal 	PARAMS(( void ));
-extern	int	pbi_is				PARAMS(( void ));
-extern	int	pbi_srandom			PARAMS(( void ));
+extern	int	pbi_time			( void );
+extern	int	pbi_less			( void );
+extern	int	pbi_greater			( void );
+extern	int	pbi_equalorless		( void );
+extern	int	pbi_greaterorequal 	( void );
+extern	int	pbi_arithequal		( void );
+extern	int	pbi_arithnotequal 	( void );
+extern	int	pbi_is				( void );
+extern	int	pbi_srandom			( void );
 /* fpbasis.c */
-extern	int pbi_fpconst_val			PARAMS( (void) );
-extern	int pbi_uia_poke_fpconst	PARAMS( (void) );
+extern	int pbi_fpconst_val			(void);
+extern	int pbi_uia_poke_fpconst	(void);
 
 /* from bcinter.c */
 #ifdef DOS
-extern	int	pbi_c_make_farptr PARAMS(( void ));
+extern	int	pbi_c_make_farptr ( void );
 #endif
-extern	int	pbi_c_malloc		PARAMS(( void ));
-extern	int	pbi_c_free			PARAMS(( void ));
-extern	int	pbi_c_set			PARAMS(( void ));
-extern	int	pbi_c_examine		PARAMS(( void ));
+extern	int	pbi_c_malloc		( void );
+extern	int	pbi_c_free			( void );
+extern	int	pbi_c_set			( void );
+extern	int	pbi_c_examine		( void );
 
 /* bdb.c */
-extern	int	pbi_abolish				PARAMS(( void ));
-extern	int	pbi_abolish_clausegroup	PARAMS(( void ));
-extern	int	pbi_asserta				PARAMS(( void ));
-extern	int	pbi_assertz				PARAMS(( void ));
-extern	int	pbi_addclause			PARAMS(( void ));
-extern	int	pbi_execcommand			PARAMS(( void ));
-extern	int	pbi_erase				PARAMS(( void ));
-extern	int	pbi_dynamic				PARAMS(( void ));
-extern	int	pbi_icode				PARAMS(( void ));
-extern	int	pbi_index_proc			PARAMS(( void ));
-extern	int	pbi_massively_abolish_clausegroup PARAMS(( void ));
-extern	int	pbi_nextproc			PARAMS(( void ));
-extern	int	pbi_procinfo			PARAMS(( void ));
-extern	int	pbi_clauseinfo			PARAMS(( void ));
-extern	int	pbi_firstargkey			PARAMS(( void ));
-extern	int	pbi_resolve_module		PARAMS(( void ));
-extern	int	pbi_exported_proc		PARAMS(( void ));
-extern	int	pbi_next_module			PARAMS(( void ));
-extern	int	pbi_cr_mod_close		PARAMS(( void ));
-extern	int	pbi_libbreak			PARAMS(( void ));
-extern	int	pbi_listasm_clause		PARAMS(( void ));
-extern	int	pbi_listasm_ntblentry	PARAMS(( void ));
-extern	int	pbi_push_clausegroup	PARAMS(( void ));
-extern	int	pbi_pop_clausegroup		PARAMS(( void ));
-extern	int	pbi_collectcode			PARAMS(( void ));
+extern	int	pbi_abolish				( void );
+extern	int	pbi_abolish_clausegroup	( void );
+extern	int	pbi_asserta				( void );
+extern	int	pbi_assertz				( void );
+extern	int	pbi_addclause			( void );
+extern	int	pbi_execcommand			( void );
+extern	int	pbi_erase				( void );
+extern	int	pbi_dynamic				( void );
+extern	int	pbi_icode				( void );
+extern	int	pbi_index_proc			( void );
+extern	int	pbi_massively_abolish_clausegroup ( void );
+extern	int	pbi_nextproc			( void );
+extern	int	pbi_procinfo			( void );
+extern	int	pbi_clauseinfo			( void );
+extern	int	pbi_firstargkey			( void );
+extern	int	pbi_resolve_module		( void );
+extern	int	pbi_exported_proc		( void );
+extern	int	pbi_next_module			( void );
+extern	int	pbi_cr_mod_close		( void );
+extern	int	pbi_libbreak			( void );
+extern	int	pbi_listasm_clause		( void );
+extern	int	pbi_listasm_ntblentry	( void );
+extern	int	pbi_push_clausegroup	( void );
+extern	int	pbi_pop_clausegroup		( void );
+extern	int	pbi_collectcode			( void );
 
 	/* freeze.c */
-extern	int	pbi_cptx		PARAMS(( void ));
-extern	int	disp_heap		PARAMS(( void ));
-extern	int     disp_item		PARAMS((void));
-extern	int	pbi_swp_tr		PARAMS(( void ));
-extern	int	pbi_walk_cps		PARAMS(( void ));
-extern	int	pbi_delay		PARAMS(( void ));
-extern  int	pbi_is_delay_var	PARAMS(( void ));
-extern  int	pbi_kill_freeze	PARAMS(( void ));
-extern	int 	pbi_clct_tr 		PARAMS(( void ));
-extern	int 	pbi_unset_2nd 		PARAMS(( void ));
-extern	int 	pbi_del_tm_for		PARAMS(( void ));
-extern	int	pbi_bind_vars		PARAMS(( void ));
+extern	int	pbi_cptx		( void );
+extern	int	disp_heap		( void );
+extern	int     disp_item		(void);
+extern	int	pbi_swp_tr		( void );
+extern	int	pbi_walk_cps		( void );
+extern	int	pbi_delay		( void );
+extern  int	pbi_is_delay_var	( void );
+extern  int	pbi_kill_freeze	( void );
+extern	int 	pbi_clct_tr 		( void );
+extern	int 	pbi_unset_2nd 		( void );
+extern	int 	pbi_del_tm_for		( void );
+extern	int	pbi_bind_vars		( void );
+extern	int	pbi_cptz		( void );
+extern	int	x_disp_heap		( void );
+extern	int	pbi_x_swp_tr		( void );
 
 #ifdef INTCONSTR
 
 	/* intaux.c */
-extern int	pbi_fuzz			PARAMS((void));
+extern int	pbi_fuzz			(void);
 
 	/* int_net.c */
-extern int  ilinknet			PARAMS((void));
-extern int reset_cstr_ctrs		PARAMS (( void ));
-extern int get_cstr_ctrs_vals	PARAMS (( void ));
-extern int set_max_iters_val	PARAMS (( void ));
-extern int run_grteq_cstrs		PARAMS (( void ));
-extern int  x_int_op			PARAMS((void));
+extern int  ilinknet			(void);
+extern int reset_cstr_ctrs		( void );
+extern int get_cstr_ctrs_vals	( void );
+extern int set_max_iters_val	( void );
+extern int run_grteq_cstrs		( void );
+extern int  x_int_op			(void);
 
 #endif /* INTCONSTR */
 
 #ifdef CONSTRDEBUG
-extern void	debugconstr		PARAMS((void));
+extern void	debugconstr		(void);
 #endif /* CONSTRDEBUG */
 
 	/* bdbg.c */
-extern	int	pbi_dbg_nospy	PARAMS(( void ));
-extern	int	pbi_dbg_spy	PARAMS(( void ));
-extern	int	pbi_dbg_spyon	PARAMS(( void ));
-extern	int	pbi_dbg_spyoff	PARAMS(( void ));
-extern	int	pbi_dbg_spying	PARAMS(( void ));
+extern	int	pbi_dbg_nospy	( void );
+extern	int	pbi_dbg_spy	( void );
+extern	int	pbi_dbg_spyon	( void );
+extern	int	pbi_dbg_spyoff	( void );
+extern	int	pbi_dbg_spying	( void );
 
 	/* bgv.c */
-extern	int	pbi_gv_alloc	PARAMS(( void ));
-extern	int	pbi_gv_free	PARAMS(( void ));
-extern	int	pbi_gv_get	PARAMS(( void ));
-extern	int	pbi_gv_set	PARAMS(( void ));
-extern	int	pbi_gv_alloc_init	PARAMS(( void ));
-extern	int	pbi_gv_isfree	PARAMS(( void ));
-extern	int	pbi_gv_maxpossible	PARAMS(( void ));
+extern	int	pbi_gv_alloc	( void );
+extern	int	pbi_gv_free	( void );
+extern	int	pbi_gv_get	( void );
+extern	int	pbi_gv_set	( void );
+extern	int	pbi_gv_alloc_init	( void );
+extern	int	pbi_gv_isfree	( void );
+extern	int	pbi_gv_maxpossible	( void );
 
 	/* bio.c */
-extern	int	pbi_display	PARAMS(( void ));
-extern	int	pbi_get	PARAMS(( void ));
-extern	int	pbi_get0	PARAMS(( void ));
-extern	int	pbi_load	PARAMS(( void ));
-extern	int	pbi_nl	PARAMS(( void ));
-extern	int	pbi_put	PARAMS(( void ));
-extern	int	pbi_read	PARAMS(( void ));
-extern	int	pbi_see	PARAMS(( void ));
-extern	int	pbi_seeing	PARAMS(( void ));
-extern	int	pbi_seen	PARAMS(( void ));
-extern	int	pbi_tell	PARAMS(( void ));
-extern	int	pbi_telling	PARAMS(( void ));
-extern	int	pbi_told	PARAMS(( void ));
-extern	int	pbi_debug	PARAMS(( void ));
-extern	int	pbi_ttyflush	PARAMS(( void ));
-extern	int	pbi_write	PARAMS(( void ));
-extern	int	pbi_writeq	PARAMS(( void ));
-extern	int	pbi_obp_open	PARAMS(( void ));
-extern	int	pbi_obp_close	PARAMS(( void ));
-extern	int	pbi_obp_load	PARAMS(( void ));
-extern	int	pbi_obp_push_stop	PARAMS(( void ));
-extern	int	pbi_obp_pop	PARAMS(( void ));
-extern	int	pbi_resource_load	PARAMS(( void ));
-extern	int	pbi_old_consult	PARAMS(( void ));
-extern	int	pbi_save_image_with_state_to_file	PARAMS(( void ));
-extern	int	pbi_attach_state_to_file	PARAMS(( void ));
-extern	int	pbi_save_state_to_file	PARAMS(( void ));
-extern	int	pbi_get_current_image	PARAMS(( void ));
+extern	int	pbi_display	( void );
+extern	int	pbi_get	( void );
+extern	int	pbi_get0	( void );
+extern	int	pbi_load	( void );
+extern	int	pbi_nl	( void );
+extern	int	pbi_put	( void );
+extern	int	pbi_read	( void );
+extern	int	pbi_see	( void );
+extern	int	pbi_seeing	( void );
+extern	int	pbi_seen	( void );
+extern	int	pbi_tell	( void );
+extern	int	pbi_telling	( void );
+extern	int	pbi_told	( void );
+extern	int	pbi_debug	( void );
+extern	int	pbi_ttyflush	( void );
+extern	int	pbi_write	( void );
+extern	int	pbi_writeq	( void );
+extern	int	pbi_obp_open	( void );
+extern	int	pbi_obp_close	( void );
+extern	int	pbi_obp_load	( void );
+extern	int	pbi_obp_push_stop	( void );
+extern	int	pbi_obp_pop	( void );
+extern	int	pbi_resource_load	( void );
+extern	int	pbi_old_consult	( void );
+extern	int	pbi_save_image_with_state_to_file	( void );
+extern	int	pbi_attach_state_to_file	( void );
+extern	int	pbi_save_state_to_file	( void );
+extern	int	pbi_get_current_image	( void );
 #ifdef MacOS
-extern  int	pbi_save_app_with_obp	PARAMS(( void ));
+extern  int	pbi_save_app_with_obp	( void );
 #endif
 #ifdef DynamicForeign
-extern	int	pbi_load_foreign	PARAMS(( void ));
+extern	int	pbi_load_foreign	( void );
 #endif /* DynamicForeign */
 
 /* bmeta.c */
 #ifdef	CMeta
-extern	int	pbi_true	PARAMS(( void ));
-extern	int	pbi_equal	PARAMS(( void ));
-extern	int	pbi_arg		PARAMS(( void ));
-extern	int	pbi_mangle	PARAMS(( void ));
+extern	int	pbi_true	( void );
+extern	int	pbi_equal	( void );
+extern	int	pbi_arg		( void );
+extern	int	pbi_mangle	( void );
 #ifdef TRAILVALS
-extern int pbi_trailed_mangle PARAMS(( void ));
+extern int pbi_trailed_mangle ( void );
 #endif
-extern	int	pbi_functor	PARAMS(( void ));
-extern	int	pbi_identical	PARAMS(( void ));
-extern	int	pbi_unidentical	PARAMS(( void ));
-extern	int	pbi_eq		PARAMS(( void ));
-extern	int	pbi_noneq	PARAMS(( void ));
-extern	int	pbi_var		PARAMS(( void ));
-extern	int	pbi_nonvar	PARAMS(( void ));
-extern	int	pbi_integer	PARAMS(( void ));
-extern	int	pbi_float	PARAMS(( void ));
-extern	int	pbi_number	PARAMS(( void ));
-extern	int	pbi_atom	PARAMS(( void ));
-extern	int	pbi_atomic	PARAMS(( void ));
-extern	int	pbi_compound	PARAMS(( void ));
+extern	int	pbi_functor	( void );
+extern	int	pbi_identical	( void );
+extern	int	pbi_unidentical	( void );
+extern	int	pbi_eq		( void );
+extern	int	pbi_noneq	( void );
+extern	int	pbi_var		( void );
+extern	int	pbi_nonvar	( void );
+extern	int	pbi_integer	( void );
+extern	int	pbi_float	( void );
+extern	int	pbi_number	( void );
+extern	int	pbi_atom	( void );
+extern	int	pbi_atomic	( void );
+extern	int	pbi_compound	( void );
 #endif	/* CMeta */
-extern	int	pbi_findterm	PARAMS(( void ));
+extern	int	pbi_findterm	( void );
 
 /* bmisc.c */
 #ifdef	CMeta
-extern	int	pbi_compare	PARAMS(( void ));
+extern	int	pbi_compare	( void );
 #endif
-extern	int	pbi_hashN	PARAMS(( void ));
-extern	int	pbi_gensym	PARAMS(( void ));
-extern	int	pbi_isgensym	PARAMS(( void ));
-extern	int	pbi_ptermaddr	PARAMS(( void ));
-extern	int	pbi_traildump	PARAMS(( void ));
-extern	int	pbi_frame_info	PARAMS(( void ));
+extern	int	pbi_hashN	( void );
+extern	int	pbi_gensym	( void );
+extern	int	pbi_isgensym	( void );
+extern	int	pbi_ptermaddr	( void );
+extern	int	pbi_traildump	( void );
+extern	int	pbi_frame_info	( void );
 
 /* bos.c */
-extern	int	pbi_access	PARAMS(( void ));
-extern	int	pbi_chdir	PARAMS(( void ));
-extern	int	pbi_getenv	PARAMS(( void ));
-extern  int     pbi_get_user_home PARAMS(( void ));
-extern	int	pbi_system	PARAMS(( void ));
-extern	int	pbi_tmpnam	PARAMS(( void ));
-extern	int	pbi_protect_bottom_stack_page	PARAMS(( void ));
-extern	int	pbi_get_image_dir_and_name	PARAMS(( void ));
+extern	int	pbi_access	( void );
+extern	int	pbi_chdir	( void );
+extern	int	pbi_getenv	( void );
+extern  int     pbi_get_user_home ( void );
+extern	int	pbi_system	( void );
+extern	int	pbi_tmpnam	( void );
+extern	int	pbi_protect_bottom_stack_page	( void );
+extern	int	pbi_get_image_dir_and_name	( void );
 extern int   argcount;
 extern char **argvector;
-extern	int pbi_command_line	PARAMS((void));
+extern	int pbi_command_line	(void);
 #if defined(UNIX) /* _XOPEN_CRYPT */
-extern	int pbi_crypt			PARAMS((void));
+extern	int pbi_crypt			(void);
 #endif
-extern	int pbi_copy_file		PARAMS((void));
+extern	int pbi_copy_file		(void);
 
 /* bparser.c */
-extern	int	pbi_op		PARAMS(( void ));
-extern	int	pbi_tokid	PARAMS(( void ));
-extern	int	pbi_name	PARAMS(( void ));
-extern	int	pbi_atom_chars	PARAMS(( void ));
-extern	int	pbi_atom_codes	PARAMS(( void ));
-extern	int	pbi_atom_length	PARAMS(( void ));
-extern	int	pbi_sub_atom	PARAMS(( void ));
-extern	int	pbi_char_code	PARAMS(( void ));
-extern	int	pbi_uia_alloc	PARAMS(( void ));
-extern	int	pbi_uia_clip	PARAMS(( void ));
-extern	int	pbi_uia_size	PARAMS(( void ));
-extern	int	pbi_uia_peek	PARAMS(( void ));
-extern	int	pbi_uia_peekb	PARAMS(( void ));
-extern	int	pbi_uia_peekw	PARAMS(( void ));
-extern	int	pbi_uia_peekl	PARAMS(( void ));
-extern	int	pbi_uia_peekd	PARAMS(( void ));
-extern	int	pbi_uia_peeks	PARAMS(( void ));
-extern	int	pbi_uia_peeks4	PARAMS(( void ));
-extern	int	pbi_uia_poke	PARAMS(( void ));
-extern	int	pbi_uia_pokeb	PARAMS(( void ));
-extern	int	pbi_uia_pokew	PARAMS(( void ));
-extern	int	pbi_uia_pokel	PARAMS(( void ));
-extern	int	pbi_uia_poked	PARAMS(( void ));
-extern	int	pbi_uia_pokes	PARAMS(( void ));
-extern	int	pbi_strlen	PARAMS(( void ));
-extern	int	pbi_atom_concat	PARAMS(( void ));
+extern	int	pbi_op		( void );
+extern	int	pbi_tokid	( void );
+extern	int	pbi_name	( void );
+extern	int	pbi_atom_chars	( void );
+extern	int	pbi_atom_codes	( void );
+extern	int	pbi_atom_length	( void );
+extern	int	pbi_sub_atom	( void );
+extern	int	pbi_char_code	( void );
+extern	int	pbi_uia_alloc	( void );
+extern	int	pbi_uia_clip	( void );
+extern	int	pbi_uia_size	( void );
+extern	int	pbi_uia_peek	( void );
+extern	int	pbi_uia_peekb	( void );
+extern	int	pbi_uia_peekw	( void );
+extern	int	pbi_uia_peekl	( void );
+extern	int	pbi_uia_peekd	( void );
+extern	int	pbi_uia_peeks	( void );
+extern	int	pbi_uia_peeks4	( void );
+extern	int	pbi_uia_poke	( void );
+extern	int	pbi_uia_pokeb	( void );
+extern	int	pbi_uia_pokew	( void );
+extern	int	pbi_uia_pokel	( void );
+extern	int	pbi_uia_poked	( void );
+extern	int	pbi_uia_pokes	( void );
+extern	int	pbi_atom_concat	( void );
 
 /* bsio.c */
-extern	int	sio_mkstream	PARAMS(( void ));
-extern	int	sio_errcode	PARAMS(( void ));
-extern	int	sio_set_errcode	PARAMS(( void ));
-extern	int	sio_errno	PARAMS(( void ));
-extern	int	sio_aux	PARAMS(( void ));
-extern	int	sio_fd	PARAMS(( void ));
-extern	int	sio_cpos	PARAMS(( void ));
-extern	int	sio_lpos	PARAMS(( void ));
-extern	int	sio_buf_params	PARAMS(( void ));
-extern	int	sio_increment_bufpos	PARAMS(( void ));
-extern	int	sio_set_position	PARAMS(( void ));
-extern	int	sio_set_eof	PARAMS(( void ));
-extern	int	sio_reset_eof	PARAMS(( void ));
-extern	int	sio_file_open	PARAMS(( void ));
-extern	int	sio_console_open	PARAMS(( void ));
+extern	int	sio_mkstream	( void );
+extern	int	sio_errcode	( void );
+extern	int	sio_set_errcode	( void );
+extern	int	sio_errno	( void );
+extern	int	sio_aux	( void );
+extern	int	sio_fd	( void );
+extern	int	sio_cpos	( void );
+extern	int	sio_lpos	( void );
+extern	int	sio_buf_params	( void );
+extern	int	sio_increment_bufpos	( void );
+extern	int	sio_set_position	( void );
+extern	int	sio_set_eof	( void );
+extern	int	sio_reset_eof	( void );
+extern	int	sio_file_open	( void );
+extern	int	sio_console_open	( void );
 #ifdef SysVIPC
-extern	int	sio_sysVq_open	PARAMS(( void ));
-extern	int	pbi_ftok	PARAMS(( void ));
-extern	int	pbi_msgctl	PARAMS(( void ));
+extern	int	sio_sysVq_open	( void );
+extern	int	pbi_ftok	( void );
+extern	int	pbi_msgctl	( void );
 #endif
 #ifdef SSBQ
-extern	int	sio_ssbq_open	PARAMS(( void ));
+extern	int	sio_ssbq_open	( void );
 #endif
 #ifdef HAVE_SOCKET
-extern	int	sio_nsocket		PARAMS(( void ));
-extern	int	sio_nsocket_connect	PARAMS(( void ));
-extern	int	sio_nsocket_bind	PARAMS(( void ));
-extern	int	sio_nsocket_listen	PARAMS(( void ));
-extern	int	sio_nsocket_accept	PARAMS(( void ));
-extern	int	sio_nsocket_close	PARAMS(( void ));
-extern	int	sio_nsocket_select	PARAMS(( void ));
-extern	int	sio_nsocketpair	        PARAMS(( void ));
+extern	int	sio_nsocket		( void );
+extern	int	sio_nsocket_connect	( void );
+extern	int	sio_nsocket_bind	( void );
+extern	int	sio_nsocket_listen	( void );
+extern	int	sio_nsocket_accept	( void );
+extern	int	sio_nsocket_close	( void );
+extern	int	sio_nsocket_select	( void );
+extern	int	sio_nsocketpair	        ( void );
 
-extern	int	sio_nsocket_open	PARAMS(( void ));
+extern	int	sio_nsocket_open	( void );
 
 extern int pbi_gethostbyname(void);
 extern int pbi_gethostbyaddr(void);
 
-extern	int	sio_gethostname	PARAMS(( void ));
-extern	int	sio_socket_open	PARAMS(( void ));
-extern	int	sio_is_server_socket	PARAMS(( void ));
-extern	int	sio_accept_socket_connection	PARAMS(( void ));
-extern	int	sio_poll		PARAMS(( void ));
-extern	int	sio_simple_select		PARAMS(( void ));
+extern	int	sio_gethostname	( void );
+extern	int	sio_socket_open	( void );
+extern	int	sio_is_server_socket	( void );
+extern	int	sio_accept_socket_connection	( void );
+extern	int	sio_poll		( void );
+extern	int	sio_simple_select		( void );
 #endif /* HAVE_SOCKET */
-extern	int	sio_fork	PARAMS(( void ));
-extern	int	sio_rexec	PARAMS(( void ));
-extern	int	sio_generic_open	PARAMS(( void ));
-extern	int	sio_close	PARAMS(( void ));
+extern	int	sio_fork	( void );
+extern	int	sio_rexec	( void );
+extern	int	sio_generic_open	( void );
+extern	int	sio_close	( void );
 #ifndef SIO_ASM
-extern	int	sio_get_byte	PARAMS(( void ));
-extern	int	sio_put_byte	PARAMS(( void ));
+extern	int	sio_get_byte	( void );
+extern	int	sio_put_byte	( void );
 #endif /* SIO_ASM */
-extern	int	sio_unget_byte	PARAMS(( void ));
-extern	int	sio_getpos	PARAMS(( void ));
-extern	int	sio_seek	PARAMS(( void ));
-extern	int	sio_readbuffer	PARAMS(( void ));
-extern  int     sio_set_do_lineedit PARAMS(( void ));
-extern  int     sio_set_lineedit_prompt  PARAMS(( void ));
-extern  int     sio_set_history_file    PARAMS(( void ));
-extern  int     sio_set_no_load_prev_history    PARAMS(( void ));
-extern	int	sio_writebuffer	PARAMS(( void ));
-extern	int	sio_bufshift	PARAMS(( void ));
-extern	int	sio_next_token	PARAMS(( void ));
-extern	int	sio_next_tokens	PARAMS(( void ));
-extern	int	sio_skip_layout	PARAMS(( void ));
-extern	int	sio_linenumber	PARAMS(( void ));
-extern	int	sio_put_atom	PARAMS(( void ));
-extern	int	sio_put_number	PARAMS(( void ));
-extern	int	sio_get_number	PARAMS(( void ));
-extern	int	sio_qatom	PARAMS(( void ));
-extern	int	sio_var_to_atom	PARAMS(( void ));
-extern	int	sio_lettervar	PARAMS(( void ));
-extern	int	sio_sprintf	PARAMS(( void ));
-extern	int sio_sprintf_number PARAMS((void));
-extern	int	sio_isgraphicatom	PARAMS(( void ));
-extern	int	sio_readln	PARAMS(( void ));
-extern	int	sio_nl	PARAMS(( void ));
-extern	int	sio_position_in_line	PARAMS(( void ));
+extern	int	sio_unget_byte	( void );
+extern	int	sio_getpos	( void );
+extern	int	sio_seek	( void );
+extern	int	sio_readbuffer	( void );
+extern  int     sio_set_do_lineedit ( void );
+extern  int     sio_set_lineedit_prompt  ( void );
+extern  int     sio_set_history_file    ( void );
+extern  int     sio_set_no_load_prev_history    ( void );
+extern	int	sio_writebuffer	( void );
+extern	int	sio_bufshift	( void );
+extern	int	sio_next_token	( void );
+extern	int	sio_next_tokens	( void );
+extern	int	sio_skip_layout	( void );
+extern	int	sio_linenumber	( void );
+extern	int	sio_put_atom	( void );
+extern	int	sio_put_number	( void );
+extern	int	sio_get_number	( void );
+extern	int	sio_qatom	( void );
+extern	int	sio_var_to_atom	( void );
+extern	int	sio_lettervar	( void );
+extern	int	sio_sprintf	( void );
+extern	int sio_sprintf_number (void);
+extern	int	sio_isgraphicatom	( void );
+extern	int	sio_readln	( void );
+extern	int	sio_nl	( void );
+extern	int	sio_position_in_line	( void );
 
 /* bsystem.c */
-extern	int	pbi_ouch		PARAMS(( void ));
-extern	int	pbi_forceCtlC		PARAMS(( void ));
-extern	int	pbi_forcePrologError	PARAMS(( void ));
-extern	int	pbi_reset_wm_normal	PARAMS(( void ));
-extern	int	pbi_showanswers		PARAMS(( void ));
-extern	int	pbi_halt		PARAMS(( void ));
-extern	int	pbi_statistics		PARAMS(( void ));
-extern	int	pbi_stack_overflow	PARAMS(( void ));
-extern	int	pbi_stack_info		PARAMS(( void ));
+extern	int	pbi_ouch		( void );
+extern	int	pbi_forceCtlC		( void );
+extern	int	pbi_forcePrologError	( void );
+extern	int	pbi_reset_wm_normal	( void );
+extern	int	pbi_showanswers		( void );
+extern	int	pbi_halt		( void );
+extern	int	pbi_statistics		( void );
+extern	int	pbi_stack_overflow	( void );
+extern	int	pbi_stack_info		( void );
 #ifdef MacOS
-extern	int	pbi_debugger		PARAMS(( void ));
+extern	int	pbi_debugger		( void );
 #endif
-extern	int	pbi_printno		PARAMS(( void ));
-extern	int	pbi_printwarning	PARAMS(( void ));
-/* extern	int pbi_limits_info		PARAMS(( void )); */
+extern	int	pbi_printno		( void );
+extern	int	pbi_printwarning	( void );
+/* extern	int pbi_limits_info		( void ); */
 #if	defined(Portable) && defined(IProfile)
-extern	int	pbi_init_iprofile	PARAMS(( void ));
-extern	int	pbi_dump_iprofile	PARAMS(( void ));
+extern	int	pbi_init_iprofile	( void );
+extern	int	pbi_dump_iprofile	( void );
 #endif	/* defined(Portable) && defined(IProfile) */
 
 /* gc.c */
-extern	int	gc		PARAMS(( void ));
+extern	int	gc		( void );
 
 /* sig.c */
-extern	int	pbi_alarm	PARAMS(( void ));
-extern	int	pbi_signal_name	PARAMS(( void ));
+extern	int	pbi_alarm	( void );
+extern	int	pbi_signal_name	( void );
 
 /* wam.c -- byte only */
 #ifdef TRACEBWAM
-extern	int 	toggle_bwam 	PARAMS( ( void ) );
+extern	int 	toggle_bwam 	( void );
 #endif
 
 /* lforeign.c */
@@ -440,9 +442,12 @@ extern int prolog_load_plugin(void);
 
 
 #ifdef SUBTYPES
-extern	int	pbi_less_sut_int	PARAMS(( void ));
-extern	int	pbi_eq_sut_int	PARAMS(( void ));
-extern	int	pbi_mk_sut_int	PARAMS(( void ));
-extern	int	pbi_t_sut_int	PARAMS(( void ));
-extern	int	pbi_pos_atom	PARAMS(( void ));
+extern	int	pbi_less_sut_int	( void );
+extern	int	pbi_eq_sut_int	( void );
+extern	int	pbi_mk_sut_int	( void );
+extern	int	pbi_t_sut_int	( void );
+extern	int	pbi_pos_atom	( void );
 #endif /* SUBTYPES */
+
+extern	int	curl_c_builtin	( void );
+extern	int	lookup_opt_info	( void );

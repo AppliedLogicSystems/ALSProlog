@@ -295,9 +295,9 @@ univ_install(S,N,Arity,[Arg|Args]) :-
  |	If AtomCs is a list of character codes, and if Splitter is the character 
  |	code of of a character, then, if the character with code Splitter occurs in
  |	AtomCs, LeftPart is the list consisting of that part of AtomCs from the
- |	left up to and including the leftmost occurrence of Splitter,
- |	and RightPart is the atom consisting of that part of AtomCs extending 
- |	from immediately after the end of LeftPart to the end of AtomCs.
+ |	left up to but not including the leftmost occurrence of Splitter,
+ |	and RightPart is the list consisting of that part of AtomCs extending 
+ |	from immediately after the occurrence of Splitter to the end of AtomCs.
  *!--------------------------------------------------------------------*/
 export asplit0/4.
 asplit0([Char|Rest],Splitter,[Char|R1],String2) 
@@ -322,4 +322,5 @@ all_to_atoms([String | Strings], [Atom | Atoms])
 	:-
 	atom_codes(Atom, String),
 	all_to_atoms(Strings, Atoms).
+
 endmod.		%% blt_term.pro: Term Manipulation Builtins

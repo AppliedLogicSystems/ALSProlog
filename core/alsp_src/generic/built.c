@@ -69,94 +69,94 @@ extern
 #endif /* arch_i386 */
 
 #ifdef MotorolaMath
-extern	int	padd		PARAMS(( void ));
-extern	int	psub		PARAMS(( void ));
-extern	int	pmul		PARAMS(( void ));
-extern	int	pdiv		PARAMS(( void ));
-extern	int	pmac		PARAMS(( void ));
-extern	int	eiexp		PARAMS(( void ));
+extern	int	padd		( void );
+extern	int	psub		( void );
+extern	int	pmul		( void );
+extern	int	pdiv		( void );
+extern	int	pmac		( void );
+extern	int	eiexp		( void );
 
-extern	int	psin		PARAMS(( void ));
-extern	int	pcos		PARAMS(( void ));
-extern	int	ptan		PARAMS(( void ));
-extern	int	psinh		PARAMS(( void ));
-extern	int	pcosh		PARAMS(( void ));
-extern	int	ptanh		PARAMS(( void ));
-extern	int	pasin		PARAMS(( void ));
-extern	int	pacos		PARAMS(( void ));
-extern	int	patan		PARAMS(( void ));
-extern	int	plog10		PARAMS(( void ));
-extern	int	plog		PARAMS(( void ));
-extern	int	pexp		PARAMS(( void ));
-extern	int	psqrt		PARAMS(( void ));
-extern	int	pfloor		PARAMS(( void ));
-extern	int	pceil		PARAMS(( void ));
-extern	int	pfabs		PARAMS(( void ));
-extern	int	pgamma		PARAMS(( void ));
-extern	int	ppow		PARAMS(( void ));
-extern	int	pfmod		PARAMS(( void ));
-extern	int	patan2		PARAMS(( void ));
-extern	int	phypot		PARAMS(( void ));
-extern	int	perf		PARAMS(( void ));
-extern	int	perfc		PARAMS(( void ));
+extern	int	psin		( void );
+extern	int	pcos		( void );
+extern	int	ptan		( void );
+extern	int	psinh		( void );
+extern	int	pcosh		( void );
+extern	int	ptanh		( void );
+extern	int	pasin		( void );
+extern	int	pacos		( void );
+extern	int	patan		( void );
+extern	int	plog10		( void );
+extern	int	plog		( void );
+extern	int	pexp		( void );
+extern	int	psqrt		( void );
+extern	int	pfloor		( void );
+extern	int	pceil		( void );
+extern	int	pfabs		( void );
+extern	int	pgamma		( void );
+extern	int	ppow		( void );
+extern	int	pfmod		( void );
+extern	int	patan2		( void );
+extern	int	phypot		( void );
+extern	int	perf		( void );
+extern	int	perfc		( void );
 
-extern	int	pc_add		PARAMS(( void ));
-extern	int	pc_sub		PARAMS(( void ));
-extern	int	pc_mul		PARAMS(( void ));
-extern	int	pcj_mul		PARAMS(( void ));
-extern	int	pc_mac		PARAMS(( void ));
-extern	int	pc_mag2		PARAMS(( void ));
-extern	int	pc_mag		PARAMS(( void ));
-extern	int	pc_conj		PARAMS(( void ));
-extern	int	pc_rec		PARAMS(( void ));
-extern	int	pc_div		PARAMS(( void ));
-extern	int	prc_mul		PARAMS(( void ));
-extern	int	prc_mac		PARAMS(( void ));
+extern	int	pc_add		( void );
+extern	int	pc_sub		( void );
+extern	int	pc_mul		( void );
+extern	int	pcj_mul		( void );
+extern	int	pc_mac		( void );
+extern	int	pc_mag2		( void );
+extern	int	pc_mag		( void );
+extern	int	pc_conj		( void );
+extern	int	pc_rec		( void );
+extern	int	pc_div		( void );
+extern	int	prc_mul		( void );
+extern	int	prc_mac		( void );
 
-extern	int	make_vector	PARAMS(( void ));
-extern	int	vrr_add		PARAMS(( void ));
-extern	int	vrr_sub		PARAMS(( void ));
-extern	int	vrr_mul		PARAMS(( void ));
-extern	int	vrr_div		PARAMS(( void ));
-extern	int	vrr_dot		PARAMS(( void ));
+extern	int	make_vector	( void );
+extern	int	vrr_add		( void );
+extern	int	vrr_sub		( void );
+extern	int	vrr_mul		( void );
+extern	int	vrr_div		( void );
+extern	int	vrr_dot		( void );
 
-extern	int	varg		PARAMS(( void ));
-extern	int	varg_first	PARAMS(( void ));
-extern	int	varg_last	PARAMS(( void ));
-extern	int	vlength		PARAMS(( void ));
+extern	int	varg		( void );
+extern	int	varg_first	( void );
+extern	int	varg_last	( void );
+extern	int	vlength		( void );
 
-extern	int	vr_sum		PARAMS(( void ));
-extern	int	vrs_scale	PARAMS(( void ));
-extern	int	vr_mag2		PARAMS(( void ));
-extern	int	vr_neg		PARAMS(( void ));
-extern	int	vrsr_mul	PARAMS(( void ));
-extern	int	vr_select	PARAMS(( void ));
+extern	int	vr_sum		( void );
+extern	int	vrs_scale	( void );
+extern	int	vr_mag2		( void );
+extern	int	vr_neg		( void );
+extern	int	vrsr_mul	( void );
+extern	int	vr_select	( void );
 
-extern	int	vcc_add		PARAMS(( void ));
-extern	int	vcc_sub		PARAMS(( void ));
-extern	int	vcc_mul		PARAMS(( void ));
-extern	int	vcc_div		PARAMS(( void ));
-extern	int	vcc_dot		PARAMS(( void ));
-extern	int	vrc_mul		PARAMS(( void ));
-extern	int	vcjc_dot	PARAMS(( void ));
-extern	int	vc_conj		PARAMS(( void ));
-extern	int	vc_neg		PARAMS(( void ));
-extern	int	vc_sum		PARAMS(( void ));
-extern	int	vcsc_mul	PARAMS(( void ));
-extern	int	vcsr_mul	PARAMS(( void ));
+extern	int	vcc_add		( void );
+extern	int	vcc_sub		( void );
+extern	int	vcc_mul		( void );
+extern	int	vcc_div		( void );
+extern	int	vcc_dot		( void );
+extern	int	vrc_mul		( void );
+extern	int	vcjc_dot	( void );
+extern	int	vc_conj		( void );
+extern	int	vc_neg		( void );
+extern	int	vc_sum		( void );
+extern	int	vcsc_mul	( void );
+extern	int	vcsr_mul	( void );
 
-extern	int	vc_cmag2	PARAMS(( void ));
-extern	int	vrc_mul		PARAMS(( void ));
+extern	int	vc_cmag2	( void );
+extern	int	vrc_mul		( void );
 
-extern	int	vc_select	PARAMS(( void ));
+extern	int	vc_select	( void );
 
-extern	int	lrr_dot		PARAMS(( void ));
-extern	int	lrr_mul		PARAMS(( void ));
-extern	int	lcc_dot		PARAMS(( void ));
-extern	int	lcc_add		PARAMS(( void ));
-extern	int	lcc_sub		PARAMS(( void ));
-extern	int	lcc_mul		PARAMS(( void ));
-extern	int	lsplit2		PARAMS(( void ));
+extern	int	lrr_dot		( void );
+extern	int	lrr_mul		( void );
+extern	int	lcc_dot		( void );
+extern	int	lcc_add		( void );
+extern	int	lcc_sub		( void );
+extern	int	lcc_mul		( void );
+extern	int	lsplit2		( void );
 
 #endif /* MotorolaMath */
 
@@ -165,7 +165,7 @@ extern	int	lsplit2		PARAMS(( void ));
 static struct blt_struct {
     const char *name;
     int   arity;
-    int   (*blt) PARAMS(( void ));
+    int   (*blt) ( void );
     const char *bltname;
 } blt_tab[] = {
 	BLT("<", 2, pbi_less, "_pbi_less"),
@@ -208,6 +208,9 @@ static struct blt_struct {
 	BLT("display_item_addr", 1, disp_item, "_disp_item"),
 	BLT("swp_tr", 0, pbi_swp_tr, "_pbi_swp_tr"),
 	BLT("walk_cps", 0, pbi_walk_cps, "_pbi_walk_cps"),
+	BLT("cptz", 0, pbi_cptz, "_pbi_cptz"),
+	BLT("x_display_heap", 2, x_disp_heap, "_x_disp_heap"),
+	BLT("x_swp_tr", 0, pbi_x_swp_tr, "_pbi_x_swp_tr"),
 #endif /* DEBUGSYS */
 		/* SPECIAL -- Freeze-related */
 #ifdef FREEZE
@@ -316,7 +319,6 @@ static struct blt_struct {
 	BLT("$uia_pokel", 3, pbi_uia_pokel, "_pbi_uia_pokel"),
 	BLT("$uia_poked", 3, pbi_uia_poked, "_pbi_uia_poked"),
 	BLT("$uia_pokes", 3, pbi_uia_pokes, "_pbi_uia_pokes"),
-	BLT("$strlen", 2, pbi_strlen, "_pbi_strlen"),
 	BLT("$atom_concat", 3, pbi_atom_concat, "_pbi_atom_concat"),
 
 #ifndef PURE_ANSI
@@ -595,15 +597,18 @@ static struct blt_struct {
 #endif /* SUBTYPES */
 
 	BLT("signal_name", 2, pbi_signal_name, "_pbi_signal_name"),
-	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory")
+	BLT("resize_memory", 2, pbi_resize_memory, "_pbi_resize_memory"),
+
+	BLT("curl_c_builtin", 2, curl_c_builtin, "_curl_c_builtin"),
+	BLT("lookup_opt_info", 1, lookup_opt_info, "_lookup_opt_info")
 
 };
 	/* blt_tab[] */
 
-#define NULLF ((int (*) PARAMS(( void ))) 0)
+#define NULLF ((int (*) ( void )) 0)
 #define BLT2(nam,arity,installer,p1,p2,fname) 				\
 		{nam,arity, 						\
-		(void (*) PARAMS((ntbl_entry *, PWord, PWord)))installer, \
+		(void (*) (ntbl_entry *, PWord, PWord))installer, \
 		p1,p2,fname}
 
 /*
@@ -611,50 +616,50 @@ static struct blt_struct {
  *      functions.
  */
 
-extern int wm_catch22 	PARAMS(( void ));
-extern int wm_colon 	PARAMS(( void ));
-extern int wm_cut 	PARAMS(( void ));
-extern int wm_jump 	PARAMS(( void ));
-extern int wm_ocall 	PARAMS(( void ));
-extern int wm_dbg_call 	PARAMS(( void ));
-extern int wm_throw 	PARAMS(( void ));
+extern int wm_catch22 	( void );
+extern int wm_colon 	( void );
+extern int wm_cut 	( void );
+extern int wm_jump 	( void );
+extern int wm_ocall 	( void );
+extern int wm_dbg_call 	( void );
+extern int wm_throw 	( void );
 
 #ifndef CMeta
-extern int wm_arg 	PARAMS(( void ));
-extern int wm_atom 	PARAMS(( void ));
-extern int wm_atomic 	PARAMS(( void ));
-extern int wm_compare 	PARAMS(( void ));
-extern int wm_float 	PARAMS(( void ));
-extern int wm_functor 	PARAMS(( void ));
-extern int wm_identical PARAMS(( void ));
-extern int wm_integer 	PARAMS(( void ));
-extern int wm_mangle 	PARAMS(( void ));
-extern int wm_nonidentical PARAMS(( void ));
-extern int wm_nonvar 	PARAMS(( void ));
-extern int wm_number 	PARAMS(( void ));
-extern int wm_var 	PARAMS(( void ));
+extern int wm_arg 	( void );
+extern int wm_atom 	( void );
+extern int wm_atomic 	( void );
+extern int wm_compare 	( void );
+extern int wm_float 	( void );
+extern int wm_functor 	( void );
+extern int wm_identical ( void );
+extern int wm_integer 	( void );
+extern int wm_mangle 	( void );
+extern int wm_nonidentical ( void );
+extern int wm_nonvar 	( void );
+extern int wm_number 	( void );
+extern int wm_var 	( void );
 
-extern int wm_call 	PARAMS(( void ));
-extern int wm_eq 	PARAMS(( void ));
-extern int wm_noneq 	PARAMS(( void ));
+extern int wm_call 	( void );
+extern int wm_eq 	( void );
+extern int wm_noneq 	( void );
 
 #endif /* CMeta */
 
 #ifdef Portable
-#define INTF(v) ((int (*) PARAMS((void))) (v))
+#define INTF(v) ((int (*) (void)) (v))
 #endif
 
 #ifdef SIO_ASM
-extern	int	wm_sio_pbyte	PARAMS(( void ));
-extern	int	wm_sio_gbyte	PARAMS(( void ));
+extern	int	wm_sio_pbyte	( void );
+extern	int	wm_sio_gbyte	( void );
 #endif /* SIO_ASM */
 
 
 static struct blt2_struct {
     const char *name;
     int   arity;
-    void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
-    int   (*p1) PARAMS(( void )), (*p2) PARAMS(( void ));
+    void  (*installer) ( ntbl_entry *, PWord, PWord );
+    int   (*p1) ( void ), (*p2) ( void );
     const char *bltname;
 } blt2_tab[] = {
 

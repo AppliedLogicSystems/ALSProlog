@@ -5,17 +5,13 @@ OS_AR = ar rusc
 OS_RANLIB = true
 OS_SL_EXT = dll
 OS_SL_LINK = $(CC) -shared
-LIBS = -lwsock32 -lcomdlg32
+LIBS = -lwsock32 -lcomdlg32 -lcurl
 SL_LINK_LIBS = $(LIBS)
 TCLVER=86
 
-ALS_BUILD_SUPPORT = /usr/i686-w64-mingw32/sys-root/mingw/
-ALS_BUILD_SUPPORT_INCLUDES = -isystem $(ALS_BUILD_SUPPORT)/include/tcl8.6
-
-ALS_BUILD_SUPPORT_LIBDIR = -L $(ALS_BUILD_SUPPORT)/lib
-
-# Set path to allow access to Tcl/Tk DLLs
-export PATH := $(ALS_BUILD_SUPPORT)/bin:$(PATH)
+ALS_BUILD_SUPPORT =
+ALS_BUILD_SUPPORT_INCLUDES =
+ALS_BUILD_SUPPORT_LIBDIR =
 
 ALSDEV_OS_SOURCE = win32_alsdev.c
 

@@ -1,12 +1,13 @@
 /*======================================================================
  |			listutl1.pro
- |		Copyright (c) 1991-96 Applied Logic Systems, Inc.
- |
- |		Various algebraic list predicates
+ |	Copyright (c) 1991-2019 Applied Logic Systems, Inc.
+ |		Group: Lists
+ |		DocTitle: list_diff/3
+ |		-- Various algebraic list predicates
  *=====================================================================*/
 module builtins.
 
-export lappend/2.
+export append/2.
 export list_diff/3.
 export list_diffs/4.
 export symmetric_diff/3.
@@ -17,6 +18,7 @@ export union/3.
 export sorted_merge/3.
 export sorted_merge/2.
 export subset/2.
+export init_seg_list/2.
 
 /*!---------------------------------------------------------------------
  |	append/2
@@ -26,8 +28,7 @@ export subset/2.
  |	- appends a list of lists together
  |
  |	If ListOfLists if a list, each of whose elements is a list, Result
- |	is obtained by appending the members of ListOfLists together in
- |	order.
+ |	is obtained by appending the members of ListOfLists together in order.
  *!--------------------------------------------------------------------*/
 append([], []).
 append([List | ListOfLists], Result)
@@ -91,8 +92,8 @@ symmetric_diff(A,B,A_symd_B)
  |
  |	- returns the intersection of two lists
  |
- |	If A and B are lists, returns the intersection AintB of A and B, which
- |	is the collection of all items common to both lists.
+ |	If A and B are lists, returns the intersection AintB of A and B, 
+ |	which is the list of all items common to both lists, in order.
  *!--------------------------------------------------------------------*/
 intersect([],_,[]) :-!.
 intersect(_,[],[]) :-!.
@@ -133,8 +134,8 @@ int_diff([X | RestA], B, RestAintB, [X | RestAnotB])
  |
  |	- returns the intersection of a list of lists
  |
- |	If L is a list of lists, returns the intersection IntsectL of all the
- |	list appearing on L.
+ |	If L is a list of lists, returns the intersection IntsectL of all 
+ |	of the lists appearing on L.
  *!--------------------------------------------------------------------*/
 intersect([], []) :-!.
 
@@ -157,8 +158,8 @@ intersect0([B | RestL], Accum, IntsectL)
  |
  |	If A and B are lists, returns the ordered union of A and B, consisting
  |	of all items occurring on either A or B, with all occurrences of items
- |	from A occurring before any items from B-A; equivalent to:
- |		append(A,B-A,AuB);
+ |	from A occurring before any items from B-A; equivalent to:<br>
+ |		append(A,B-A,AuB);<br>
  |	If both lists have the property that each element occurs no more 
  |	than once, then the union also has this property.
  *!--------------------------------------------------------------------*/
@@ -166,7 +167,7 @@ union([],B, B) :-!.
 union(A,[], A) :-!.
 union(A,B, AuB)
    :-
-   union0(B,A,AuB).
+   union0(A,B,AuB).
 
 union0([],A,A).
 union0([X | RestB],A,[X | RestAuB])
@@ -223,5 +224,20 @@ subset([E | T], RL)
 	:-
 	dmember(E, RL),
 	subset(T, RL).
+
+/*!--------------------------------------------------------------------*
+ |	init_seg_list/2
+ |	init_seg_list(LeftList, RightList)
+ |	init_seg_list(+, +)
+ |
+ |	- determines if one list is an initial segment of another
+ |
+ |	If LeftList and RightList are both lists, this predicate is
+ |	true if and only if LeftList is an initial sublist of  RightList.
+ *!--------------------------------------------------------------------*/
+init_seg_list([], _) :-!.
+init_seg_list([A | LeftTail], [A | RightTail])
+        :-!,
+        init_seg_list(LeftTail, RightTail).
 
 endmod.

@@ -1,0 +1,18 @@
+<ul>
+{%- for package in site.ref_packages %}
+
+<li>
+<strong>{{package | escape}}</strong>
+
+{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
+
+<ul>
+{%- for g in groups %}
+  <li>
+    <a href="ref/#{{g.name|slugify}}">{{g.name}}</a>
+  </li>
+{%- endfor %}
+</ul>
+</li>
+{%- endfor %}
+</ul>

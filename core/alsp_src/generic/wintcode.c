@@ -28,7 +28,7 @@
 #include <sys/mman.h>
 
 #elif	defined(arch_m88k)  /* !HAME_MMAP */
-extern	int	memctl		PARAMS(( void *, int, int ));
+extern	int	memctl		( void *, int, int );
 
 #endif /* HAVE_MMAP */
 
@@ -77,14 +77,14 @@ long *aib_clause_addr;		/* used by assertz */
 
 /*//static struct codeblock *codeblock_list = (struct codeblock *) 0;*/
 
-static	long *	code_alloc	PARAMS(( size_t, int ));
-static	void	makerunable	PARAMS(( void ));
-static	void	makewritable	PARAMS(( void ));
-static	ntbl_entry * alloc_name_entry PARAMS(( void ));
-static	long *	cbsffa		PARAMS(( Code * ));
-static	long *	clause_start_from_retaddr PARAMS(( Code *, long * ));
-static	void	mark_fromretaddr PARAMS(( Code * ));
-static	void	mark_clause	PARAMS(( long * ));
+static	long *	code_alloc	( size_t, int );
+static	void	makerunable	( void );
+static	void	makewritable	( void );
+static	ntbl_entry * alloc_name_entry ( void );
+static	long *	cbsffa		( Code * );
+static	long *	clause_start_from_retaddr ( Code *, long * );
+static	void	mark_fromretaddr ( Code * );
+static	void	mark_clause	( long * );
 
 /*-----------------------------------------------------------------*
  | code_alloc
@@ -491,7 +491,11 @@ w_alloccode(size)
 
 #ifdef MDEBUG
     if (size > WC_AREASIZE - WC_OVERHEAD)
+#ifdef __LP64__
+	printf("w_alloccode: Need block of size %d\n", sizeof(Code) * size);
+#else
 	printf("w_alloccode: Need block of size %d\n", 4 * size);
+#endif
 #endif
 
     p = w_freeptr;
@@ -505,11 +509,19 @@ w_alloccode(size)
 	    	long *new;
 	    	long  len = max(size + 2, WC_AREASIZE);
 
+#ifdef __LP64__
+#ifdef MDEBUG
+	    	if (len > WC_AREASIZE + sizeof(Code))
+			printf("w_alloccode: allocating block of size %ld\n", sizeof(Code) * len);
+#endif
+	    	new = (long *) code_alloc((size_t)(sizeof(Code) * len), FE_XMEM_CLAUSE);
+#else
 #ifdef MDEBUG
 	    	if (len > WC_AREASIZE + 4)
 			printf("w_alloccode: allocating block of size %ld\n", 4 * len);
 #endif
 	    	new = (long *) code_alloc((size_t)(4 * len), FE_XMEM_CLAUSE);
+#endif
 
 	    		/* update record of total space */
 	    	w_totspace += len;
@@ -684,9 +696,9 @@ w_installcode(buffer, bufsize, extra, actualsize)
  | copy_code procedure for the 88k.
  *-----------------------------------------------------------------*/
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 void
 copy_code(buffer, to, bufsize)
@@ -755,9 +767,9 @@ copy_code(buffer, to, bufsize)
 #else  /* arch_m88k */
 #ifdef arch_sparc
 
-extern	void	wm_g_uia	PARAMS(( void ));
-extern	void	wm_p_uia	PARAMS(( void ));
-extern	void	mth_pushdbl0	PARAMS(( void ));
+extern	void	wm_g_uia	( void );
+extern	void	wm_p_uia	( void );
+extern	void	mth_pushdbl0	( void );
 
 /*-----------------------------------------------------------------*
  * copy_code procedure for the Sparc.
@@ -1735,7 +1747,7 @@ void
 w_assert_builtin(name, arity, builtin)
     const char *name;
     int   arity;
-    int   (*builtin) PARAMS(( void ));
+    int   (*builtin) ( void );
 {
     ntbl_entry *ent;
 
@@ -1750,7 +1762,7 @@ void
 w_assert_built2(name, arity, installer, p1, p2)
     const char *name;
     int   arity;
-    void  (*installer) PARAMS(( ntbl_entry *, PWord, PWord ));
+    void  (*installer) ( ntbl_entry *, PWord, PWord );
     PWord p1, p2;
 {
     ntbl_entry *ent;
@@ -1780,7 +1792,7 @@ w_assert_foreign(modid, name, arity, builtin)
     PWord modid;
     const char *name;
     int   arity;
-    int   (*builtin) PARAMS(( void ));
+    int   (*builtin) ( void );
 {
     ntbl_entry *ent;
 
@@ -1982,7 +1994,7 @@ make_dbref(a, res, restype)
 	int   ct;
 
 	w_mk_term(res, restype, (PWord) TK_DBREF, 4);
-
+// TODO LP64: check use of short
 	w_install_argn(*res, 1, (PWord) (((long) a) & 0xffff), WTP_INTEGER);
 	w_install_argn(*res, 2, (PWord) (((long) a) >> 16), WTP_INTEGER);
 	w_install_argn(*res, 3, (PWord) (*(a + WCI_PROCIDX) & 0xffff),

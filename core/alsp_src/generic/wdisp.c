@@ -37,27 +37,27 @@
  *
  */
 
-static	void	wr_trm		PARAMS(( PWord, int, int ));
-static	void	wr_int		PARAMS(( PWord, int, int ));
-static	void	wr_lst		PARAMS(( PWord, int, int ));
-static	void	wr_sym		PARAMS(( PWord, int, int ));
-static	void	wr_var		PARAMS(( PWord, int, int ));
-static	void	wr_uia		PARAMS(( PWord, int, int ));
+static	void	wr_trm		( PWord, int, int );
+static	void	wr_int		( PWord, int, int );
+static	void	wr_lst		( PWord, int, int );
+static	void	wr_sym		( PWord, int, int );
+static	void	wr_var		( PWord, int, int );
+static	void	wr_uia		( PWord, int, int );
 
-static	int	wr_op2		PARAMS(( PWord, int, long, int, int ));
-static	int	wr_op		PARAMS(( PWord, long, int, int ));
-static	void	write_quoted_symbol PARAMS(( char * ));
+static	int	wr_op2		( PWord, int, long, int, int );
+static	int	wr_op		( PWord, long, int, int );
+static	void	write_quoted_symbol ( char * );
 
 #ifdef DoubleType
-static	void	wr_dbl		PARAMS(( PWord, int, int ));
-static	int	check_vector	PARAMS(( long *, long * ));
-static	void	print_vector	PARAMS(( long *, long ));
-static	void	craig_get_double PARAMS(( double *, long * ));
+static	void	wr_dbl		( PWord, int, int );
+static	int	check_vector	( long *, long * );
+static	void	print_vector	( long *, long );
+static	void	craig_get_double ( double *, long * );
 #endif /* DoubleType */
 
 /* This order has to match up with the WTP_type constants in winter.h */
 
-static void (*wr_tbl[]) PARAMS(( PWord, int, int )) = {
+static void (*wr_tbl[]) ( PWord, int, int ) = {
 	wr_var,
 	wr_lst,
 	wr_trm,

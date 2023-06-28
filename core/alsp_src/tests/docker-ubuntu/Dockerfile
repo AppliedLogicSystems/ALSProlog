@@ -21,9 +21,16 @@
 FROM ubuntu
 LABEL maintainer Chuck Houpt <chuck@habilis.net>
 
+ENV DEBIAN_FRONTEND noninteractive
+
 # Install standard dev tools and 32-bit libraries
 RUN dpkg --add-architecture i386 && apt-get -y update && apt-get -y install build-essential
-RUN apt-get -y install git gcc-multilib tk-dev:i386
+RUN apt-get -y install git gcc-multilib ruby ruby-dev zlib1g-dev php tk-dev:i386 libcurl3-dev:i386
+ENV LANG C.UTF-8
+RUN gem install bundler
+
+# Not strictly necessary, but speeds up builds by pre-installing
+RUN gem install jekyll html-proofer
 
 # Default command is to clone and run tests from Github master
 CMD git clone --depth 1 https://github.com/AppliedLogicSystems/ALSProlog.git /tmp/alsptest \

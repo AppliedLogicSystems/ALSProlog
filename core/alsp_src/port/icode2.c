@@ -310,7 +310,7 @@ ic_install_no(buf, clausestart, nocatcher)
 void
 ic_install_builtin(ne, builtin)
     ntbl_entry *ne;
-    int   (*builtin) PARAMS(( void ));
+    int   (*builtin) ( void );
 {
     Code *oldptr = ic_ptr;
 

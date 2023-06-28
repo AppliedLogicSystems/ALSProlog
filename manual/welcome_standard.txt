@@ -11,7 +11,9 @@ LICENSE
 =======
 ALS Prolog is an open source version of Prolog distributed by
 Applied Logic Systems, Inc. under the MIT License, which is
-contained in the file LICENSE.txt in this directory.
+contained in the file LICENSE.txt in this directory.  The 
+source files are located at
+	https://github.com/AppliedLogicSystems/ALSProlog
 
 WARRANTY
 ========
@@ -29,68 +31,53 @@ INSTALLATION DIRECTORY
 	README.md 		-- this file  
 	LICENSE.txt		-- Open Source Licence for ALS Prolog  
 	als-prolog-manual.pdf   -- Primary manual  
-	als_help.htm		-- Reference Help System entry (*)  
-	help/             	-- Reference Help System files  
+	docs/index.html		-- Documentation Help System entry (*)  
 	examples/		-- Sample Prolog programs  
-	alspro                 -- ALS Prolog executable  
+	alspro                 	-- ALS Prolog executable  
 	alsdir/           	-- Directory containing components used by the executables  
 	libalspro.a		-- ALS Prolog static library  
 	alspro.pst              -- relocatable Prolog code space used for creating executable application images  
 	libalspro.dylib	-- ALS Prolog dynamic library  
 	ALS_Prolog_Foreign_SDK/ -- Tools for adding C-defined predicates to ALS Prolog programs (*)  
-	alsdev                 -- IDE based on ALS Prolog and Tcl/Tk (*)  
+	alsdev         		-- IDE based on ALS Prolog and Tcl/Tk (*)  
 	alsdev.pst		-- relocatable Prolog code space used for creating executable application images (*)  
 	lib/			-- Tk files for alsdev  
 	(*) Not yet converted/debugged for the open source release
 
 MANUAL
 ======
-The User Manual for ALS Prolog is provided by the file
+The original (1990's) User Manual for ALS Prolog is provided by the pdf file
 
 	als-prolog-manual.pdf
 
-in this folder.  This is an Adobe Acrobat(r) file.  
+in this folder, and the original Reference Manual is provided by the pdf file
 
-To read the ALS Prolog manual:  
-Double-click on the icon for als-prolog-manual.pdf, or start Acrobat, and load the manual.
+	als-ref-manual.pdf.
 
-There is a separate manual for the foreign C-language interface, in
+Both manuals can be read using standard PDF viewers, or even by opening them with widely used browsers.
+
+There are separate (original) manuals for the foreign C-language interface, in
 
 	ALS_Prolog_Foreign_SDK/documentation/FI_Manual.pdf  
 
-The reference manual is contained in  
+and
 
 	ALS_Prolog_Foreign_SDK/documentation/FI_Ref.pdf  
 
 HELP SYSTEM
 ===========
 
-The Reference Manual for ALS Prolog is implemented as an HTML-based HELP system.
-You will need a fairly recent version of a standard browser to read the help files.
+The current Reference Manual for ALS Prolog is implemented as an HTML-based HELP system.
+You will need a fairly recent version of a standard browser to read the help files.	
 
-After the installation is complete, the ALS Prolog HELP system is contained in the
+To view the ALS Prolog Help system, simply open the file
 
-	help
+	docs/index.html
 
-directory inside the installation directory.  It consists of a large number of
-*.htm and *.gif files, together with a number of additonal files.  In addition,
-there is one file
-
-	als_help.htm 
-
-in the installation directory.  To view the ALS Prolog Help system, simply open the 
-file
-
-	als_help.htm
-
-in your browser.  PLEASE NOTE that the start-up of the help system may be
-slow, since the browser must fire up Java and other components.  However,
-once the contents for the system have appeared, it performs quite nicely
-on most platforms.
+in your browser.  
 
    = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 	Applied Logic Systems, Inc.
-	PO Box 468, Vanderwagen, NM 87326 USA
-	Web: http://www.applied-logic-systems.com
+	https://www.applied-logic-systems.com
 

@@ -216,7 +216,7 @@ gen_project_mgrAction(shutdown_project, State)
 	tcl_call(shl_tcli, [unpost_open_project, ProjTitle], _).
 
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%%%%%%%%% 		SAVE PROJECT		%%%%%%%%%%%%%
+	%%%%%%%%% 	SAVE PROJECT	    %%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 als_ide_mgrAction(save_project, ALSIDEObject)
 	:-
@@ -225,9 +225,10 @@ als_ide_mgrAction(save_project, ALSIDEObject)
 als_ide_mgrAction(save_project(Flag), ALSIDEObject)
 	:-
 	accessObjStruct(cur_project,ALSIDEObject,CurProject),
-	send(CurProject, update_check_complete(Flag)),
-	(Flag = ok ->
+	send(CurProject, update_check_complete(UpdateCCFlag)),
+	(UpdateCCFlag = ok ->
 		send(CurProject, save_to_file)
+,info_dialog(shl_tcli, 'Project Saved', 'Info')
 		;
 		true
 	).

@@ -1,7 +1,7 @@
 Welcome to the ALS Prolog Source Tree
 =====================================
 
-[![Travis-CI Build Status](https://travis-ci.org/AppliedLogicSystems/ALSProlog.svg?branch=master)](https://travis-ci.org/AppliedLogicSystems/ALSProlog)
+[![Build & Test](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml/badge.svg)](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/786esihnss6ksk7k/branch/master?svg=true)](https://ci.appveyor.com/project/AppliedLogicSystems/alsprolog/branch/master)
 
 The ALS Prolog source tree is divided into core and peripheral
@@ -39,21 +39,24 @@ Build Dependencies
 
 ### Linux
 
-Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, and Tcl/Tk. Packages for popular distributions:
+Generally, a GNU/Linux OS with standard build tools (Make, GCC with 32-bit support), Git, Ruby, Libcurl, and Tcl/Tk. Packages for popular distributions:
 
-Debian/Ubuntu: `sudo pkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib tk-dev:i386`
+Debian/Ubuntu: `sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install build-essential git gcc-multilib ruby ruby-dev php libcurl4-openssl-dev:i386 tk-dev:i386`
 
-CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install glibc-devel.i686 libgcc.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
+CentOS/Fedora: `sudo yum groupinstall 'Development Tools' && sudo yum install ruby ruby-dev php glibc-devel.i686 libgcc.i686 libcurl.i686 tcl-devel.i686 tcl.i686 tk-devel.i686 tk.686`
 
 ### Mac OS X
 
 [Xcode](https://developer.apple.com/xcode/) command line tools.
+For version before High Sierra (10.13), a recent version of Ruby is required. [Homebrew Ruby](https://jekyllrb.com/docs/installation/macos/#homebrew) is recommended.
+For versions after Big Sur (11), PHP is required for testing. [Homebrew PHP](https://formulae.brew.sh/formula/php) is recommended.
 
 ### Windows
 
-[Cygwin](https://cygwin.com) 32-bit is used to build both Win32 and Cygwin, with packages:
+[MSYS2](https://www.msys2.org) tool-chain is used to build for Win32, with packages:
 
-- Devel (git make gcc-core mingw64-i686-gcc-core libcrypt-devel mingw64-i686-libgcrypt)
-- Tcl-Tk (tcl-tk-devel mingw64-i686-tcl mingw64-i686-tk)
-- Archive (zip)
-- X11 (optional to run X11 alsdev)
+    pacman --sync git base-devel mingw-w64-i686-toolchain mingw-w64-i686-curl zip procps
+
+[Ruby](https://www.ruby-lang.org/en/) installed via [RubyInstaller](https://rubyinstaller.org) (use recommended Ruby+DevKit version).
+
+[PHP](https://www.php.net) installed via [PHP Download](https://windows.php.net/download/) or elsewhere.

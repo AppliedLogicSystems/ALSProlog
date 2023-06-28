@@ -1,4 +1,7 @@
-CC=clang -m32
+# TODO LP64: For debugging in 64-bit
+#CC=clang -O0 -DBytecode=1 -DTRACEBWAM
+#CC=clang -O0 -DBytecode=1
+CC=clang
 
 CFLAGS += -MMD -Weverything \
 -Wno-unused-parameter \

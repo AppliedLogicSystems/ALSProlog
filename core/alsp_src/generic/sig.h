@@ -9,28 +9,25 @@
  *====================================================================*/
 
 #include <signal.h>
-#ifdef UNIX
-#include "missing.h"
-#endif
 
 #if defined(HAVE_UCONTEXT_H)
 #include <ucontext.h>
 
-extern	void	signal_handler	PARAMS(( int, siginfo_t *, ucontext_t *));
+extern	void	signal_handler	( int, siginfo_t *, ucontext_t *);
 
 #elif defined(arch_m88k)
-extern	void	signal_handler	PARAMS(( int, struct siginfo * ));
+extern	void	signal_handler	( int, struct siginfo * );
 
 #elif defined(HAVE_SIGVEC)
-extern	void  signal_handler	PARAMS(( int, int, struct sigcontext *, char * ));
+extern	void  signal_handler	( int, int, struct sigcontext *, char * );
 
 #elif defined(HAVE_SIGVECTOR)
-extern	void  signal_handler	PARAMS(( int, int, struct sigcontext *, char * ));
+extern	void  signal_handler	( int, int, struct sigcontext *, char * );
 
 #elif defined(VMS)
-extern	void  signal_handler	PARAMS(( char ));	/* !!? */
+extern	void  signal_handler	( char );	/* !!? */
 
 #else		/* otherwise */
-extern	void  signal_handler	PARAMS(( int ));
+extern	void  signal_handler	( int );
 
 #endif

@@ -258,6 +258,8 @@ struct codeblock {
  *-----------------------------------------------------------------*/
 
 #define CGI_WIDTH	9
+// TODO LP64: Check to see if this is needed for 64-bit:
+//#define CGI_OFFSET	(64-CGI_WIDTH)
 #define CGI_OFFSET	(32-CGI_WIDTH)
 #define CGI_MASK	((1<<CGI_WIDTH)-1)
 #define CGI_VMASK	((1<<CGI_OFFSET)-1)
@@ -314,78 +316,78 @@ extern	unsigned long w_timestamp;
 extern	unsigned long w_reconstamp;
 extern	PWord	wm_aborted;
 
-extern	dbprot_t w_dbprotect	PARAMS(( dbprot_t ));
-extern	int	w_namelookup	PARAMS(( PWord, PWord, int ));
-extern	ntbl_entry *w_nameprobe PARAMS(( PWord, PWord, int ));
-extern	ntbl_entry *w_nameentry	PARAMS(( PWord, PWord, int ));
-extern	void	w_initcode	PARAMS(( void ));
-extern	void	w_freecount	PARAMS(( long *, long * ));
-extern	long *	w_alloccode	PARAMS(( int ));
-extern	void	w_freecode	PARAMS(( long * ));
-extern	long *	w_installcode	PARAMS(( Code *, int, int, int* ));
-extern	void	copy_code	PARAMS(( long *, long *, int ));
-extern	void	w_nukeindexing	PARAMS(( ntbl_entry * ));
-extern	void	w_fixchoicepoints PARAMS(( long * ));
-extern	void	w_abolish	PARAMS(( ntbl_entry * ));
-extern	int	w_erase		PARAMS(( int, long * ));
-extern	void	w_freeclause	PARAMS(( long * ));
-extern	void	w_assertz	PARAMS(( PWord, int, Code *, int,
-                                         long, int, int, long ));
-extern	void	w_asserta	PARAMS(( PWord, int, Code *, int,
-					 long, int, int, long ));
-extern	void	w_addclause	PARAMS(( PWord, int, int, Code *,
+extern	dbprot_t w_dbprotect	( dbprot_t );
+extern	int	w_namelookup	( PWord, PWord, int );
+extern	ntbl_entry *w_nameprobe ( PWord, PWord, int );
+extern	ntbl_entry *w_nameentry	( PWord, PWord, int );
+extern	void	w_initcode	( void );
+extern	void	w_freecount	( long *, long * );
+extern	long *	w_alloccode	( int );
+extern	void	w_freecode	( long * );
+extern	long *	w_installcode	( Code *, int, int, int* );
+extern	void	copy_code	( long *, long *, int );
+extern	void	w_nukeindexing	( ntbl_entry * );
+extern	void	w_fixchoicepoints ( long * );
+extern	void	w_abolish	( ntbl_entry * );
+extern	int	w_erase		( int, long * );
+extern	void	w_freeclause	( long * );
+extern	void	w_assertz	( PWord, int, Code *, int,
+                                         long, int, int, long );
+extern	void	w_asserta	( PWord, int, Code *, int,
+					 long, int, int, long );
+extern	void	w_addclause	( PWord, int, int, Code *,
 					 int, long, int, int,
-					 long ));
-extern	void	w_abolish_cg	PARAMS(( ntbl_entry *, int, int ));
-extern	void	w_execquery	PARAMS(( Code *, int ));
-extern	void	w_execcommand	PARAMS(( Code *, int ));
-extern	void	w_exec		PARAMS(( Code *, int, const char* ));
-extern	void	w_assert_builtin PARAMS(( const char *, int, int (*) PARAMS(( void )) ));
-extern	void	w_assert_built2	PARAMS(( const char *, int, void (*) PARAMS(( ntbl_entry *, PWord, PWord )), PWord, PWord ));
-extern	void	w_assert_foreign PARAMS(( PWord, const char *, int, int (*) PARAMS(( void )) ));
-extern	void	w_dynamic	PARAMS(( PWord, PWord, int ));
-extern	int	w_spy		PARAMS(( PWord, PWord, int ));
-extern	int	w_nospy		PARAMS(( PWord, PWord, int ));
-extern	void	w_libbreak	PARAMS(( PWord, PWord, int ,int ));
-extern	PWord	nextproc	PARAMS(( PWord, int ));
-extern	long *	first_clause	PARAMS(( int ));
-extern	long *	next_clause	PARAMS(( long * ));
-extern	void	make_dbref	PARAMS(( long *, PWord *, int * ));
-extern	long *	w_validate_dbref PARAMS(( long *, int nid, long cid ));
+					 long );
+extern	void	w_abolish_cg	( ntbl_entry *, int, int );
+extern	void	w_execquery	( Code *, int );
+extern	void	w_execcommand	( Code *, int );
+extern	void	w_exec		( Code *, int, const char* );
+extern	void	w_assert_builtin ( const char *, int, int (*) ( void ) );
+extern	void	w_assert_built2	( const char *, int, void (*) ( ntbl_entry *, PWord, PWord ), PWord, PWord );
+extern	void	w_assert_foreign ( PWord, const char *, int, int (*) ( void ) );
+extern	void	w_dynamic	( PWord, PWord, int );
+extern	int	w_spy		( PWord, PWord, int );
+extern	int	w_nospy		( PWord, PWord, int );
+extern	void	w_libbreak	( PWord, PWord, int ,int );
+extern	PWord	nextproc	( PWord, int );
+extern	long *	first_clause	( int );
+extern	long *	next_clause	( long * );
+extern	void	make_dbref	( long *, PWord *, int * );
+extern	long *	w_validate_dbref ( long *, int nid, long cid );
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
-extern	long *	validate_dbref	PARAMS(( PWord, int, PWord * ));
-extern	Code *	jump_validate_dbref PARAMS(( PWord ref, PWord term ));
+extern	long *	validate_dbref	( PWord, int, PWord * );
+extern	Code *	jump_validate_dbref ( PWord ref, PWord term );
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
-extern	void	gen_indexing	PARAMS(( void ));
-extern	void	decr_icount	PARAMS(( Code * ));
-extern	void	seticount	PARAMS(( ntbl_entry * ));
+extern	void	gen_indexing	( void );
+extern	void	decr_icount	( Code * );
+extern	void	seticount	( ntbl_entry * );
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_D0
 #endif
-extern	long *	next_choice_in_a_deleted_clause PARAMS(( long * ));
+extern	long *	next_choice_in_a_deleted_clause ( long * );
 #ifdef POINTERS_IN_A0
 #pragma pointers_in_A0
 #endif
-extern	void	w_collect	PARAMS(( void ));
-extern	PWord *	w_frame_info	PARAMS(( PWord *, long **, long * ));
-extern	void	w_relink	PARAMS(( ntbl_entry * ));
-extern	void	w_relinkall	PARAMS(( void ));
-extern	char *	w_getnamestring	PARAMS(( Code *, char * ));
-extern	int	nameprobe	PARAMS(( PWord, PWord, int ));
+extern	void	w_collect	( void );
+extern	PWord *	w_frame_info	( PWord *, long **, long * );
+extern	void	w_relink	( ntbl_entry * );
+extern	void	w_relinkall	( void );
+extern	char *	w_getnamestring	( Code *, char * );
+extern	int	nameprobe	( PWord, PWord, int );
 
 /*-----------------------------------------------------------------*
  | from index.c 
  *-----------------------------------------------------------------*/
-extern	void	indexproc	PARAMS(( PWord, PWord, int ));
-extern	void	do_indexing	PARAMS(( ntbl_entry * ));
+extern	void	indexproc	( PWord, PWord, int );
+extern	void	do_indexing	( ntbl_entry * );
 
 /*-----------------------------------------------------------------*
  | from gc.c 
  *-----------------------------------------------------------------*/
-extern	int	gc		PARAMS(( void ));
+extern	int	gc		( void );
 
 #endif /* _WINTCODE_H_INCLUDED_ */

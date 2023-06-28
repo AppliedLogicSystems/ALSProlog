@@ -1,31 +1,57 @@
 #!/bin/bash
 
-# Automagically calculate project version number from git tags
+# Automagically calculate project version number and copyright date from git
 
-# Archive hash and description set by git-archive via export-subst in .gitattributes
-ARCHIVE='$Format:%h%d$'
+# Usage: version [version | year | flags]
+#   Options:
+#     version - (default) output version info
+#     year    - output copyright year
+#     flags   - output compiler flags to set VERSION and YEAR
+
+# Archive hash, refs and date set by git-archive via export-subst in .gitattributes
+
+# Note: the refs (%d) are truncated to only show the version tag, thus avoiding
+# variability caused by moving branch references (like master). This makes archives
+# build from tags stable for downstream package distribution. However, versons tags
+# are limited to a maximum 9 chars (i.e. v00.00.00) and must start with "v".
+
+ARCHIVED='$Format:archived$'
+HASH='$Format:%h$'
+REFS='$Format:%<(13,ltrunc)%d$'
+DATE='$Format:%aI$'
 
 # Examples expansions:
-#ARCHIVE='09f863b (tag: v3.2.0)'
-#ARCHIVE='2ea0e4a (HEAD -> master)'
+#ARCHIVED='archived'
+#HASH='09f863b'
+#REFS='..g: v1.2.3)'
+#DATE='1988-01-01...'
 
-# Use archive tag, if found
-if [[ $ARCHIVE =~ tag:\ ([^\)]+)\) ]]
-then
-	VERSION=${BASH_REMATCH[1]}
+VERSION='unknown'
+YEAR='????'
+
+case $ARCHIVED in
+
+# When archiving is detected, extract year from date and version from refs, or fall back to hash.
+archived)
+	if [[ $REFS =~ (v[^\)]+)\)$ ]]
+	then
+		VERSION=${BASH_REMATCH[1]}
+	else
+		VERSION=$HASH
+	fi
+	YEAR=${DATE:0:4}
+	;;		
+
+# Default to using git to generate version number and year in working tree
+*)
+	if [[ $(git rev-parse --is-inside-work-tree) == 'true' ]]
+	then
+		VERSION=$(git describe --always --tags --dirty)
+		YEAR=$(git log -1 --date=format:%Y --pretty=format:%ad)
+	fi
+	;;
 	
-# Use archive branch and hash, if found
-elif [[ $ARCHIVE =~ ([^ ]+)\ \(.*-\>\ ([^\),]+).*\) ]]
-then
-	VERSION=${BASH_REMATCH[2]}-${BASH_REMATCH[1]}
-
-# Use git-describe for working trees
-elif [[ $(git rev-parse --is-inside-work-tree) == 'true' ]]
-then
-	VERSION=$(git describe --tags --dirty)
-else
-	VERSION='unknown'
-fi
+esac
 
 # Strip leading 'v' if found
 if [[ ${VERSION:0:1} == 'v' ]]
@@ -33,4 +59,15 @@ then
 	VERSION=${VERSION:1}
 fi
 
-echo $VERSION
+# Send output based on option
+case ${1:-version} in
+version)
+	echo $VERSION
+	;;
+year)
+	echo $YEAR
+	;;
+flags)
+	echo -DVERSION=$VERSION -DYEAR=$YEAR
+	;;
+esac

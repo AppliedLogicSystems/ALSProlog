@@ -101,20 +101,20 @@ static long sp_disp;
 		 (iidx >= 0 ? posic[iidx] : negic[-iidx-1]), \
 		 w,x,y,z);
 
-#define ICODE(macro,str,addr,obp) void addr PARAMS(( long, long, long, long ));
+#define ICODE(macro,str,addr,obp) void addr ( long, long, long, long );
 #include "icodedef.h"
 
-static	void	ic_illegal	PARAMS(( long, long, long, long ));
-static	void	ic_uiastr	PARAMS(( char * ));
-static	void	ic_p_const	PARAMS(( long, long, long ));
-static	void	ic_backpatch	PARAMS(( Code *, int ));
-static	void	addtosp		PARAMS(( long ));
+static	void	ic_illegal	( long, long, long, long );
+static	void	ic_uiastr	( char * );
+static	void	ic_p_const	( long, long, long );
+static	void	ic_backpatch	( Code *, int );
+static	void	addtosp		( long );
 
 #undef ICODE
 #define ICODE(macro,str,addr,obp) {addr},
 
 static struct {
-    void  (*doit) PARAMS(( long, long, long, long ));
+    void  (*doit) ( long, long, long, long );
 } instrs[] = {
 
 #include "icodedef.h"
@@ -1131,7 +1131,7 @@ icode(iidx, w, x, y, z)
 	    case IC_INIT:
 		ic_ptr = icode_buf;
 		
-		memset(icode_buf, -1, ICBUFSIZE);
+		memset(icode_buf, -1, sizeof(Code)*ICBUFSIZE);
 
 		callidx = 0;
 

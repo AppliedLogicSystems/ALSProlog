@@ -4,22 +4,33 @@ alspro \- Prolog compiler and interactive shell
 .SH SYNOPSIS
 .B alspro
 [
-.B \-b
+.B \-s \fIpath-to-dir\fR
 ] 
 [ \fB\-g \fIgoal\fR ]
 [
-.B \-v
+.B \-b \-q \-v
+] 
+[
+.B \-a \-A \fIgoal\fR
 ]
 .if n .ti +7n
 [ \fB\-heap \fInumber\fR ]
 [ \fB\-stack \fInumber\fR ]
 .if n .ti +7n
 [
+.B \-obp \-gic \-gis \-giac \-gias \-no_obp
+] 
+.if n .ti +7n
+[
+.B \-no_dot_alspro \-nwd \-shell \-h \-\-help
+] 
+.if n .ti +7n
+[
 .IR sourcefile\| .\|.\|.
 ]
 .if n .ti +7n
 [
-.B \-p
+.B \-p \-P
 .IR appargs\| .\|.\|.
 ]
 .SH DESCRIPTION
@@ -47,27 +58,99 @@ when loading the file.  When specified without an extension, ALS Prolog will
 load the most recently modified
 of the \fI.pro\fR and \fI.obp\fR files updating the latter if necessary.
 .SH OPTIONS
-.TP 
-.B \-b
-run ALS Prolog in batch mode; that is
-control will return to the OS shell
-invoking ALS Prolog after processing the command line.
-This option is useful if you just want to compile
-Prolog files without entering the Prolog shell.
+.TP
+\fB\-s \fI<pathToDirectory>Directory\fR
+The path is added to the searchdir/1 sequence. Multiple occurrences of -s with
+a path may occur on the command line; the associated paths are processed
+and added to the searchdir/1 facts in order corresponding to their left-toright
+occurrence on the command line. All paths occurring with -s on the
+command line are added to the searchdir/1 facts before any paths obtained
+from the ALSPATH environment variable.
 .TP  
 \fB\-g \fIgoal\fR
 run the Prolog 
 .IR goal
-after ALS Prolog starts up. The goal might have to be quoted depending on the
+after ALS Prolog starts up as if it was the first goal typed to the 
+Prolog shell after the system is started. The goal might have to be quoted depending on the
 rules of the shell you are running in or if the goal contains any of your
 shell's special characters.  The goal need not have a terminating full stop
-(period).  After execution of the goal, control will return to the operating
-system shell.
+(period). Multiple goals can be submitted; they are executed in left-to-right order.
+When the submitted goal (or goals) finishes running (with success or failure), control is 
+passed to the normal Prolog shell unless the -b command line option has also been used, 
+in which case control returns to the operating system shell.  
+.TP 
+.B \-b
+runs alspro in batch mode, which means that the normal Prolog shell is prevented
+from running and control will return to the OS shell when all command line processing is 
+complete, including processing of source files and execution of -g goals.
 .TP
-.B \-p
+.B \-q 
+causes all standard system loading messages to be suppressed, 
+including the banner. One of the uses of -q is to permit you to use
+alspro as a Unix filter. Note that this does not turn off prompts issued
+by the Prolog shell.
+.TP
+.B \-v
+turns on verbose mode. This causes all system loading messages, including 
+some which are normally suppressed, to be printed.
+.TP
+\fB\-a,-A \fI<Expr>\fR
+where <Expr> can be M:(<H1>,...<Hk>) or M:<H>, or M can be omitted, and where
+the <Hi> and <H> are Prolog facts (and where the entire expression may need to be
+enclosed in single quotes to defeat the OS shell), causes all of the <Hi>, or <H> to
+be asserted in module M, or if M is omitted, asserted in module user.  Thus, 
+alspro -a 'ice:(ben, jerry)' will cause the facts ben and jerry to be asserted in
+module ice, and alspro -A 'tasty(vanilla)' will cause the fact tasty(vanilla) to
+be asserted in module user.
+.TP
+.B \-heap \fInumber\fR
+For large \fInumber\fR, sets the initial heap size to \fInumber\fR Kilobytes. 
+For small \fInumber\fR, sets the initial heap size to the base heap size, incremented
+by \fInumber\fR Kilobytes.  The
+.B \-heap
+option overrides the ALS_OPTIONS environment varaible's heap_size option. 
+Cf. statistics/0.
+.TP
+.B \-stack \fInumber\fR
+sets the stack size to \fInumber\fR Kilobytes. The
+.B \-stack
+options overrides the ALS_OPTIONS enviromnent variable's stack_size option.
+Cf. statistics/0.
+.TP
+Below note that consulting <path><file>.pro suppresses creation 
+.ti -7n
+of <file>.obp, while consulting <path><file> without '.pro' 
+.ti -7n
+requests creation of <file>.obp.
+.TP
+.B \-obp
+causes alspro to keep generated obp files in the same directory where the image is running.
+.TP
+.B \-gic
+causes alspro to keep generated obp files in the same directory where the image is running.
+.TP
+.B \-gis
+causes alspro to keep generated obp files in the same directory from which the source file was consulted.
+.TP
+.B \-giac
+causes alspro to generate obp files in a subdirectory of the directory the where the image is running;
+the subdirectory is named for the architecture of the running image.
+.TP
+.B \-gias
+causes alspro to generate obp files in a subdirectory of the directory from which the source
+files where consulted;
+the subdirectory is named for the architecture of the running image.
+.TP
+.B \-no_obp
+causes alspro to suppress all generation of *.obp files.
+.TP
+.B \-no_dot_alspro 
+causes alspro to avoid loading .alspro or alspro.pro.
+.TP
+.B \-p,-P
 distinguishes between command line arguments intended for ALS Prolog and 
 those switches intended for an application.  Those command line arguments
-which occur after the \fB\-p\fR will be accessible as a list via the
+which occur after (rightwards from) the \fB\-p\fR will be accessible as a list via the
 procedure \fIcommand_line/1\fR.
 If \fB\-P\fR is used instead of \fB\-p\fR, the name of the image will be
 the first element of the list obtained from \fIcommand_line/1\fR.  The
@@ -75,19 +158,16 @@ the first element of the list obtained from \fIcommand_line/1\fR.  The
 switch is useful for developing programs which will eventually be turned
 into standalone applications.
 .TP
-.B \-v
-turns on verbose mode. This causes all system loading messages, including 
-some which are normally suppressed, to be printed.
+.B \-nwd 
+instructs the debugger under alsdev to only use the system console for display.
 .TP
-.B \-heap \fInumber\fR
-sets the initial heap size to \fInumber\fR Kilobytes. The
-.B \-heap
-option overrides the ALS_OPTIONS environment varaible's heap_size option. 
+.B \-shell \fI<shell>\fR
+causes alspro to use the non-default <shell> after processing the command line; currently, the only known other <shell> is alsdev.
 .TP
-.B \-stack \fInumber\fR
-sets the initial stack size to \fInumber\fR Kilobytes. The
-.B \-stack
-options overrides the ALS_OPTIONS enviromnent variable's stack_size option.
+.B \-h 
+Displays the help info on the console.
+.TP
+See also Wiki Section 13.7.
 .LP
 The
 .B ALS_OPTIONS

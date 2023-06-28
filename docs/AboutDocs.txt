@@ -1,0 +1,304 @@
+About ALSProlog/docs
+====================
+
+The issues leading to the current setup were:
+
+<a href="https://github.com/AppliedLogicSystems/ALSProlog/issues/128">#128</a>
+The Problem: Docs are scattered in three different locations.
+
+* gh_pages branch for alsprolog.com
+* alshelp on master branch (partial reference manual)
+* wiki repo for user manual
+For developers, this means that making simple fixes/additions to the docs involves making changes to 2 repos on 2 or 3 different branches -- all the downsides of version control, without functional version control! For users, docs are scattered and not fully available online.
+
+The Solution (on alldocs branch):
+
+  []Move all docs into the ALSProlog repo on the master branch
+  []Orginize/compile docs with Github-Pages compatible Jekyll to produce integrated site with all docs
+  []Reconfigure packaged docs to be build from docs folder
+Downsides:
+
+*Increased complexity for generating docs (Jekyll themes and templates)
+*Heavier toolset required and a more complex build (Jekyll, etc)
+---------------------------------------------------------
+
+<a href="https://github.com/AppliedLogicSystems/ALSProlog/issues/129">#129</a>
+Once #128 is complete, the following steps are needed to switch:
+
+  Reconfigure alsprolog.com to serve from master docs folder
+  Delete gh_pages branch
+  Delete Wiki (leave stub pointing to new location on alsprolog.com)
+++++++
+  Ken switched the site, and I deleted gh_pages branch and deactivated the wiki. 
+  When a wiki is deactivated, the URLs redirect to the repo page (i.e. ALSProlog Github page).
+
+=================================
+
+A very useful item: docs/GNUmakefile consolidates commands for building parts of the docs subsystem.  Execute 'make' in ALSProlog/docs to see the targets available:
+
+SSD > make
+Makefile Targets:
+all                   Build site and local docs
+run                   Run site for live development
+site                  Build site in _site
+local                 Build local docs in _local_site
+test                  Test all markup and links
+test-site             Test site
+test-local            Test local docs
+clean                 Clean all generated files
+help                  Display this help
+
+=================================
+
+Here are the top-level files and folders appearing in ALSProlog/docs:
+
+AboutDocs.txt		-- This document
+CNAME			-- ??
+GNUmakefile		-- Makefile described above
+Gemfile			-- Ruby gems used
+Gemfile.lock		-- As it's name suggests, a lockfile
+_build_local_docs.sh*	-- (re-)builds the _local_site folder
+_config.yml		-- Basic configurations file for _site, _local_site
+_data/			-- *.yml files for references to books
+_includes/		-- various *.md and *.html include files, appearing as follows:
+			book.md:
+				appears in various source files in docs/ref
+			edit-source.html
+				_layouts/guide-page.html
+				_layouts/reference-page.html
+			google-analytics.html
+				??
+			ref-packtoc.html
+				??
+			ref-toc.html
+				??
+_layouts/		-- various layouts referenced as follows:
+			guide-page.html:
+				_config.yml:      layout: "guide-page"
+			reference-page.html:
+				_config.yml:      layout: "reference-page"
+			toc-page.html:
+				docs/guide/index.md:layout: toc-page
+				docs/ref/index.md:layout: toc-page
+			toc-frame.html:
+				docs/ref/toc_alsdev.html:layout: toc-frame
+				docs/ref/toc_alslib.html:layout: toc-frame
+				docs/ref/toc_c_intf.html:layout: toc-frame
+				docs/ref/toc_core_prolog.html:layout: toc-frame
+_local_config.yml	-- Overrides _config.yml configurations for 
+			   docs-only local site
+_local_site/		-- Local version for inclusion in distributions
+_site/			-- Complete documentation available at 
+			   https://alsprolog.netlify.com
+about.md		-- Markdown source for the About appearing in the 
+			   headers of the Documentation pages
+assets/			-- ??
+docs/			-- Source markdown for the User's Guide and the Reference Manual
+				guide/    ref/
+				index.md: alspro.com > Documentation page
+index.md		-- Markdown source for http://alsprolog.com
+ref-manual/		-- empty??
+src_help_md/		-- various (prolog) scripts for dealing with docs
+
+========================
+
+About alsprolog.com
+
+(As of 3/11/2019) The url alsprolog.com is registered in Ken Bowen's account at DreamHost (https://panel.dreamhost.com :: ken@desert-light.org). [ToDo: Setup another user on this account, with near-owner privileges and print-out recovery codes and secret Q&A:
+https://panel.dreamhost.com/index.cgi?tree=users.access&
+https://panel.dreamhost.com/index.cgi?tree=billing.secure&    ]
+alsprolog.com is hosted by GitHub Pages.  To control this, use
+	https://github.com/AppliedLogicSystems/ALSProlog/settings
+and scroll down to GitHup Pages.
+
+===============================
+
+Details About *.md Source Files
+
+YAML Front-matter occurs at the beginning of a file (*.md), and is delineated by 2 lines of 3 dashes:
+---
+---
+
+Basic format of docs/guide/*.md
+	YAML Front-matter (empty) - just the two lines:
+		---
+		---
+	Includes:     [need details]
+	    toc/no_toc
+
+Basic format of docs/ref/*.md
+	YAML Front-matter details
+	    Samples:
+	    	append3.md:
+	    ---
+	    title: 'append/3'
+	    group: Terms
+	    predicates:
+	    - {sig: 'append/3', desc: 'append two lists'}
+	    - {sig: 'dappend/3', desc: 'append two lists'}
+	    ---
+	    
+	    	listutl1.md:
+	    ---
+	    title: 'list_diff/3'
+	    package: alslib
+	    group: Lists
+	    module: builtins
+	    predicates:
+	    - {sig: 'append/2', desc: 'appends a list of lists together'}
+	    - {sig: 'int_diff/4', desc: 'returns the intersection and one difference of two lists'}
+	    - {sig: 'intersect/2', desc: 'returns the intersection of a list of lists'}
+	    ...........
+	    ---
+	    
+	    	clause23.md:
+	    ---
+	    title: 'clause/[2,3]'
+	    group: Prolog Database
+	    predicates:
+	    - {sig: 'clause', args: {
+	        2: 'retrieve a clause',
+	        3: 'retrieve a clause with a database reference'
+	      }}
+	    - {sig: 'instance/2', desc: 'retrieve a clause from the database reference'}
+	    ---
+	    
+	    General Format:
+	    ---
+	    title: <one of the predicates described on this page>
+
+	    package: <one of ref_packages: from _config.yml; default = Core Prolog>
+
+	    group: Lists <Anything meaningful for the given page>
+	    
+	    	Although packages are a fixed/declared set (in_config.yml), groups are an open set. 
+	    	A group will exist as long as a ref page uses it. For example, if you add a 
+		/docs/ref/foo1.md file that uses group "Foobars", then "Foobars" will auto-magically 
+		appear in the TOC as a group. 
+	    
+	    module: <default = builtins; nearly all pages should be a single module>
+
+	    predicates:
+	    	format for a predicate with a single NAME/ARITY occurrence on the page:
+	    - {sig: 'append/2', desc: 'appends a list of lists together'}
+	    	format for predicate with multiple NAME/ARITIES occurrences on the page,
+		where the arities of the predicates are 2 & 3:
+	    - {sig: 'clause', args: {
+	        2: 'retrieve a clause',
+	        3: 'retrieve a clause with a database reference'
+	      }}
+	    <These two formats can occur multiply in any mixed order.>
+	    ---
+
+	Includes:     [need details]
+	    toc/no_toc
+
+	    {% include book.md ...
+
+=============================================
+
+Tracking Code:
+
+The piwik tracking code displays at:
+https://piwik.strong-brain.com/index.php?module=CoreHome&action=index&date=previous30&period=range&idSite=6#?module=Dashboard&action=embeddedIndex&date=previous30&period=range&idSite=6&idDashboard=1
+
+=============================================
+
+Generation Of html Files
+
+Broadly, "make all" uses <a href="https://jekyllrb.com">Jekyll</a> to process the sources (docs/[guide,ref] and the various index.md files, etc., using the _layouts and _includes, etc.) into two versions of the html ALSProlog documentation: the full version in _site and a slightly reduced version in _local_site. The full version in _site appears online at 
+
+	https://alsprolog.com > Documentation [https://alsprolog.com/docs/]
+
+Currently (3/10/19), it also appears at the free testing account
+
+	https://alsprolog.netlify.com  > Documentation [https://alsprolog.com/docs/]
+
+The slightly reduced version in _local_site is packaged with the ALS Prolog releases.
+
+=============================================
+
+ALSProlog/docs/_local_site/index.html
+and
+	ALSProlog/docs/_site/docs/index.html
+are generated.
+
+These are generated by make rules that run Jekyll. For example, for _site:
+
+_site/index.html : Gemfile.lock $(source)
+	bundle exec jekyll build
+
+Note that the target for the rule (_site/index.html) is just one of the files generated. The whole _site directory is overwritten by the jekyll build command.
+
+All the HTML/CSS/etc in the _site and _local_site dirs are generated output files, built by Jekyll. Think of them as the .o object files that are generated from .c source files by a C-compiler.
+
+The source files for the site/manual are all the files outside of _site and _local_site. Most of the source files are Markdown, but some are HTML (_includes, _layouts), and others are declarative data (_config.yml, _data/), etc.
+
+For example, if you edit /docs/about.md and run `make site`, then you'll see your "compiled" edits in /docs/_site/about.html. If you `make run`, you'll see your edits appear immediately in a browser.
+
+Also note that `make clean` entirely deletes _site and _local_site (just as it would for .o files). Anything modified in _site or _local_site will be deleted or overwritten during the normal edit-compile-run work-flow.
+
+=============================================
+
+
+{From here down, much has been extracted from email between Chuck & Ken}
+
+Display theme and some mechanics:
+
+* The ALS Prolog jekyll-generated html files utilize the Minima theme, to be found at:
+
+https://github.com/jekyll/minima/tree/v2.5.0
+
+* Minima's ReadMe file has some info on usage and customization, although I've found I [Chuck] often need to read the source to see what it is doing.
+
+Jekyll Themes in general are documented at:
+
+https://jekyllrb.com/docs/themes/
+
+* Without customization, the Minima theme seems to duplicate site.title in the footer. To customize the footer's contact info, you can define site.author and site.email in _config.yml. I was thinking something like this:
+
+author: Applied Logic Systems, Inc.
+email: info@applied-logic-systems.com
+
+
+* The header on netlify has
+	ALS Prolog          Documentation       About
+but the packaged version only has
+	ALS Prolog
+
+I [Chuck] did this intentionally. The packaged version only includes the manual/documentation for alspro, not a complete copy of the alsprolog.com web site. I.e. _local_site only contains pages from /docs/docs. As a result it has no menu nav. If it seems too weird, we can adjust things.
+
+* Info about ALS Prolog packages under Reference Manual:
+
+The ordering of the ALS Prolog packages is defined in _config.yml:
+
+ref_packages:
+ - Core Prolog
+ - alslib
+ - C Interface
+ - ALSDev
+
+The names of packages are as they appear on each ref page's YAML front-matter and in the above ref_packages. To change a name {e.g. “alslib”}, modify ref_packages in _config.yml, and all that package's ref pages.
+
+Similarly, how do I get at the order the sub-subdivisions appear in? (Under ALSLib, the order ought to be Lists, Web [and later Strings in between].
+In _include/ref-toc.html and ref-packtoc.html, we'll need to pass the groups variable thru a sorting filter. The change would be to the groups assignment line in both files, like this:
+
+{%- assign groups = site.pages | ... | sort: "name" %}
+
+* More generally, as I [Ken] finish the doc for files in ALSLib and apply the auto-md generator to them, when there is a new group in ALSLib, I’d like to be able to auto-insert that.
+Although packages are a fixed/declared set, groups are an open set. A group will exist as long as a ref page uses it. For example, if you add a /docs/ref/foo1.md file that uses group "Foobars", then "Foobars" will auto-magically appear in the TOC as a group. Here's foo1.md:
+
+File "/docs/ref/foo1.md":
+---
+title: 'foo/1'
+package: ALSLib
+group: Foobars
+predicates:
+- {sig: 'foo/1', desc: 'foo the bar'}
+---
+
+So adding docs for a new predicate (in new or existing group) only requires adding a single markdown file.
+
+=============================================
+
+

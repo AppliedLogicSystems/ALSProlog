@@ -1199,7 +1199,7 @@ scan(Char,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 scan(Atom,T,Count,Breaks,LineLen,BreakLev,ILL,EL) :-
 	atom(Atom),
 	!,
-	'$strlen'(Atom,AtomLength),
+	atom_length(Atom,AtomLength),
 	NewCount is Count+AtomLength,
 	scan(T,NewCount,Breaks,LineLen,BreakLev,ILL,EL).
 
@@ -1307,7 +1307,7 @@ insertBreak(_,Pri,H,T,Break,[H|NewT]) :-
     
 breakCount(break(_,_,_,_),false,1) :- !.
 breakCount(break(_,_,_,_),_,0) :- !.
-breakCount(spop(_,_,Atom,_),_,N) :- '$strlen'(Atom,NC), !, N is NC+2.
+breakCount(spop(_,_,Atom,_),_,N) :- atom_length(Atom,NC), !, N is NC+2.
 breakCount(space(_,_,_,_),_,1).
 
 
@@ -1407,7 +1407,7 @@ os2(spop(Pri,break,Atom,_IL),T,Stream,IL,II)
 	tab(Stream,II),
 	indent(Stream,ILP),
 	put_atom(Stream,Atom),
-	'$strlen'(Atom,AtomLength),
+	atom_length(Atom,AtomLength),
 	TabWidth is 4-AtomLength,
 	tab(Stream,TabWidth),
 	!,

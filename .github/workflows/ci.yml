@@ -1,0 +1,27 @@
+name: 32-bit Build & Test
+on: [push]
+jobs:
+
+  Linux:
+    runs-on: ubuntu-20.04
+    env:
+      BUNDLE_PATH:  ~/.gem
+    steps:
+     - uses: actions/checkout@v3
+     - run: sudo gem install bundler
+     - run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386
+     - run: CFLAGS=-m32 ./cibuild
+
+  Windows:
+    runs-on: windows-2019
+    steps:
+     - uses: actions/checkout@v3
+     - uses: ruby/setup-ruby@v1
+       with:
+         ruby-version: '2.7'
+     - uses: msys2/setup-msys2@v2
+       with:
+          msystem: MINGW32
+          install: git mingw-w64-i686-gcc base-devel mingw-w64-i686-tk mingw-w64-i686-curl zip procps
+     - shell: msys2 {0}
+       run: ./cibuild

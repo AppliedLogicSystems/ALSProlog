@@ -8,5 +8,6 @@ version
 # Tests use BTF files (Binary Text Files), which are binary.
 *.btf binary
 
-# Use export substitution to burn version info into source tarballs
+# Use export substitution to burn version and date info into source tarballs.
 version export-subst
+LICENSE.txt export-subst

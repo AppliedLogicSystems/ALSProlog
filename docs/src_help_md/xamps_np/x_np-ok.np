@@ -1,0 +1,11 @@
+np(
+   core_prolog,  %Package
+   control,  %Group
+   'sample/[1,2]',  %Title
+   x_sample,  %FileName
+   builtins, %Module
+   % Preds With Descriptions:
+   [p('sample/1', 'Sample unary predicate'),
+    p('sample/3', 'Sample ternary predicate')
+   ]
+  ).

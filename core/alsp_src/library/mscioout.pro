@@ -1,8 +1,9 @@
 /*=====================================================================
  | 			mscioout.pro		
  |	Copyright (c) 1990-96 Applied Logic Systems, Inc.
- |
- |		Various I/O utilities: output 
+ |		Group: Input Output
+ |		DocTitle: write_lines/1
+ |		-- Various I/O utilities: output 
  *====================================================================*/
 module builtins.
 
@@ -55,7 +56,7 @@ colwrite([Item | Items], [NextColPos | RestColStarts], CurPos, Stream)
     CurPos < NextColPos,
     !,
 	(atom(Item) -> 
-		'$strlen'(Item, ItemLen)
+		atom_length(Item, ItemLen)
 		;
 		name(Item,ICs),length(ICs,ItemLen)
 	),

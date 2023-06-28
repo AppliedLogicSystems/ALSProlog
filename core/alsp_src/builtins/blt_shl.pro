@@ -1,6 +1,6 @@
 /*=============================================================*
  |		blt_shl.pro
- |	Copyright (c) 1986-1996 Applied Logic Systems, Inc.
+ |	Copyright (c) 1986-2019 Applied Logic Systems, Inc.
  |
  |	The actual environmental shell; both the tty
  |	version, and the underlying portion of the 
@@ -22,6 +22,15 @@ use sio.
 
 %:-	make_gv("_shell_prompts"), 	set_shell_prompts( [('?- ','?-_')] ).
 :-	make_gv("_shell_prompts", [('?- ','?-_')] ).
+
+path_separator(';').
+
+atom_split(Atom,Splitter,Part1,Part2)
+        :-
+        atom_codes(Atom,List),
+        asplit0(List,Splitter,String1,String2),
+        atom_codes(Part1,String1),
+        atom_codes(Part2,String2).
 
 /*-------------------------------------------------------------------------------*
  | start_shell/1
@@ -175,16 +184,16 @@ setup_debugger_stubs
 
 make_clinfo( CLInfo, DefaultShellCall, Verbosity)
 	:-
-	CLInfo = clinfo(true,				/* -g: goal to run */
-					Verbosity,			/* -v/-q: verbosity */
-					[],					/* files to consult */
-					ImageName,
-					default,			/* -nwd: debugger to set up */
-					[],					/* -s init search list */
-					DefaultShellCall,	/* shell/or not */
-					[], 				/* Command-line asserts */
-					true				/* Load .alspro: true = do it */
-					). 				
+	CLInfo = clinfo(true,			/* -g: goal to run */
+				Verbosity,	/* -v (false) /-q (true): verbosity */
+				[],		/* files to consult */
+				ImageName,
+				default,	/* -nwd: debugger to set up */
+				[],		/* -s init search list */
+				DefaultShellCall, /* shell/or not */
+				[], 		/* Command-line asserts */
+				true		/* Load .alspro: true = do it */
+			). 				
 
 
 /*---------------------------------------
@@ -296,6 +305,7 @@ print_banner(OutS,L)
 	system_name(L, Name),
 	dmember(os_variation = OSVar, L),
 	dmember(prologVersion = Version, L),
+	dmember(prologYear = Year, L),
 	current_prolog_flag(windows_system, WinsName),
 	name(WinsName, [InC | WNCs]),
 	UInC is InC - 32,
@@ -306,7 +316,7 @@ print_banner(OutS,L)
 #else
 	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
 #endif
-	printf(OutS,'   Copyright (c) 1987-2017 Applied Logic Systems, Inc.\n\n',[]),
+	printf(OutS,'   Copyright (c) 1987-%s Applied Logic Systems, Inc.\n\n',[Year]),
 	flush_output(OutS).
 
 system_name(L, Name)
@@ -429,11 +439,6 @@ prolog_shell_loop(Wins,InStream,OutStream)
 	prolog_shell_loop(Wins,InStream,OutStream).
 
 prolog_shell_loop(_,_,_).
-/*
-prolog_shell_loop(Wins,InStream,OutStream)
-	:-
-write(prolog_shell_loop_2),nl,flush_output.
-*/
 
 export shell_read_execute/4.
 shell_read_execute(InStream,OutStream,Wins,Status)
@@ -650,14 +655,12 @@ do_shell_query(Goal0,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream)
 	setRetry(0),            %%    and Retry in case of debugging.
 	xform_command_or_query(Goal0,Goal1),
 	do_shell_query2(user,Goal1),
-%	dbg_notrace,
 	dbg_spyoff,
 	showanswers(VarNames,Vars,Wins,InStream,OutStream),
 	!.
 
 do_shell_query(Goal,VarNames,Vars,Wins,AlarmIntrv,InStream,OutStream) 
 	:-
-%	dbg_notrace,
 	dbg_spyoff,
 	print_no(OutStream).
 

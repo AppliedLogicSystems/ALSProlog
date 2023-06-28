@@ -27,11 +27,11 @@
 
 #if 0 /* RH6 */
 #if defined(HAVE_SIGACTION) && defined(SA_SIGINFO)
-extern void stack_overflow  PARAMS(( int, siginfo_t *, ucontext_t * ));
+extern void stack_overflow  ( int, siginfo_t *, ucontext_t * );
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
-extern void    stack_overflow  PARAMS(( int, int, struct sigcontext *, caddr_t ));
+extern void    stack_overflow  ( int, int, struct sigcontext *, caddr_t );
 #elif defined(Portable)
-extern void   stack_overflow  PARAMS(( int ));
+extern void   stack_overflow  ( int );
 #else
 #error
 #endif
@@ -78,9 +78,17 @@ static unsigned long *marks;
 #define ISPOINTER(h)   ((((long) (h)) & MTP_TAGMASK) != MTP_CONST)
 #define ISFENCE(v) (((v) & MTP_CONSTMASK) == MTP_FENCE)
 #define ISUIA(v)   (((v) & MTP_CONSTMASK) == MTP_UIA)
+#ifdef __LP64__
+#define UIAVAL(v)  ((MUIA(v)) >> 3)
+#else
 #define UIAVAL(v)  ((MUIA(v)) >> 2)
+#endif
 #define ISCONST(h) ((((long) (h)) & MTP_TAGMASK) == MTP_INT)
+#ifdef __LP64__
+#define REVBIT     0x8000000000000000
+#else
 #define REVBIT     0x80000000
+#endif
 #define BIAS       0
 
 #endif /* MTP_CONST */
@@ -90,8 +98,14 @@ static unsigned long *marks;
    either the lower or upper half of address space.
  */
 
+
+#ifdef __LP64__
+#define HIBIT_MASK 0x8000000000000000
+#define ADDR_MASK  0x7FFFFFFFFFFFFFFF
+#else
 #define HIBIT_MASK 0x80000000
 #define ADDR_MASK  0x7FFFFFFF
+#endif
 #define REVERSEIT(targ, v) (~((targ) | ADDR_MASK) | ((targ) & ADDR_MASK) | ((v) & MTP_TAGMASK))
 #define ISNORMAL(ptr, v) ((((unsigned long)ptr) & HIBIT_MASK) == ((v) & HIBIT_MASK))
 /*#define ISNORMAL(ptr, v) (!(~(((unsigned long)ptr) | ADDR_MASK) & v))*/
@@ -130,15 +144,15 @@ static int gccallcount;		/* number of times gc has been called */
 extern int gcbeep;
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 
-static	long *	mark_args	PARAMS(( long *, Code * ));
-static	void	mark_from	PARAMS(( long * ));
-static	void	rev		    PARAMS(( long *, long *, long *, long ));
-static	void	rev_update	PARAMS(( long *, long ));
-static	void	init_marks	PARAMS(( void ));
-static	void	mark		PARAMS(( long ));
+static	long *	mark_args	( long *, Code * );
+static	void	mark_from	( long * );
+static	void	rev		    ( long *, long *, long *, long );
+static	void	rev_update	( long *, long );
+static	void	init_marks	( void );
+static	void	mark		( long );
 
 #ifdef INTCONSTR
-static	int	core_gc		PARAMS(( void ));
+static	int	core_gc		( void );
 #endif
 
 #include <stdio.h>
@@ -166,11 +180,25 @@ gc()
 #endif
     long *oldest_ap;
     Code *ra;			/* return address */
+#ifdef __LP64__
+    register long i;
+#else
     register int i;
+#endif
     register long *h;
     register unsigned long *mp;
     register unsigned long m;
+#ifdef __LP64__
+    long   compactionbit;
+#else
     int   compactionbit;
+#endif
+
+// TODO LP64: GC is not 64-bit yet
+#ifdef __LP64__
+printf("gc not 64-bit yet\n");
+return 1;
+#endif
 
 #ifdef DEBUGSYS /*--------------------------------------------------*/
     unsigned long start_tick = 0, finish_tick;
@@ -882,11 +910,11 @@ mark(val)
     register long *ptr, *bptr;
     register long tag, btag;
     int arity;
-#if 0
+
 #ifdef FREEZE
     long xval;
 #endif
-#endif
+
 
     bptr = (long *) 0;
     btag = 0;
@@ -922,7 +950,7 @@ mark_top:
 
 	case MTP_UNBOUND:
 
-#if 0
+
 #ifdef FREEZE
 				/* If the var is a delay var, mark the 
 				   whole delay term containing it:
@@ -945,7 +973,7 @@ mark_top:
 #endif /* ---------------------------------------------- DEBUGSYS --*/
 			}
 #endif /* FREEZE */
-#endif
+
 
 	    if (MARKED(ptr))
 			goto mark_backup;
@@ -1041,7 +1069,6 @@ gc()
     long *b;
     long *ap;
     long *tr;
-printf("Start new GC\n");
 				/* printf("Tr_b= %x  B= %x  TR= %x  H= %x  HB= %x  H_b= %x\n",
 					(int)wm_trailbase,(int)wm_B,(int)wm_TR,
 					(int)wm_H,(int)wm_HB,(int)wm_heapbase);  */
@@ -1191,7 +1218,6 @@ core_gc();
 
     }	/* while (b <= oldestcp) */
 
-printf("End new GC\n");
 	return 1;
 }
 #endif    /* FREEZE */

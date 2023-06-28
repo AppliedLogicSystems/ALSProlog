@@ -1,56 +1,38 @@
 /*========================================================================*
- |		strings.pro
- |	Copyright (c) 1988-96 Applied Logic Systems, Inc.
- |
- |		Prolog String and UIA utilities
- |
- |	Authors:	Keith Hughes, Ken Bowen, Kevin Buettner
- |	Date:		1986-91
+ |			strings.pro
+ |	Copyright (c) 1988-2019 Applied Logic Systems, Inc.
+ |		Group: Strings
+ |		DocTitle: make_lc/2
+ |		-- String utilities, with related atom/UIA predicates
  *========================================================================*/
 module builtins.
 
 export asplit/4.
 export head/4.
-export alower/2.
-export asub/4.
-export asplit00/4.
 export head0/4.
-export alower0/2.
-export insert_spaces/2.
-
-export catenate/2.
-export catenate/3.
-export string_to_uia/2.
-export cnvrt_to_UIA/2.
-export string_to_uia/3.
-export sized_string_to_uia/3.
-export copy_to_uia/3.
-export atomic_to_uia/2.
-export make_uc/2.
+export asplit00/4.
 export make_lc/2.
-export make_uc_sym/2.
+export make_uc/2.
 export make_lc_sym/2.
-export change_case_sym/2.
+export make_uc_sym/2.
 export convert_to_uc/2.
 export same_uc/2.
+export change_case_sym/2.
+export string_to_uia/2.
+export string_to_uia/3.
+export string_to_sized_uia/3.
+export atomic_to_uia/2.
+export cnvrt_to_UIA/2.
 export truncate/3.
 export strip_tail_white/2.
 export strip_white/2.
 export strip_both_white/2.
 export strip_both_white_atom/2.
-
 export read_to/5.
 export read_to_blank/3.
-
 export char_in/3.
 export replace_char_atom/4.
 export replace_char_string/4.
-
-export strip_prefix/3.
-export prefix_dir/3.
-export prefix_to/3.
-
-export underbarUpperCrazyKap/2.
 
 /*!---------------------------------------------------------------------
  |	asplit/4
@@ -62,14 +44,14 @@ export underbarUpperCrazyKap/2.
  |	If Atom is any atom or UIA, and if Splitter is the character code of
  |	of a character, then, if the character with code Splitter occurs in
  |	Atom, LeftPart is an atom consisting of that part of Atom from the
- |	left up to and including the leftmost occurrence of the character
+ |	left up to but not including the leftmost occurrence of the character
  |	with code Splitter, and RightPart is the atom consisting of that
- |	part of Atom extending from immediately after the end of LeftPart
- |	to the end of Atom.
+ |	part of Atom extending from immediately after the occurrence of 
+ |	the character with code Splitter, to the end of Atom.
  *!--------------------------------------------------------------------*/
 asplit(Atom,Splitter,Part1,Part2) 
 	:-
-	name(Atom,List),
+	atom_codes(Atom,List),
 	asplit0(List,Splitter,String1,String2),
 	atom_codes(Part1,String1),
 	atom_codes(Part2,String2).
@@ -82,38 +64,16 @@ asplit(Atom,Splitter,Part1,Part2)
  |	- splits an list into segments determined by a character code
  |
  |	If Atom is a list of character codes, splits Atom into Head and
- |	tail the way asplit would, using the first occurrence of Splitter;
- |	on successive retrys, usings the succeeding occurrences of Spliter
- |	as the split point.
+ |	Tail similar to the way asplit would for the list of chars,, using 
+ |	the leftmost occurrence of Splitter. On successive retrys, uses the 
+ |	succeeding occurrences of Splitter in Tail as the split point.
  *!--------------------------------------------------------------------*/
 head(Atom,Splitter,Head,Tail)
 	:-
-	name(Atom,List),
+	atom_codes(Atom,List),
 	head0(List,Splitter,H0,T0),
 	atom_codes(Head,H0),
 	atom_codes(Tail,T0).
-
-/*!---------------------------------------------------------------------
- |	asplit00/4
- |	asplit00(AtomCs,SplitList,LeftPartCs,RightPartCs) 
- |	asplit00(+,+,-,-) 
- |
- |	- divides a list of character codes as det. by a list of char codes
- |
- |	If AtomCs is a list of character codes, and if Splitter is the character 
- |	code of of a character, then, if the character with code Splitter occurs in
- |	AtomCs, LeftPart is the list consisting of that part of AtomCs from the
- |	left up to and including the leftmost occurrence of Splitter,
- |	and RightPart is the atom consisting of that part of AtomCs extending 
- |	from immediately after the end of LeftPart to the end of AtomCs.
- *!--------------------------------------------------------------------*/
-asplit00([Char|Rest],SplitterList,[],Rest) 
-	:-
-	dmember(Char, SplitterList), !.
-
-asplit00([Char|Rest],SplitterList,[Char|R1],String2) 
-	:-
-	asplit00(Rest,SplitterList,R1,String2).
 
 /*!---------------------------------------------------------------------
  |	head0/4
@@ -123,9 +83,10 @@ asplit00([Char|Rest],SplitterList,[Char|R1],String2)
  |	- splits a character code list into segments determined by a code
  |
  |	If List is a list of character codes, splits List into Head and
- |	tail the way asplit0 would, using the first occurrence of Splitter;
- |	on successive retrys, usings the succeeding occurrences of Spliter
- |	as the split point.
+ |	tail the way asplit0 would, using the leftmost occurrence of 
+ |	Splitter. On successive retrys, uses the succeeding occurrences 
+ |	of Spliter in Tail as the split point, effectively breaking
+ |	List into segments determined by Splitter.
  *!--------------------------------------------------------------------*/
 head0(List,Splitter,Head,Tail)
 	:-
@@ -139,112 +100,189 @@ head0(List,Splitter,Head,Tail)
 head0(List,Splitter,List,[]).
 
 /*!---------------------------------------------------------------------
- |	alower/2
- |	alower(Atom, Lower) 
- |	alower(+, -) 
+ |	asplit00/4
+ |	asplit00(String,SplitList,LeftPartCs,RightPartCs) 
+ |	asplit00(+,+,-,-) 
  |
- | - changes upper case codes to lower case codes in an atom
+ |	- divides a list of character codes as det. by a list of char codes
  |
- |	If Atom is an Atom , Lower is identical to Atom except that all 
- |	occurrences of upper case characters have been changed to the 
- |	corresponding lower case character.
+ |	If String and SplitList are both lists of character codes, 
+ |	and if any code on SplitList also occurs on String, then LeftPartCs 
+ |	consists of all those codes of String up to, but not including, 
+ |	the leftmost occurrence of any code CS on SplitList, and RightPartCs 
+ |	consist of all codes on String following CS.
  *!--------------------------------------------------------------------*/
-alower(Atom,Lower) 
+asplit00([Char|Rest],SplitterList,[],Rest) 
 	:-
-	name(Atom,String),
-	alower0(String,LowString),
-	atom_codes(Lower,LowString).
+	dmember(Char, SplitterList), !.
+
+asplit00([Char|Rest],SplitterList,[Char|R1],String2) 
+	:-
+	asplit00(Rest,SplitterList,R1,String2).
 
 /*!---------------------------------------------------------------------
- | alower0/2
- | alower0(List,Result)
- | alower0(+,-)
+ |	make_lc/2
+ |	make_lc(Cs, LCs)
+ |	make_lc(+, -)
  |
- | - changes upper case codes to lower case codes in a string
+ | 	- converts a Prolog string to all lowercase character (codes)
  |
- |	If List is a list of ASCII character codes, Result is identical
- |	to List except that all occurrences of codes of upper case characters
- |	have been changed to the corresponding lower case code.
+ |	If Cs is a list of character codes, then LCs is the list of
+ |	codes corresponding to Cs, with every uppercase code converted
+ |	to the corresponding lowercase code.
  *!--------------------------------------------------------------------*/
-alower0([],[]) 
-	:- !.
-alower0([Char|Rest],[Fixed|SRest]) 
+make_lc([], []).
+make_lc([C | Cs], [LC | LCs])
 	:-
-	0'A =< Char, Char =< 0'Z,!,
-	Fixed is Char+32,
-	alower0(Rest,SRest).
-alower0([Char|Rest],[Char|SRest]) 
+	0'A =< C, C =< 0'Z, 
+	!, 
+	LC is C + 32,
+	make_lc(Cs, LCs).
+make_lc([C | Cs], [C | LCs])
 	:-
-	alower0(Rest,SRest).
+	make_lc(Cs, LCs).
 
 /*!---------------------------------------------------------------------
- | asub/4
- | asub(Atom,Start,Length,Result) 
- | asub(+,+,+,_) 
+ |	make_uc/2
+ |	make_uc(Cs, UCs)
+ |	make_uc(+, -)
  |
- |	- extracts a substring from an atom
+ | 	- converts a Prolog string to all uppercase character (codes)
  |
- |	Result is the sub-string (atom) of Atom of length Length beginning 
- |	at position Start.
+ |	If Cs is a list of character codes, then UCs is the list of
+ |	codes corresponding to Cs, with every lowercase code converted
+ |	to the corresponding uppercase code.
  *!--------------------------------------------------------------------*/
-asub(Atom,Start,Length,Result) 
+make_uc([], []).
+make_uc([C | Cs], [UC | UCs])
 	:-
-	name(Atom,String),
-	sublist(String,Start,Length,RString),
-	atom_codes(Result,RString).
+	0'a =< C, C =< 0'z, 
+	!, 
+	UC is C - 32,
+	make_uc(Cs, UCs).
+make_uc([C | Cs], [C | UCs])
+	:-
+	make_uc(Cs, UCs).
 
 /*!---------------------------------------------------------------------
- |	insert_spaces/2
- |	insert_spaces(In_List, Out_List).
- |	insert_spaces(+, -).
+ |	make_lc_sym/2
+ |	make_lc_sym(InSym, LCSym)
+ |	make_lc_sym(+, -)
  |
- | - interleaves quoted blank between elements of a list
+ | 	- converts an atom or UIA to all lowercase characters
  |
+ |	If InSym is a symbol, then LCSym is that symbol consisting of
+ |	the same characters, in order, as InSym, except that all 
+ |	uppercase symbols will have been converted to lowercase.
  *!--------------------------------------------------------------------*/
-insert_spaces([], []).
-insert_spaces([Item], [Item])
+make_lc_sym(InSym, LCSym)
+	:-
+	atom_codes(InSym, ISCs),
+	make_lc(ISCs, LCCs),
+	atom_codes(LCSym, LCCs).
+
+/*!---------------------------------------------------------------------
+ |	make_uc_sym/2
+ |	make_uc_sym(InSym, UCSym)
+ |	make_uc_sym(+, -)
+ |
+ | 	- converts an atom or UIA to all uppercase characters
+ |
+ |	If InSym is a symbol, then UCSym is that symbol consisting of
+ |	the same characters, in order, as InSym, except that all 
+ |	lowercase symbols will have been converted to uppercase.
+ *!--------------------------------------------------------------------*/
+make_uc_sym(InSym, UCSym)
+	:-
+	atom_codes(InSym, ISCs),
+	make_uc(ISCs, UCCs),
+	atom_codes(UCSym, UCCs).
+
+/*!---------------------------------------------------------------------
+ |	convert_to_uc/2
+ |	convert_to_uc(Items, UCItems)
+ |	convert_to_uc(+, -)
+ |
+ | 	- converts all items in a list of terms to uppercase
+ |
+ |	If Items is a list of terms including atoms, numbers and
+ |	compound terms, then UCItems will be the corresponding list,
+ |	in order, of terms where atoms are converted to uppercase 
+ |	(make_uc is applied), numbers and variables are left unchanged,
+ |	and for any compound term, it's functor and args are are 
+ |	converted by recursively applying convert_to_uc.
+ *!--------------------------------------------------------------------*/
+convert_to_uc(Item, Item)
+	:-
+	var(Item),!.
+convert_to_uc([], [])
 	:-!.
-insert_spaces([Item | RestIn_List], [Item, ' ' | RestOut_List])
+convert_to_uc(Item, Item)
 	:-
-	insert_spaces(RestIn_List, RestOut_List).
+	number(Item),!.
+convert_to_uc(Item, UCItem)
+	:-
+	atom(Item),!,
+	make_uc_sym(Item,UCItem).
+convert_to_uc([Item | Items], [UCItem | UCItems])
+	:-!,
+	convert_to_uc(Item, UCItem),
+	convert_to_uc(Items, UCItems).
+convert_to_uc(Item, UCItem)
+	:-
+	Item =..[Functor | Args],!,
+	convert_to_uc(Args, UCArgs),
+	convert_to_uc(Functor, UCFunctor),
+	UCItem =.. [UCFunctor | UCArgs].
+convert_to_uc(Item, Item).
 
 /*!---------------------------------------------------------------------
- |	catenate/3
- |	catenate(Atom1, Atom2, Atom3)
- |	catenate(+, +, -)
+ |	same_uc/2
+ |	same_uc(Term1, Term2)
+ |	same_uc(+, +)
  |
- | - catenates two atoms to produce a third
+ | 	- Term1,Term2 unify after converting all characters to upper case
  |
+ |	Applies convert_to_uc/2 to both Term1,Term2, and tests
+ |	whether the results unify.
  *!--------------------------------------------------------------------*/
-catenate(Atom1, Atom2, Atom3)
+same_uc(Term1, Term2)
 	:-
-	name(Atom1, A1Cs),
-	name(Atom2, A2Cs),
-	append(A1Cs, A2Cs, A3Cs),
-%	string_to_uia(A3Cs, Atom3).
-	atom_codes(Atom3, A3Cs).
+	convert_to_uc(Term1, UCTerm),
+	convert_to_uc(Term2, UCTerm).
 
 /*!---------------------------------------------------------------------
- |	catenate/2
- |	catenate(ListOfAtoms, Result)
- |	catenate(+, -)
+ |	change_case_sym/2
+ |	change_case_sym(InSym, OutSym)
+ |	change_case_sym(+, -)
  |
- | - catenates a list of atoms 
+ | 	- converts the case of characters in a symbol, based on the first
  |
+ |	Changes the case of characters in a symbol InSym as follows:<br>
+ |	a) If the first character of InSym is lowercase, applies make_uc 
+ |	   to change all characters of InSym to uppercase;<br>
+ |	b) If the first character of InSym is uppercase, applies make_lc 
+ |	   to change all characters of InSym to lowercase.
  *!--------------------------------------------------------------------*/
-catenate([], '').
-catenate([Atom | Atoms], Result)
+change_case_sym(InSym, OutSym)
 	:-
-	catenate(Atoms, InterResult),
-	catenate(Atom, InterResult, Result).
+	atom_codes(InSym, ISCs),
+	ISCs = [C1 | _],
+	(C1 < 0'a ->
+		make_lc(ISCs, OutCs);
+		make_uc(ISCs, OutCs)
+	),
+	atom_codes(OutSym, OutCs).
 
 /*!---------------------------------------------------------------------
  |	string_to_uia/2
  |	string_to_uia(String, UIA)
  |	string_to_uia(+, -)
  |
- | - creates a UIA corresponding to a Prolog string
+ | 	- creates a UIA corresponding to an arbitrary string
  |
+ |	Given a String of arbitrary characters, UIA will be a uia
+ |	containing exactly the same characters, in order.
  *!--------------------------------------------------------------------*/
 string_to_uia([], '') :-!.
 string_to_uia(String, UIA)
@@ -258,13 +296,16 @@ string_to_uia(String, UIA)
  |	string_to_uia(Chars, Pos, UIA)
  |	string_to_uia(+, +, +)
  |
- | - insert list of char (codes) into a UIA 
+ | 	- insert list of char (codes) into a UIA 
  |
  |	If Chars is a list of charater codes of length L, if UIA is a
  | 	uia, if Pos is a positive integer =< length(UIA), then:
- |	Inserts the characters (in order) corresponding to Chars into
- |	UIA beginning at Pos.  Succeeds of length(UIA) - Pos >= L.
- |  If length(UIA) - Pos < L, fails, but has descructively modified
+ |	if length(Chars) = N, this predicate attempts to replace the
+ |	N characters of UIA beginning at position Pos (counting from 0 
+ |	at the beginning of UIA), replacing each character of UIA,
+ |	in order, by the corresponding character of Chars.  This succeeds 
+ |	if length(UIA) - Pos >= L.  If length(UIA) - Pos < L, this fails; 
+ |	however, note that this call will have descructively modified 
  |	UIA to insert the first length(UIA) - Pos Chars.
  *!--------------------------------------------------------------------*/
 string_to_uia([], _, _).
@@ -274,207 +315,98 @@ string_to_uia([Char | Chars], CurPos, UIA)
    NextPos is CurPos+1,
    string_to_uia(Chars, NextPos, UIA).
 
+
 /*!---------------------------------------------------------------------
- |	sized_string_to_uia/3
- |	sized_string_to_uia(Size, Chars, UIA)
- |	sized_string_to_uia(+, +, -)
+ |	string_to_sized_uia/3
+ |	string_to_sized_uia(Size, Chars, UIA)
+ |	string_to_sized_uia(+, +, -)
  |
- | - creates a UIA containg chars corresponding to a Prolog string
+ | 	- creates a UIA containg chars corresponding to a string
  |
+ |	If Size is an integer, and if Chars is a list of character codes, 
+ |	then:<br>
+ |	a) if Size >= length(Chars), allocates a (new) UIA of length
+ |	   Size, and copies Chars into UIA starting at position 0.
+ |	b) if Size < length(Chars), fails.  
  *!--------------------------------------------------------------------*/
-sized_string_to_uia(Size, Chars, UIA)
+string_to_sized_uia(Size, Chars, UIA)
    :-
    '$uia_alloc'(Size, UIA),
    string_to_uia(Chars, 0, UIA).
-
-/*!---------------------------------------------------------------------
- |	copy_to_uia/3
- |	copy_to_uia(Chars,NN,Buf)
- |	copy_to_uia(+,+,+)
- |
- | - insert chars into a UIA corresponding to a Prolog string
- |
- *!--------------------------------------------------------------------*/
-copy_to_uia([],_,_).
-copy_to_uia([H|T],N,Buf) 
-	:-
-	'$uia_pokeb'(Buf,N,H),
-	NN is N+1,
-	copy_to_uia(T,NN,Buf).
 
 /*!---------------------------------------------------------------------
  |	atomic_to_uia/2
  |	atomic_to_uia(Atom, UIABuf)
  |	atomic_to_uia(+, -)
  |
- | - create a UIA corresponding to an atomic item
+ | 	- create a UIA corresponding to an atomic item
  |
+ |	Allocates a new UIA buffer UIABuf of smallest allowed size
+ |	greater than length(Atom), and copies Atom into UIABuf
+ |	beginning at position 0.
  *!--------------------------------------------------------------------*/
 atomic_to_uia(Atom, UIABuf)
 	:-
 	atomic(Atom),  	
-	name(Atom,LName),
-	length([_|LName],BufLen),
+	atom_codes(Atom, AtomCodes),
+	length(AtomCodes, BufLen),
 	'$uia_alloc'(BufLen,UIABuf),
-	copy_to_uia(LName,0,UIABuf).
+	string_to_uia(AtomCodes,0,UIABuf).
 
 /*!---------------------------------------------------------------------
  |	cnvrt_to_UIA/2
  |	cnvrt_to_UIA(Term, UIABuf)
  |	cnvrt_to_UIA(+, -)
  |
- | - create a UIA corresponding to an arbitrary term
+ | 	- create a UIA corresponding to an arbitrary term
  |
+ |	If term_codes(Term, Codes) holds, then allocates
+ |	allocates a new UIA buffer UIABuf of smallest allowed size
+ |	>= length(Codes) and copies Codes into UIABuf begninning
+ |	at position 0.
  *!--------------------------------------------------------------------*/
 cnvrt_to_UIA(In,Out)
 	:-
-	atom_codes(In, Chars),
+	term_codes(In, Chars),
 	length(Chars,Size),
 	'$uia_alloc'(Size,Out),
 	string_to_uia(Chars,0,Out).
 
-/*!---------------------------------------------------------------------
- |	make_uc/2
- |	make_uc(Cs, UCs)
- |	make_uc(+, -)
- |
- | - converts a Prolog string to all uppercase character (codes)
- |
- *!--------------------------------------------------------------------*/
-make_uc([], []).
-make_uc([C | Cs], [UC | UCs])
-	:-
-	0'a =< C, C =< 0'z, !, UC is C - 32,
-	make_uc(Cs, UCs).
-make_uc([C | Cs], [C | UCs])
-	:-
-	make_uc(Cs, UCs).
-
-/*!---------------------------------------------------------------------
- |	make_lc/2
- |	make_lc(Cs, LCs)
- |	make_lc(+, -)
- |
- | - converts a Prolog string to all lowercase character (codes)
- |
- *!--------------------------------------------------------------------*/
-make_lc([], []).
-make_lc([C | Cs], [LC | LCs])
-	:-
-	0'A =< C, C =< 0'Z, !, LC is C + 32,
-	make_lc(Cs, LCs).
-make_lc([C | Cs], [C | LCs])
-	:-
-	make_lc(Cs, LCs).
-
-/*!---------------------------------------------------------------------
- |	make_uc_sym/2
- |	make_uc_sym(InSym, UCSym)
- |	make_uc_sym(+, -)
- |
- | - converts an atom or UIA to all uppercase characters
- |
- *!--------------------------------------------------------------------*/
-make_uc_sym(InSym, UCSym)
-	:-
-	name(InSym, ISCs),
-	make_uc(ISCs, UCCs),
-	name(UCSym, UCCs).
-
-/*!---------------------------------------------------------------------
- |	make_lc_sym/2
- |	make_lc_sym(InSym, UCSym)
- |	make_lc_sym(+, -)
- |
- | - converts an atom or UIA to all lowercase characters
- |
- *!--------------------------------------------------------------------*/
-make_lc_sym(InSym, LCSym)
-	:-
-	name(InSym, ISCs),
-	make_lc(ISCs, LCCs),
-	name(LCSym, LCCs).
-
-/*!---------------------------------------------------------------------
- |	change_case_sym/2
- |	change_case_sym(InSym, OutSym)
- |	change_case_sym(+, -)
- |
- | - converts the case of characters in a symbol
- |
- *!--------------------------------------------------------------------*/
-change_case_sym(InSym, OutSym)
-	:-
-	name(InSym, ISCs),
-	ISCs = [C1 | _],
-	(C1 < 0'a ->
-		make_lc(ISCs, OutCs);
-		make_uc(ISCs, OutCs)
-	),
-	name(OutSym, OutCs).
-
-/*!---------------------------------------------------------------------
- |	convert_to_uc/2
- |	convert_to_uc(Items, UCItems)
- |	convert_to_uc(+, -)
- |
- | - converts all atoms and functors in a list of terms to upper case
- |
- *!--------------------------------------------------------------------*/
-
-convert_to_uc([], []).
-convert_to_uc([Item | Items], [UCItem | UCItems])
-	:-!,
-	convert_to_uc(Item, UCItem),
-	convert_to_uc(Items, UCItems).
-convert_to_uc(Item, UCItem)
-	:-
-	atom(Item),!,
-	make_uc_sym(Item,UCItem).
-convert_to_uc(Item, UCItem)
-	:-
-	Item =..[Functor | Args],!,
-	convert_to_uc(Args, UCArgs),
-	UCItem =.. [Functor | UCArgs].
-convert_to_uc(Item, Item).
-
-/*!---------------------------------------------------------------------
- |	same_uc/2
- |	same_uc(Term1, Term2)
- |	same_uc(+, +)
- |
- | - Term1 and Term2 unify after converting all characters to upper case
- |
- *!--------------------------------------------------------------------*/
-same_uc(Term1, Term2)
-	:-
-	convert_to_uc(Term1, UCTerm),
-	convert_to_uc(Term2, UCTerm).
 
 /*!---------------------------------------------------------------------
  |	truncate/3
  |	truncate(InField, MaxSize, OutField)
  |	truncate(+, +, -)
  |
- | - creates a UIA or number truncating the input expression
+ | 	- creates a UIA truncating the input expression
  |
+ |	Obtains the list of character codes corresponding to the
+ |	input expression, truncates that list at MaxSize, allocates
+ |	a UIA of that size, and copies the list of character codes
+ |	into that UIA.
  *!--------------------------------------------------------------------*/
 truncate(InField, MaxSize, OutField)
 	:-
-	name(InField, IFCs),
-	at_most_n(IFCs, MaxSize, TIFCs),
-	(number(InField) ->
-		name(OutField, TIFCs)
+	(atom(InField) -> atom_codes(InField, IFCs)
 		;
-		string_to_uia(TIFCs, OutField)
-	).
+		(number(InField) -> number_codes(InField, IFCs)
+			;
+			term_codes(InField, IFCs)
+		)
+	),
+	at_most_n(IFCs, MaxSize, TIFCs),
+	string_to_uia(TIFCs, OutField).
+
 
 /*!---------------------------------------------------------------------
  |	strip_white/2
  |	strip_white(String, Result)
  |	strip_white(+, -)
  |
- |	- strips leading white space chars from a prolog string
+ |	- strips leading white space from a string
+ |
+ |	Removes all leading whitespace chars (space, tab) from the
+ |	input String to produce Result.
  *!--------------------------------------------------------------------*/
 strip_white([], []).
 strip_white([C | Tail], Result)
@@ -489,7 +421,10 @@ strip_white(Tail, Tail).
  |	strip_tail_white(String, Result)
  |	strip_tail_white(+, -)
  |
- |	- strips trailing white space chars from a prolog string
+ |	- strips trailing white space  from a string
+ |
+ |	Removes all trailing whitespace chars (space, tab) from the
+ |	input String to produce Result.
  *!--------------------------------------------------------------------*/
 strip_tail_white(String, Result)
 	:-
@@ -502,7 +437,10 @@ strip_tail_white(String, Result)
  |	strip_both_white(String, Result)
  |	strip_both_white(+, -)
  |
- |	- strips leading and trailing white space chars from a prolog string
+ |	- strips leading and trailing white space chars from a string
+ |
+ |	Removes all leading and trailing whitespace chars (space, tab) 
+ |	from the input String to produce Result.
  *!--------------------------------------------------------------------*/
 strip_both_white(String, Result)
 	:-
@@ -512,11 +450,14 @@ strip_both_white(String, Result)
 	dreverse(RResult, Result).
 
 /*!---------------------------------------------------------------------
- |	strip_both_white_atom/2.
+ |	strip_both_white_atom/2
  |	strip_both_white_atom(Atom, ResultAtom)
  |	strip_both_white_atom(+, -)
  |
  |	- strips leading and trailing white space chars from a prolog atom
+ |
+ |	Removes all leading and trailing whitespace chars (space, tab) 
+ |	that occur in the input symbol.
  *!--------------------------------------------------------------------*/
 strip_both_white_atom(Atom, ResultAtom)
 	:-
@@ -531,14 +472,14 @@ strip_both_white_atom(Atom, ResultAtom)
  |
  |	-splits a string according to one of several possible chars
  |
- |	If:
- |	-Chars is a prolog string;
- |	-Stoppers is a list of codes of chars
- |		and if intersect(Chars,Stoppers) \= [], 
- |	Then:
- |		Stopper is the element of Stopper with leftmost occurrence in Chars,
- |		Head is the portion of Chars to the left of the occurrence of Stopper,
- |	and
+ |	If:<br>
+ |	Chars is a prolog string;<br>
+ |	Stoppers is a list of codes of chars
+ |		and if intersect(Chars,Stoppers) \= [],<br>
+ |	Then:<br>
+ |		Stopper is the element of Stopper with leftmost occurrence in Chars,<br>
+ |		Head is the portion of Chars to the left of the occurrence of Stopper,<br>
+ |	and<br>
  |		Tail is the portion of Chars to the right of the occurrence of Stopper.
  *!----------------------------------------------------------------------------*/
 read_to([], _, [], [],-1).
@@ -559,12 +500,12 @@ read_to([C | Chars], Stoppers, [C | Head], Tail,Stopper)
  |
  |	- splits a string around the leftmost occurrence of blank
  |
- |	If:
- |	-Chars is a prolog string containing at least one blank,
- |	Then:
- |		Head is the portion of Chars to the left of the first occurrence
- |			 of a blank, and
- |		Tail is the portion of Chars to the right of the first occurrence 
+ |	If:<br>
+ |	Chars is a prolog string containing at least one blank,<br>
+ |	Then:<br>
+ |	Head is the portion of Chars to the left of the first occurrence
+ |		 of a blank, and<br>
+ |	Tail is the portion of Chars to the right of the first occurrence 
  |		of a blank
  *!--------------------------------------------------------------------*/
 
@@ -577,11 +518,17 @@ read_to_blank([C | Chars], [C | Head], Tail)
 	:-
 	read_to_blank(Chars, Head, Tail).
 
-
 /*!---------------------------------------------------------------------
  |	char_in/3
  |	char_in(Atom, Char, Pos)
  |	char_in(+, +, -)
+ |
+ |	- Locates the position of a character in an atom.
+ |
+ |	If Atom is an atom, and Char is a quoted character, then:<br>
+ |	a) If Char occurs in atom, then Pos is the position of the 
+ |	   leftmost occurrence of Char, counting from 1.<br>
+ |	b) Fails if Char does not occur in Atom.
  *!--------------------------------------------------------------------*/
 
 char_in(Atom, Char, Pos)
@@ -589,119 +536,16 @@ char_in(Atom, Char, Pos)
 	sub_atom(Atom,Pos0,1,_,Char),
 	Pos is Pos0 + 1.
 
-/****
-	atom_length(Atom, AtomLen),
-	char_in(1,AtomLen,Atom,Char,Pos).
-			 
-char_in(Pos,AtomLen,Atom,Char,Pos)
-	:-
-	Pos > AtomLen, !, fail.
-					  
-char_in(Pos,AtomLen,Atom,Char,Pos)
-	:-
-	sub_atom(Atom, Pos, 1, _, Char), !.
-							   
-char_in(CurPos,AtomLen,Atom,Char,Pos)
-	:-
-	NextPos is CurPos + 1,
-	char_in(NextPos,AtomLen,Atom,Char,Pos).
-****/
-
-/*!---------------------------------------------------------------------
- |	strip_prefix/3
- |	strip_prefix(List, Prefix, Result)
- |	strip_prefix(+, +, -)
- |
- |	- strip a prefix from a list of atoms
- |
- |	List is a list of atoms, Prefix is an atom, and Result is a list
- |	of atoms which is obtained by obtained by removing the initial
- |	N characters of each element of List, where the length of Prefix = N.
- *!--------------------------------------------------------------------*/
-strip_prefix([], Prefix, []).
-strip_prefix([P/A | List], Prefix, [Stripped/A | Result])
-	:-
-	sub_atom(P,0,Len,_,Prefix),
-	!,
-	sub_atom(P,Len,_,0,Stripped),
-	strip_prefix(List, Prefix, Result).
-strip_prefix([Item | List], Prefix, [Stripped | Result])
-	:-
-	sub_atom(Item,0,Len,_,Prefix),
-	!,
-	sub_atom(Item,Len,_,0,Stripped),
-	strip_prefix(List, Prefix, Result).
-strip_prefix([Item | List], Prefix, [Item | Result])
-	:-
-	strip_prefix(List, Prefix, Result).
-
-/*
-	atom_length(Prefix, PLen),
-	PLen0 is PLen+1,
-	strip_prefix0(List, PLen0, Result).
-
-strip_prefix0([], _, []).
-
-strip_prefix0([P/A | List], Start, [SP | Result])
-	:-!,
-	atom_length(P, PL),
-	TailLen is PL - Start + 1,
-	sub_atom(P,Start,TailLen,_, SP),
-	strip_prefix0(List, Start,  Result).
-
-strip_prefix0([P | List], Start, [SP | Result])
-	:-!,
-	atom_length(P, PL),
-	sub_atom(P,Start,PL,_, SP),
-	strip_prefix0(List, Start, Result).
-
-strip_prefix0([_ | List], Start, Result)
-	:-
-	strip_prefix0(List, Start, Result).
-*/
-
-/*!-----------------------------------------------------------------------
- |	prefix_dir/3
- |	prefix_dir(List, Dir, XList)
- |	prefix_dir(+, +, -)
- |
- |	- prefix Dir to each (atomic) item on List
- *-----------------------------------------------------------------------*/
-prefix_dir([], _, []).
-prefix_dir([Item | List], WSDir, [XItem | XList])
-	:-
-	extendPath(WSDir, Item, XItem),
-	prefix_dir(List, WSDir, XList).
-
-/*!-----------------------------------------------------------------------
- |	prefix_to/3
- |	prefix_to(List, Atom, XList)
- |	prefix_to(+, +, -)
- |
- |	- catenate Atom to the front of each element on List
- *-----------------------------------------------------------------------*/
-prefix_to([], _, []).
-prefix_to([Item | List], Atom, [XItem | XList])
-	:-
-	catenate(Atom, Item, XItem),
-	prefix_to(List, Atom, XList).
-
-/*!-----------------------------------------------------------------------
- |	replace_char_atom/4
- |	replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
- |	replace_char_atom(+, +, -)
- *-----------------------------------------------------------------------*/
-replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
-	:-
-	atom_codes(AtomIn,  AICs),
-	replace_char_string(AICs, OrigCharNum, NewCharNum, AOCs),
-	atom_codes(AtomOut, AOCs).
-
 /*!-----------------------------------------------------------------------
  |	replace_char_string/4
  |	replace_char_string(InString, OrigCharNum, NewCharNum, OutString)
  |	replace_char_string(+, +, -)
- *-----------------------------------------------------------------------*/
+ |
+ |	- Replace occurrences of a char in a string by another char
+ |
+ |	Creates OutString by replacing all occurrences (possibly zero) of 
+ |	OrigCharNum in InString by NewCharNum.
+ *!-----------------------------------------------------------------------*/
 
 replace_char_string([], _, _, []).
 replace_char_string([OrigCharNum | InString], OrigCharNum, 
@@ -712,47 +556,21 @@ replace_char_string([C | InString], OrigCharNum, NewCharNum, [C | OutString])
 	:-
 	replace_char_string(InString, OrigCharNum, NewCharNum, OutString).
 
-
 /*!-----------------------------------------------------------------------
- *-----------------------------------------------------------------------*/
-underbarUpperCrazyKap(In, Out)
-	:-
-	atom_codes(In, InCs),
-	InCs = [InC0 | RestInCs],
-	to_uc_c(InC0, OutC0),
-	ubCrzyK(RestInCs, RestOutCs),
-	OutCs = [OutC0 | RestOutCs],
-	atom_codes(Out, OutCs).
+ |	replace_char_atom/4
+ |	replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
+ |	replace_char_atom(+, +, -)
+ |
+ |	- Replace occurrences of a char in an atom by another char
+ |
+ |	Creates AtomOut by replacing all occurrences (possibly zero) of 
+ |	OrigCharNum in AtomIn by NewCharNum.
+ *!-----------------------------------------------------------------------*/
 
-to_lc_c(InC, OutC)
+replace_char_atom(AtomIn, OrigCharNum, NewCharNum, AtomOut)
 	:-
-	0'A =< InC, InC =< 0'Z,
-	!,
-	OutC is InC + 32.
-to_lc_c(InC, InC).
-
-to_uc_c(InC, OutC)
-	:-
-	0'a =< InC, InC =< 0'z,
-	!,
-	OutC is InC - 32.
-to_uc_c(InC, InC).
-
-ubCrzyK([], []).
-ubCrzyK([0'_], [0'_])
-	:-!.
-ubCrzyK([0' ], [])
-	:-!.
-ubCrzyK([0'	], [])	% tab
-	:-!.
-ubCrzyK([X, C | InCs], [UC | OutCs])
-	:-
-	dmember(X, [0'_, 0' , 0'	]),  % _, space, tab
-	!,
-	to_uc_c(C, UC),
-	ubCrzyK(InCs, OutCs).
-ubCrzyK([C | InCs], [C | OutCs])
-	:-
-	ubCrzyK(InCs, OutCs).
+	atom_codes(AtomIn,  AICs),
+	replace_char_string(AICs, OrigCharNum, NewCharNum, AOCs),
+	atom_codes(AtomOut, AOCs).
 
 endmod.

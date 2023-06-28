@@ -21,7 +21,7 @@ pwrd  nil_val =
 pword prs_area;
 static pword areap;
 
-static	pword	allocat	PARAMS(( size_t ));
+static	pword	allocat	( size_t );
 
 void
 prs_area_init(marksize)
