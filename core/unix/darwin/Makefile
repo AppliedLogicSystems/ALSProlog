@@ -3,8 +3,7 @@ OS=unix
 SUBOS=darwin
 PROC=port
 
-# Include Tk Framework headers on system path for X11 header access
-SDK:=$(shell xcrun --show-sdk-path)
-BUILD_FLAGS=-isystem $(SDK)/System/Library/Frameworks/Tk.framework/Versions/Current/Headers
-
+# Include Tcl/Tk headers on system path for alsdev
+BUILD_FLAGS=-isystem /usr/local/include/tcl-tk
+TCLVER=8.6
 include $(SOURCE_DIR)/generic/gnu_makefile
