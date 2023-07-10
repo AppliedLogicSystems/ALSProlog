@@ -1,0 +1,538 @@
+ALSProlog <-> SQLite3 Interface
+===============================
+
+For information on sqlite(3) itself, see:
+https://www.sqlite.org/docs.html
+https://www.sqlite.org/c3ref/intro.html
+https://www.sqlite.org/inmemorydb.html
+
+The interface between ALS Prolog and Sqlite is provided by the files sqlite3_intf.psl and sqlite3_intf.pro.
+The file sqlite3_intf.psl provides the very low-level somewhat raw direct C interface between ALS Prolog and the C api of Sqlite3.  This file must be consulted or loaded from the command line in order to interface to Sqlite3.  The file sqlite3_intf.pro provides a more convenient layer of prolog over the calls in sqlite3_intf.psl; when consulted/loaded, it automatically loads sqlite3_intf.psl. 
+
+We describe the various calls, providing examples.  There are a few low-level C-languge interface calls from sqlite3_intf.psl that one needs to be aware of.  After discussing them, we go on to discuss the calls from  sqlite3_intf.pro.
+
+In discussing examples,  we'll make use the command-line tool sqlite3 (https://sqlite.org/cli.html) to "look behind the scenes" and see what's actually in the db.  We'll will run the prolog side of the examples in the partially complete 64-bit version of ALS Prolog under development.
+The examples are drawn from the file examps.pro.
+
+Low Level Immediate (C language) Interface
+==========================================
+
+sqlite3_open/2
+sqlite3_open(DBName, DBHandle)
+sqlite3_open(+, -)
+
+DBName is an atom naming a file in which the sqlite3 database resides.  DBHandle is an integer serving as a handle to an opaque object managing a connection to the database; it is a parameter in most other access predicates.  If the file does not exist, it is created.
+
+> ls *.db
+ls: *.db: No such file or directory
+
+> alspro sqlite3_intf.psl sqlite3_intf.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+........
+?- sqlite3_open('my_sqlite3.db', DBHandle).
+
+DBHandle=5486166736
+yes.
+
+> ls *.db
+my_sqlite3.db
+
+--------------------------------------------
+
+sqlite3_close/1
+sqlite3_close(DBHandle)
+sqlite3_close(+)
+
+DBHandle is an integer returned as DBHandle by eqlite3_open.
+Closes the  database connection DBHandle, but leaves the database file (e.g. my_sqlite3.db) intact.
+
+> ls *.db
+my_sqlite3.db
+
+> alspro sqlite3_intf.psl sqlite3_intf.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+
+?- sqlite3_open('my_sqlite3.db', DBHandle), sqlite3_close(DBHandle).
+
+DBHandle=5401233312
+
+yes.
+
+The haandle (connection) to the database has been closed in prolog, but the database file rmains intact:
+
+> ls *.db
+my_sqlite3.db
+
+Note that returning to the top level of the prolog shell loses the association between the large prolog integer and sqlite3 database handle:
+
+?- sqlite3_open('my_sqlite3.db', DBHandle).
+
+DBHandle=5410669760
+
+yes.
+?- sqlite3_close(5410669760).
+
+no.
+
+--------------------------------------------
+
+sqlite3_exec_norows/2
+sqlite3_exec_norows(DBAccess, SQLStatement)
+sqlite3_exec_norows(+, +)
+
+DBAccess is either a DBName or a DBHandle.  SQLStatement is a UIA representing an sql statement from which no rows will be returned, e.g., a CREATE TABLE.
+If DBAccess is a DBHandle, the statement is executed  against the DBHandle database..
+If DBAccess is a DBName, sqlite3_open is called (on the C side) to obtain a DBHandle against which the statement is executed.
+
+--------------------------------------------
+
+sqlite3_exec_rows/4
+sqlite3_exec_rows(DBAccess, SelectString, Limit,  Result),
+sqlite3_exec_rows(+, +, +, -)
+
+DBAccess is either a DBName or a DBHandle just as for sqlite3_exec_norows/2.
+Limit is either an integer or the atom 'all', used to set an upper limit on the number of rows returned.  
+Result is a list of terms of the form 
+
+	r(v1,...,vn)
+
+where <v1,...,vn> are the rows returned by executing the SELECT statement, in order.
+
+
+
+Upper Level Convenience Predicates
+--------------------------------
+
+See:
+sqlite3_intf.pro
+tests_sqlite3_intf.pro
+
+https://www.sqlite.org/lang_createtable.html2dd
+https://www.sqlite.org/limits.html#max_length
+
+In the following, DBAccess is either a DBName or a DBHandle. 
+Since all of the upper-level predicates ultimately call either sqlite3_exec_norows/2 or sqlite3_exec_rows/4,
+in all higher-level predicates below, occurrences of DBAccess can be either a DBName or a DBHandle.
+
+Table Creation
+--------------
+
+sql_create_table/4
+sql_create_table(DBName, TableName, ColumnsList, Primary)
+sql_create_table(+, +, +, +)
+
+DBName is an atom naming a file in which the sqlite3 database resides.
+TableName is an atom which will name a an sql table in DBName.
+ColumnsList is a list of column specs, which are sublists of the form
+
+	     [column_name=<name>, column_type=<type>],
+
+where <name> and <type> are atoms; e.g.,
+
+	     [column_name='Name', column_type='TEXT'],
+
+Primary is one of the column names (or ''), indicating which column is the primary index.
+Example:
+
+        TableName = 'Cars',
+        ColumnsList = [
+                [column_name='Id', column_type='INT'],
+                [column_name='Name', column_type='TEXT'],
+                [column_name='Price', column_type='INT'] ],
+        Primary = 'Id'.
+
+> sqlite3 my_sqlite3.db
+SQLite version 3.39.5 2022-10-14 20:58:05
+Enter ".help" for usage hints.
+sqlite> .tables
+sqlite>
+                No tables were found
+
+Now consider:
+
+ex_1(CreateTableString)
+        :-
+        TableName = 'Cars', Primary = 'Id',
+        ColumnsList = [
+                [column_name='Id', column_type='INT'],
+                [column_name='Name', column_type='TEXT'],
+                [column_name='Price', column_type='INT'] ],
+    sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString).
+
+> alspro sqlite3_intf.psl sqlite3_intf.pro  examps.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_1(X).
+
+X='CREATE TABLE Cars (Id INT PRIMARY KEY, Name TEXT , Price INT );'
+
+Now sql_create_table/4 is defined by:
+
+sql_create_table(DBName, TableName, ColumnsList, Primary)
+        :- 
+        sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
+        sqlite3_exec_norows(DBName, CreateTableString).
+
+Let ex_2 :-
+        DBName = 'my_sqlite3.db',
+        TableName = 'Cars', Primary = 'Id',
+        ColumnsList = [
+                [column_name='Id', column_type='INT'],
+                [column_name='Name', column_type='TEXT'],
+                [column_name='Price', column_type='INT'] ],
+    sql_create_table(DBName, TableName, ColumnsList, Primary).
+
+Run
+
+> alspro sqlite3_intf.psl sqlite3_intf.pro  examps.pro
+?- ex_2.
+
+yes.
+
+So we see:
+
+sqlite> .tables
+Cars
+sqlite>
+
+Alternatvely:
+
+ex_3 :-
+        sqlite3_open('my_sqlite3.db', DBHandle),
+        TableName = 'Cars', Primary = 'Id',
+        ColumnsList = [
+                [column_name='Id', column_type='INT'],
+                [column_name='Name', column_type='TEXT'],
+                [column_name='Price', column_type='INT'] ],
+    sql_create_table(DBHandle, TableName, ColumnsList, Primary).
+
+sqlite> drop table Cars;
+sqlite> .tables
+sqlite>
+
+> alspro sqlite3_intf.psl sqlite3_intf.pro  examps.pro
+?- ex_3.
+gc not 64-bit yet
+
+yes.
+
+sqlite> .tables
+Cars
+sqlite>
+
+Insertions
+----------
+
+A complete example sql statement for an insertion to the Cars table would look like this:
+ 
+	'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);'
+
+Note that in SQL, text must be quoted; hence the interior occurrences of \'.  To execute this statement, since no rows will be returned, one would simply pass it to sqlite3_exec_norows/2:
+
+?- sqlite3_exec_norows('my_sqlite3.db', 'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);' ).
+
+Note that that complete statement is a UIA, due to the outer surrounding single quotes(').
+
+ex_4 :-
+        sqlite3_exec_norows('my_sqlite3.db', 'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);' ).
+
+sqlite> .tables
+Cars
+sqlite> select * from Cars;
+sqlite>
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_4.
+
+yes.
+
+sqlite> select * from Cars;
+3|Skoda|9000
+sqlite>
+
+--------------------------------------------
+The next predicate allows us to break up that monolithic insertion UIA.
+
+insert_one_row/3
+insert_one_row(DBHandle, TableName, RowList)
+insert_one_row(+, +, +)
+
+RowList is a list making up the values for a single row of TableName, for example:
+
+                        [ 3, 'Skoda', 9000 ]
+
+Notice that Skoda carries single-quotes because it is a prolog UIA, not (yet) because of SQL text quoting.  insert_one_row/3 will combine all the individual values into a single UIA "vector"
+
+                '3, \'Skoda\', 9000'
+           
+which then becomes part 0f a comlete SQL statement
+
+                'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);' 
+
+which can be executed by sqlite3_exec_norows/2.
+
+sqlite> delete from Cars;
+sqlite> select * from Cars;
+sqlite> 
+
+ex_5 :-
+        insert_one_row('my_sqlite3.db', 'Cars',  [ 3, 'Skoda', 9000 ] ).
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_5.
+
+yes.
+
+sqlite> select * from Cars;
+3|Skoda|9000
+sqlite> 
+
+--------------------------------------------
+insert_rows/3
+insert_rows(ListOfRows, DBHandle, TableName)
+insert_rows(+, +, +)
+
+insert_rows/3 applies insert_one_row/3 to a list of RowLists (above):
+
+ex_6 :- ListOfRows =
+           [    [ 3, 'Skoda', 9000],
+                [ 4, 'Volvo', 29000],
+                [ 5, 'Bentley', 350000]   ],
+        insert_rows(ListOfRows, 'my_sqlite3.db', 'Cars').o
+
+
+sqlite> delete from Cars;
+sqlite> 
+
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_6.
+
+yes
+
+sqlite> select * from Cars;
+3|Skoda|9000
+4|Volvo|29000
+5|Bentley|350000
+sqlite> 
+
+Selections
+----------
+
+select_one_table/3
+select_one_table(DBHandle, TableName, Result)
+select_one_table(+, +, -)
+
+--------------------------------------------
+
+select_all_table/3
+select_all_table(DBHandle, TableName, Result)
+select_all_table(+, +, -)
+
+Both run ''SELECT * FROM ___' against TableName, select_one_table returning the first row found, while select_all_table returns all rows found; if no rows are found, Result = [].
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- select_one_table('my_sqlite3.db', 'Cars', R).
+gc not 64-bit yet
+
+R=[r(3,'Skoda',9000)] 
+
+yes.
+?- select_all_table('my_sqlite3.db', 'Cars', R).
+gc not 64-bit yet
+
+R=[r(3,'Skoda',9000),r(4,'Volvo',29000),r(5,'Bentley',350000)] 
+
+yes.
+
+--------------------------------------------
+
+select_where_lists/5
+select_where_lists(DBHandle, TableName, ColStringsList, WhereClauseList, Result)
+select_where_lists(+, +, +, +, -)
+
+ > ColStringsList is a list of atoms(uias) which are Id's of columns of TableName; the list
+may be a subset of and order variant  of the full list of the columns of TableName.
+ > WhereClauseList is a list of UIAs which are natural representations of SQL constraints on the IDs in ColStringsList.
+
+ex_8(R) :-
+        ColStringsList = ['Price', 'Name'],
+        WhereClauseList = ['Price > 10000'],
+        select_where_lists('my_sqlite3.db', 'Cars', ColStringsList, WhereClauseList, R).
+
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_8(R).
+
+R=[r(29000,'Volvo'),r(350000,'Bentley')] 
+
+yes.
+
+Updates
+-------
+
+sql_update/4
+sql_update(DBName, TableName, SetList, WhereClauseList)
+sql_update(+, +, +, +)
+
+Updates the values of selected rows.
+
+> WhereClauseList is a list of UIAs which are natural representations of SQL constraints on the IDs in ColStringsList.
+> SetList is a list of UIAs of the form <col> = <value>, where <col> is a column_name of TableName. 
+
+ex_9 :-   DBName = 'my_sqlite3.db',
+        TableName = 'Cars',
+        WhereClauseList = ['Id = 4'],
+        select_where_lists(DBName, TableName, ['*'], WhereClauseList, R1),
+        sql_update(DBName, TableName, ['Price = 31500'], WhereClauseList),
+        select_where_lists(DBName, TableName, ['*'], WhereClauseList, R2),
+        write((R1 -> R2)), nl.
+
+sqlite> select * from Cars;
+3|Skoda|9000
+4|Volvo|29000
+5|Bentley|350000
+sqlite> 
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+?- ex_9.
+[r(4,Volvo,29000)] -> [r(4,Volvo,31500)]
+
+yes.
+
+sqlite> select * from Cars;
+3|Skoda|9000
+4|Volvo|31500
+5|Bentley|350000
+sqlite> 
+
+Deleting Rows and CLearing the DB
+---------------------------------
+
+sql_delete/3
+sql_delete(DBAccess, TableName, WhereClauseList)
+sql_delete(+, +, +)
+
+Removes the selected rows from the table.
+
+sql_clear_table/2
+sql_clear_table(DBAccess, TableName)
+sql_clear_table(+, +)
+
+DBAccess, TableName and WhereClauseList are as above.  
+
+Removes all rows from table.
+
+sqlite> select * from Cars;
+3|Skoda|9000
+4|Volvo|29000
+5|Bentley|350000
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_10.
+
+yes.
+
+sqlite>  select * from Cars;
+3|Skoda|9000
+5|Bentley|350000
+sqlite> 
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_11.
+
+yes.
+?- 
+
+sqlite> .tables
+Cars
+sqlite> select * from Cars;
+sqlite> 
+
+Creating indicies
+-----------------
+	See https://www.sqlite.org/lang_createindex.html
+
+sql_create_index/4
+sql_create_index(ColExpr, TableName, IndexName, DBHandle)
+sql_create_index(+, +, +, +)
+
+Defined by:
+
+sql_create_index(ColExpr, TableName, IndexName, DBHandle)
+        :-
+        sql_create_index(ColExpr, '', TableName, IndexName, '', [], DBHandle).
+
+sql_create_index/7
+sql_create_index(ColExpr, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
+sql_create_index(+, +, +, +, +, +, +)
+
+Creates an index on a table column other than Primary (which has one by default).  Modifier is either the atom unique (in which case, the created index satisfies UNIQUE), or anything else; 
+
+Defined by:
+sql_create_index(ColExprsList, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
+        :- 
+        sql_index_string(ColExprsList, Modifier, TableName, IndexName, WhereClause, CreateIndexString),
+        sqlite3_exec_norows(DBHandle, CreateIndexString).
+
+sql_index_string/6
+sql_index_string(ColExpr, Modifier, TableName, IndexName, WhereClause, IndexString)
+sql_index_string(+, +, +, +, +, -)
+
+	Creates the necessary sql index string command.
+	 
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_12.
+Index String: CREATE INDEX IF NOT EXISTS cars_name ON Cars  (  Name  ) ;
+
+yes.
+
+KB-SSD > sqlite3 my_sqlite3.db 
+sqlite> SELECT sql FROM SQLite_master WHERE type = 'index' AND tbl_name = 'Cars' ;
+
+CREATE INDEX cars_name ON Cars  (  Name  ) 
+sqlite>
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_14.
+gc not 64-bit yet
+
+yes.
+
+sqlite> SELECT sql FROM SQLite_master WHERE type = 'index' AND tbl_name = 'Cars' ;
+
+sqlite> 
+
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_13.
+gc not 64-bit yet
+Index String: CREATE UNIQUE INDEX IF NOT EXISTS cars_name ON Cars  (  Price  )  WHERE Price > 10000 ;
+
+yes.
+?- 
+KB-SSD > sqlite3 my_sqlite3.db 
+sqlite> SELECT sql FROM SQLite_master WHERE type = 'index' AND tbl_name = 'Cars' ;
+
+CREATE UNIQUE INDEX cars_name ON Cars  (  Price  )  WHERE Price > 10000 
+sqlite>
+
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a-dirty [darwin]
+?- ex_14.
+
+yes.
+?- 
+KB-SSD > sqlite3 my_sqlite3.db 
+sqlite> SELECT sql FROM SQLite_master WHERE type = 'index' AND tbl_name = 'Cars' ;
+
+sqlite> 
+
+
+Dropping indicies
+-----------------
+sql_drop_index/2
+sql_drop_index(IndexName, DBHandle)
+sql_drop_index(+, +)
+
+	Completely removes the index named by IndexName from the database.  See ex_14 example calls above with ex_12 an ex_13.
+
+
