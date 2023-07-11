@@ -10,7 +10,7 @@ run: sqlite3_intf.psl
 	$(ALSPRO) sqlite3_intf.pro
 
 test: sqlite3_intf.psl
-	$(ALSPRO) ../../core/alsp_src/tests/test.pro tests_sqlite3_intf.pro -g test_sqlite3 -b
+	$(ALSPRO) -s ../../core/alsp_src/tests tests_sqlite3_intf.pro -g test_sqlite3 -b
 
 clean:
 	rm -f sqlite3_intf.psl
