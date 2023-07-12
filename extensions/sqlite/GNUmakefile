@@ -15,3 +15,6 @@ test: sqlite3_intf.psl
 clean:
 	rm -f sqlite3_intf.psl
 	rm -rf darwin/
+
+tt: sqlite3_intf.psl
+	$(ALSPRO) -s ../../core/alsp_src/tests tests_sqlite3_intf.pro

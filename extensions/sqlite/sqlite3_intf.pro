@@ -39,6 +39,9 @@ export sql_create_index/4.
 export sql_create_index/7.
 export sql_index_string/6.
 export sql_drop_index/2.
+export query_foreign_keys/2.
+export set_foreign_keys_on/1.
+export set_foreign_keys_off/1.
 	
 /*
 	/*----------------------------------------------------------------*
@@ -461,6 +464,46 @@ sql_drop_index(IndexName, DBHandle)
 	printf(S, 'DROP INDEX %t;', [IndexName]),
 	close(S),
         sqlite3_exec_norows(DBHandle, DropString).
+
+
+	/* -------------------------------------------- *
+	   	Turn foreign key constraint support
+		on/off, query status
+		See:
+		https://www.sqlite.org/foreignkeys.html
+		https://www.sqlite.org/pragma.html
+
+Note from https://www.sqlite.org/foreignkeys.html:
+	"Foreign key constraints are disabled by default (for backwards compatibility), so must be enabled separately for each database connection. (Note, however, that future releases of SQLite might change so that foreign key constraints enabled by default. Careful developers will not make any assumptions about whether or not foreign keys are enabled by default but will instead enable or disable them as necessary.)"
+	Consequence:  if foreign key constraint is required (e.g. performing inserts, deletes,
+	updates, etc.), caution must be exercise about how you make calls which connect to the db.  
+	Separate calls which use the db NAME are separate connections to the db.  So, for example,
+		set_foreign_keys_on(DBName),
+		insert_one_row(DBName, TableName, RowList)
+	invoke separate connections.  So even though the set_foreign_keys_on(DBName) call turns
+	foreign key constraint support, the 2nd call, insert_one_row(...) occurs through a
+	separate connection, and foreign key constraint support will NOT be for that
+	connection.  One needs to separately open a connection, recieving a DBHandle, and
+	then pass that DBHandle to the two calls:
+		sqlite3_open(DBName, DBHandle),
+		    ...
+		set_foreign_keys_on(DBHandle),
+		insert_one_row(DBHandle, TableName, RowList)
+	This discipline is only necessary when foreign key constraint support is required,
+	e.g. inserts, deletes, updates, etc.  It is not necessary for selects, etc.
+	 * -------------------------------------------- */
+query_foreign_keys(DBAccess, Result)
+	:-
+        sqlite3_exec_rows(DBAccess, 'SELECT * FROM pragma_foreign_keys();', 1,  SelectResult),
+	SelectResult = [r(Result)].
+	
+set_foreign_keys_on(DBHandle)
+	:-
+        sqlite3_exec_norows(DBHandle, 'PRAGMA foreign_keys = 1;').
+
+set_foreign_keys_off(DBHandle)
+	:-
+        sqlite3_exec_norows(DBHandle, 'PRAGMA foreign_keys = 0;').
 
 	/* ============================================ *
 	    		Utilities
