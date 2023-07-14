@@ -53,6 +53,8 @@ test_sqlite3
 	test_delete(DBName, 'Cars'),
 	test_delete(DBName, members),
 
+	test_foreign_key_constraint_manip(DBName),
+
 	true]).
 
 drop_db(DBName) :- 
@@ -343,3 +345,19 @@ test_delete(DBName, TableName)
 	sql_delete(DBHandle, TableName, WhereClauseList),
 	select_where_lists(DBHandle, TableName, ['*'], WhereClauseList, After),
 	write((Before -> After)),nl.
+
+	/* ------------------------------------------------------------------------------------- *
+			Enabling foreign key constraint support
+	 * ------------------------------------------------------------------------------------- */
+expected_fk_results(members,  [0, 1, 0]).
+
+test_foreign_key_constraint_manip(DBName)
+	:-
+	sqlite3_open(DBName, DBHandle), 
+	expected_fk_results(members,  [Result1, Result2, Result3]),
+
+	query_foreign_keys(DBHandle, Result1),
+	set_foreign_keys_on(DBHandle),
+	query_foreign_keys(DBHandle, Result2),
+	set_foreign_keys_off(DBHandle),
+	query_foreign_keys(DBHandle, Result3).

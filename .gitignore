@@ -39,3 +39,4 @@ _local_site
 .jekyll-cache/
 .jekyll-metadatabuild-xcode
 xcuserdata/
+*.swp
