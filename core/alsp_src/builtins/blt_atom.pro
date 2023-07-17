@@ -209,6 +209,61 @@ sub_atom0(Atom, Before, Length, After, SubAtom) :-
 	Start is Before+1,
 	'$sub_atom'(Atom, Start, Length, SubAtom).
 	
+/*
+ * atom_split/4
+ *
+ * atom_split(Atom, Splitter, Left, Right) is true iff either
+ * Atom and Splitter are atoms, and either:
+ * a) there is no occurrence of Splitter as a subatom of Atom, Left equals
+ *    Atom, and Right is the empty atom '', or
+ * b) there is at least one occurrence of Splitter as a subatom of Atom, 
+ *    Left is the subatom of Atom extending from the leftmost character of
+ *    Atom up to but not including the leftmost character of the leftmost
+ *    occurence of Splitter in Atom, and Right is the subatom of Atom 
+ *    extending from the first character to the right of the rightmost
+ *   character of the leftmost occurrence of Splitter in Atom.
+ *
+ *  atom_split(+atom, ?splitter, ?left, ?right)
+ */
+
+export atom_split/4.
+atom_split(Atom, SplitterAtom, LeftSubAtom, RightSubAtom)
+        :-
+        sub_atom(Atom, Begin, SALen, After,  SplitterAtom),
+        sub_atom(Atom, 0, Begin, _, LeftSubAtom),
+        sub_atom(Atom, _, After, 0, RightSubAtom).
+
+/*
+ * atom_split/3
+ *
+ * atom_split(Atom, Splitter, ListOfSubAtoms) is true iff either
+ * Atom and Splitter are atoms, and either:
+ * a) there is no occurrence of Splitter as a subatom of Atom, and 
+ *    ListOfSubAtoms equals the list consisting of Atom alone, or
+ * b) there is at least one occurrence of Splitter as a subatom of Atom, 
+ *    and ListOfSubAtoms is the list consisting of all of the subatoms of
+ *    Atom, in left-to-right order, which satisfy one of:
+ * i) extends from the leftmost (beginning) character of Atom to the
+ *    leftmost character of the leftmost occurrence of Splitter in Atom;
+ * ii) extend from the rightmost character of one occurrence of Splitter
+ *    in Atom to the leftmost character of the next occurrence of Splitter
+ *    to the right;
+ * iii) extends from the leftmost character of the rightmost occurrence
+ *    of Splitter in Atom to the right end of Atom.
+ *
+ *  atom_split(+atom, ?splitter, ?list_of_atoms)
+ */
+
+export atom_split/3.
+
+atom_split(Atom, SplitterAtom, [InterLeft | RestCList])
+        :-
+        atom_split(Atom, SplitterAtom, InterLeft, InterRight),
+        !,
+        atom_split(InterRight, SplitterAtom, RestCList).
+
+atom_split(Atom, SplitterAtom, [Atom]).
+
 
 /*
  * number_chars/2
