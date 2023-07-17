@@ -5,6 +5,8 @@ VPATH = $(SOURCE_DIR)/$(OS):$(SOURCE_DIR)/generic:$(SOURCE_DIR)/$(PROC):$(SOURCE
 
 VERSION_FLAGS := $(or $(shell $(SOURCE_DIR)/../../version flags), $(error version error))
 
+## Build all binaries
+
 default : binaries
 
 MAKEFS = Makefile gnu_makefile $(OS)_makefile $(CCOMP)_makefile
@@ -113,6 +115,8 @@ so_test : libalspro.$(OS_SL_EXT) $(MAKEFS)
 
 TEST_DIR = $(SOURCE_DIR)/tests
 
+## Run all tests
+
 test: testrun
 
 testrun : curl_test test_app_image command_line_test iso_test_suite test_suite 
@@ -122,6 +126,8 @@ curl_test: alspro
 
 command_line_test: alspro
 	sh $(TEST_DIR)/tsuite/test_command_line.sh ./alspro
+
+## Run test suite, add ID=testid to run single test
 
 test_suite: alspro
 	./alspro -no_obp -s $(TEST_DIR) -b autotest.pro atest_db.pro -g run_tests -p -srcdir $(SOURCE_DIR)
@@ -196,3 +202,9 @@ superclean : clean
 
 -include *.d
 
+## Display this help
+help:
+	@echo Makefile Targets:
+	@awk -F ':|##' \
+	'/^##/ {d=$$2}; /^[^#]/ {if (d) {printf "\033[36m%-20s\033[0m %s\n",$$1,d}; d=""}' \
+	$(MAKEFILE_LIST)
