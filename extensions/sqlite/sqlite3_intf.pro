@@ -14,7 +14,6 @@
  | statement in question is executed.
  *=======================================================================*/
 :-['sqlite3_intf.psl'], write('LOADED sqlite3_intf.psl'), nl,nl.
-%:-['foo.pro'].
 
 module sqlite3.
 
@@ -522,5 +521,14 @@ dbl_sgn_q([C | Cs], [C | DCs])
         :-
         dbl_sgn_q(Cs, DCs).
 
+export drop_db/1.
+drop_db(DBName) :- 
+	(exists_file(DBName) ->
+		remove_file(DBName) ; true ).
+
+export check_db_exists/1.
+check_db_exists(DBName) :- 
+	((DBName \= ':memory:', DBName \= '') -> 
+		exists_file(DBName) ; true).
 
 endmod.

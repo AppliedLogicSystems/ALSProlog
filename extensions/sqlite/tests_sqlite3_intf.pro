@@ -7,7 +7,7 @@
  |	All tests utilize the sqlite3 database testsq3.db
  *=======================================================================*/
 :-['sqlite3_intf.pro'].
-:-['test.pro'].
+:-['../../core/alsp_src/tests/test.pro'].
 
 	/* Cf. https://www.sqlite.org/inmemorydb.html */
 test_db(':memory:').
@@ -57,6 +57,7 @@ test_sqlite3
 
 	true]).
 
+/*
 drop_db(DBName) :- 
 	(exists_file(DBName) ->
 		remove_file(DBName) ; true ).
@@ -64,6 +65,7 @@ drop_db(DBName) :-
 check_db_exists(DBName) :- 
 	((DBName \= ':memory:', DBName \= '') -> 
 		exists_file(DBName) ; true).
+*/
 
 
 test_open(DBName)
@@ -96,13 +98,13 @@ table_spec(members, ColumnsList, Primary)
 		[column_name=first_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=last_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=email, column_type='TEXT', constraints=['NOT NULL', 'UNIQUE']],
-		[column_name=balance, column_type='FLOAT', constraints=['NOT NULL']] ],
+		[column_name=balance, column_type='REAL', constraints=['NOT NULL']] ],
 	Primary = contact_id.
 
 expected_create_table_string_for('Cars', 
 		'CREATE TABLE Cars (Id INT PRIMARY KEY, Name TEXT, Price INT);').
 expected_create_table_string_for(members, 
-		'CREATE TABLE members (contact_id INTEGER PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, balance FLOAT NOT NULL);').
+		'CREATE TABLE members (contact_id INTEGER PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, balance REAL NOT NULL);').
 
 test_create_table_string(TableName)
 	:-
@@ -146,7 +148,7 @@ test_create_table_by_handle(DBName, TableName)
 		[column_name=first_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=last_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=email, column_type='TEXT', constraints=['NOT NULL', 'UNIQUE']],
-		[column_name=balance, column_type='FLOAT', constraints=['NOT NULL']] ],
+		[column_name=balance, column_type='REAL', constraints=['NOT NULL']] ],
 	 * ------------------------------------------------------------------------------------- */
 setup_table(DBHandle, TableName)
 	:-
@@ -250,7 +252,7 @@ test_select_all_table_2(DBName, TableName)
 		[column_name=first_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=last_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=email, column_type='TEXT', constraints=['NOT NULL', 'UNIQUE']],
-		[column_name=balance, column_type='FLOAT', constraints=['NOT NULL']] ],
+		[column_name=balance, column_type='REAL', constraints=['NOT NULL']] ],
 	 * ------------------------------------------------------------------------------------- */
 
 
@@ -292,7 +294,7 @@ test_select_all_where(DBName, TableName)
 		[column_name=first_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=last_name, column_type='TEXT', constraints=['NOT NULL']],
 		[column_name=email, column_type='TEXT', constraints=['NOT NULL', 'UNIQUE']],
-		[column_name=balance, column_type='FLOAT', constraints=['NOT NULL']] ],
+		[column_name=balance, column_type='REAL', constraints=['NOT NULL']] ],
                    99,  Mark, Slotnik, mark.s@gmail.com, 90.00,
                    100, Jane, Mason, mason@greenday.com, 20.89,
                    101, Grace, Jones, grace@gjones.com, 351.87,
