@@ -92,6 +92,7 @@ static int prolog_sqlite3_exec_norows(void) {
 
 	if (type1 == PI_INT) {
 		dbHandle = (sqlite3 *)val1;
+fprintf(stderr, "norows-val1-dbHandle: %d\n", dbHandle);
 	} else {
 		switch(type1) {
 			case PI_SYM:
@@ -125,6 +126,8 @@ static int prolog_sqlite3_exec_norows(void) {
 			}
 			PI_FAIL;
 	}
+
+fprintf(stderr, "norows - val2 - buf: %s\n", buf);
 	returnv = sqlite3_exec(dbHandle, buf, 0, 0, &err_msg);
 
 	if (returnv != SQLITE_OK ) {
@@ -133,7 +136,7 @@ static int prolog_sqlite3_exec_norows(void) {
 		if (handle_opened == 1){
 			sqlite3_close(dbHandle);
 		}
-		PI_FAIL;
+	PI_FAIL;
 	}
 	if (handle_opened == 1){
 		sqlite3_close(dbHandle);

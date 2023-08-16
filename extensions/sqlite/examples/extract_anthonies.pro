@@ -6,9 +6,9 @@
 	https://lincolnlibraries.org/bookguide/award-winners/anthony-awards/
 
 	to
-		AA_Lincoln.txt
+		AA_Lincoln.txt;
 
-	and discarded the first 3022 lines (no target data there).
+	then discarded the first 3022 lines (no target data there).
 	As usual, all the effort lies in scraping and cleaning the source data.
 
 	Sample query at end of this file.

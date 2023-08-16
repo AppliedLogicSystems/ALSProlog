@@ -16,10 +16,11 @@
 		Education Level Code,Number of Births,\
 		Average Age of Mother (years),Average Birth Weight (g)
 
-	An additional INT (RowId) column is added as primary key.
+	An additional RowId column (type 'INT') is added as primary key;
 
 	As is typical, most of the effort lies in cleaning and adjusting the
-	data for insertion, including the column names.
+	data for insertion, including the column names.  The code below is
+	naive and inefficient; likely it can be improved.
 
 	Below, unary facts specify the files and names:
 
@@ -36,7 +37,7 @@
 	primary:
 		specifies the name of the additional primary key
 
-	Sample query at end of this file.
+	A sample query is presented at the end of this file.
  *============================================================================*/
     	%% For dev: the searchdir fact finds sqlite3_intf.pro, 
 	%% and then finds sqlite3_intf.psl:

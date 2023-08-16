@@ -18,7 +18,8 @@
 module sqlite3.
 
 export sql_create_table/4.
-export sql_create_table_string/4.
+export sql_create_table/5.
+export sql_create_table_string/5.
 export sql_drop_table/2.
 export insert_one_row/3.
 export insert_one_row_string/3.
@@ -51,17 +52,28 @@ export set_foreign_keys_off/1.
 */
 sql_create_table(DBAccess, TableName, ColumnsList, Primary)
 	:-
-	sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
+%	sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
+%	sqlite3_exec_norows(DBAccess, CreateTableString).
+	sql_create_table(DBAccess, TableName, ColumnsList, Primary, []).
+
+sql_create_table(DBAccess, TableName, ColumnsList, Primary, ForeignKeys)
+	:-
+	sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeys, CreateTableString),
 	sqlite3_exec_norows(DBAccess, CreateTableString).
 
-sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString)
+sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeys, CreateTableString)
 	:-
 	open(atom(CreateTableString), write, S),
 	printf(S, 'CREATE TABLE %t (', [TableName]),
-	write_sql_create_table_columns(ColumnsList, S, Primary),
+%	write_sql_create_table_columns(ColumnsList, S, Primary),
+%	(ForeignKeys \= [] -> write_foreign_keys(ForeignKeys, S) ; true),
+
+	write_sql_create_table_columns(ColumnsList, S, Primary, ForeignKeys),
+
 	printf(S, ');', []),
 	close(S).
 
+/*
 write_sql_create_table_columns([], _, _).
 
 write_sql_create_table_columns([ColumnSpec], S, Primary)
@@ -73,6 +85,29 @@ write_sql_create_table_columns([ColumnSpec | RestColumnSpecs], S, Primary)
 	write_sql_column(ColumnSpec, S, Primary),
 	printf(S, ', ', []),
 	write_sql_create_table_columns(RestColumnSpecs, S, Primary).
+*/
+
+write_sql_create_table_columns([], S, Primary, ForeignKeys)
+	:-
+	(ForeignKeys \= [] -> 
+		printf(S, ', ', []),
+		write_foreign_keys(ForeignKeys, S) 
+		; 
+		true
+	).
+
+write_sql_create_table_columns([ColumnSpec], S, Primary, ForeignKeys)
+	:-
+	write_sql_column(ColumnSpec, S, Primary),
+write_sql_create_table_columns([], S, Primary, ForeignKeys).
+
+write_sql_create_table_columns([ColumnSpec | RestColumnSpecs], S, Primary, ForeignKeys)
+	:-
+	write_sql_column(ColumnSpec, S, Primary),
+	printf(S, ', ', []),
+	write_sql_create_table_columns(RestColumnSpecs, S, Primary, ForeignKeys).
+
+
 
 write_sql_column(ColumnSpec, S, Primary)
 	:-
@@ -82,9 +117,24 @@ write_sql_column(ColumnSpec, S, Primary)
 	printf(S, '%t %t', [ColumnName, ColumnType]),
 	(ColumnName = Primary -> printf(S, ' PRIMARY KEY', []) 
 		; 
-		printf(S, ' ', []),
+%		printf(S, ' ', []),
 		print_constraints(ConstraintsList, S)
 	).
+
+write_foreign_keys([], S).
+write_foreign_keys([ForeignKey], S)
+	:-!,
+	write_out_foreign_key(ForeignKey, S, last).
+write_foreign_keys([ForeignKey | ForeignKeys], S)
+	:-
+	write_out_foreign_key(ForeignKey, S, notlast),
+	write_foreign_keys(ForeignKeys, S).
+
+%fk(<local column name>, <foreign table dentifying db functor>, <foreign table column>)
+write_out_foreign_key(fk(LocalColName, ForeignTable, ForeignColumn), S, Where)
+	:-
+	printf(S, 'FOREIGN KEY(%t) REFERENCES %t(%t) ', [LocalColName, ForeignTable, ForeignColumn]),
+	(Where = last -> printf(S, '', []) ; printf(S, ', ', []) ).
 
 print_constraints([], _).
 
