@@ -6062,7 +6062,7 @@ sio_var_to_atom()
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
-    UCHAR  buf[20];
+    UCHAR  buf[sizeof(void*)*8+2];
 
 
     w_get_An(&v1, &t1, 1);
@@ -6071,7 +6071,7 @@ sio_var_to_atom()
     if (t1 != WTP_UNBOUND)
 	FAIL;
 
-    sprintf((char *)buf, "_%lu", (long) (((PWord *) v1) - wm_heapbase));
+    snprintf((char *)buf, sizeof(buf), "_%lu", (long) (((PWord *) v1) - wm_heapbase));
     w_mk_uia(&v3, &t3, buf);
     if (w_unify(v2, t2, v3, t3))
 	SUCCEED;
