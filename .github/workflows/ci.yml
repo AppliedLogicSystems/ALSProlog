@@ -1,5 +1,9 @@
 name: 32-bit Build & Test
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '8 8 8 * *'
+
 jobs:
 
   Linux:

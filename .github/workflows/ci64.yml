@@ -1,5 +1,8 @@
 name: 64-bit Build & PARTIAL-TESTS
-on: [push]
+on:
+  push:
+  schedule:
+    - cron: '8 8 8 * *'
 env:
   LP64_PARTIAL_TEST: 1
 jobs:
