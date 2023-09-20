@@ -95,7 +95,7 @@ WriteMemWithFileCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
     char *ff;
     ff = memf->filename;
-    if (ff != '\0'){
+    if (ff != NULL){
         FILE *pf;
         pf = fopen(ff, "ab");
         if (pf){
