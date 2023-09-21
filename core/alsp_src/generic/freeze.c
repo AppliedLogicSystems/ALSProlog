@@ -103,9 +103,9 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 */
 		/* 1st two args of the delay term: */
 	one = (PWord *)((PWord *)wm_H + 1); 
-	w_install(one,(int)one,MTP_UNBOUND); 
+	w_install(one,(PWord)one,MTP_UNBOUND);
 	two = (PWord *)((PWord *)wm_H + 2); 
-	w_install(two,(int)two,MTP_UNBOUND);
+	w_install(two,(PWord)two,MTP_UNBOUND);
 		/* make the delay term: */
 	w_mk_term(&vv, &vvt, TK_DELAY, 4);
 		/* the 2nd arg (=two) is ok -- it's unbound;
@@ -173,7 +173,7 @@ printf("   >incoming var: %x[_%lu]\n",(int)*dv,
 	   blt_frez.pro.
 	 * ------------------------------------------------------*/
 
-	w_install(dv,(int)one,MTP_UNBOUND);
+	w_install(dv,(PWord)one,MTP_UNBOUND);
 
 /* printf("Calling update_chpt_slots(h=%x,hb=%x)\n",wm_H,wm_HB); */
 
@@ -300,13 +300,13 @@ pbi_clct_tr()
 				{
 				printf(" - Active\n");
 				Back1 = (PWord *)DrT-1;
-				w_install_argn((int)Back1, 2, clctv, cvt);
+				w_install_argn((PWord)Back1, 2, clctv, cvt);
     w_get_argaddr(argaddr, Back1, (int) 2, 4);
 
   *(((PWord *)wm_TR)-2) = *argaddr;
   *(((PWord *)wm_TR)-1) = (PWord)argaddr;
 
-				w_install(&clctv, (int)Back1, WTP_STRUCTURE);
+				w_install(&clctv, (PWord)Back1, WTP_STRUCTURE);
 				cvt = WTP_STRUCTURE;
 				}
 			else
@@ -332,8 +332,8 @@ pbi_clct_tr()
 			if (M_ISVAR(*Forw1) && (M_VARVAL(*Forw1) == (PWord)Forw1)) 
 			{
 				Back1 = (PWord *)DrT-1;
-				w_install_argn((int)Back1, 2, clctv, cvt);
-				w_install(&clctv, (int)Back1, WTP_STRUCTURE);
+				w_install_argn((PWord)Back1, 2, clctv, cvt);
+				w_install(&clctv, (PWord)Back1, WTP_STRUCTURE);
 				cvt = WTP_STRUCTURE;
 			}
 			else
@@ -376,7 +376,7 @@ pbi_del_tm_for()
 	{
 		DrT = deref_2((PWord)v1);
 		Back1 = (PWord *)DrT-1;
-		w_install(&tms, (int)Back1, WTP_STRUCTURE);
+		w_install(&tms, (PWord)Back1, WTP_STRUCTURE);
 		if (w_unify(v2, t2, tms, WTP_STRUCTURE))  
 			SUCCEED;
 		else
@@ -662,7 +662,7 @@ int
 disp_heap()
 {
     PWord v1,v2;
-    int   t1,t2,start,stop;
+    int   t1,t2; PWord start,stop;
 	PWord *CurA;
 
     w_get_An(&v1, &t1, 1);
@@ -670,22 +670,22 @@ disp_heap()
     if (t1 != WTP_INTEGER || t2 != WTP_INTEGER)
 		FAIL;
 
-printf("wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1, (int)v2, (int)wm_heapbase);
+printf("wm_H=%p v1=%x v2=%x wm_heapbase=%p\n", wm_H, (int)v1, (int)v2, wm_heapbase);
 
 		/* If v1,v2 > 0, need:  wm_H >= v1 >= v2 >=  wm_heapbase */
 	if (v1 == 0)
-		start = (int)wm_H;
+		start = (PWord)wm_H;
 	else if (wm_H < (PWord *)v1  || v1 < 0)
 		FAIL;
 	else 
-		start = (int)v1;
+		start = (PWord)v1;
 
 	if (v2 == 0) 
-		stop = (int)wm_heapbase+1;
+		stop = (PWord)wm_heapbase+1;
 	else if (v2 < 0)
 	{
-		stop = start + (int)v2;
-		if (stop < (int)wm_heapbase)
+		stop = start + (PWord)v2;
+		if (stop < (PWord)wm_heapbase)
 			FAIL;
 	}
 	else if ( (v1 < v2) || (((PWord *)v2) < wm_heapbase) )
@@ -693,7 +693,7 @@ printf("wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1, (int)v2, (int
 	else
 		stop = v2;
 
-printf("Heap display: start = %x --> stop = %x\n",start,stop);
+printf("Heap display: start = %lx --> stop = %lx\n",start,stop);
 
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
@@ -849,7 +849,7 @@ int
 x_disp_heap()
 {
     PWord v1,v2;
-    int   t1,t2,start,stop;
+    int   t1,t2; PWord start,stop;
 	PWord *CurA;
 
     w_get_An(&v1, &t1, 1);
@@ -857,22 +857,22 @@ x_disp_heap()
     if (t1 != WTP_INTEGER || t2 != WTP_INTEGER)
 		FAIL;
 
-printf("display_heap: wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1, (int)v2, (int)wm_heapbase);
+printf("display_heap: wm_H=%p v1=%x v2=%x wm_heapbase=%p\n", wm_H, (int)v1, (int)v2, wm_heapbase);
 
 		/* If v1,v2 > 0, need:  wm_H >= v1 >= v2 >=  wm_heapbase */
 	if (v1 == 0)
-		start = (int)wm_H;
+		start = (PWord)wm_H;
 	else if (wm_H < (PWord *)v1  || v1 < 0)
 		FAIL;
 	else 
-		start = (int)v1;
+		start = (PWord)v1;
 
 	if (v2 == 0) 
-		stop = (int)wm_heapbase+1;
+		stop = (PWord)wm_heapbase+1;
 	else if (v2 < 0)
 	{
-		stop = start + (int)v2;
-		if (stop < (int)wm_heapbase)
+		stop = start + (PWord)v2;
+		if (stop < (PWord)wm_heapbase)
 			FAIL;
 	}
 	else if ( (v1 < v2) || (((PWord *)v2) < wm_heapbase) )
@@ -880,7 +880,7 @@ printf("display_heap: wm_H=%x v1=%x v2=%x wm_heapbase=%x\n", (int)wm_H, (int)v1,
 	else
 		stop = v2;
 
-printf("====== Heap display_x: start = %x --> stop = %x\n",start,stop);
+printf("====== Heap display_x: start = %lx --> stop = %lx\n",start,stop);
 
 
 	for (CurA = (PWord *)start; CurA >= (PWord *)stop; CurA -= 1)
