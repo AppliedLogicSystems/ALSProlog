@@ -22,6 +22,7 @@ export sql_create_table/5.
 export sql_create_table_string/5.
 export sql_drop_table/2.
 export insert_one_row/3.
+export insert_one_row/4.
 export insert_one_row_string/3.
 export insert_rows/3.
 export select_one_table/3.
@@ -61,14 +62,14 @@ sql_create_table(DBAccess, TableName, ColumnsList, Primary, ForeignKeys)
 	sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeys, CreateTableString),
 	sqlite3_exec_norows(DBAccess, CreateTableString).
 
-sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeys, CreateTableString)
+sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeyData, CreateTableString)
 	:-
 	open(atom(CreateTableString), write, S),
 	printf(S, 'CREATE TABLE %t (', [TableName]),
 %	write_sql_create_table_columns(ColumnsList, S, Primary),
 %	(ForeignKeys \= [] -> write_foreign_keys(ForeignKeys, S) ; true),
 
-	write_sql_create_table_columns(ColumnsList, S, Primary, ForeignKeys),
+	write_sql_create_table_columns(ColumnsList, S, Primary, ForeignKeyData),
 
 	printf(S, ');', []),
 	close(S).
@@ -87,11 +88,13 @@ write_sql_create_table_columns([ColumnSpec | RestColumnSpecs], S, Primary)
 	write_sql_create_table_columns(RestColumnSpecs, S, Primary).
 */
 
-write_sql_create_table_columns([], S, Primary, ForeignKeys)
+%write_sql_create_table_columns([], S, Primary, ForeignKeyData)
+write_sql_create_table_columns([], S, Primary, FKLine)
 	:-
-	(ForeignKeys \= [] -> 
-		printf(S, ', ', []),
-		write_foreign_keys(ForeignKeys, S) 
+	(FKLine \= nothing -> 
+%		printf(S, ', ', []),
+%		write_foreign_keys(ForeignKeys, S) 
+		printf(S, ', %t ', [FKLine])
 		; 
 		true
 	).
@@ -204,19 +207,28 @@ sql_drop_table(DBAccess, TableName)
 	 *----------------------------------------------------------------*/
 insert_one_row(DBAccess, TableName, RowList)
 	:-
-	insert_one_row_string(TableName, RowList, InsertString),
+	insert_one_row(DBAccess, TableName, RowList, false).
+
+insert_one_row(DBAccess, TableName, RowList, Q4Boolean)
+	:-
+	insert_one_row_string(TableName, RowList, Q4Boolean, InsertString),
         sqlite3_exec_norows(DBAccess, InsertString).
 
-insert_one_row_string(TableName, RowList, InsertString)
+insert_one_row_string(TableName, RowList, Q4Boolean, InsertString)
 	:-
 	open(atom(InsertString), write, S),
 	printf(S, 'INSERT INTO %t VALUES (', [TableName]), 
-	compose_row(RowList, S),
+	(RowList = [_|_] -> 
+		compose_row(RowList, Q4Boolean, S)
+		;
+		RowList =.. [_ | Args],
+		compose_row(Args, Q4Boolean, S)
+	),
 	printf(S, ');', []),
 	close(S).
 
-compose_row([], S).
-compose_row([Value | RowList], S)
+compose_row([], Q4Boolean, S).
+compose_row([Value | RowList], Q4Boolean, S)
 	:-
 	number(Value),
         !,
@@ -224,19 +236,52 @@ compose_row([Value | RowList], S)
 		printf(S, '%t ', [Value])
 		;
 		printf(S, '%t, ', [Value]),
-		compose_row(RowList, S)
+		compose_row(RowList, Q4Boolean, S)
 	).
 
-compose_row([Value | RowList], S)
+compose_row([Value | RowList], Q4Boolean, S)
 	:-
 	atom(Value),
         !,
-	(RowList = [] -> 
-		printf(S, '\'%t\' ', [Value])
+	(RowList = [] -> 	% whether there's a terminating comma output:
+		(Q4Boolean=true ->
+			atom_codes(Value, VCs),
+			put_single_quotes(3, S),
+			q4_write(VCs, S),
+			put_single_quotes(3, S)
+			;
+			printf(S, '\'\'\'%t\'\'\' ', [Value])
+		)
 		;
-		printf(S, '\'%t\', ', [Value]),
-		compose_row(RowList, S)
+		(Q4Boolean=true ->
+			atom_codes(Value, VCs),
+			put_single_quotes(3, S),
+			q4_write(VCs, S),
+			put_single_quotes(3, S),
+			put_code(S, 0',),
+			compose_row(RowList, Q4Boolean, S)
+			;
+			printf(S, '\'\'\'%t\'\'\', ', [Value]),
+			compose_row(RowList, Q4Boolean, S)
+		)
 	).
+
+put_single_quotes(0, S) :-!.
+put_single_quotes(N, S)
+	:-
+	put_code(S, 0''),
+	M is N-1,
+	put_single_quotes(M, S).
+
+q4_write([], S).
+q4_write([0'' | CCs], S)
+        :-
+	put_single_quotes(4, S),
+        q4_write(CCs, S).
+q4_write([CC | CCs], S)
+        :-
+	put_code(S, CC),
+        q4_write(CCs, S).
 
 
 insert_rows([], DBAccess, TableName).
@@ -308,7 +353,7 @@ select_where_lists(+, +, +, +, -)
 
 	* ColAtomsList is a list of atoms naming a subset of the columns of TableName
 	* WhereClauseList is a list of atoms (UIAs) expressing sql conditons on
-	  columns of TableName
+	  those columns of TableName
 
  *-----------------------------------------------------------------------------------*/
 
@@ -439,13 +484,13 @@ sql_create_index(ColExpr, Modifier, TableName, IndexName, Primary, WhereClause, 
 sql_create_index(ColExpr, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
 	:-
 	sql_index_string(ColExpr, Modifier, TableName, IndexName, WhereClause, CreateIndexString),
-printf('Index String: %t\n', [CreateIndexString]),
+%printf('Index String: %t\n', [CreateIndexString]),
         sqlite3_exec_norows(DBHandle, CreateIndexString).
 	
 sql_create_index(ColExprsList, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
 	:-
 	sql_index_string(ColExprsList, Modifier, TableName, IndexName, WhereClause, CreateIndexString),
-printf('%Index String: t\n', [CreateIndexString]),
+%printf('%Index String: t\n', [CreateIndexString]),
         sqlite3_exec_norows(DBHandle, CreateIndexString).
 	
 sql_index_string(ColExpr, Modifier, TableName, IndexName, WhereClause, IndexString)
@@ -531,7 +576,7 @@ Note from https://www.sqlite.org/foreignkeys.html:
 		insert_one_row(DBName, TableName, RowList)
 	invoke separate connections.  So even though the set_foreign_keys_on(DBName) call turns
 	foreign key constraint support, the 2nd call, insert_one_row(...) occurs through a
-	separate connection, and foreign key constraint support will NOT be for that
+	separate connection, and foreign key constraint support will NOT be on for that
 	connection.  One needs to separately open a connection, recieving a DBHandle, and
 	then pass that DBHandle to the two calls:
 		sqlite3_open(DBName, DBHandle),
@@ -570,6 +615,17 @@ dbl_sgn_q([0'' | Cs], [0'', 0'' | DCs])
 dbl_sgn_q([C | Cs], [C | DCs])
         :-
         dbl_sgn_q(Cs, DCs).
+export quad_sgn_q/2.
+quad_sgn_q([], []).
+quad_sgn_q([0'' | Cs], [0'', 0'', 0'', 0'' | DCs])
+        :-
+        quad_sgn_q(Cs, DCs).
+quad_sgn_q([C | Cs], [C | DCs])
+        :-
+        quad_sgn_q(Cs, DCs).
+
+quad_sgn_q_a(Atom, DCs).
+
 
 export drop_db/1.
 drop_db(DBName) :- 
