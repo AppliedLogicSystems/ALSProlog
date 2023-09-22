@@ -195,7 +195,7 @@ pbi_system()
 }
 
 
-#ifdef OSACCESS
+#if 0 // ifdef OSACCESS: tmpnam/mktemp are depricated for security
 /*
  * pbi_tmpnam calls either tmpnam or tempnam to obtain the name of a temporary
  * file.  tmpnam is pretty lame, but unfortunately tempnam (note the 'e') is
