@@ -827,7 +827,7 @@ c_convertCstrPstr()
     for (i = len; i > 0; i--)
 	ptr[i] = ptr[i - 1];
 
-    ptr[0] = ((len >= 255) ? 255 : len);
+    ptr[0] = (char)((len >= 255) ? 255 : len);
 
     PI_SUCCEED;
 }
