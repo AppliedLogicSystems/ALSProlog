@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#define CURL_DISABLE_DEPRECATION
 #include <curl/curl.h>
 
 /* Prolog types:
