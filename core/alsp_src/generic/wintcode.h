@@ -263,7 +263,7 @@ struct codeblock {
 #define CGI_OFFSET	(32-CGI_WIDTH)
 #define CGI_MASK	((1<<CGI_WIDTH)-1)
 #define CGI_VMASK	((1<<CGI_OFFSET)-1)
-#define CGI_ASSERTA	((-1<<(CGI_WIDTH-1))+1)
+#define CGI_ASSERTA	(((unsigned int)-1<<(CGI_WIDTH-1))+1)
 #define CGI_ASSERTZ	((1<<(CGI_WIDTH-1))-1)
 
 #define cgId(item)	(((long)clauseId(item)) >> CGI_OFFSET)
