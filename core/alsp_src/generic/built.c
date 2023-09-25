@@ -60,10 +60,10 @@ extern
 #ifdef DOS
 
 extern
-      pbi_int86_9arg(), pbi_int86_10arg(), pbi_int86_16arg();
+      pbi_int86_9arg(void), pbi_int86_10arg(void), pbi_int86_16arg(void);
 
 extern
-      pbi_dos_first_match(), pbi_dos_next_match();
+      pbi_dos_first_match(void), pbi_dos_next_match(void);
 
 #endif /* DOS */
 #endif /* arch_i386 */
@@ -805,7 +805,7 @@ BLT2("$comma", 3, ic_install_bref, INTF("$comma"), INTF(4), (char *) -1),
 
 
 void
-builtin_init()
+builtin_init(void)
 {
     /*//static long builtins_initialized=0;*/
 
@@ -865,7 +865,7 @@ int pbi_uncaught_interrupt(void)
 }
 
 void
-time_cut_interrupt_init()
+time_cut_interrupt_init(void)
 {
     os_init_time();
 
@@ -911,7 +911,7 @@ static struct blt_addr_tbl_entry {
 } blt_addr_tbl[BLT_ADDR_TBL_SIZE];
 
 
-builtin_addr_table_init()
+builtin_addr_table_init(void)
 {
     register int i;
     register struct blt_struct *p;

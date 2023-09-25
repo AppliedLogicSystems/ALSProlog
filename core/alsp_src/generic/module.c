@@ -52,8 +52,8 @@ struct use_entry {
 #endif
 
 Code *
-resolve_reference(entfrom)
-    ntbl_entry *entfrom;	/* entry from which we are coming from */
+resolve_reference(ntbl_entry *entfrom)
+    /* entfrom: entry from which we are coming from */
 {
     ntbl_entry *entto;		/* entry where we'd like to go to */
     PWord functor;
@@ -90,9 +90,7 @@ resolve_reference(entfrom)
 #endif
 
 ntbl_entry *
-resolve_ref(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+resolve_ref(PWord modid, PWord tokid, int arity)
 {
     register int u;
     int   modidx;
@@ -133,9 +131,7 @@ resolve_ref(modid, tokid, arity)
 #endif
 
 Code *
-call_resolve_reference(m, p, a, i)
-    PWord m, p;
-    int   a, i;
+call_resolve_reference(PWord m, PWord p, int a, int i)
 {
     ntbl_entry *ent;
     dbprot_t odbrs;
@@ -175,7 +171,7 @@ call_resolve_reference(m, p, a, i)
 
 #ifdef PACKAGE
 void
-set_curr_package_module()
+set_curr_package_module(void)
 {
     /* set current module to the module "builtin" */
     top_module = &module_stack[0];
@@ -185,12 +181,11 @@ set_curr_package_module()
 
 
 int
-next_module(n, m, mt, u, ut)
-    int   n;
-    PWord *m;			/* module */
-    int  *mt;			/* module type */
-    PWord *u;			/* use list */
-    int  *ut;			/* use list type */
+next_module(int n, PWord *m, int  *mt, PWord *u, int  *ut)
+    /* m: module */
+    /* mt: module type */
+    /* u: use list */
+    /* ut: use list type */
 {
     PWord l, ll;		/* temporary lists */
     int   llt;			/* temporary list types */
@@ -245,8 +240,7 @@ next_module(n, m, mt, u, ut)
  */
 
 int
-mod_id(tk)
-    int   tk;
+mod_id(int tk)
 {
     int   i;
 
@@ -271,8 +265,7 @@ mod_id(tk)
  */
 
 int
-modprobe_id(tk)
-    PWord tk;
+modprobe_id(PWord tk)
 {
     int   i;
 
@@ -309,8 +302,7 @@ struct defprocs {
 
 
 void
-new_mod(tk)
-    PWord tk;
+new_mod(PWord tk)
 {
     register int i;
     int   modidx;
@@ -355,7 +347,7 @@ new_mod(tk)
  */
 
 void
-end_mod()
+end_mod(void)
 {
 
     if (top_module == module_stack) {
@@ -371,8 +363,7 @@ end_mod()
  */
 
 void
-push_clausegroup(cg)
-    int   cg;
+push_clausegroup(int cg)
 {
     if (++top_clausegroup == &clausegroup_stack[MAXMODNESTING])
 	fatal_error(FE_OVER_CGSTK, 0);
@@ -384,7 +375,7 @@ push_clausegroup(cg)
  */
 
 int
-pop_clausegroup()
+pop_clausegroup(void)
 {
     int   cg;
 
@@ -401,8 +392,7 @@ pop_clausegroup()
  */
 
 void
-add_default_use(tokid)
-    int   tokid;
+add_default_use(int tokid)
 {
     int   i;
 
@@ -429,8 +419,7 @@ add_default_use(tokid)
 
 #ifdef PACKAGE
 void
-pckg_add_default_use(tokid)
-    int   tokid;
+pckg_add_default_use(int tokid)
 {
     int   i;
 
@@ -454,9 +443,8 @@ pckg_add_default_use(tokid)
  */
 
 int
-get_default_use(n, m, mt)
-    PWord n;
-    PWord *m, *mt;		/* default use module name */
+get_default_use(PWord n, PWord *m, PWord *mt)
+    /* m, mt: default use module name */
 {
     if (n >= 0 && n < default_usemax) {
 	*m = (PWord) default_uses[n];
@@ -492,9 +480,7 @@ get_default_use(n, m, mt)
  */
 
 void
-add_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+add_default_proc(PWord tokid, int arity)
 {
     int   i;
 
@@ -528,9 +514,7 @@ add_default_proc(tokid, arity)
  * this is called from pckgload.c
  */
 void
-pckg_add_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+pckg_add_default_proc(PWord tokid, int arity)
 {
     int   i;
 
@@ -555,9 +539,7 @@ pckg_add_default_proc(tokid, arity)
  */
 
 int
-pckg_is_default_proc(tokid, arity)
-    PWord tokid;
-    int   arity;
+pckg_is_default_proc(PWord tokid, int arity)
 {
     int   i;
 
@@ -577,10 +559,9 @@ pckg_is_default_proc(tokid, arity)
  */
 
 int
-get_default_proc(n, p, pt, a, at)
-    PWord n;
-    PWord *p, *pt;		/* default procedure name */
-    PWord *a, *at;		/* default procedure arity */
+get_default_proc(PWord n, PWord *p, PWord *pt, PWord *a, PWord *at)
+    /* p, pt: default procedure name */
+    /* a, at: default procedure arity */
 {
     if (n >= 0 && n < default_procmax) {
 	*p = (PWord) default_procs[n].tokid;
@@ -605,8 +586,7 @@ get_default_proc(n, p, pt, a, at)
  */
 
 void
-adduse(m, u)
-    int   m, u;
+adduse(int m, int u)
 {
     int   up;			/* use pointer */
 
@@ -642,10 +622,10 @@ adduse(m, u)
 
 
 void
-export_pred(mod, tok, arity)
-    PWord mod;			/* module id */
-    PWord tok;			/* token id  */
-    int   arity;		/* arity     */
+export_pred(PWord mod, PWord tok, int arity)
+    /* mod: module id */
+    /* tok: token id  */
+    /* arity: arity     */
 {
     ntbl_entry *ent;
 
@@ -667,10 +647,7 @@ export_pred(mod, tok, arity)
  */
 
 void
-createModuleClosureProcedure(name1, arity, name2)
-    PWord name1;
-    int   arity;
-    PWord name2;
+createModuleClosureProcedure(PWord name1, int arity, PWord name2)
 {
     ntbl_entry *ent1, *ent2;
     int   arity2;
@@ -695,11 +672,7 @@ createModuleClosureProcedure(name1, arity, name2)
 }
 
 int
-createModCloseProc(tgtmod, name1, arity, name2)
-	int tgtmod;
-    PWord name1;
-    int   arity;
-    PWord name2;
+createModCloseProc(int tgtmod, PWord name1, int arity, PWord name2)
 {
     ntbl_entry *ent1, *ent2;
     int   arity2;
@@ -730,7 +703,7 @@ createModCloseProc(tgtmod, name1, arity, name2)
 #ifdef debugging
 
 void
-mod_stats()
+mod_stats(void)
 {
     int   m, u;
 
@@ -754,7 +727,7 @@ mod_stats()
 
 
 void
-module_init()
+module_init(void)
 {
     if (!module_stack) {
 	module_stack = (int *)

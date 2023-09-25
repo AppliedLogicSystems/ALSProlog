@@ -31,8 +31,7 @@ static	void	vwalk_rule	( pword, int, int );
 static	void	vwalk_vo	( pword, int, int );
 
 static void
-init_vtbl(n)
-    int   n;
+init_vtbl(int n)
 {
     register int i;
 
@@ -76,9 +75,7 @@ static void (*vwalk_tbl[]) ( pword, int, int ) = {
 #define VWALK(t,l,g) (*vwalk_tbl[TYPEOF(t)])(t,l,g)
 
 static void
-vwalk_term(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_term(pword t, int l, int gn)
 {
     register int i, n;
 
@@ -88,17 +85,13 @@ vwalk_term(t, l, gn)
 }
 
 static void
-vwalk_const(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_const(pword t, int l, int gn)
 {
     /* empty */
 }
 
 static void
-vwalk_list(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_list(pword t, int l, int gn)
 {
     while (TYPEOF(t) == TP_LIST) {
 	VWALK(LIST_CAR(t), l + 1, gn);	/* Walk the car */
@@ -108,9 +101,7 @@ vwalk_list(t, l, gn)
 }
 
 static void
-vwalk_rule(t, l, gn)
-    pword t;
-    int   l, gn;
+vwalk_rule(pword t, int l, int gn)
 {
     register int i, n;
 
@@ -126,9 +117,7 @@ vwalk_rule(t, l, gn)
 }
 
 static void
-vwalk_vo(t, l, gn)		/* the payoff */
-    pword t;
-    int   l, gn;
+vwalk_vo(pword t, int l, int gn)		/* the payoff */
 {
     register int vo = (int) VO_VAL(t);
 
@@ -152,8 +141,7 @@ vwalk_vo(t, l, gn)		/* the payoff */
  */
 
 int
-classify_vars(t)
-    pword t;
+classify_vars(pword t)
 {
     int   ptb[VTBLSIZE];
     register int i, j;		/* indices */
@@ -236,9 +224,7 @@ classify_vars(t)
  */
 
 void
-compute_call_env_sizes(ngoals, nvars)
-    int   ngoals;
-    int   nvars;
+compute_call_env_sizes(int ngoals, int nvars)
 {
     register int i;
     register int j;

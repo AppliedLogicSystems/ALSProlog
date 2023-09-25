@@ -28,9 +28,7 @@ static	int	get_prec	( PWord, PWord );
  */
 
 static int
-string_to_number(str, dblp)
-    register UCHAR *str;
-    double *dblp;
+string_to_number(register UCHAR *str, double *dblp)
 {
     register int c;
     double v;
@@ -157,7 +155,7 @@ string_to_number(str, dblp)
 
 
 int
-pbi_name()
+pbi_name(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -286,8 +284,7 @@ pbi_name()
 
 
 static int
-get_prec(assoc, tok)
-    PWord assoc, tok;
+get_prec(PWord assoc, PWord tok)
 {
     int   prec, tassoc;
 
@@ -346,7 +343,7 @@ get_prec(assoc, tok)
 }
 
 int
-pbi_op()
+pbi_op(void)
 {				/* op(P,A,T) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -431,7 +428,7 @@ pbi_op()
 }
 
 int
-pbi_tokid()
+pbi_tokid(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -447,7 +444,7 @@ pbi_tokid()
 
 
 int
-pbi_uia_alloc()
+pbi_uia_alloc(void)
 {				/* $uia_alloc(BufLen,UIABuf) */
     PWord v1, v2;
     int   t1, t2;
@@ -470,7 +467,7 @@ pbi_uia_alloc()
 
 
 int
-pbi_uia_peekb()
+pbi_uia_peekb(void)
 {				/* $uia_peekb(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -495,7 +492,7 @@ pbi_uia_peekb()
 
 
 int
-pbi_uia_pokeb()
+pbi_uia_pokeb(void)
 {				/* $uia_pokeb(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -518,7 +515,7 @@ pbi_uia_pokeb()
 
 
 int
-pbi_uia_peekw()
+pbi_uia_peekw(void)
 {				/* $uia_peekw(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -543,7 +540,7 @@ pbi_uia_peekw()
 
 
 int
-pbi_uia_pokew()
+pbi_uia_pokew(void)
 {				/* $uia_pokew(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -566,7 +563,7 @@ pbi_uia_pokew()
 
 
 int
-pbi_uia_peekl()
+pbi_uia_peekl(void)
 {				/* $uia_peekl(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -593,7 +590,7 @@ pbi_uia_peekl()
 
 
 int
-pbi_uia_pokel()
+pbi_uia_pokel(void)
 {				/* $uia_pokel(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -637,7 +634,7 @@ do_pbi_uia_peekd(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 }	/* do_pbi_uia_peekd */
 
 int
-pbi_uia_peekd()
+pbi_uia_peekd(void)
 {				/* $uia_peekd(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -668,7 +665,7 @@ do_pbi_uia_poked(PWord v1, int t1, PWord v2, int t2, PWord v3, int t3)
 }	/* do_pbi_uia_poked */
 
 int
-pbi_uia_poked()
+pbi_uia_poked(void)
 {				/* $uia_poked(UIABuf,Offset,Value) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -683,7 +680,7 @@ pbi_uia_poked()
 
 
 int
-pbi_uia_peek()
+pbi_uia_peek(void)
 {				/* $uia_peek(UIABuf,Offset,Size,Val) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -707,7 +704,7 @@ pbi_uia_peek()
 
 
 int
-pbi_uia_poke()
+pbi_uia_poke(void)
 {			/* $uia_poke(UIABuf,Offset,Size,Val,ValOffset) */
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -742,7 +739,7 @@ pbi_uia_poke()
 
 
 int
-pbi_uia_peeks()
+pbi_uia_peeks(void)
 {				/* $uia_peeks(UIABuf,Offset,Sym) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -771,7 +768,7 @@ pbi_uia_peeks()
 
 
 int
-pbi_uia_peeks4()
+pbi_uia_peeks4(void)
 {				/* $uia_peeks(UIABuf,Offset,Size,Sym) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -801,7 +798,7 @@ pbi_uia_peeks4()
 
 
 int
-pbi_uia_pokes()
+pbi_uia_pokes(void)
 {				/* $uia_pokes(UIABuf,Offset,Sym) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -821,7 +818,7 @@ pbi_uia_pokes()
 
 
 int
-pbi_uia_clip()
+pbi_uia_clip(void)
 {				/* $uia_clip(UIABuf,Size) */
     PWord v1, v2;
     int   t1, t2;
@@ -837,7 +834,7 @@ pbi_uia_clip()
 
 
 int
-pbi_uia_size()
+pbi_uia_size(void)
 {				/* $uia_size(UIABuf,Size) */
     PWord v1, v2;
     int   t1, t2;
@@ -852,10 +849,7 @@ pbi_uia_size()
 }
 
 int
-get_number(v, t, val)
-    PWord v;
-    int   t;
-    double *val;
+get_number(PWord v, int t, double *val)
 {
     if (t == WTP_INTEGER)
 	*val = (double) v;
@@ -888,7 +882,7 @@ get_number(v, t, val)
 }
 
 int
-pbi_atom_concat()
+pbi_atom_concat(void)
 {				/* $atom_concat(In1,In2,Out) */
     PWord v1, v2, v3, vConcat;
     int   t1, t2, t3, tConcat;
@@ -922,7 +916,7 @@ pbi_atom_concat()
  */
 
 int
-pbi_sub_atom()
+pbi_sub_atom(void)
 {
     PWord v1, v2, v3, v4, vSA;
     int   t1, t2, t3, t4, tSA;
@@ -971,7 +965,7 @@ pbi_sub_atom()
  */
 
 int
-pbi_atom_length()
+pbi_atom_length(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -1011,7 +1005,7 @@ pbi_atom_length()
  */
 
 int
-pbi_char_code()
+pbi_char_code(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -1060,11 +1054,7 @@ enum C_list_codes {
 static int string_to_C_list ( PWord *, int *, UCHAR *, enum C_list_codes );
 
 static int
-string_to_C_list(vp,tp,str,C_which)
-    PWord *vp;
-    int *tp;
-    UCHAR *str;
-    enum C_list_codes C_which;
+string_to_C_list(PWord *vp,int *tp,UCHAR *str,enum C_list_codes C_which)
 {
     register PWord *H, *lim;
     if (!*str) {
@@ -1104,12 +1094,7 @@ enum ltos_retcodes {
 static enum ltos_retcodes C_list_to_string ( PWord *, int *, PWord, int, enum C_list_codes );
 
 static enum ltos_retcodes
-C_list_to_string(vp,tp,vin,tin,C_which)
-    PWord *vp;
-    int *tp;
-    PWord vin;
-    int tin;
-    enum C_list_codes C_which;
+C_list_to_string(PWord *vp,int *tp,PWord vin,int tin,enum C_list_codes C_which)
 {
     PWord va;
     int ta;
@@ -1169,7 +1154,7 @@ C_list_to_string(vp,tp,vin,tin,C_which)
  */
 
 int
-pbi_atom_chars()
+pbi_atom_chars(void)
 {
     PWord v1, v2, vr;
     int t1, t2, tr;
@@ -1235,7 +1220,7 @@ pbi_atom_chars()
  */
 
 int
-pbi_atom_codes()
+pbi_atom_codes(void)
 {
     PWord v1, v2, vr;
     int t1, t2, tr;
@@ -1296,7 +1281,7 @@ pbi_atom_codes()
 #ifdef SUBTYPES
 
 int
-pbi_less_sut_int()
+pbi_less_sut_int(void)
 {				/* less_sut_int(A,B) */
     PWord v1, v2;
     int   t1, t2;
@@ -1325,7 +1310,7 @@ pbi_less_sut_int()
 }
 
 int
-pbi_eq_sut_int()
+pbi_eq_sut_int(void)
 {				/* eq_sut_int(A,B) */
     PWord v1, v2;
     int   t1, t2;
@@ -1356,10 +1341,7 @@ pbi_eq_sut_int()
 extern void    w_mk_sut_int ( PWord *, int *, long );
 
 void
-w_mk_sut_int(rval, rtag, ival)
-    PWord *rval;
-	int  *rtag;
-	long ival;
+w_mk_sut_int(PWord *rval, int  *rtag, long ival)
 {
     *rval = (PWord) MMK_UIAVAL(wm_H);
 	*rtag = WTP_UIA;
@@ -1375,7 +1357,7 @@ w_mk_sut_int(rval, rtag, ival)
 	   same as the value in the incoming prolog integer 
 	   in arg #1 */
 int
-pbi_mk_sut_int()
+pbi_mk_sut_int(void)
 {				/* mk_sut_int(A,B) */
     PWord v1, v2, new;
     int   t1, t2, newt;
@@ -1394,7 +1376,7 @@ pbi_mk_sut_int()
 }
 
 int
-pbi_t_sut_int()
+pbi_t_sut_int(void)
 {
 	long i,m;
 
@@ -1409,7 +1391,7 @@ pbi_t_sut_int()
 }
 
 int
-pbi_pos_atom()
+pbi_pos_atom(void)
 {
     PWord v1, v2, new;
     int   t1, t2, newt;

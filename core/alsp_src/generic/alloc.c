@@ -24,8 +24,7 @@ static pword areap;
 static	pword	allocat	( size_t );
 
 void
-prs_area_init(marksize)
-    unsigned long  marksize;
+prs_area_init(unsigned long marksize)
 {
     if (marksize < sizeof (pwrd) * PARSER_AREASIZ)
 	marksize = sizeof (pwrd) * PARSER_AREASIZ;
@@ -46,8 +45,7 @@ prs_area_init(marksize)
 }
 
 static pword
-allocat(size)
-    size_t size;
+allocat(size_t size)
 {
     register pword t;
 
@@ -62,14 +60,13 @@ allocat(size)
 }
 
 void
-alc_rst()
+alc_rst(void)
 {
     areap = prs_area;
 }
 
 pword
-mk_term(arity)
-    long  arity;
+mk_term(long arity)
 {
     register pword t;
 
@@ -80,8 +77,7 @@ mk_term(arity)
 }
 
 pword
-mk_functor(tkid, arity)
-    long  tkid, arity;
+mk_functor(long tkid, long arity)
 {
     register pword f;
 
@@ -94,8 +90,7 @@ mk_functor(tkid, arity)
 }
 
 pword
-mk_list(car, cdr)
-    pword car, cdr;
+mk_list(pword car, pword cdr)
 {
     register pword c;
 
@@ -108,8 +103,7 @@ mk_list(car, cdr)
 }
 
 pword
-mk_int(iv)
-    long  iv;
+mk_int(long iv)
 {
     register pword h;
 
@@ -122,8 +116,7 @@ mk_int(iv)
 
 
 pword
-mk_vo(vo)
-    long  vo;
+mk_vo(long vo)
 {
     register pword z;
 
@@ -135,8 +128,7 @@ mk_vo(vo)
 }
 
 pword
-mk_rule(ng)
-    long  ng;
+mk_rule(long ng)
 {
     register pword rv;
 
@@ -148,8 +140,7 @@ mk_rule(ng)
 }
 
 pword
-mk_double(dbl)
-    double dbl;
+mk_double(double dbl)
 {
     register pword d;
 
@@ -178,8 +169,7 @@ mk_double(dbl)
 
 #ifdef DoubleType
 double
-double_val(p)
-    pword p;
+double_val(pword p)
 {
     double d;
 
@@ -208,8 +198,7 @@ double_val(pword p)
  */
 
 long
-functor_id_of_term(p)
-    pword p;
+functor_id_of_term(pword p)
 {
     switch (TYPEOF(p)) {
 	case TP_TERM:
@@ -224,8 +213,7 @@ functor_id_of_term(p)
 }
 
 long
-arity_of_term(p)
-    pword p;
+arity_of_term(pword p)
 {
     switch (TYPEOF(p)) {
 	case TP_TERM:
@@ -245,9 +233,7 @@ arity_of_term(p)
  */
 
 int
-is_double(d, t)
-    double *d;
-    pword t;
+is_double(double *d, pword t)
 {
 #ifdef DoubleType
     if (TYPEOF(t) == TP_DOUBLE) {
@@ -270,8 +256,7 @@ is_double(d, t)
 
 
 pword
-mk_uia(s)
-    char *s;
+mk_uia(char *s)
 {
     pword f;
     register char *t;

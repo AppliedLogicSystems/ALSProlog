@@ -111,10 +111,7 @@ deref(PWord w)
 }
 
 void
-w_get(vp, tp, in)
-    PWord *vp;
-    int  *tp;
-    PWord in;
+w_get(PWord *vp, int  *tp, PWord in)
 {
 
     in = deref(in);
@@ -166,10 +163,7 @@ w_get(vp, tp, in)
 }
 
 void
-w_install(addr, val, tag)
-    PWord *addr;
-    PWord val;
-    int   tag;
+w_install(PWord *addr, PWord val, int tag)
 {
     switch (tag) {
 	case WTP_UNBOUND:
@@ -204,11 +198,7 @@ w_install(addr, val, tag)
 }
 
 void
-w_install_argn(s, n, v, t)
-    PWord s;
-    int   n;
-    PWord v;
-    int   t;
+w_install_argn(PWord s, int n, PWord v, int t)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -219,9 +209,7 @@ w_install_argn(s, n, v, t)
 }
 
 void
-w_install_unbound_argn(s, n)
-    PWord s;
-    int   n;
+w_install_unbound_argn(PWord s, int n)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -232,11 +220,7 @@ w_install_unbound_argn(s, n)
 }
 
 void
-w_get_argn(rval, rtag, s, argn)
-    PWord *rval;
-    int  *rtag;
-    PWord s;
-    int   argn;
+w_get_argn(PWord *rval, int *rtag, PWord s, int argn)
 {
 #ifdef BigStruct
     if (MFUNCTOR_ARITY(*((PWord *) s)) == ESCAPE_ARITY) {
@@ -247,11 +231,7 @@ w_get_argn(rval, rtag, s, argn)
 }
 
 void
-w_mk_term(rval, rtag, func, arity)
-    PWord *rval;
-    int  *rtag;
-    PWord func;
-    int   arity;
+w_mk_term(PWord *rval, int *rtag, PWord func, int arity)
 {
     register PWord *p;
 
@@ -275,17 +255,13 @@ w_mk_term(rval, rtag, func, arity)
 }
 
 void
-w_get_functor(rfunc, saddr)
-    PWord *rfunc;
-    PWord saddr;
+w_get_functor(PWord *rfunc, PWord saddr)
 {
     *rfunc = MFUNCTOR_TOKID(*((PWord *) saddr));
 }
 
 void
-w_get_arity(rarity, saddr)
-    int  *rarity;
-    PWord saddr;
+w_get_arity(int *rarity, PWord saddr)
 {
     *rarity = MFUNCTOR_ARITY(*((PWord *) saddr));
 #ifdef BigStruct
@@ -296,9 +272,7 @@ w_get_arity(rarity, saddr)
 }
 
 void
-w_mk_list(rval, rtag)
-    PWord *rval;
-    int  *rtag;
+w_mk_list(PWord *rval, int *rtag)
 {
     *rval = (PWord) wm_H;
     wm_H += 2;
@@ -311,9 +285,7 @@ w_mk_list(rval, rtag)
  */
 
 void
-w_mk_unbound(rval, rtag)
-    PWord *rval;
-    int  *rtag;
+w_mk_unbound(PWord *rval, int *rtag)
 {
     register PWord *p;
 
@@ -331,10 +303,7 @@ w_mk_unbound(rval, rtag)
  */
 
 void
-w_get_An(rval, rtag, n)
-    PWord *rval;
-    int  *rtag;
-    int  n;
+w_get_An(PWord *rval, int  *rtag, int n)
 {
     w_get(rval, rtag, *(wm_SP + n + 1));
 }
@@ -349,10 +318,7 @@ w_get_An(rval, rtag, n)
  */
 
 UCHAR *
-w_get_uianame(s, uia, size)
-    register UCHAR *s;
-    PWord uia;
-    register int size;
+w_get_uianame(register UCHAR *s, PWord uia, register int size)
 {
     UCHAR *buf = s;
     register UCHAR *t;
@@ -382,10 +348,7 @@ w_get_uianame(s, uia, size)
  * output of UIAs, hence the somewhat messy code.
  */
 void
-w_mk_uia(rval, rtag, str)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
+w_mk_uia(PWord *rval, int  *rtag, register UCHAR *str)
 {
     register UCHAR *t;
     register int i = 0;
@@ -414,11 +377,7 @@ w_mk_uia(rval, rtag, str)
  *      the length of str is explicitly passed, so str does not have to be 0 terminated.
  */
 void
-w_mk_len_uia(rval, rtag, str, len)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
-    register size_t len;
+w_mk_len_uia(PWord *rval, int *rtag, register UCHAR *str, register size_t len)
 {
     register UCHAR *t;
     register int i = len;
@@ -448,10 +407,7 @@ w_mk_len_uia(rval, rtag, str, len)
  */
 
 void
-w_mk_uia_in_place(rval, rtag, str)
-    PWord *rval;
-    int  *rtag;
-    register UCHAR *str;
+w_mk_uia_in_place(PWord *rval, int *rtag, register UCHAR *str)
 {
     register UCHAR *t;
     register int i;
@@ -478,10 +434,7 @@ w_mk_uia_in_place(rval, rtag, str)
  *      uia will be stored.
  */
 void
-w_uia_alloc(rval, rtag, size)
-    PWord *rval;
-    int  *rtag;
-    size_t size;
+w_uia_alloc(PWord *rval, int *rtag, size_t size)
 {
     register PWord *t;
 #ifdef __LP64__
@@ -522,9 +475,7 @@ w_uia_alloc(rval, rtag, size)
  * w_uia_clip(uia,clipsize)
  */
 int
-w_uia_clip(uia, clipsize)
-    PWord uia;
-    int   clipsize;
+w_uia_clip(PWord uia, int clipsize)
 {
     int   size;
     int   i;
@@ -578,11 +529,7 @@ w_uia_clip(uia, clipsize)
  * w_uia_peek(uia,off,val,valsize)
  */
 int
-w_uia_peek(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_peek(PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -603,11 +550,7 @@ w_uia_peek(uia, off, val, valsize)
  * w_uia_poke(uia,off,val,valsize)
  */
 int
-w_uia_poke(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_poke(PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -628,11 +571,7 @@ w_uia_poke(uia, off, val, valsize)
  * w_uia_peeks(uia,off,val,valsize)
  */
 int
-w_uia_peeks(uia, off, val, valsize)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
-    register int valsize;
+w_uia_peeks(PWord uia, int off, register UCHAR *val, register int valsize)
 {
     int   size;
     register UCHAR *t;
@@ -657,10 +596,7 @@ w_uia_peeks(uia, off, val, valsize)
  * w_uia_pokes(uia,off,val)
  */
 int
-w_uia_pokes(uia, off, val)
-    PWord uia;
-    int   off;
-    register UCHAR *val;
+w_uia_pokes(PWord uia, int off, register UCHAR *val)
 {
     int   size;
     register UCHAR *t;
@@ -681,10 +617,7 @@ w_uia_pokes(uia, off, val)
 #ifdef DoubleType
 
 void
-w_mk_double(rval, rtag, dbl)
-    PWord *rval;
-    int  *rtag;
-    double dbl;
+w_mk_double(PWord *rval, int *rtag, double dbl)
 {
 #ifdef COERCE2INTS
     if (dbl == floor(dbl) && MINPROLOGINT <= dbl && dbl <= MAXPROLOGINT) {
@@ -708,9 +641,7 @@ w_mk_double(rval, rtag, dbl)
 }
 
 void
-w_get_double(dbl, ptr)
-    double *dbl;
-    PWord ptr;
+w_get_double(double *dbl, PWord ptr)
 {
     *(long *) dbl = *(((PWord *)ptr) + 1);
     *(((long *) dbl) + 1) = *(((PWord *)ptr) + 2);
@@ -742,9 +673,7 @@ w_get_double(double *dbl, PWord ptr)
 
 
 int
-w_unify(v1, t1, v2, t2)
-    PWord v1, v2;
-    int   t1, t2;
+w_unify(PWord v1, int t1, PWord v2, int t2)
 {
     PWord a1, a2;
 
@@ -756,9 +685,7 @@ w_unify(v1, t1, v2, t2)
 }
 
 int
-w_rungoal(mod, gv, gt)
-    PWord mod, gv;
-    int   gt;
+w_rungoal(PWord mod, PWord gv, int gt)
 {
     PWord a1, a2;
     dbprot_t odbrs;

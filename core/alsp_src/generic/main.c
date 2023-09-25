@@ -138,14 +138,14 @@ static	void	autoload	( char * );
 static	void	chpt_init	( void );
 
 static void
-panic_fail()
+panic_fail(void)
 {
     fatal_error(FE_PANIC_FAIL, 0);
 }
 
 #ifdef arch_m88k
 static void
-panic_continue()
+panic_continue(void)
 {
     fatal_error(FE_PANIC_CONTINUE, 0);
 }
@@ -545,10 +545,7 @@ static int PI_prolog_init0(const PI_system_setup *setup)
  * abolish_predicate abolishes the given predicate
  */
 static void
-abolish_predicate(module, pred, arity)
-    const char *module;
-    const char *pred;
-    int   arity;
+abolish_predicate(const char *module, const char *pred, int arity)
 {
     char  command[2048];
 
@@ -568,8 +565,7 @@ abolish_predicate(module, pred, arity)
  * been loaded, it is necessary to use the most primitive version of assert.
  */
 static void
-assert_sys_searchdir(name)
-    char *name;
+assert_sys_searchdir(char *name)
 {
     PWord c, a1, a2, a4, b, s, p;
     int ct, a1t, a2t, a4t, bt, st, pt;
@@ -605,9 +601,7 @@ assert_sys_searchdir(name)
  | 	builtins file; primarily used for modules builtins and syscfg.
  *-----------------------------------------------------------------------------*/
 static void
-assert_atom_in_module(mod_name,atom_name)
-    const char *mod_name;
-    const char *atom_name;
+assert_atom_in_module(const char *mod_name, const char *atom_name)
 {
     char  command[2048];
 
@@ -623,8 +617,8 @@ assert_atom_in_module(mod_name,atom_name)
  |	loading the builtins file.
  *-----------------------------------------------------------------------------*/
 static void
-assert_als_system(os, os_var, proc, man, ver, year, hwb)
-    const char *os, *os_var, *proc, *man, *ver, *year; int hwb;
+assert_als_system(const char *os, const char *os_var, const char *proc,
+	const char *man, const char *ver, const char *year, int hwb)
 {
     char  command[2048];
 
@@ -652,8 +646,7 @@ assert_als_system(os, os_var, proc, man, ver, year, hwb)
  *-------------------------------------------------------------*/
 
 static void
-autoload(f)
-    char *f;
+autoload(char *f)
 {
     int   status = 0;
     char  fext[1024];
@@ -756,8 +749,7 @@ PI_status_toplevel(int *result)
 }
 
 void
-als_exit(status)
-    int   status;
+als_exit(int status)
 {
     exit_status = status;
 
@@ -780,12 +772,10 @@ PI_shutdown0(void)
 }
 
 #ifdef DOS
-extern int _access();
+extern int _access(void);
 
 int
-access(fname, mode)
-    char *fname;
-    int   mode;
+access(char *fname, int mode)
 {
     return (_access(fname, mode));
 }
@@ -793,7 +783,7 @@ access(fname, mode)
 #endif /* DOS */
 
 static void
-chpt_init()
+chpt_init(void)
 {
     wm_E = wm_SP - 2;
     wm_E[0] = (PWord) wm_SP;
@@ -817,7 +807,7 @@ chpt_init()
 extern	char *	copyright	( void );
 
 char *
-copyright()
+copyright(void)
 {
     static char copyright_[] = "Copyright (c) 1994-6 Applied Logic Systems, Inc";
     return copyright_;

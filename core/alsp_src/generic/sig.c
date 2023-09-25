@@ -77,33 +77,26 @@ static int cntrcl_init_flag = 0;
 #if defined(HAVE_UCONTEXT_H)
 
 #ifdef arch_sparc
-extern set_prolog_interrupt();
+extern set_prolog_interrupt(void);
 unsigned long cntrl_c_resume;
 #endif /* arch_sparc */
 void
 signal_handler(int signum, siginfo_t *siginf, ucontext_t *sigcon)
 #elif defined(arch_m88k)
 void
-signal_handler(signum, siginf)
-    int   signum;
-    struct siginfo *siginf;
+signal_handler(int signum, struct siginfo *siginf)
 #elif defined(HAVE_SIGVEC) || defined(HAVE_SIGVECTOR)
 extern set_prolog_interrupt(void);
 int   cntrl_c_resume;
-void  signal_handler(signum, code, scp, addr)
-    int   signum, code;
-    struct sigcontext *scp;
-    char *addr;
+void  signal_handler(int signum, int code, struct sigcontext *scp, char *addr)
 #elif defined(VMS)
 static unsigned short chan;
-extern set_prolog_interrupt();
-void  signal_handler(AST_param)
-    char  AST_param;
+extern set_prolog_interrupt(void);
+void  signal_handler(char AST_param)
 #else
 #define NAIVE_SIGNAL_HANDLER 1
 extern int set_prolog_interrupt	(void);
-void  signal_handler(signum)
-    int   signum;
+void  signal_handler(int signum)
 #endif 		/* defined(HAVE_UCONTEXT_H) */
 {
 #if 0
@@ -211,7 +204,7 @@ void  signal_handler(signum)
 
 
 void
-reissue_cntrlc()
+reissue_cntrlc(void)
 {
 #if 0
     //if (wm_regidx != 0)
@@ -334,7 +327,7 @@ int pbi_signal_name(void)
 }
 
 void
-init_sigint()
+init_sigint(void)
 {
     /*
      * Initilize the signal name table.
@@ -436,7 +429,7 @@ init_sigint()
 
 
 void
-reset_sigint()
+reset_sigint(void)
 {
 #ifdef DOS
     if (cntrcl_init_flag == 1) {
@@ -503,8 +496,7 @@ int pbi_alarm(void)
 static	void	burychild	( int );
 
 static void
-burychild(signo)
-    int signo;
+burychild(int signo)
 {
 #if defined(HAVE_WAITPID) && defined(WNOHANG)
     /* waitpid is preferable */
@@ -522,7 +514,7 @@ burychild(signo)
 }
 
 void
-deathwatch()
+deathwatch(void)
 {
     /* FIXME: Reliable signals */
     (void) signal(SIGCHLD, burychild);

@@ -15,7 +15,7 @@
 static	void	fixptrs	(prolog_engine *);
 
 PWord
-gv_alloc()
+gv_alloc(void)
 {
     register int i;
     PWord vn;
@@ -96,8 +96,7 @@ prolog_engine_invariant(&current_engine);
  */
 
 int
-gv_alloc_gvnum(gvnum)
-    int gvnum;
+gv_alloc_gvnum(int gvnum)
 {
     PWord *tofree;
     int num;
@@ -126,8 +125,7 @@ gv_alloc_gvnum(gvnum)
  */
 
 int
-gv_isfree(gvnum)
-    int gvnum;
+gv_isfree(int gvnum)
 {
     if (gvnum > wm_gvbase - wm_trailbase)
 	return 1;
@@ -180,27 +178,20 @@ static void fixptrs(prolog_engine *pe)
 }
 
 void
-gv_free(vn)
-    PWord vn;
+gv_free(PWord vn)
 {
     *(long **) (wm_gvbase - vn) = wm_gvfreelist;
     wm_gvfreelist = wm_gvbase - vn;
 }
 
 void
-gv_get(vp, tp, vn)
-    PWord *vp;
-    int  *tp;
-    PWord vn;
+gv_get(PWord *vp, int *tp, PWord vn)
 {
     w_get(vp, tp, *(wm_gvbase - vn));
 }
 
 void
-gv_set(v, t, vn)
-    PWord v;
-    int   t;
-    PWord vn;
+gv_set(PWord v, int t, PWord vn)
 {
     register PWord *newp;
     register PWord *b;

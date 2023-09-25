@@ -42,8 +42,7 @@ static  pword	expand_expand	( int, pword );
  */
 
 static pword
-expand_pred(r)
-    pword r;
+expand_pred(pword r)
 {
     if (TYPEOF(r) == TP_UIA)
 	return (MK_SYM(find_token((UCHAR *)UIA_NAME(r))));
@@ -52,9 +51,7 @@ expand_pred(r)
 }
 
 static pword
-expand_fact(nvars, r)
-    int   nvars;
-    pword r;
+expand_fact(int nvars, pword r)
 {
     pword rv;
 
@@ -66,9 +63,7 @@ expand_fact(nvars, r)
 }
 
 static pword
-expand_rule(nvars, r)
-    int   nvars;
-    pword r;
+expand_rule(int nvars, pword r)
 {
     push_rator(nvars, 0);
     *pst_rand++ = expand_pred(TERM_ARGN(r, 1));
@@ -79,9 +74,7 @@ expand_rule(nvars, r)
 
 
 static pword
-expand_query(nvars, r)
-    int   nvars;
-    pword r;
+expand_query(int nvars, pword r)
 {
     push_rator(nvars, 0);
     *pst_rand++ = MK_SYM(TK_QUEST);
@@ -92,9 +85,7 @@ expand_query(nvars, r)
 }
 
 static pword
-expand_command(nvars, r)
-    int   nvars;
-    pword r;
+expand_command(int nvars, pword r)
 {
     push_rator(nvars, 0);
     *pst_rand++ = MK_SYM(TK_RIF);
@@ -104,9 +95,7 @@ expand_command(nvars, r)
 }
 
 static pword
-expand_expand(nvars, r)
-    int   nvars;
-    pword r;
+expand_expand(int nvars, pword r)
 {
     pword s, t;
 
@@ -149,8 +138,7 @@ expand_expand(nvars, r)
  */
 
 void
-rxpbod(gs)
-    pword gs;
+rxpbod(pword gs)
 {
     pword t;
     register int tp;
@@ -200,9 +188,7 @@ rxpbod(gs)
 #define FROM_PARSER 1
 
 void
-parser_action(nvars, t)
-    int   nvars;
-    pword t;
+parser_action(int nvars, pword t)
 {
     icode(IC_INIT, 0, 0, 0, 0);
     if (TYPEOF(t) == TP_TERM) {
@@ -309,9 +295,7 @@ static pword (*cvt_walk_tbl[])( PWord ) = {
 #define CVTWALK(v,t) (*cvt_walk_tbl[(t)])(v)
 
 pword
-cvt_term_to_rule(v, t)
-    PWord v;
-    int   t;
+cvt_term_to_rule(PWord v, int t)
 {
     pword r;
     PWord functor;
@@ -363,8 +347,7 @@ cvt_term_to_rule(v, t)
 }
 
 static pword
-cvt_walk_term(v)
-    PWord v;
+cvt_walk_term(PWord v)
 {
     PWord functor, arg;
     int   i, arity, argt;
@@ -386,8 +369,7 @@ cvt_walk_term(v)
 
 
 static pword
-cvt_walk_list(v)
-    PWord v;
+cvt_walk_list(PWord v)
 {
     PWord carv, cdrv;
     int   cart, cdrt;
@@ -399,23 +381,20 @@ cvt_walk_list(v)
 }
 
 static pword
-cvt_walk_sym(v)
-    PWord v;
+cvt_walk_sym(PWord v)
 {
     return (MK_SYM((int) v));
 }
 
 static pword
-cvt_walk_int(v)
-    PWord v;
+cvt_walk_int(PWord v)
 {
     return (MK_INT(v));
 }
 
 
 static pword
-cvt_walk_uia(v)
-    PWord v;
+cvt_walk_uia(PWord v)
 {
     char  buf[512];
 
@@ -427,8 +406,7 @@ cvt_walk_uia(v)
 
 #ifdef DoubleType
 static pword
-cvt_walk_dbl(v)
-    PWord  v;
+cvt_walk_dbl(PWord v)
 {
     double d;
 
@@ -438,8 +416,7 @@ cvt_walk_dbl(v)
 #endif
 
 static pword
-cvt_walk_var(v)
-    PWord v;
+cvt_walk_var(PWord v)
 {
     int   i;
 

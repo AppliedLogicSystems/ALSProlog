@@ -18,13 +18,13 @@
 #ifdef CMeta
 
 int
-pbi_true()
+pbi_true(void)
 {
     SUCCEED;
 }
 
 int
-pbi_equal()
+pbi_equal(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -40,7 +40,7 @@ pbi_equal()
 }	/* pbi_equal */
 
 int
-pbi_arg()
+pbi_arg(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -113,7 +113,7 @@ pbi_arg()
 #define w_get_cdraddr(addr,list)    (addr = (PWord *)list + 1)
 
 int
-pbi_mangle()
+pbi_mangle(void)
 {				/* mangle(ArgN,Struct,Arg) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -434,7 +434,7 @@ trailed_mangle0(v1,v2,t2,v3,t3)
 #endif
 
 int
-pbi_functor()
+pbi_functor(void)
 {				/* functor(Struct,F,A)  */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -565,7 +565,7 @@ pbi_functor()
 }
 
 int
-pbi_identical()
+pbi_identical(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -580,7 +580,7 @@ pbi_identical()
 }
 
 int
-pbi_unidentical()
+pbi_unidentical(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -595,7 +595,7 @@ pbi_unidentical()
 }
 
 int
-pbi_eq()
+pbi_eq(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -610,7 +610,7 @@ pbi_eq()
 }
 
 int
-pbi_noneq()
+pbi_noneq(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -626,7 +626,7 @@ pbi_noneq()
 
 
 int
-pbi_var()
+pbi_var(void)
 {
     PWord va1;
     int   ta1;
@@ -640,7 +640,7 @@ pbi_var()
 }
 
 int
-pbi_nonvar()
+pbi_nonvar(void)
 {
     PWord va1;
     int   ta1;
@@ -654,7 +654,7 @@ pbi_nonvar()
 }
 
 int
-pbi_integer()
+pbi_integer(void)
 {
     PWord va1;
     int   ta1;
@@ -668,7 +668,7 @@ pbi_integer()
 }
 
 int
-pbi_float()
+pbi_float(void)
 {
     PWord v;
     int   t;
@@ -697,7 +697,7 @@ pbi_float()
 }
 
 int
-pbi_number()
+pbi_number(void)
 {
     PWord v;
     int   t;
@@ -728,7 +728,7 @@ pbi_number()
 }
 
 int
-pbi_atom()
+pbi_atom(void)
 {
     PWord va1;
     int   ta1;
@@ -742,7 +742,7 @@ pbi_atom()
 }
 
 int
-pbi_atomic()
+pbi_atomic(void)
 {
     PWord va1;
     int   ta1;
@@ -813,7 +813,7 @@ pbi_compound(void)
  */
 
 int
-pbi_findterm()
+pbi_findterm(void)
 {				/* $findterm(F,A,Pos, Term,NewPos) */
     PWord f, a, p, t, n;
     int   ft, at, pt, tt, nt;

@@ -14,15 +14,13 @@ int is_ieee_nan (double);
 int is_ieee_inf (double);
 
 int
-is_ieee_nan(v)
-	double v;
+is_ieee_nan(double v)
 {
 	return isnan(v);
 }
 
 int
-is_ieee_inf(v)
-	double v;
+is_ieee_inf(double v)
 {
 #if defined(SOLARIS) || defined(UNIX_SOLARIS)
 	switch (fpclass(v)) {

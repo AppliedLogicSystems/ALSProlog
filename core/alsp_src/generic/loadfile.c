@@ -164,7 +164,7 @@ static char MAGIC[] =
 "ALS-Prolog Loadable Object Module\r\nFormat 1.21(XXXXXXXXXX,YYYYYYYYYY)\r\n\032\004\019\026";
 
 void
-fix_MAGIC()
+fix_MAGIC(void)
 {
     char *m = MAGIC;
     char *p = ProcStr;
@@ -221,9 +221,7 @@ static long obp_nrecs;
  * Put the given icode into the .OBP file.
  */
 void
-f_icode(opcode, a1, a2, a3, a4)
-    int   opcode;
-    long  a1, a2, a3, a4;
+f_icode(int opcode, long a1, long a2, long a3, long a4)
 {
     long  args[4];
     register int format;
@@ -304,8 +302,7 @@ f_icode(opcode, a1, a2, a3, a4)
  * Returns 0 if it is unsuccessful.
  */
 int
-obp_open(fname)
-    char *fname;
+obp_open(char *fname)
 {
     mod_header obp_header = {
     	"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -350,7 +347,7 @@ fname = RedirectOBP(fname, new_name);
 }
 
 void
-obp_close()
+obp_close(void)
 {
     int   i;
     unsigned short strsize;
@@ -605,7 +602,7 @@ static struct obp_stack_rec {
 static int obp_stack_top = 0;
 
 void
-obp_push()
+obp_push(void)
 {
     obp_stack[obp_stack_top].nrecs = obp_nrecs;
     obp_stack[obp_stack_top].makeobp = makeobp;
@@ -614,7 +611,7 @@ obp_push()
 }
 
 void
-obp_pop()
+obp_pop(void)
 {
     obp_stack_top--;
     obp_nrecs = obp_stack[obp_stack_top].nrecs;
@@ -642,8 +639,7 @@ static	long	get_file_modified_time	( const char * );
 static	int	isdir			(const char * );
 
 static long 
-get_file_modified_time(fname)
-    const char *fname;
+get_file_modified_time(const char *fname)
 {
 #if defined(DOS)
 
@@ -690,8 +686,7 @@ get_file_modified_time(fname)
  *
  */
 static int
-isdir(fname)
-    const char *fname;
+isdir(const char *fname)
 {
 #if defined(DOS)
 
@@ -745,9 +740,7 @@ static int faccess(char *fname, int mode)
 #ifdef OLDCLOAD
 
 int
-load_file(fname, options)
-    char *fname;
-    int   options;
+load_file(char *fname, int options)
 {
     long  pro_time;
     char *ext, *fnp;
@@ -962,9 +955,7 @@ load_file(fname, options)
 #else  /* not-OLDCLOAD */
 
 int
-load_file(fname, options)
-    char *fname;
-    int   options;
+load_file(char *fname, int options)
 {
     strcat(fname, ".obp");
 

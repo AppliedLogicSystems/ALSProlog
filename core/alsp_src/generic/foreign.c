@@ -25,9 +25,7 @@ static	void	fixTag		( PWord *, int * );
 static	void	tagFix		( PWord *, int * );
 
 static void
-fixTag(v, t)
-    PWord *v;
-    int  *t;
+fixTag(PWord *v, int *t)
 {
     if (*t == WTP_STRUCTURE) {
 	PWord functor;
@@ -41,9 +39,7 @@ fixTag(v, t)
 }
 
 static void
-tagFix(v, t)
-    PWord *v;
-    int  *t;
+tagFix(PWord *v, int *t)
 {
     if (*t == PI_DOUBLE)
 	*t = WTP_STRUCTURE;
@@ -53,10 +49,7 @@ tagFix(v, t)
 static PWord PI_modid = MODULE_GLOBAL;
 
 int
-load_foreign(filename, libstr, initfcn)
-    char *filename;
-    char *libstr;
-    char *initfcn;
+load_foreign(char *filename, char *libstr, char *initfcn)
 {
 #ifdef DynamicForeign
     void (*fptr)( void );

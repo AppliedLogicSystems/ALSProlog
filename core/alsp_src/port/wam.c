@@ -52,7 +52,7 @@ extern int trailed_mangle0 (PWord,PWord,int,PWord,int);
 static long iprofile_counts[W_NUM_OPS];
 #define DO_PROFILE(op)	: iprofile_counts[op]++; lp##op
 
-init_iprofile()
+init_iprofile(void)
 {
     int i;
     for (i=0; i<W_NUM_OPS; i++)
@@ -64,14 +64,12 @@ typedef struct {
     int  idx;
 } iprofstruct;
 
-static int iprofcmp(a,b)
-    iprofstruct *a;
-    iprofstruct *b;
+static int iprofcmp(iprofstruct *a, iprofstruct *b)
 {
     return a->count < b->count;
 }
 
-dump_iprofile()
+dump_iprofile(void)
 {
     int i;
     iprofstruct s[W_NUM_OPS];
@@ -194,9 +192,7 @@ int ck_intvl_punch   (PWord, PWord, int);
 	 |	which run instead...
 	 *-------------------------------------------------*/
 int
-ck_intvl_punch(r, fv, ft)
-	PWord r,fv;
-	int ft;
+ck_intvl_punch(PWord r, PWord fv, int ft)
 {
 	PWord r3, mf;
 	int r3t, mfa;
@@ -671,7 +667,7 @@ ck_intvl_punch(r, fv, ft)
  *-----------------------------------------------------*/
 
 void
-wam_init()
+wam_init(void)
 {
     struct {
 	CodePtr patchaddr;
@@ -763,8 +759,7 @@ wam_init()
  *---------------------------------------------------------*/
 
 int
-wm_rungoal(a1, a2)		/* module, goal */
-    PWord a1, a2;
+wm_rungoal(PWord a1, PWord a2)		/* module, goal */
 {
     *rungoal_modpatch = a1;
     *rungoal_goalpatch = a2;
@@ -777,8 +772,7 @@ wm_rungoal(a1, a2)		/* module, goal */
  *-----------------------------------------------------------------*/
 
 void
-wm_exec(startaddr)
-    Code *startaddr;
+wm_exec(Code *startaddr)
 {
     (void) run_wam(startaddr);
 }
@@ -790,8 +784,8 @@ wm_exec(startaddr)
  *---------------------------------------------------------------*/
 
 int
-run_wam(startaddr)
-    Code *startaddr;		/* pointer to clause to execute wam on */
+run_wam(Code *startaddr)
+    /* startaddr: pointer to clause to execute wam on */
 {
     register Code *P = startaddr;
     /* register */ PWord *S = NULL;
@@ -2243,8 +2237,7 @@ UNWINDTRAIL for (reg1 = mr_TR+1; reg1 < mr_B; reg1+=2){ *PWPTR(*reg1) = *((PWord
 #define mr_SPB gr_SPB
 
 static int
-wam_unify(f1, f2)
-    register PWord *f1, *f2;
+wam_unify(register PWord *f1, register PWord *f2)
 {
     register int t1, t2;	/* types of the formulae */
     PWord *temp;
@@ -2370,8 +2363,7 @@ wam_unify(f1, f2)
      *---------------------------------------------*/
 
 int
-_w_unify(f1, f2)
-    PWord f1, f2;
+_w_unify(PWord f1, PWord f2)
 
 {
     int   retval;
@@ -2402,7 +2394,7 @@ _w_unify(f1, f2)
 int     pbi_bind_vars           ( void );
 
 int
-pbi_bind_vars()
+pbi_bind_vars(void)
 {
 	PWord r,  g;
 	int   rt, gt;
@@ -2431,8 +2423,7 @@ pbi_bind_vars()
 void plain_bind	(PWord, PWord);
 
 void
-plain_bind(r, v)
-	PWord r,  v;
+plain_bind(PWord r, PWord v)
 {
 	*PWPTR(r) = v;
 	PLAINTRAIL(r);
@@ -2442,10 +2433,7 @@ plain_bind(r, v)
 
 void bind_point_unfreeze	(PWord *,int *,double,int);
 void
-bind_point_unfreeze(r,t,pv,k)
-	PWord *r;
-	int *t,k;
-	double pv;
+bind_point_unfreeze(PWord *r, int *t, double pv, int k)
 {
 	PWord *vl;
 	int vlt;

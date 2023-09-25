@@ -79,27 +79,21 @@ static int spaceneeded;		/* indicates that a space is needed when
 				 */
 
 void
-prolog_write(v, t)
-    PWord v;
-    int   t;
+prolog_write(PWord v, int t)
 {
     spaceneeded = 0;
     WRITE(v, t, 0, 0);
 }
 
 void
-prolog_writeq(v, t)
-    PWord v;
-    int   t;
+prolog_writeq(PWord v, int t)
 {
     spaceneeded = 0;
     WRITE(v, t, WQUOTE, 0);
 }
 
 void
-prolog_display(v, t)
-    PWord v;
-    int   t;
+prolog_display(PWord v, int t)
 { 
     spaceneeded = 0;
     WRITE(v, t, WDISP | WQUOTE, 0);
@@ -110,12 +104,7 @@ prolog_display(v, t)
 
 
 static int
-wr_op2(p, t, inprec, flags, depth)
-    PWord p;
-    int   t;
-    long  inprec;
-    int   flags;
-    int   depth;
+wr_op2(PWord p, int t, long inprec, int flags, int depth)
 {
     if (t != WTP_STRUCTURE || depth > WRITEDEPTH)
 	return (0);
@@ -124,11 +113,7 @@ wr_op2(p, t, inprec, flags, depth)
 }
 
 static int
-wr_op(w, inprec, flags, depth)
-    PWord w;
-    long  inprec;
-    int   flags;
-    int   depth;
+wr_op(PWord w, long inprec, int flags, int depth)
 {
     int   parenthesized;	/* indicates if expression is parenthesized */
     int   argn;			/* argument counter */
@@ -216,9 +201,7 @@ wr_op(w, inprec, flags, depth)
 }
 
 static void
-wr_trm(w, flags, depth)
-    PWord w;
-    int   flags, depth;
+wr_trm(PWord w, int flags, int depth)
 {
     int   n;
     PWord vl;
@@ -264,10 +247,7 @@ wr_trm(w, flags, depth)
 }
 
 static void
-wr_int(w, flags, depth)
-    PWord w;
-    int   flags;
-    int   depth;
+wr_int(PWord w, int flags, int depth)
 {
     if (spaceneeded && w < 0)
 	PI_oprintf(" %ld", w);
@@ -276,10 +256,7 @@ wr_int(w, flags, depth)
 }
 
 static void
-wr_lst(w, flags, depth)
-    PWord w;
-    int   flags;
-    int   depth;
+wr_lst(PWord w, int flags, int depth)
 {
     PWord vl;
     int   tp;
@@ -314,10 +291,7 @@ wr_lst(w, flags, depth)
 }
 
 static void
-wr_sym(w, flags, depth)
-    PWord w;
-    int   flags;
-    int   depth;
+wr_sym(PWord w, int flags, int depth)
 {
     if ((flags & WQUOTE) && qtok((int) w))
 	write_quoted_symbol((char *)TOKNAME(w));
@@ -326,8 +300,7 @@ wr_sym(w, flags, depth)
 }
 
 void
-write_quoted_symbol(s)
-    char *s;
+write_quoted_symbol(char *s)
 {
     PI_oputchar('\'');
     while (*s) {
@@ -343,17 +316,13 @@ write_quoted_symbol(s)
 }
 
 static void
-wr_var(w, flags, depth)
-    PWord w;
-    int   flags, depth;
+wr_var(PWord w, int flags, int depth)
 {
     PI_oprintf("_%lu", (long) ((PWord *)w - wm_heapbase));
 }
 
 static void
-wr_uia(w, flags, depth)
-    PWord w;
-    int   flags, depth;
+wr_uia(PWord w, int flags, int depth)
 {
     if (flags & WQUOTE)
 	write_quoted_symbol((char *)M_FIRSTUIAWORD(w));
@@ -369,9 +338,7 @@ wr_uia(w, flags, depth)
  */
 
 static void
-wr_dbl(w, flags, depth)
-    PWord w;
-    int   flags, depth;
+wr_dbl(PWord w, int flags, int depth)
 {
     double d;
     long  count;
@@ -387,18 +354,14 @@ wr_dbl(w, flags, depth)
 }
 
 static int
-check_vector(ptr, count)
-    long *ptr;
-    long *count;
+check_vector(long *ptr, long *count)
 {
     *count = (MFENCE_VAL(*ptr) - 1) / 2;
     return (*count > 1);
 }
 
 static void
-print_vector(w, count)
-    long *w;
-    long  count;
+print_vector(long *w, long count)
 {
     int   i;
     double d;
@@ -413,9 +376,7 @@ print_vector(w, count)
 
 
 static void
-craig_get_double(dbl, ptr)
-    double *dbl;
-    long *ptr;
+craig_get_double(double *dbl, long *ptr)
 {
     *(long *) dbl = *ptr;
     *(((long *) dbl) + 1) = *(ptr + 1);

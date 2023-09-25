@@ -51,7 +51,7 @@ int pbi_attach_state_to_file(void)
 
 #if !defined(KERNAL) && !defined(PURE_ANSI)
 int
-pbi_save_state_to_file()		/* save_state_to_file */
+pbi_save_state_to_file(void)		/* save_state_to_file */
 {
     PWord v1;
     int t1;
@@ -68,9 +68,7 @@ pbi_save_state_to_file()		/* save_state_to_file */
 static	int	pload_file	( UCHAR *, int );
 
 static int
-pload_file(name, reconbit)
-    UCHAR *name;
-    int   reconbit;
+pload_file(UCHAR *name, int reconbit)
 {
     int   retval;
 
@@ -82,7 +80,7 @@ pload_file(name, reconbit)
 }
 
 int
-pbi_load()
+pbi_load(void)
 {				/* $load(File,Flag) */
     PWord v1, v2;
     int   t1, t2;
@@ -98,14 +96,14 @@ pbi_load()
 }
 
 int
-pbi_nl()
+pbi_nl(void)
 {
     fio_nl();
     SUCCEED;
 }
 
 int
-pbi_ttyflush()
+pbi_ttyflush(void)
 {
     fio_flush();
 
@@ -199,7 +197,7 @@ int pbi_debug(void)
 
 #ifndef KERNAL
 int
-pbi_write()
+pbi_write(void)
 {
     PWord v;
     int   t;
@@ -215,7 +213,7 @@ pbi_write()
 
 
 int
-pbi_display()
+pbi_display(void)
 {
     PWord va1;
     int   ta1;
@@ -228,7 +226,7 @@ pbi_display()
 }
 
 int
-pbi_get()
+pbi_get(void)
 {
     PWord v;
     int   t;
@@ -242,7 +240,7 @@ pbi_get()
 }
 
 int
-pbi_get0()
+pbi_get0(void)
 {
     PWord v;
     int   t;
@@ -258,7 +256,7 @@ pbi_get0()
 
 
 int
-pbi_put()
+pbi_put(void)
 {
     PWord v;
     int   t;
@@ -275,7 +273,7 @@ pbi_put()
 
 
 int
-pbi_read()
+pbi_read(void)
 {
     PWord a1v, rv;
     int   a1t, rt;
@@ -292,7 +290,7 @@ pbi_read()
 
 
 int
-pbi_see()
+pbi_see(void)
 {
     PWord v;
     int   t;
@@ -307,7 +305,7 @@ pbi_see()
 
 
 int
-pbi_seeing()
+pbi_seeing(void)
 {
     PWord v;
     int   t;
@@ -322,7 +320,7 @@ pbi_seeing()
 
 
 int
-pbi_seen()
+pbi_seen(void)
 {
     fio_seen();
 
@@ -331,7 +329,7 @@ pbi_seen()
 
 
 int
-pbi_tell()
+pbi_tell(void)
 {
     PWord v;
     int   t;
@@ -346,7 +344,7 @@ pbi_tell()
 
 
 int
-pbi_telling()
+pbi_telling(void)
 {
     PWord v;
     int   t;
@@ -361,7 +359,7 @@ pbi_telling()
 
 
 int
-pbi_told()
+pbi_told(void)
 {
     fio_told();
 
@@ -371,7 +369,7 @@ pbi_told()
 
 
 int
-pbi_writeq()
+pbi_writeq(void)
 {
     PWord va1;
     int   ta1;
@@ -388,7 +386,7 @@ pbi_writeq()
 #ifdef DynamicForeign
 
 int
-pbi_load_foreign()
+pbi_load_foreign(void)
 {				/* $loadforeign(Name, LibStr, InitFunction) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -420,7 +418,7 @@ pbi_load_foreign()
 
 #ifdef SYS_OBP
 int
-pbi_obp_push_stop()
+pbi_obp_push_stop(void)
 {
 #ifdef OBP
     obp_push();
@@ -430,7 +428,7 @@ pbi_obp_push_stop()
 }
 
 int
-pbi_obp_pop()
+pbi_obp_pop(void)
 {
 #ifdef OBP
     obp_pop();
@@ -439,7 +437,7 @@ pbi_obp_pop()
 }
 
 int
-pbi_obp_open()
+pbi_obp_open(void)
 {
 #ifdef OBP
     PWord v1;
@@ -466,7 +464,7 @@ pbi_obp_open()
 }
 
 int
-pbi_obp_close()
+pbi_obp_close(void)
 {
 #ifdef OBP
     obp_close();
@@ -477,7 +475,7 @@ pbi_obp_close()
 
 
 int
-pbi_obp_load()
+pbi_obp_load(void)
 {				/* obp_load(FileName,Stat) */
     PWord v1, v2;
     int   t1, t2, status;
@@ -516,7 +514,7 @@ pbi_obp_load()
 
 #ifdef OLDCONSULT
 int
-pbi_old_consult()
+pbi_old_consult(void)
 {				/* old_consult(FileName,NErrs) */
     PWord v1, v2;
     int   t1, t2;

@@ -26,10 +26,10 @@ static	void	hc	( PWord *, int *, pword );
 static long varptrs[MAXVARS];	/* pointers to words */
 
 static void
-hc(rval, rtag, w)
-    PWord *rval;		/* value to return */
-    int  *rtag;			/* tag to return   */
-    pword w;			/* object to copy */
+hc(PWord *rval, int *rtag, pword w)
+    /* rval: value to return */
+    /* rtag: tag to return   */
+    /* w: object to copy */
 {
     register int i;
     PWord v;
@@ -82,10 +82,7 @@ hc(rval, rtag, w)
 }
 
 void
-heap_copy(rval, rtag, w)
-    PWord *rval;
-    int  *rtag;
-    pword w;
+heap_copy(PWord *rval, int *rtag, pword w)
 {
     register int i;
 
@@ -96,9 +93,7 @@ heap_copy(rval, rtag, w)
 }
 
 int
-xform_uia(vp, tp)
-    PWord *vp;
-    int  *tp;
+xform_uia(PWord *vp, int *tp)
 {
     int   tk = 0;
 
@@ -118,9 +113,7 @@ xform_uia(vp, tp)
 }
 
 int
-force_uia(vp, tp)
-    PWord *vp;
-    int  *tp;
+force_uia(PWord *vp, int *tp)
 {
     if (*tp == WTP_UIA) {
 	*vp = (PWord) find_token((UCHAR *)M_FIRSTUIAWORD(*vp));
@@ -134,10 +127,7 @@ force_uia(vp, tp)
 }
 
 void
-string_to_list(l, t, s)
-    PWord *l;
-    int  *t;
-    UCHAR *s;
+string_to_list(PWord *l, int *t, UCHAR *s)
 {
     unsigned char *q;
     PWord lt;
@@ -159,10 +149,10 @@ string_to_list(l, t, s)
 }
 
 int
-list_to_string(s, l, m)
-    UCHAR *s;			/* Buffer to copy to */
-    PWord l;			/* List pointer */
-    int   m;			/* Max length of string */
+list_to_string(UCHAR *s, PWord l, int m)
+    /* s: Buffer to copy to */
+    /* l: List pointer */
+    /* m: Max length of string */
 {
     int   t;
     PWord carv;
@@ -198,10 +188,7 @@ list_to_string(s, l, m)
  */
 
 int
-getstring(addr, v, t)
-    UCHAR **addr;
-    PWord v;
-    int   t;
+getstring(UCHAR **addr, PWord v, int t)
 {
     if (t == WTP_SYMBOL)
 	*addr = TOKNAME(v);
@@ -224,10 +211,7 @@ getstring(addr, v, t)
  */
 
 int
-getlong(ip, v, t)
-    long *ip;
-    PWord v;
-    int   t;
+getlong(long *ip, PWord v, int t)
 {
     switch (t) {
 	case WTP_INTEGER:
@@ -278,10 +262,7 @@ getlong(ip, v, t)
  */
 
 int
-getdouble(dp, v, t)
-    double *dp;
-    PWord v;
-    int   t;
+getdouble(double *dp, PWord v, int t)
 {
     switch (t) {
 	case WTP_INTEGER:
@@ -327,8 +308,7 @@ getdouble(dp, v, t)
  */
 
 int
-get_gv_number(name)
-    UCHAR *name;
+get_gv_number(UCHAR *name)
 {
     PWord vArg, vFunctor, vStruct, vName;
     int   tArg, tFunctor, tStruct, tName;
@@ -355,9 +335,8 @@ get_gv_number(name)
 }
 
 void
-set_prolog_error(namtok,arity,rfunc,rarity,rsym,v2,t2,v3,t3)
-    PWord namtok, rfunc, rsym, v2, v3;
-    int arity, rarity, t2, t3;
+set_prolog_error(PWord namtok, int arity, PWord rfunc, int rarity,
+	PWord rsym, PWord v2, int t2, PWord v3, int t3)
 {
     /*//static long pegvnum = -5;*/	/* something other than -1 */
     if (pegvnum < 0) {

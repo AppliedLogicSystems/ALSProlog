@@ -170,9 +170,9 @@ static	void	increase_table_size	( void );
  */
 
 static tkentry **
-lookup(name, len)
-    UCHAR *name;		/* character string to hash */
-    size_t *len;		/* length of string */
+lookup(UCHAR *name, size_t *len)
+    /* name: character string to hash */
+    /* len: length of string */
 {
     register UCHAR *s =  name;
     register unsigned int n, shift;
@@ -238,8 +238,8 @@ lookup(name, len)
  */
 
 long
-probe_token(s)
-    UCHAR *s;			/* string to find */
+probe_token(UCHAR *s)
+    /* s: string to find */
 {
     tkentry **pos;
 
@@ -301,8 +301,7 @@ find_token(const UCHAR *cs)
 #define default_string_space_request 1024
 
 static void
-new_string_space(request)
-    size_t request;
+new_string_space(size_t request)
 {
     if (strings_next && *strings_next > (signed) request) {
 	strings = (UCHAR *) strings_next;
@@ -332,7 +331,7 @@ new_string_space(request)
  */
 
 static void
-increase_table_size()
+increase_table_size(void)
 {
     tkentry *new_table;
     register unsigned int i;
@@ -390,7 +389,7 @@ increase_table_size()
 
 
 void
-symtab_init()
+symtab_init(void)
 {
     register unsigned int i;
     char chtokstr[2];
@@ -462,7 +461,7 @@ symtab_init()
  *      4. binop        Binary operator precedence and associativity (short)
  */
 void
-pckg_toktbl_init()
+pckg_toktbl_init(void)
 {
     register UCHAR *tokptr;	/* Pointer to package token table */
     register long numoftoks;	/* Number of tokens in package token table */
@@ -545,7 +544,7 @@ pckg_toktbl_init()
 
 
 int
-save_toktbl()
+save_toktbl(void)
 {
     register int idx;
     long  firsttokid;		/* Token ID of first token in package token

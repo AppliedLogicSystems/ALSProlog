@@ -163,10 +163,10 @@ static	int	core_gc		( void );
 
 #ifdef INTCONSTR
 int
-core_gc()
+core_gc(void)
 #else
 int
-gc()
+gc(void)
 #endif
 {
     long *mrccp;
@@ -725,9 +725,8 @@ chpt_after_trail_entry:	/* entry point into for-loop */
 	 *----------------------------------------------------*/
 
 static long *
-mark_args(e, ra)
-    long *e;
-    Code *ra;			/* return address */
+mark_args(long *e, Code *ra)
+    /* ra: return address */
 {
     long  mask;			/* mask           */
     int   nargs;
@@ -780,8 +779,7 @@ mark_args(e, ra)
 	 *----------------------------------------------------*/
 
 static void
-mark_from(loc)
-    long *loc;
+mark_from(long *loc)
 {
     mark(val_at(loc));
     REV(loc);
@@ -801,8 +799,7 @@ mark_from(loc)
  *-------------------------------------------------------------------------------*/
 
 static void
-rev(lo, hi, loc, targ)
-    long *lo, *hi, *loc, targ;
+rev(long *lo, long *hi, long *loc, long targ)
 {
     long *ptr;
     long  v;
@@ -840,8 +837,7 @@ rev(lo, hi, loc, targ)
  *------------------------------------------------------------------------------*/
 
 static void
-rev_update(loc, targ)
-    long *loc, targ;
+rev_update(long *loc, long targ)
 {
     long  v, tags, *ptr, temp;
 
@@ -882,7 +878,7 @@ rev_update(loc, targ)
 
 
 static void
-init_marks()
+init_marks(void)
 {
     register unsigned long *m;
 
@@ -904,8 +900,7 @@ init_marks()
 	 *----------------------------------------------------*/
 
 static void
-mark(val)
-    register long val;
+mark(register long val)
 {
     register long *ptr, *bptr;
     register long tag, btag;
@@ -1058,7 +1053,7 @@ mark_backup:
 
 #ifdef INTCONSTR
 int
-gc()
+gc(void)
 {
     /*-----------------------------------------------------------------------*
      | Create the string of delay terms before running normal gc

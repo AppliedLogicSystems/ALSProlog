@@ -48,7 +48,7 @@ static	int	escape_char	( char ** );
  *----------------------------------------------------------------------*/
 
 void
-next_token()
+next_token(void)
 {
     register char *bp = lexbdp->curpos;		/* buffer pointer */
     int   ctype;		/* character type */
@@ -425,8 +425,7 @@ next_token()
 }
 
 static int
-escape_char(bpp)
-    register char **bpp;
+escape_char(register char **bpp)
 {
     int   iv;
 

@@ -184,7 +184,7 @@ termcmp(PWord v1, int t1, PWord v2, int t2)
 }
 
 int
-pbi_compare()
+pbi_compare(void)
 {				/* compare(Rel,Term1,Term2)   */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -204,11 +204,7 @@ pbi_compare()
 }
 
 int
-wm_identical(v1, t1, v2, t2)
-    PWord v1;
-    int   t1;
-    PWord v2;
-    int   t2;
+wm_identical(PWord v1, int t1, PWord v2, int t2)
 {
     PWord argval1, argval2;
     int   argtype1, argtype2;
@@ -296,10 +292,7 @@ wm_identical(v1, t1, v2, t2)
 
 #ifdef HASH
 static unsigned long
-hashN(v, t, d)
-    PWord v;
-    int   t;
-    int   d;
+hashN(PWord v, int t, int d)
 {
     if (d <= 0)
 	return 0;
@@ -380,7 +373,7 @@ hashN(v, t, d)
 }
 
 int
-pbi_hashN()
+pbi_hashN(void)
 {				/* hashN(Term,N,Depth,HashVal) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -408,8 +401,7 @@ static long gensym_start_time = 0;
 static long gensym_counter = 0;
 
 static void
-als_gensym(buffer, prefix)
-    UCHAR *buffer, *prefix;
+als_gensym(UCHAR *buffer, UCHAR *prefix)
 {
     if (!gensym_start_time) gensym_start_time = time(NULL);
 
@@ -422,7 +414,7 @@ als_gensym(buffer, prefix)
 
 
 int
-pbi_gensym()
+pbi_gensym(void)
 {
     PWord v1, v2, vr;
     int   t1, t2, tr;
@@ -447,7 +439,7 @@ pbi_gensym()
 }
 
 int
-pbi_isgensym()
+pbi_isgensym(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -495,7 +487,7 @@ static const char *typestrings[] =
 };
 
 int
-pbi_ptermaddr()
+pbi_ptermaddr(void)
 {
     PWord v1;
     int   t1;
@@ -514,7 +506,7 @@ pbi_ptermaddr()
  */
 
 int
-pbi_traildump()
+pbi_traildump(void)
 {
     PWord *tr, *b;
 
@@ -566,7 +558,7 @@ pbi_traildump()
  *-------------------------------------------------------------------*/
 
 int
-pbi_frame_info()	/* frame_info(Count,Goal) */
+pbi_frame_info(void)	/* frame_info(Count,Goal) */
 {
     PWord v1, v2, vg, va, vr;
     int   t1, t2, tg, ta, tr;

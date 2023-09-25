@@ -18,7 +18,7 @@
  */
 
 int
-pbi_c_malloc()
+pbi_c_malloc(void)
 {
     PWord v1;
     int   t1;
@@ -46,7 +46,7 @@ pbi_c_malloc()
  */
 
 int
-pbi_c_free()
+pbi_c_free(void)
 {
     PWord v;
     int   t;
@@ -84,7 +84,7 @@ pbi_c_free()
  */
 
 int
-pbi_c_set()
+pbi_c_set(void)
 {
     PWord v1;
     int   t1;
@@ -288,7 +288,7 @@ pbi_c_set()
  */
 
 int
-pbi_c_examine()
+pbi_c_examine(void)
 {
     PWord v1;
     int   t1;
@@ -470,10 +470,7 @@ pbi_c_examine()
 #ifdef DOS
 
 void
-make_farptr(vp, tp, ptr)
-    PWord *vp;
-    int  *tp;
-    unsigned short *ptr;
+make_farptr(PWord *vp, int *tp, unsigned short *ptr)
 {
     w_mk_term(vp, tp, (PWord) find_token("$farptr"), 3);
     w_install_argn(*vp, 1, (PWord) * (ptr), WTP_INTEGER);
@@ -485,7 +482,7 @@ make_farptr(vp, tp, ptr)
  * usage : $c_make_farptr(ptr,seg,farptr)
  */
 int
-pbi_c_make_farptr()
+pbi_c_make_farptr(void)
 {
     PWord v1;
     int   t1;

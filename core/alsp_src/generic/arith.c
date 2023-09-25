@@ -104,7 +104,7 @@ extern	void	srandom		( int );
 
 #ifdef HAVE_TIME
 int
-pbi_time()
+pbi_time(void)
 {				/* real system time */
     PWord vsec, vmin, vhour, vmday, vmon, vyear, vwday, vyday, visdst, vkind;
     int   tsec, tmin, thour, tmday, tmon, tyear, twday, tyday, tisdst, tkind;
@@ -151,7 +151,7 @@ pbi_time()
 #endif /* HAVE_TIME */
 
 int
-pbi_srandom()
+pbi_srandom(void)
 {
     PWord v1;
     int t1;
@@ -171,8 +171,7 @@ pbi_srandom()
 #ifndef HAVE_AINT
 /* aint rounds towards zero */
 double
-aint(d)
-    double d;
+aint(double d)
 {
     if (d < 0)
 	return (ceil(d));
@@ -184,8 +183,7 @@ aint(d)
 /********
 #ifndef HAVE_RINT
 double
-rint(d)
-    double d;
+rint(double d)
 {
     return (floor(d + 0.5));
 }
@@ -198,8 +196,7 @@ rint0(double d)
 }
 
 #ifndef HAVE_EXP10
-double exp10(d)
-    double d;
+double exp10(double d)
 {
     return pow((double) 10, d);
 }
@@ -274,10 +271,7 @@ double sym_f_cnst[] = {
  *--------------------------------------------------------------------------------*/
 
 static double
-do_is(v, t, ty)
-    PWord v;
-    int   t;
-    int   *ty;
+do_is(PWord v, int t, int *ty)
 {
     int   arity;
     PWord functor;
@@ -544,10 +538,7 @@ do_is(v, t, ty)
 
 
 void
-make_number(v, t, d)
-    PWord *v;
-    int  *t;
-    double d;
+make_number(PWord *v, int *t, double d)
 {
 	make_numberx(v,t,d,WTP_INTEGER);
 }
@@ -564,10 +555,7 @@ make_number(v, t, d)
  *--------------------------------------------------------------*/
 
 void
-make_numberx(v, t, d, TP)
-    PWord *v;
-    int  *t, TP;
-    double d;
+make_numberx(PWord *v, int *t, double d, int TP)
 {
     int fl;
 
@@ -598,17 +586,13 @@ else	/* TP != WTP_INTEGER */
  *--------------------------------------------------------------*/
 
 void
-make_ieee_nan(v, t)
-    PWord *v;
-    int  *t;
+make_ieee_nan(PWord *v, int *t)
 {
     w_mk_double(v, t, NAN);
 }
 
 void
-make_ieee_inf(v, t)
-    PWord *v;
-    int  *t;
+make_ieee_inf(PWord *v, int *t)
 {
     w_mk_double(v, t, INFINITY);
 }
@@ -658,7 +642,7 @@ static int handle_is_error(int status)
 }
 
 int
-pbi_is()
+pbi_is(void)
 {
     PWord v1, v2;
     int   t1, t2, ty;
@@ -691,7 +675,7 @@ pbi_is()
 
 #define NUMCOMP(name,rel)		\
 int								\
-name()						  	\
+name(void)						\
 {							   	\
     PWord v1,v2;				\
     int t1,t2;					\
@@ -730,7 +714,7 @@ NUMCOMP(pbi_arithnotequal, !=)
 int pbi_fpconst_val	( void );
 
 int
-pbi_fpconst_val()
+pbi_fpconst_val(void)
 {
     PWord cnst, value, fv;
     int   cnst_t, value_t, fv_t;
@@ -756,7 +740,7 @@ pbi_fpconst_val()
 int pbi_uia_poke_fpconst 	( void );
 
 int
-pbi_uia_poke_fpconst()
+pbi_uia_poke_fpconst(void)
 { 			/* uia_poke_fpconst(V,Sgn,UIA,Off) */
     PWord Val, Sgn, UIABuf, Off;
     int   Val_t, Sgn_t, UIABuf_t, Off_t;

@@ -31,5 +31,4 @@ CFLAGS += -MMD -Weverything \
 -Wno-unreachable-code \
 -Wno-unreachable-code-return \
 -Wno-missing-noreturn \
--Wno-poison-system-directories \
--Wno-deprecated-non-prototype -Wno-strict-prototypes
+-Wno-poison-system-directories

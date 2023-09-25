@@ -49,7 +49,7 @@
 #include "compile.h"
 
 int
-pbi_abolish()
+pbi_abolish(void)
 {				/* abolish(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -76,7 +76,7 @@ pbi_abolish()
 }
 
 int
-pbi_abolish_clausegroup()
+pbi_abolish_clausegroup(void)
 {				/* abolish_clausegroup(Module,Pred,Arity,CG) */
     PWord m, p, a, cg;
     int   mt, pt, at, cgt;
@@ -105,7 +105,7 @@ extern long *aib_clause_addr;
 static	int	doassert	( int, PWord, pword, int );
 
 int
-pbi_asserta()
+pbi_asserta(void)
 {				/* asserta(Module,Clause,Ref,ReconsultFlag) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -155,7 +155,7 @@ pbi_assertz(void)
 }
 
 int
-pbi_addclause()
+pbi_addclause(void)
 {				/* addclause(Module,Clause) */
     PWord v1, v2;
     int   t1, t2;
@@ -171,7 +171,7 @@ pbi_addclause()
 }
 
 int
-pbi_execcommand()
+pbi_execcommand(void)
 {				/* execcommand(Goals) */
     PWord v1, vc, vh;
     int   t1, tc, th;
@@ -188,11 +188,7 @@ pbi_execcommand()
 }
 
 static int
-doassert(which, mod, rule, reconsult_flag)
-    int   which;
-    PWord mod;
-    pword rule;
-    int   reconsult_flag;
+doassert(int which, PWord mod, pword rule, int reconsult_flag)
 {
     int   status, popmod;
     unsigned long old_reconstamp = 0;
@@ -234,7 +230,7 @@ doassert(which, mod, rule, reconsult_flag)
 }
 
 int
-pbi_erase()
+pbi_erase(void)
 {				/* $erase(DBRef)        */
     PWord v;
     int   t;
@@ -255,7 +251,7 @@ pbi_erase()
 }
 
 int
-pbi_icode()
+pbi_icode(void)
 {				/* $icode(OpCode,W,X,Y,Z) */
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -280,7 +276,7 @@ pbi_icode()
 }
 
 int
-pbi_index_proc()
+pbi_index_proc(void)
 {
 #ifdef Indexing
     PWord v1, v2, v3;
@@ -305,7 +301,7 @@ pbi_index_proc()
  *---------------------------------------*/
 
 int
-pbi_massively_abolish_clausegroup()
+pbi_massively_abolish_clausegroup(void)
 {				
     PWord v1;
     int   t1;
@@ -327,7 +323,7 @@ pbi_massively_abolish_clausegroup()
 }
 
 int
-pbi_nextproc()
+pbi_nextproc(void)
 {				/* $nextproc(N,F,NN) */
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -372,7 +368,7 @@ pbi_nextproc()
 #define UNKNOWN_PROC_TYPE 	-1
 
 int
-pbi_procinfo()
+pbi_procinfo(void)
 {
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
@@ -438,7 +434,7 @@ pbi_procinfo()
 }
 
 int
-pbi_clauseinfo()
+pbi_clauseinfo(void)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -465,7 +461,7 @@ pbi_clauseinfo()
 }
 
 int
-pbi_dynamic()
+pbi_dynamic(void)
 {				/* $dynamic(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -485,7 +481,7 @@ pbi_dynamic()
 }
 
 int
-pbi_exported_proc()
+pbi_exported_proc(void)
 {				/* $exported_proc(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -504,7 +500,7 @@ pbi_exported_proc()
 }
 
 int
-pbi_next_module()
+pbi_next_module(void)
 {				/* $next_module(N,NN,Module,UseList) */
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -532,7 +528,7 @@ pbi_next_module()
  |	$cr_mod_close(Mod,Pred,Arity,TProc)
  *-------------------------------------------------------------*/
 int
-pbi_cr_mod_close()
+pbi_cr_mod_close(void)
 {				
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -554,7 +550,7 @@ pbi_cr_mod_close()
 
 
 int
-pbi_listasm_clause()
+pbi_listasm_clause(void)
 {				/* $listasm_clause(DBRef) */
     PWord v1;
     int   t1;
@@ -574,7 +570,7 @@ pbi_listasm_clause()
 }
 
 int
-pbi_listasm_ntblentry()
+pbi_listasm_ntblentry(void)
 {				/* $listasm_ntblentry(Module,Pred,Arity)   */
     PWord m, p, a;
     int   mt, pt, at;
@@ -598,7 +594,7 @@ pbi_listasm_ntblentry()
 }
 
 int
-pbi_firstargkey()
+pbi_firstargkey(void)
 {				/* $firstargkey(DBRef,FirstArgKey)  */
     PWord v1, v2;
     int   t1, t2;
@@ -656,7 +652,7 @@ pbi_firstargkey()
 }
 
 int
-pbi_resolve_module()
+pbi_resolve_module(void)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -702,7 +698,7 @@ pbi_resolve_module()
 }
 
 int
-pbi_push_clausegroup()
+pbi_push_clausegroup(void)
 {				/* push_clausegroup(CG) */
     PWord v1;
     int   t1;
@@ -717,7 +713,7 @@ pbi_push_clausegroup()
 }
 
 int
-pbi_pop_clausegroup()
+pbi_pop_clausegroup(void)
 {				/* pop_clausegroup(CG) */
     PWord v1;
     int   t1;
@@ -734,7 +730,7 @@ pbi_pop_clausegroup()
 /* Test stuff (kev) */
 
 int
-pbi_collectcode()
+pbi_collectcode(void)
 {
 #ifdef CodeGC
     dbprot_t odbrs = w_dbprotect(DBRS_WRITABLE);
@@ -749,7 +745,7 @@ pbi_collectcode()
 #ifdef LIBBRK
 
 int
-pbi_libbreak()
+pbi_libbreak(void)
 {				/* $libbreak(Module,Pred,Arity,BreakNum)   */
     PWord m, p, a, i;
     int   mt, pt, at, it;

@@ -99,7 +99,7 @@ static	int	buf_syntaxerror	( lxi_but *, const char * );
  */
 
 void
-parser_init()
+parser_init(void)
 {
     symtab_init();
     parser_reset();		/* Reset the parser */
@@ -110,7 +110,7 @@ parser_init()
  */
 
 void
-parser_reset()
+parser_reset(void)
 {
     nxtvar = 0;
     pst_rator = ps_rator;	/* initialize tops of stacks */
@@ -126,8 +126,7 @@ parser_reset()
  */
 
 int
-find_var(s)
-    char *s;
+find_var(char *s)
 {
     register int i;
 
@@ -169,9 +168,7 @@ find_var(s)
  */
 
 void
-push_rator(tokid, prec)
-    long tokid;
-    long prec;
+push_rator(long tokid, long prec)
 {
     pst_rator->last_rand = pst_rand;
     pst_rator->precedence = prec;
@@ -185,7 +182,7 @@ push_rator(tokid, prec)
  */
 
 static void
-bld_struct()
+bld_struct(void)
 {
     int   n;
 
@@ -221,7 +218,7 @@ bld_struct()
  */
 
 void
-bld_clause()
+bld_clause(void)
 {
     pword r;
     int   n;
@@ -260,8 +257,7 @@ bld_clause()
  */
 
 static int
-reduce_stack(prec)
-    int   prec;
+reduce_stack(int prec)
 {
     int   arity;
 
@@ -326,8 +322,7 @@ call_bld_struct:
  */
 
 static void
-push_op(raw_prec)
-    int   raw_prec;
+push_op(int raw_prec)
 {
     pst_rator->last_rand = pst_rand - 1;
     pst_rator->precedence = raw_prec;
@@ -344,7 +339,7 @@ push_op(raw_prec)
  */
 
 static void
-nt_term0()
+nt_term0(void)
 {
     long  tok;
 
@@ -451,8 +446,7 @@ makeconst:
  */
 
 static void
-nt_term(n)
-    int   n;
+nt_term(int n)
 {
     int   prefix_prec;
 
@@ -518,7 +512,7 @@ post_op:
  */
 
 static void
-nt_list()
+nt_list(void)
 {
     if (curtkty == TKTP_OTHER && curtok == TK_LBRAC)
 	next_token();
@@ -541,7 +535,7 @@ nt_list()
 
 
 static void
-nt_listexpr()
+nt_listexpr(void)
 {
     pword temp;
 
@@ -606,7 +600,7 @@ nt_args(void)
 #define export_predicate(tok,arity)	icode(IC_EXPORTPRED,tok,arity,0,0)
 
 static void
-nt_uselist()
+nt_uselist(void)
 {
     for (;;) {
 	check_sym("Module name expected in use declaration.");
@@ -624,7 +618,7 @@ nt_uselist()
 }
 
 static void
-nt_exportlist()
+nt_exportlist(void)
 {
     long  token;
     int   arity;
@@ -659,8 +653,7 @@ nt_exportlist()
 
 
 static void
-check_sym(errstr)
-    const char *errstr;
+check_sym(const char *errstr)
 {
     if (curtkty == TKTP_OTHER || curtkty == TKTP_OP || curtkty == TKTP_CONST)
 	return;
@@ -678,7 +671,7 @@ check_sym(errstr)
 
 
 static void
-nt_toplevel()
+nt_toplevel(void)
 {
 
     if (curtkty == TKTP_FULLSTOP)
@@ -717,7 +710,7 @@ nt_toplevel()
 }
 
 void
-nt_query()
+nt_query(void)
 {
     if (curtkty == TKTP_FULLSTOP)
 	return;
@@ -735,8 +728,7 @@ nt_query()
 
 
 void
-parser_error(errstring)
-    const char *errstring;
+parser_error(const char *errstring)
 {
     errcount++;
 
@@ -747,9 +739,7 @@ parser_error(errstring)
 }
 
 void
-read_loop(rdfunc, pptidx)
-    void  (*rdfunc) ( void );
-    int   pptidx;
+read_loop(void  (*rdfunc) ( void ), int pptidx)
 {
     int   eof = 0;
 
@@ -779,8 +769,7 @@ read_loop(rdfunc, pptidx)
 
 
 pword
-bld_strl(s)
-    char *s;
+bld_strl(char *s)
 {
     register char *t = s;
     register pword r = MK_SYM(TK_NIL);
@@ -797,7 +786,7 @@ bld_strl(s)
 }
 
 pword
-bld_vlst()
+bld_vlst(void)
 {
     int   i = nxtvar - 1;
     pword r = MK_SYM(TK_NIL);
@@ -809,8 +798,7 @@ bld_vlst()
 }
 
 int
-qtok(t)
-    int   t;
+qtok(int t)
 {
     register UCHAR *s = TOKNAME(t);
 
@@ -831,7 +819,7 @@ qtok(t)
 
 
 void
-bld_showanswers()
+bld_showanswers(void)
 {
     register pword vl;
     register int i;
@@ -853,8 +841,7 @@ bld_showanswers()
  */
 
 int
-consult(f)
-    int   f;
+consult(int f)
 {
     int   ec;
     int   oldf = fio_seeing();
@@ -881,8 +868,7 @@ consult(f)
 
 /* This is what actually does a read */
 static int
-bottomRead(pprompt, sprompt)
-    const char *pprompt, *sprompt;
+bottomRead(const char *pprompt, const char *sprompt)
 {
     int   retval;
 
@@ -944,7 +930,7 @@ bottomRead(pprompt, sprompt)
  */
 
 pword
-prim_read()
+prim_read(void)
 {
     /* Do read and check for EOF */
     if (bottomRead(prompts[PMPT_READ].pprompt, prompts[PMPT_READ].sprompt))
@@ -960,8 +946,7 @@ prim_read()
 #define whitespace(c) ((c) <= 32 || (c) == 127)
 
 static void
-buf_nextline(lbp)
-    lxi_but *lbp;
+buf_nextline(lxi_but *lbp)
 {
     register char *bp = lbp->bufptr;
 
@@ -978,16 +963,13 @@ buf_nextline(lbp)
 
 
 static int
-buf_syntaxerror(lbp, errstring)
-    lxi_but *lbp;
-    const char *errstring;
+buf_syntaxerror(lxi_but *lbp, const char *errstring)
 {
     return (0);
 }
 
 int
-exec_query_from_buf(buf)
-    char *buf;
+exec_query_from_buf(char *buf)
 {
     lxi_but *oldlb;
     lxi_but lb;
@@ -1027,8 +1009,7 @@ exec_query_from_buf(buf)
  */
 
 UCHAR *
-token_name(tok)
-    int   tok;
+token_name(int tok)
 {
     return (TOKNAME(tok));
 }

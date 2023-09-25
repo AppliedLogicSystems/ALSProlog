@@ -25,14 +25,14 @@
 static	void	abortmessage	( void );
 
 int
-pbi_ouch()
+pbi_ouch(void)
 {
     wm_safety = wm_trigger;
     SUCCEED;
 }
 
 int
-pbi_forceCtlC()
+pbi_forceCtlC(void)
 {
     wm_interrupt_caught = SIGINT;
     wm_safety = wm_trigger;
@@ -40,7 +40,7 @@ pbi_forceCtlC()
 }
 
 int
-pbi_forcePrologError()
+pbi_forcePrologError(void)
 {
     wm_interrupt_caught = ALSSIG_ERROR;
     wm_safety = wm_trigger;
@@ -56,7 +56,7 @@ pbi_forcePrologError()
  */
 
 int
-pbi_reset_wm_normal()
+pbi_reset_wm_normal(void)
 {
     wm_normal = DEFAULT_SAFETY;
     /*
@@ -76,7 +76,7 @@ pbi_reset_wm_normal()
 #ifdef OLDSHELL
 
 int
-pbi_showanswers()
+pbi_showanswers(void)
 {
     int   ch;
     PWord nv, av, ev;
@@ -140,7 +140,7 @@ pbi_showanswers()
 #endif /* OLDSHELL */
 
 static void
-abortmessage()
+abortmessage(void)
 {
     switch (wm_aborted) {
 	case 0:		/* do nothing ... no abort */
@@ -160,7 +160,7 @@ abortmessage()
 }
 
 int
-pbi_halt()
+pbi_halt(void)
 {
     if (wm_aborted)
 	abortmessage();
@@ -174,7 +174,7 @@ pbi_halt()
 
 #ifdef OLDSHELL
 int
-pbi_printno()
+pbi_printno(void)
 {
     if (wm_aborted) {
 	/* If we are at the top level, print message;
@@ -190,7 +190,7 @@ pbi_printno()
 #endif /* OLDSHELL */
 
 int
-pbi_printwarning()
+pbi_printwarning(void)
 {
     if (wm_aborted) {
 	/* If we are at the top level, print message;
@@ -212,7 +212,7 @@ pbi_printwarning()
 
 
 int
-pbi_stack_overflow()
+pbi_stack_overflow(void)
 {
     PWord v;
     int   t;
@@ -227,7 +227,7 @@ pbi_stack_overflow()
 }
 
 int
-pbi_stack_info()
+pbi_stack_info(void)
 {
     PWord v1;
     int   t1;
@@ -243,7 +243,7 @@ pbi_stack_info()
 
 
 /*
-int pbi_limits_info()
+int pbi_limits_info(void)
 {
     PWord v1,v2,v3;
     int   t1,t2,t3;
@@ -285,7 +285,7 @@ pbi_debugger(void)
 
 /* #ifdef OLDSHELL */
 int
-pbi_statistics()
+pbi_statistics(void)
 {
     PWord v;
     int   t;
@@ -388,14 +388,14 @@ pbi_statistics()
 
 #ifdef	IProfile
 int
-pbi_init_iprofile()
+pbi_init_iprofile(void)
 {
     init_iprofile();
     SUCCEED;
 }
 
 int
-pbi_dump_iprofile()
+pbi_dump_iprofile(void)
 {
     dump_iprofile();
     SUCCEED;

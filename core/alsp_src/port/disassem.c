@@ -48,8 +48,7 @@ int	display_instr	(enum AbstractMachineOps, Code *);
  */
 
 enum AbstractMachineOps
-decode_instr(inst)
-    Code inst;
+decode_instr(Code inst)
 {
     enum AbstractMachineOps i;
     for (i=W_FIRST_OP; i<W_NUM_OPS; i++)
@@ -67,10 +66,8 @@ decode_instr(inst)
 */
 
 void
-list_asm(addr, n)
-    Code *addr;			/* Start address */
-    int   n;
-
+list_asm(Code *addr, int n)
+    /* addr: Start address */
 {
     Code *stopaddr = addr + n - 2, *ip;
     long  ilength;
@@ -100,9 +97,7 @@ list_asm(addr, n)
 }
 
 int
-display_instr(instr,ip)
-    enum AbstractMachineOps instr;
-	Code *ip;
+display_instr(enum AbstractMachineOps instr, Code *ip)
 {
     long  i, ilength, need_comma;
 	ilength = 1;
@@ -240,8 +235,7 @@ toggle_bwam(void)
 }
 
 void
-tracewam(PP)
-    Code *PP;
+tracewam(Code *PP)
 {
     enum AbstractMachineOps instr;
 

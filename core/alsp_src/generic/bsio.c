@@ -437,7 +437,7 @@ EXPORT ALSPI_API(void)	PI_set_console_functions(console_func read,
  */
 
 int
-sio_mkstream()
+sio_mkstream(void)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -500,9 +500,7 @@ sio_mkstream()
  */
 
 static UCHAR *
-get_stream_buffer(v, t)
-    PWord v;
-    int   t;
+get_stream_buffer(PWord v, int t)
 {
     PWord functor;
     int   arity;
@@ -535,7 +533,7 @@ get_stream_buffer(v, t)
 
 
 int
-sio_errcode()
+sio_errcode(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -563,7 +561,7 @@ sio_errcode()
 
 
 int
-sio_set_errcode()
+sio_set_errcode(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -597,7 +595,7 @@ sio_set_errcode()
  */
 
 int
-sio_buf_params()
+sio_buf_params(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -631,7 +629,7 @@ sio_buf_params()
 
 
 int
-sio_errno()
+sio_errno(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -660,7 +658,7 @@ sio_errno()
 
 
 int
-sio_aux()
+sio_aux(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -687,7 +685,7 @@ sio_aux()
  */
 
 int
-sio_fd()
+sio_fd(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -727,7 +725,7 @@ sio_fd()
  */
 
 int
-sio_increment_bufpos()
+sio_increment_bufpos(void)
 {
     PWord v1;
     int   t1;
@@ -752,7 +750,7 @@ sio_increment_bufpos()
  */
 
 int
-sio_set_position()
+sio_set_position(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -784,7 +782,7 @@ sio_set_position()
  */
 
 int
-sio_set_eof()
+sio_set_eof(void)
 {
     PWord v1;
     int   t1;
@@ -811,7 +809,7 @@ sio_set_eof()
  */
 
 int
-sio_reset_eof()
+sio_reset_eof(void)
 {
     PWord v1;
     int   t1;
@@ -837,7 +835,7 @@ sio_reset_eof()
  */
 
 int
-sio_cpos()
+sio_cpos(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -863,7 +861,7 @@ sio_cpos()
  */
 
 int
-sio_lpos()
+sio_lpos(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -975,8 +973,7 @@ static int next_prime(int n)
 }
 	
 static void
-incr_fdrefcnt(fd)
-    int fd;
+incr_fdrefcnt(int fd)
 {
     if (fdrefcnts == NULL) {
 #ifdef MSWin32
@@ -1004,8 +1001,7 @@ incr_fdrefcnt(fd)
 }
 
 static int
-decr_fdrefcnt(fd)
-    int fd;
+decr_fdrefcnt(int fd)
 {
     if (--fdrefcnts[refcnt_index(fd)].refcnt <= 0)
 	return 1;
@@ -1020,8 +1016,7 @@ static int openmax = 0;
 #define OPEN_MAX_GUESS 256
 
 static void
-incr_fdrefcnt(fd)
-    int fd;
+incr_fdrefcnt(int fd)
 {
     if (fdrefcnts == NULL) {
 #if defined(_SC_OPEN_MAX)
@@ -1046,8 +1041,7 @@ incr_fdrefcnt(fd)
 }
 
 static int
-decr_fdrefcnt(fd)
-    int fd;
+decr_fdrefcnt(int fd)
 {
     if (fd < 0 || fd >= openmax) fatal_error(FE_FDREFOVERFLOW, 0);
     if (--fdrefcnts[fd] <= 0)
@@ -1066,10 +1060,7 @@ decr_fdrefcnt(fd)
  */
 
 static int
-compute_flags(buf, m, b)
-    char *buf;
-    int m;
-    int b;
+compute_flags(char *buf, int m, int b)
 {
     long flags;
 
@@ -1132,7 +1123,7 @@ static int MSL_open_patch(const char *path, int flags)
 #endif
 
 int
-sio_file_open()
+sio_file_open(void)
 {
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -1236,7 +1227,7 @@ sio_file_open()
 
 
 int
-sio_console_open()
+sio_console_open(void)
 {
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
@@ -1292,7 +1283,7 @@ sio_console_open()
  */
 
 int
-pbi_ftok()
+pbi_ftok(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -1334,7 +1325,7 @@ pbi_ftok()
  */
 
 int
-sio_sysVq_open()
+sio_sysVq_open(void)
 {
     PWord v1, v2, v3, v4, v5, v6, v7;
     int   t1, t2, t3, t4, t5, t6, t7;
@@ -1396,7 +1387,7 @@ sio_sysVq_open()
  */
 
 int
-sio_ssbq_initialize()
+sio_ssbq_initialize(void)
 {
 
     if (ipc_init(30) == -1) {
@@ -1416,7 +1407,7 @@ sio_ssbq_initialize()
  */
 
 int
-sio_ssbq_open()
+sio_ssbq_open(void)
 {
     PWord v1, v2, v3, v4, v5, v6;
     int   t1, t2, t3, t4, t5, t6;
@@ -1481,7 +1472,7 @@ sio_ssbq_open()
 #ifdef HAVE_SOCKET
 
 int
-sio_gethostname()
+sio_gethostname(void)
 {
     PWord v1,v2;
     int   t1,t2;
@@ -1999,7 +1990,7 @@ int sio_nsocketpair(void)
 
 
 int
-sio_nsocket_open()
+sio_nsocket_open(void)
 {
     PWord descriptor, type, mode, buffering, eoln, stream;
     int   descriptor_t, type_t, mode_t, buffering_t, eoln_t, stream_t;
@@ -2167,7 +2158,7 @@ int pbi_gethostbyaddr(void) {return AP_OldToNewCall(do_gethostbyaddr, 4);}
  */
 
 int
-sio_socket_open()
+sio_socket_open(void)
 {
     PWord v1, v2, v3, v4, v5, v6, v7, v8, v9, v10;
     int   t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
@@ -2491,8 +2482,7 @@ sio_socket_open()
 }
 
 static void
-delete_stream_name(vsd)
-    PWord vsd;
+delete_stream_name(PWord vsd)
 {
 #ifndef MISSING_UNIX_DOMAIN_SOCKETS
     PWord vns,vn,vd;
@@ -2519,10 +2509,7 @@ delete_stream_name(vsd)
  */
 
 static int
-accept_connection(vsd, buf, sktaddr)
-    PWord vsd;
-    char  *buf;
-    char  **sktaddr;
+accept_connection(PWord vsd, char *buf, char **sktaddr)
 {
 		/* Internet socket addresses */
     struct sockaddr_in c_addr;	
@@ -2558,7 +2545,7 @@ accept_connection(vsd, buf, sktaddr)
  */
 
 int
-sio_is_server_socket()
+sio_is_server_socket(void)
 {
     PWord v1;
     int t1;
@@ -2585,7 +2572,7 @@ sio_is_server_socket()
  */
 
 int
-sio_accept_socket_connection()
+sio_accept_socket_connection(void)
 {
     PWord v1,v2,v3;
     int t1,t2,t3;
@@ -2653,7 +2640,7 @@ sio_fork(void)
  */
 
 int
-sio_rexec()
+sio_rexec(void)
 {
 #ifndef __GO32__
     PWord v1, v2, v3, v4, v5, v6, v7;
@@ -2861,9 +2848,7 @@ username, (char *)password, (char *)command,
  */
 
 static int
-stream_is_ready(buf, usec_to_wait)
-    char *buf;
-    long usec_to_wait;
+stream_is_ready(char *buf, long usec_to_wait)
 {
     switch (SIO_TYPE(buf)) {
 	case SIO_TYPE_FILE :
@@ -2915,7 +2900,7 @@ stream_is_ready(buf, usec_to_wait)
  |	SBList, which is a list of the corresponding stream buffers.
  *------------------------------------------------------------*/
 int
-sio_simple_select()
+sio_simple_select(void)
 {
     PWord v1, v2, v3, st;
     int t1, t2, t3, stt, wait_val;
@@ -3005,7 +2990,7 @@ sio_simple_select()
 extern	int	get_number	(PWord, int, double *);
 
 int
-sio_poll()
+sio_poll(void)
 {
     PWord v1, v2;
     int t1, t2;
@@ -3051,7 +3036,7 @@ sio_poll()
  */
 
 int
-sio_generic_open()
+sio_generic_open(void)
 {
     PWord v1, v2, v3, v4, v5;
     int   t1, t2, t3, t4, t5;
@@ -3089,8 +3074,7 @@ sio_generic_open()
  */
 
 static void
-shift_buffer(buf)
-    UCHAR *buf;
+shift_buffer(UCHAR *buf)
 {
     int count = SIO_LPOS(buf) - SIO_CPOS(buf);
     if (count <= 0) {
@@ -3115,7 +3099,7 @@ shift_buffer(buf)
  */
 
 int
-sio_bufshift()
+sio_bufshift(void)
 {
     PWord v1;
     int   t1;
@@ -3151,9 +3135,7 @@ sio_bufshift()
  */
 
 static int
-write_buf(vsd,buf)
-    PWord vsd;
-    UCHAR *buf;
+write_buf(PWord vsd, UCHAR *buf)
 {
     int   writeflg = 0;
 #ifdef HAVE_SOCKET
@@ -3302,7 +3284,7 @@ write_buf(vsd,buf)
  */
 
 int
-sio_close()
+sio_close(void)
 {
     PWord v1;
     int   t1;
@@ -3512,7 +3494,7 @@ static int write_eoln(UCHAR *buf, int b)
  */
 
 int
-sio_get_byte()
+sio_get_byte(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -3569,7 +3551,7 @@ sio_get_byte()
  */
 
 int
-sio_put_byte()
+sio_put_byte(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -3636,7 +3618,7 @@ sio_put_byte()
 */
 
 int
-sio_unget_byte()
+sio_unget_byte(void)
 {
     PWord v;
     int   t;
@@ -3707,7 +3689,7 @@ ssbq_get_msg()
  */
 
 int
-sio_set_do_lineedit()
+sio_set_do_lineedit(void)
 {
     PWord v1;
     int   t1;
@@ -3723,7 +3705,7 @@ sio_set_do_lineedit()
  */
 
 int
-sio_set_lineedit_prompt()
+sio_set_lineedit_prompt(void)
 {
     PWord v1;
     int   t1;
@@ -3744,7 +3726,7 @@ sio_set_lineedit_prompt()
  */
 
 int
-sio_set_history_file()
+sio_set_history_file(void)
 {
     PWord v1;
     int   t1;
@@ -3768,7 +3750,7 @@ sio_set_history_file()
  */
 
 int
-sio_set_no_load_prev_history()
+sio_set_no_load_prev_history(void)
 {
         do_load_prev_history = 0;
         SUCCEED;
@@ -3780,7 +3762,7 @@ sio_set_no_load_prev_history()
  */
 
 int
-sio_readbuffer()
+sio_readbuffer(void)
 {
     PWord v1;
     int   t1;
@@ -3946,7 +3928,7 @@ sio_readbuffer()
  */
 
 int
-sio_writebuffer()
+sio_writebuffer(void)
 {
     PWord v1;
     int   t1;
@@ -3980,7 +3962,7 @@ sio_writebuffer()
  *-------------------------------------------------------------------------*/
 
 int
-sio_getpos()
+sio_getpos(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -4007,8 +3989,7 @@ sio_getpos()
 }
 
 static long
-stream_end(buf)
-    UCHAR *buf;
+stream_end(UCHAR *buf)
 {
     long  curpos;
     long  endpos;
@@ -4037,7 +4018,7 @@ stream_end(buf)
  *-------------------------------------------------------------------*/
 
 int
-sio_seek()
+sio_seek(void)
 {
     PWord v1, v2, v3, v4;
     int   t1, t2, t3, t4;
@@ -4276,8 +4257,7 @@ static void skip_trailing_lf(UCHAR *buf)
  */
 
 static int
-skip_layout(buf)
-    UCHAR *buf;
+skip_layout(UCHAR *buf)
 {
     register UCHAR *p, *lim;
     UCHAR *startpos;	/* used for determining value of SIO_COLUMN */
@@ -4409,8 +4389,7 @@ binary(UCHAR **pp)
 }
 
 static int
-octal(pp)
-    UCHAR **pp;
+octal(UCHAR **pp)
 {
     register UCHAR *p;
     register int val;
@@ -4427,8 +4406,7 @@ octal(pp)
 }
 
 static unsigned long
-hexadecimal(pp)
-    UCHAR **pp;
+hexadecimal(UCHAR **pp)
 {
     register UCHAR *p;
     register unsigned long val;
@@ -4456,9 +4434,7 @@ hexadecimal(pp)
 
 /*
 static double
-decimal(pp, ty)
-    UCHAR **pp;
-	int *ty;
+decimal(UCHAR **pp, int *ty)
 {
     register UCHAR *p;
     double d, frac;
@@ -4608,8 +4584,7 @@ decimal(UCHAR **pp, UCHAR *lim, double *dval, int *ty)
 }
 
 static int
-escaped_char(pp)
-    UCHAR **pp;
+escaped_char(UCHAR **pp)
 {
     register UCHAR *p = *pp + 1;
     				/* set p and skip over the backslash */
@@ -4658,12 +4633,7 @@ escaped_char(pp)
 #define DOUBLEQUOTING 1
 
 static void
-quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
-    PWord *vpTokType, *vpTokVal;
-    int  *tpTokVal;
-    UCHAR **pp;
-    UCHAR *lim;
-    UCHAR *buf;
+quoted_atom(PWord *vpTokType, PWord *vpTokVal, int  *tpTokVal, UCHAR **pp, UCHAR *lim, UCHAR *buf)
 {
     register UCHAR *p;
     register int count;
@@ -4795,12 +4765,7 @@ quoted_atom(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 }				/* quoted_atom */
 
 static int
-quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
-    PWord *vpTokType, *vpTokVal;
-    int  *tpTokVal;
-    UCHAR **pp;
-    UCHAR *lim;
-    UCHAR *buf;
+quoted_string(PWord *vpTokType, PWord *vpTokVal, int *tpTokVal, UCHAR **pp, UCHAR *lim, UCHAR *buf)
 {
     register UCHAR *p;
     register int c;
@@ -4890,11 +4855,7 @@ quoted_string(vpTokType, vpTokVal, tpTokVal, pp, lim, buf)
 }
 
 static int
-char_constant(pp, lim, inc, endc)
-    UCHAR **pp;
-    UCHAR *lim;
-    int   inc;
-    int   endc;
+char_constant(UCHAR **pp, UCHAR *lim, int inc, int endc)
 {
 #if !defined(SIO_ENDCHAR_REQUIRED_FOR_CHAR_CONSTS) && defined(__MWERKS__)
 #pragma unused(endc)
@@ -4952,12 +4913,7 @@ do {							\
 } while (0)
 
 static int
-next_token0(buf, vpTokType, tpTokType, vpTokVal, tpTokVal)
-    UCHAR *buf;
-    PWord *vpTokType;
-    int  *tpTokType;
-    PWord *vpTokVal;
-    int  *tpTokVal;
+next_token0(UCHAR *buf, PWord *vpTokType, int *tpTokType, PWord *vpTokVal, int *tpTokVal)
 {
     UCHAR *p, *lim, *tokstart, *oldp;
     int   eossave;
@@ -5239,7 +5195,7 @@ makesym:
  */
 
 int
-sio_next_token()
+sio_next_token(void)
 {
     PWord v1, v2, v3, vTokType, vTokVal;
     int   t1, t2, t3, tTokType, tTokVal;
@@ -5272,7 +5228,7 @@ sio_next_token()
  */
 
 int
-sio_next_tokens()
+sio_next_tokens(void)
 {
     PWord v1, v2, v3, vTokType, vTokVal, L, T;
     int   t1, t2, t3, tTokType, tTokVal, linenum0, preprocessing;
@@ -5438,7 +5394,7 @@ sio_next_tokens()
  */
 
 int
-sio_skip_layout()
+sio_skip_layout(void)
 {
     PWord v1;
     int   t1;
@@ -5476,7 +5432,7 @@ sio_skip_layout()
  */
 
 int
-sio_linenumber()
+sio_linenumber(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -5502,7 +5458,7 @@ sio_linenumber()
  */
 
 int
-sio_get_number()
+sio_get_number(void)
 {
     PWord v1, v2, v3, vNum;
     int   t1, t2, t3, tNum;
@@ -5685,7 +5641,7 @@ static const char *get_eoln_str(UCHAR *buf)
  */
 
 int
-sio_put_atom()
+sio_put_atom(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -5758,7 +5714,7 @@ sio_put_atom()
  */
 
 int
-sio_put_number()
+sio_put_number(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -5913,7 +5869,7 @@ sio_put_number()
  */
 
 int
-sio_qatom()
+sio_qatom(void)
 {
     PWord v1, v2, v3, vTokVal;
     int   t1, t2, t3, tTokVal;
@@ -6058,7 +6014,7 @@ sio_qatom()
  */
 
 int
-sio_var_to_atom()
+sio_var_to_atom(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -6087,7 +6043,7 @@ sio_var_to_atom()
  */
 
 int
-sio_lettervar()
+sio_lettervar(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -6126,8 +6082,7 @@ sio_lettervar()
 #define FMT_STR 3
 
 static int
-format_type(s)
-    register UCHAR *s;
+format_type(register UCHAR *s)
 {
     for (;;) {
 	while (*s && *s != '%')
@@ -6172,7 +6127,7 @@ format_type(s)
  */
 
 int
-sio_sprintf()
+sio_sprintf(void)
 {
     PWord v1, v2, v3, v4, v;
     int   t1, t2, t3, t4, t;
@@ -6357,7 +6312,7 @@ int sio_sprintf_number(void)
  */
 
 int
-sio_isgraphicatom()
+sio_isgraphicatom(void)
 {
     PWord v1;
     int   t1;
@@ -6384,8 +6339,7 @@ sio_isgraphicatom()
 #ifdef SysVIPC
 /*  for debugging the IPC message queue stuff */
 void
-display_queue(msqid)
-    int   msqid;
+display_queue(int msqid)
 {
     struct msqid_ds buffr;
 
@@ -6434,7 +6388,7 @@ display_queue(msqid)
  */
 
 int
-pbi_msgctl()
+pbi_msgctl(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -6546,7 +6500,7 @@ sio_nl(void)
  *-----------------------------------------------------------------------------*/
 
 int
-sio_readln()
+sio_readln(void)
 {
     PWord v1, v2, v3, vBuf;
     int   t1, t2, t3, tBuf;
@@ -6629,7 +6583,7 @@ sio_readln()
  */
 
 int
-sio_position_in_line()
+sio_position_in_line(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;

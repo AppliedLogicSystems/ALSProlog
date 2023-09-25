@@ -35,7 +35,7 @@
 
 
 
-pckg_init()
+pckg_init(void)
 {
     pckg_toktbl_init();
     pckg_modtbl_init();
@@ -52,7 +52,7 @@ pckg_init()
  * Initialize the module table, the default use module table,
  * and the default procedure table from the package module table.
  */
-pckg_modtbl_init()
+pckg_modtbl_init(void)
 {
     int   numofmods;		/* number of modulesin the package module
 				 * table
@@ -155,7 +155,7 @@ char  loaded_pckg_name[1024];	/* list of package names */
 /*
  * Initialize the name table from name tables of packages.
  */
-pckg_ntbl_init()
+pckg_ntbl_init(void)
 {
     long *pckg;			/* current package */
     long *pckg_array[MAX_PCKGS];	/* list of packages */
@@ -328,7 +328,7 @@ pckg_ntbl_init()
 
 }
 
-pckg_start()
+pckg_start(void)
 {
     char *modptr, *goalptr;
     char  startpred[512];
@@ -356,7 +356,7 @@ pckg_start()
  */
 
 void
-pckg_run_init_goal()
+pckg_run_init_goal(void)
 {
     char  goal[1024];
 

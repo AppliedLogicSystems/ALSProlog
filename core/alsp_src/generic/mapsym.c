@@ -104,9 +104,7 @@
 
 static long * alloc	( size_t, long ** );
 static long *
-alloc(size, to_free_ptr)
-    size_t size;
-    long **to_free_ptr;
+alloc(size_t size, long **to_free_ptr)
 {
     char *unaligned = malloc(size + 12);
     long *aligned;
@@ -135,8 +133,7 @@ alloc(size, to_free_ptr)
 
 static	void	free_em		( long * );
 static void
-free_em(to_free)
-    long *to_free;
+free_em(long *to_free)
 {
     long *tbf;
 
@@ -211,7 +208,7 @@ static struct map_descr {
  */
 
 void
-push_symmap()
+push_symmap(void)
 {
     long *to_free;
     struct map_descr *new_map;
@@ -238,7 +235,7 @@ push_symmap()
  */
 
 void
-pop_symmap()
+pop_symmap(void)
 {
     struct map_descr *old_map;
 
@@ -255,7 +252,7 @@ pop_symmap()
 static	struct bucket_block * new_bucket ( void );
 
 static struct bucket_block *
-new_bucket()
+new_bucket(void)
 {
     if (mapstack->next_bb > mapstack->last_bb) {
 	mapstack->next_bb = (struct bucket_block *)
@@ -272,8 +269,7 @@ new_bucket()
  */
 
 long
-symmap(tokid)
-    long  tokid;
+symmap(long tokid)
 {
     int   hi = tokid & HASHMASK;
     register int i;
@@ -330,8 +326,7 @@ symmap(tokid)
  */
 
 long *
-sym_order(szp)
-    long *szp;
+sym_order(long *szp)
 {
     long *rv;
     int   hi;

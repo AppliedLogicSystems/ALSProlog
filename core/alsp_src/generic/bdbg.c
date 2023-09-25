@@ -12,7 +12,7 @@
 #include "wintcode.h"
 
 int
-pbi_dbg_nospy()
+pbi_dbg_nospy(void)
 {				/* dbg_nospy(M,P,A) */
     PWord m, p, a;
     int   mt, pt, at;
@@ -38,7 +38,7 @@ pbi_dbg_nospy()
 
 
 int
-pbi_dbg_spy()
+pbi_dbg_spy(void)
 {				/* dbg_spy(M,P,A) */
     PWord m, p, a;
     int   mt, pt, at;
@@ -64,21 +64,21 @@ pbi_dbg_spy()
 
 
 int
-pbi_dbg_spyoff()
+pbi_dbg_spyoff(void)
 {				/* dbg_spyoff */
     wm_spying = 0;
     SUCCEED;
 }
 
 int
-pbi_dbg_spyon()
+pbi_dbg_spyon(void)
 {				/* dbg_spyon */
     wm_spying = 1;
     SUCCEED;
 }
 
 int
-pbi_dbg_spying()
+pbi_dbg_spying(void)
 {				/* dbg_spying */
     if (wm_spying)
 	SUCCEED;

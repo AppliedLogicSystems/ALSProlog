@@ -154,10 +154,8 @@ max(x, y)
  *=====================================================================*/
 
 int
-compile_clause(r, fromparser)
-    pword r;
-    int   fromparser;		/* flag indicating if we came from the parser
-				 */
+compile_clause(pword r, int fromparser)
+    /* fromparser: flag indicating if we came from the parser */
 {
     pword rh;			/* rule head */
 
@@ -209,8 +207,7 @@ compile_clause(r, fromparser)
 }
 
 static int
-comp_rule(rule)
-    pword rule;
+comp_rule(pword rule)
 {
     int   gtp;				/* goal type 		*/
     int   macrofix;			/* math fixup flag 	*/
@@ -643,9 +640,7 @@ comp_rule(rule)
  *========================================================================*/
 
 static void
-deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
-    pword goal;
-    int   gtp, gsize, isdeterminateforsure;
+deallocate_environment(pword goal, int gtp, int gsize, int isdeterminateforsure)
 {
     int   esize = call_env_sizes[goalnumber - 1];
     int   s, i, t, p, v;
@@ -821,7 +816,7 @@ deallocate_environment(goal, gtp, gsize, isdeterminateforsure)
  *============================================================================*/
 
 void
-gccallinfo()
+gccallinfo(void)
 {
     register int i;
     register int v;
@@ -873,7 +868,7 @@ gccallinfo()
  *============================================================================*/
 
 static void
-initialize_environment_variables()
+initialize_environment_variables(void)
 {
     register int i;
     register int v;
@@ -917,7 +912,7 @@ initialize_environment_variables()
 
 #if defined(InMath) && !defined(NewMath)
 static long
-regfreemap()
+regfreemap(void)
 {
     register int i;
     register int map = 0;
@@ -939,7 +934,7 @@ regfreemap()
 #ifdef NewMath
 
 static long
-regusemap()
+regusemap(void)
 {
     register int i;
     register int map = 0;
@@ -964,8 +959,7 @@ regusemap()
  *============================================================================*/
 
 int
-isarithmetic(goal)
-    pword goal;
+isarithmetic(pword goal)
 {
     int   f;
 
@@ -996,7 +990,7 @@ isarithmetic(goal)
  *============================================================================*/
 
 static void
-arith_temp_homes()
+arith_temp_homes(void)
 {
     register int v;
     int   n;
@@ -1016,9 +1010,7 @@ arith_temp_homes()
 #endif /* NewMath */
 
 static int
-do_macro(goal, gtp)
-    pword goal;
-    int   gtp;
+do_macro(pword goal, int gtp)
 {
     int   macrofix = 0;
 
@@ -1053,8 +1045,7 @@ do_macro(goal, gtp)
  *============================================================================*/
 
 static int
-goalsize(goal)
-    pword goal;
+goalsize(pword goal)
 {
     int   size;
     int   func;
@@ -1081,8 +1072,7 @@ goalsize(goal)
 }
 
 static void
-incr_usecnt(v)
-    int   v;
+incr_usecnt(int v)
 {
     if (++vtbl[v].usecnt == vtbl[v].noccurences) {
 	model[vtbl[v].home] = NIL_VAL;
@@ -1095,9 +1085,7 @@ incr_usecnt(v)
  *============================================================================*/
 
 static void
-init_model(head, firstgoal)
-    pword head;
-    pword firstgoal;
+init_model(pword head, pword firstgoal)
 {
     register int i;
     int   firstgoalsize = goalsize(firstgoal);
@@ -1370,8 +1358,7 @@ init_model(head, firstgoal)
  *============================================================================*/
 
 static void
-init_targets(t)
-    pword t;
+init_targets(pword t)
 {
     register int i;
 
@@ -1427,8 +1414,7 @@ init_targets(t)
  *============================================================================*/
 
 static void
-init_only_targets(t)
-    pword t;
+init_only_targets(pword t)
 {
     pword s;
     register int i, n;
@@ -1464,8 +1450,7 @@ init_only_targets(t)
  *============================================================================*/
 
 static void
-reassign_homes(head)
-    pword head;
+reassign_homes(pword head)
 {
     if (TYPEOF(head) == TP_TERM) {
 	register int i;
@@ -1501,8 +1486,7 @@ reassign_homes(head)
 }
 
 static void
-comp_head(head)
-    pword head;
+comp_head(pword head)
 {
     int   i;
     pword arg;
@@ -1578,9 +1562,7 @@ comp_head(head)
  *============================================================================*/
 
 static void
-record_first_argument(tp, arg)
-    int   tp;
-    pword arg;
+record_first_argument(int tp, pword arg)
 {
     switch (tp) {
 	case TP_SYM:
@@ -1614,8 +1596,7 @@ record_first_argument(tp, arg)
  *============================================================================*/
 
 static void
-comp_head_structure(loc)
-    int   loc;
+comp_head_structure(int loc)
 {
     int   tdbase;
     pword strct;
@@ -1671,9 +1652,7 @@ comp_head_structure(loc)
  *============================================================================*/
 
 static void
-comp_hstruct_argument(arg, n)
-    pword arg;
-    int   n;
+comp_hstruct_argument(pword arg, int n)
 {
     int   t, v;
 
@@ -1729,8 +1708,7 @@ comp_hstruct_argument(arg, n)
  *============================================================================*/
 
 int
-index_of(n)
-    int   n;
+index_of(int n)
 {
     if (n <= LASTREG)
 	return REGS;
@@ -1750,8 +1728,7 @@ index_of(n)
  *============================================================================*/
 
 int
-disp_of(n)
-    int   n;
+disp_of(int n)
 {
     int   idx = index_of(n);
 
@@ -1764,8 +1741,7 @@ disp_of(n)
 }
 
 static void
-move(n, m)
-    int   n, m;
+move(int n, int m)
 {
     if (n == m && TYPEOF(model[m]) == TP_VO
 	&& vtbl[VO_VAL(model[m])].pvnum == 0)
@@ -1780,8 +1756,7 @@ move(n, m)
  *============================================================================*/
 
 static int
-find_home(v)
-    int   v;
+find_home(int v)
 {
     int   home;
 
@@ -1805,7 +1780,7 @@ find_home(v)
  *============================================================================*/
 
 int
-find_temp()
+find_temp(void)
 {
     int   i;
 
@@ -1835,8 +1810,7 @@ find_temp()
  *============================================================================*/
 
 static int
-find_temp_in_reg(targ)
-    int   targ;
+find_temp_in_reg(int targ)
 {
     int   i;
 
@@ -1860,8 +1834,7 @@ find_temp_in_reg(targ)
  *============================================================================*/
 
 static int
-free_target(loc)
-    int   loc;
+free_target(int loc)
 {
     int   start, tdbase, loc2;
     int   limit, v, dst;
@@ -1956,8 +1929,7 @@ free_target(loc)
 }
 
 static void
-move_perms(start)
-    int   start;
+move_perms(int start)
 {
     int   i;
 
@@ -1993,8 +1965,7 @@ move_perms(start)
 }
 
 static void
-move_to_temp(loc)
-    int   loc;
+move_to_temp(int loc)
 {
     int   v = VO_VAL(model[loc]);
     int   t = find_temp();
@@ -2013,8 +1984,7 @@ move_to_temp(loc)
  *============================================================================*/
 
 static void
-comp_goal(goal)
-    pword goal;
+comp_goal(pword goal)
 {
     int   i, n, v, loc;
     pword arg;
@@ -2145,8 +2115,7 @@ comp_goal(goal)
  *============================================================================*/
 
 void
-comp_math_struct(arg)
-    pword arg;
+comp_math_struct(pword arg)
 {
     int   SPstart, loc;
 
@@ -2204,9 +2173,7 @@ comp_math_struct(arg)
  *============================================================================*/
 
 static int
-comp_goal_structure(strct, loc)
-    pword strct;
-    int   loc;
+comp_goal_structure(pword strct, int loc)
 {
     int   i, n;
     int   tdbase;
@@ -2271,8 +2238,7 @@ comp_goal_structure(strct, loc)
 }
 
 static int
-comp_struct_arg1(arg)
-    pword arg;
+comp_struct_arg1(pword arg)
 {
     switch (TYPEOF(arg)) {
 	case TP_UIA:
@@ -2290,9 +2256,7 @@ comp_struct_arg1(arg)
 }
 
 static void
-comp_struct_arg2(arg, loc, n)
-    pword arg;
-    int   loc, n;
+comp_struct_arg2(pword arg, int loc, int n)
 {
     int   t, v;
 
@@ -2365,8 +2329,7 @@ comp_struct_arg2(arg, loc, n)
  *============================================================================*/
 
 static pword
-get_compiler_directives(goal)
-    pword goal;
+get_compiler_directives(pword goal)
 {
     pword arg;
 
@@ -2399,14 +2362,14 @@ get_compiler_directives(goal)
 }
 
 static void
-compiler_directives()
+compiler_directives(void)
 {
     if (cd_cutpt != -1)
 	emit_cd_cutpt();
 }
 
 static void
-emit_cd_cutpt()
+emit_cd_cutpt(void)
 {
     int   loc = find_home(cd_cutpt);
 

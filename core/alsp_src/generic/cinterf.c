@@ -53,10 +53,7 @@ static int constsymtype;
  */
 
 void
-CI_makefar(vp, tp, ptr)
-    PWord *vp;
-    int  *tp;
-    unsigned short *ptr;
+CI_makefar(PWord *vp, int *tp, unsigned short *ptr)
 {
     PWord arg;
     int   argtype;
@@ -114,8 +111,7 @@ SymTblEntry symtable[SYMTBLSZ];
  */
 
 static int
-lookup_c_sym(symbol)
-    char *symbol;
+lookup_c_sym(char *symbol)
 {
     register unsigned long sum, acc, slen, i, start;
     register char *s;
@@ -390,7 +386,7 @@ CI_get_double(double *dbl, unsigned long arg, unsigned long type)
  */
 
 static int
-c_structinfo()
+c_structinfo(void)
 {				/* usage :
 				 * $c_structinfo(name,size__re,list_ret)
 				 */
@@ -494,7 +490,7 @@ c_structinfo()
 
 
 static int
-c_typeinfo()
+c_typeinfo(void)
 {				/* usage :
 				 * $c_typeinfo(name,size_reet)ype_ret)
 				 */
@@ -553,7 +549,7 @@ c_typeinfo()
 
 
 static int
-c_constinfo()
+c_constinfo(void)
 {				/* usage : $c_constinfo(name,val_ret) */
     PWord V1;
     int   T1;
@@ -610,7 +606,7 @@ c_constinfo()
 
 
 static int
-c_rconstinfo()
+c_rconstinfo(void)
 {				/* usage : $c_rconstinfo(name,val_ret) */
     PWord V1;
     int   T1;
@@ -652,7 +648,7 @@ c_rconstinfo()
 #define MAXNARGS 30
 
 static int
-c_call()
+c_call(void)
 {
     PWord v1;
     int   t1;			/* function pointer */
@@ -747,7 +743,7 @@ c_call()
  */
 
 static int
-c_makeuia()
+c_makeuia(void)
 {
     PWord PascalFlag;
     int PascalFlagType;
@@ -789,7 +785,7 @@ c_makeuia()
 
 
 static int
-c_convertCstrPstr()
+c_convertCstrPstr(void)
 {
     PWord Pointer, PascalFlag;
     int PointerType, PascalFlagType;
@@ -965,7 +961,7 @@ PI_END
 /* *INDENT-ON* */
 
 void
-cinterf_init()
+cinterf_init(void)
 {
     PI_makesym(&fieldsym, &fieldsymtype, "f");
     PI_makesym(&pnil, &niltype, "[]");	/* make a nil symbol */

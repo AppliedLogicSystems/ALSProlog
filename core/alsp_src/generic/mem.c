@@ -127,9 +127,7 @@ static	int	ss_saved_state_present	( void );
 #endif
 
 long *
-alloc_big_block(size, fe_num)
-    size_t size;
-    int fe_num;
+alloc_big_block(size_t size, int fe_num)
 {
     long *np;
 
@@ -143,9 +141,7 @@ alloc_big_block(size, fe_num)
 }
 
 int
-als_mem_init(file,offset)
-    const char *file;
-    long offset;
+als_mem_init(const char *file, long offset)
 {
 
     if (ss_saved_state_present())
@@ -196,11 +192,7 @@ als_mem_init(file,offset)
 #define SMALLEST_BLOCK_SIZE 16
 
 static long *
-ss_malloc0(size, align, fe_num, actual_sizep)
-    size_t size;
-    int align;
-    int fe_num;
-    long *actual_sizep;
+ss_malloc0(size_t size, int align, int fe_num, long *actual_sizep)
 {
     long **bestp = (long **) 0;
     long best_size = 0x7fffffff;
@@ -274,18 +266,13 @@ ss_malloc0(size, align, fe_num, actual_sizep)
 }
 
 long *
-ss_pmalloc(size,fe_num,actual_sizep)
-    size_t size;
-    int fe_num;
-    long *actual_sizep;
+ss_pmalloc(size_t size, int fe_num, long *actual_sizep)
 {
     return ss_malloc0(size,1,fe_num,actual_sizep);
 }
 
 long *
-ss_malloc(size,fe_num)
-    size_t size;
-    int fe_num;
+ss_malloc(size_t size, int fe_num)
 {
     return ss_malloc0(size,0,fe_num,(long *) 0);
 }
@@ -303,7 +290,7 @@ ss_malloc(size,fe_num)
  */
 
 long *
-ss_fmalloc_start()
+ss_fmalloc_start(void)
 {
     long *retval;
 /* #if defined(HAVE_MMAP) || defined(MACH_SUBSTRATE) */
@@ -322,8 +309,7 @@ ss_fmalloc_start()
 }
 
 long *
-ss_fmalloc(size)
-    size_t size;
+ss_fmalloc(size_t size)
 {
     long * newblock ;
 
@@ -338,8 +324,7 @@ ss_fmalloc(size)
 #endif
 
 void
-ss_register_global(addr)
-    long *addr;
+ss_register_global(long *addr)
 {
     if (amheader.nglobals > AM_MAXGLOBALS)
 	fatal_error(FE_SS_MAXGLOBALS,0);
@@ -1289,7 +1274,7 @@ ss_err:
  */
 
 static int
-ss_saved_state_present()
+ss_saved_state_present(void)
 {
 #ifdef MACH_SUBSTRATE
     kern_return_t stat;

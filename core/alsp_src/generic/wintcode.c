@@ -95,9 +95,7 @@ static	void	mark_clause	( long * );
  *-----------------------------------------------------------------*/
 
 static long *
-code_alloc(size, fe_num)
-    size_t size;
-    int fe_num;
+code_alloc(size_t size, int fe_num)
 {
     struct codeblock *newcb;
 
@@ -136,9 +134,7 @@ void dump_codespace(void)
 
 #ifdef PACKAGE
 int
-pckg_addto_codeblocks(addr, len)
-    long *addr;
-    int   len;
+pckg_addto_codeblocks(long *addr, int len)
 {
     struct codeblock *newcb;
 
@@ -160,7 +156,7 @@ pckg_addto_codeblocks(addr, len)
  *-----------------------------------------------------------------*/
 
 static void
-makerunable()
+makerunable(void)
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
@@ -204,7 +200,7 @@ makerunable()
  *-----------------------------------------------------------------*/
 
 static void
-makewritable()
+makewritable(void)
 {
 #if !defined(Portable) && !defined(arch_sparc)	
 			/* Portable doesn't need any of this stuff */
@@ -232,8 +228,7 @@ makewritable()
 
 
 dbprot_t
-w_dbprotect(newstate)
-    dbprot_t newstate;
+w_dbprotect(dbprot_t newstate)
 {
     static dbprot_t state = DBRS_WRITABLE;
     dbprot_t oldstate;
@@ -266,7 +261,7 @@ w_dbprotect(newstate)
 /*//static ntbl_entry *ane_entptr = (ntbl_entry *) 0;*/
 
 static ntbl_entry *
-alloc_name_entry()
+alloc_name_entry(void)
 {
 
     if (ane_entbase == ane_entptr) {
@@ -290,9 +285,7 @@ alloc_name_entry()
  *-----------------------------------------------------------------*/
 
 int
-nameprobe(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+nameprobe(PWord modid, PWord tokid, int arity)
 {
     register int i, s;
     register ntbl_entry *n;
@@ -324,9 +317,7 @@ nameprobe(modid, tokid, arity)
  *-----------------------------------------------------------------*/
 
 int
-w_namelookup(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+w_namelookup(PWord modid, PWord tokid, int arity)
 {
     int   i;
     ntbl_entry *n;
@@ -374,9 +365,7 @@ w_namelookup(modid, tokid, arity)
  *-----------------------------------------------------------------*/
 
 ntbl_entry *
-w_nameprobe(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
+w_nameprobe(PWord modid, PWord tokid, int arity)
 {
     int   i;
     ntbl_entry *n;
@@ -394,10 +383,7 @@ w_nameprobe(modid, tokid, arity)
 }
 
 ntbl_entry *
-w_nameentry(modid, tokid, arity)
-    PWord modid, tokid;
-    int   arity;
-
+w_nameentry(PWord modid, PWord tokid, int arity)
 {
     return w_nametable[w_namelookup(modid, tokid, arity)];
 }
@@ -410,7 +396,7 @@ w_nameentry(modid, tokid, arity)
 #define WC_HEADERSIZE 4
 
 void
-w_initcode()
+w_initcode(void)
 {
     if (!w_freeptr) {
 	long *headerblock;
@@ -451,9 +437,7 @@ w_initcode()
 }
 
 void
-w_freecount(tot, used)
-    long *tot, *used;
-
+w_freecount(long *tot, long *used)
 {
     long  f;
     long *p;
@@ -482,8 +466,7 @@ w_freecount(tot, used)
 /*  #define MDEBUG 1 */
 
 long *
-w_alloccode(size)
-    int   size;
+w_alloccode(int size)
 {
     long *p;			/* search pointer */
     long  codeSize = size;	/* Keep real size of usable data */
@@ -577,8 +560,7 @@ w_alloccode(size)
  *-----------------------------------------------------------------*/
 
 void
-w_freecode(p)
-    long *p;
+w_freecode(long *p)
 {
     long *q;
     long  s;
@@ -645,11 +627,11 @@ if (*(p + s) > 0) {		/* if next block is free... */
  *-----------------------------------------------------------------*/
 
 long *
-w_installcode(buffer, bufsize, extra, actualsize)
-    Code *buffer;		/* pointer to buffer of Code */
-    int   bufsize;		/* size of the buffer (in Code words) */
-    int   extra;		/* amount of extra space to allocate */
-    int  *actualsize;		/* the actual amount of space allocated */
+w_installcode(Code *buffer, int bufsize, int extra, int *actualsize)
+    /* buffer: pointer to buffer of Code */
+    /* bufsize: size of the buffer (in Code words) */
+    /* extra: amount of extra space to allocate */
+    /* actualsize: the actual amount of space allocated */
 {
     long *areastart;
     int   copysize;
@@ -701,9 +683,7 @@ extern	void	wm_p_uia	( void );
 extern	void	mth_pushdbl0	( void );
 
 void
-copy_code(buffer, to, bufsize)
-    long *buffer, *to;
-    int   bufsize;
+copy_code(long *buffer, long *to, int bufsize)
 {
     register long *s, *t;
     register long v;
@@ -776,9 +756,7 @@ extern	void	mth_pushdbl0	( void );
  *-----------------------------------------------------------------*/
 
 void
-copy_code(buffer, to, bufsize)
-    long *buffer, *to;
-    int   bufsize;
+copy_code(long *buffer, long *to, int bufsize)
 {
     register long *s, *t, *targ;
     register long v, offs;
@@ -860,10 +838,7 @@ copy_code(buffer, to, bufsize)
  *-----------------------------------------------------------------*/
 
 void
-copy_code(from, to, count)
-    register long *from;
-    register long *to;
-    register int count;
+copy_code(register long *from, register long *to, register int count)
 {
     while (count--)
 	*to++ = *from++;
@@ -885,8 +860,7 @@ copy_code(from, to, count)
  *-----------------------------------------------------------------*/
 
 void
-w_nukeindexing(ent)
-    ntbl_entry *ent;
+w_nukeindexing(ntbl_entry *ent)
 {
     long *p;
 
@@ -971,8 +945,7 @@ w_nukeindexing(ent)
  *-----------------------------------------------------------------*/
 
 void
-w_fixchoicepoints(ib)
-    long *ib;
+w_fixchoicepoints(long *ib)
 {
     long *ib_end;
     register PWord *b;
@@ -1051,8 +1024,7 @@ w_fixchoicepoints(ib)
  *-----------------------------------------------------------------*/
 
 static long *
-cbsffa(addr)
-    Code *addr;
+cbsffa(Code *addr)
 {
     long *ret, size;
     int   i;
@@ -1081,8 +1053,7 @@ cbsffa(addr)
  *-----------------------------------------------------------------*/
 
 void
-w_abolish(ent)
-    ntbl_entry *ent;
+w_abolish(ntbl_entry *ent)
 {
     w_abolish_cg(ent, 0, 0);
 }
@@ -1092,9 +1063,7 @@ w_abolish(ent)
  *-----------------------------------------------------------------*/
 
 int
-w_erase(n, a)
-    int   n;
-    long *a;
+w_erase(int n, long *a)
 {
     ntbl_entry *ent;
     long *p, *q;
@@ -1219,8 +1188,7 @@ w_erase(n, a)
  *-----------------------------------------------------------------*/
 
 void
-w_freeclause(a)
-    long *a;
+w_freeclause(long *a)
 {
 #ifndef CodeGC
     w_freecode(a);		/* Actually free up the code */
@@ -1277,17 +1245,16 @@ w_freeclause(a)
  *-----------------------------------------------------------------*/
 
 void
-w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;			/* token id */
-    int   a;			/* arity */
-    Code *buffer;		/* temp buffer which has clause code */
-    int   bufsize;		/* size of buffer */
-    long  firstargkey;		/* first argument key */
-    int   fstartoffset;		/* first argument start after dereference
-				 * loop
-				 */
-    int   dstartoffset;		/* determinate start offset */
-    long  envsavemask;		/* environment save mask */
+w_assertz(PWord p, int a, Code *buffer, int bufsize, long firstargkey,
+	int fstartoffset, int dstartoffset, long envsavemask)
+    /* p: token id */
+    /* a: arity */
+    /* buffer: temp buffer which has clause code */
+    /* bufsize: size of buffer */
+    /* firstargkey: first argument key */
+    /* fstartoffset: first argument start after dereference loop */
+    /* dstartoffset: determinate start offset */
+    /* envsavemask: environment save mask */
 
 {
     w_addclause(
@@ -1308,15 +1275,8 @@ w_assertz(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsav
  *-----------------------------------------------------------------*/
 
 void
-w_asserta(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;
-    int   a;
-    Code *buffer;
-    int   bufsize;
-    long  firstargkey;
-    int   fstartoffset;
-    int   dstartoffset;
-    long  envsavemask;
+w_asserta(PWord p, int a, Code *buffer, int bufsize, long firstargkey,
+	int fstartoffset, int dstartoffset, long envsavemask)
 {
     w_addclause(
 		   p, a, CGI_ASSERTA,
@@ -1326,18 +1286,9 @@ w_asserta(p, a, buffer, bufsize, firstargkey, fstartoffset, dstartoffset, envsav
 }
 
 void
-w_addclause(p, a, cg_id,
-	    buffer, bufsize,
-	    firstargkey, fstartoffset, dstartoffset, envsavemask)
-    PWord p;
-    int   a;
-    int   cg_id;
-    Code *buffer;
-    int   bufsize;
-    long  firstargkey;
-    int   fstartoffset;
-    int   dstartoffset;
-    long  envsavemask;
+w_addclause(PWord p, int a, int cg_id,
+	    Code *buffer, int bufsize,
+	    long firstargkey, int fstartoffset, int dstartoffset, long envsavemask)
 {
     int   procid;
     ntbl_entry *ent;
@@ -1575,10 +1526,7 @@ w_addclause(p, a, cg_id,
 	 *--------------------------------------------------*/
 
 void
-w_abolish_cg(ent, cg_id, cg_mask)
-    ntbl_entry *ent;
-    int   cg_id;
-    int   cg_mask;
+w_abolish_cg(ntbl_entry *ent, int cg_id, int cg_mask)
 {
     long *p, *q, *eb1;
 
@@ -1662,17 +1610,13 @@ w_abolish_cg(ent, cg_id, cg_mask)
 }
 
 void
-w_execquery(buffer, bufsize)
-    Code *buffer;
-    int   bufsize;
+w_execquery(Code *buffer, int bufsize)
 {
     w_exec(buffer, bufsize, "print_no");
 }
 
 void
-w_execcommand(buffer, bufsize)
-    Code *buffer;
-    int   bufsize;
+w_execcommand(Code *buffer, int bufsize)
 {
     w_exec(buffer, bufsize, "print_warning");
 }
@@ -1687,10 +1631,7 @@ extern fixSystemStack(long);
 #endif
 
 void
-w_exec(buffer, bufsize, nocatcher)
-    Code *buffer;
-    int   bufsize;
-    const char *nocatcher;
+w_exec(Code *buffer, int bufsize, const char *nocatcher)
 {
     long *qbuf;
     Code *execCode;
@@ -1744,10 +1685,7 @@ w_exec(buffer, bufsize, nocatcher)
 }
 
 void
-w_assert_builtin(name, arity, builtin)
-    const char *name;
-    int   arity;
-    int   (*builtin) ( void );
+w_assert_builtin(const char *name, int arity, int (*builtin) ( void ))
 {
     ntbl_entry *ent;
 
@@ -1759,11 +1697,8 @@ w_assert_builtin(name, arity, builtin)
 
 
 void
-w_assert_built2(name, arity, installer, p1, p2)
-    const char *name;
-    int   arity;
-    void  (*installer) ( ntbl_entry *, PWord, PWord );
-    PWord p1, p2;
+w_assert_built2(const char *name, int arity,
+	void  (*installer) ( ntbl_entry *, PWord, PWord ), PWord p1, PWord p2)
 {
     ntbl_entry *ent;
     short bflg;
@@ -1788,11 +1723,7 @@ w_assert_built2(name, arity, installer, p1, p2)
 }
 
 void
-w_assert_foreign(modid, name, arity, builtin)
-    PWord modid;
-    const char *name;
-    int   arity;
-    int   (*builtin) ( void );
+w_assert_foreign(PWord modid, const char *name, int arity, int (*builtin) ( void ))
 {
     ntbl_entry *ent;
 
@@ -1807,9 +1738,7 @@ w_assert_foreign(modid, name, arity, builtin)
 }
 
 void
-w_dynamic(m, p, a)
-    PWord m, p;
-    int a;
+w_dynamic(PWord m, PWord p, int a)
 {
     ntbl_entry *ent = w_nametable[w_namelookup(m, p, a)];
 
@@ -1819,9 +1748,7 @@ w_dynamic(m, p, a)
 }
 
 int
-w_spy(m, p, a)
-    PWord m, p;
-    int   a;
+w_spy(PWord m, PWord p, int a)
 {
     ntbl_entry *ent;
 
@@ -1836,9 +1763,7 @@ w_spy(m, p, a)
 }
 
 int
-w_nospy(m, p, a)
-    PWord m, p;
-    int   a;
+w_nospy(PWord m, PWord p, int a)
 {
     ntbl_entry *ent;
 
@@ -1854,9 +1779,7 @@ w_nospy(m, p, a)
 
 
 void
-w_libbreak(m, p, a, i)
-    PWord m, p;
-    int   a, i;
+w_libbreak(PWord m, PWord p, int a, int i)
 {
     ntbl_entry *ent;
 
@@ -1869,9 +1792,7 @@ w_libbreak(m, p, a, i)
 
 
 PWord
-nextproc(n, f)
-    register PWord n;
-    int   f;
+nextproc(register PWord n, int f)
 {
     register ntbl_entry *ent;
 
@@ -1916,8 +1837,8 @@ nextproc(n, f)
  *-----------------------------------------------------------------*/
 
 long *
-first_clause(n)
-    int   n;			/* name table index */
+first_clause(int n)
+    /* n: name table index */
 {
     register ntbl_entry *ent;
 
@@ -1944,8 +1865,8 @@ first_clause(n)
  *-----------------------------------------------------------------*/
 
 long *
-next_clause(a)
-    long *a;			/* address of current clause */
+next_clause(long *a)
+    /* a: address of current clause */
 {
     if (a == (long *) 0)
 	return ((long *) 0);
@@ -1980,10 +1901,7 @@ next_clause(a)
  *-----------------------------------------------------------------*/
 
 void
-make_dbref(a, res, restype)
-    long *a;
-    PWord *res;
-    int  *restype;
+make_dbref(long *a, PWord *res, int  *restype)
 {
     if (a == (long *) 0) {
 	*res = (PWord) 0;
@@ -2014,10 +1932,7 @@ make_dbref(a, res, restype)
  *-----------------------------------------------------------------*/
 
 long *
-w_validate_dbref(addr, nid, cid)
-    long *addr;
-    int   nid;
-    long  cid;
+w_validate_dbref(long *addr, int nid, long cid)
 {
     long  size;
 
@@ -2054,10 +1969,7 @@ w_validate_dbref(addr, nid, cid)
  *-----------------------------------------------------------------*/
 
 long *
-validate_dbref(ref, reftype, nameid)
-    PWord ref;
-    int   reftype;
-    PWord *nameid;
+validate_dbref(PWord ref, int reftype, PWord *nameid)
 {
     if (reftype == WTP_STRUCTURE) {
 	PWord functor;
@@ -2103,9 +2015,7 @@ validate_dbref(ref, reftype, nameid)
 #endif
 
 Code *
-jump_validate_dbref(ref, term)
-    PWord ref;
-    PWord term;
+jump_validate_dbref(PWord ref, PWord term)
 {
     PWord v;
     int   t;
@@ -2170,7 +2080,7 @@ jump_validate_dbref(ref, term)
  *-----------------------------------------------------------------*/
 
 void
-gen_indexing()
+gen_indexing(void)
 {
 #ifdef Indexing
     register int i;
@@ -2197,8 +2107,7 @@ gen_indexing()
  *-----------------------------------------------------------------*/
 
 void
-decr_icount(addr)
-    Code *addr;
+decr_icount(Code *addr)
 {
 #ifdef Indexing
     register ntbl_entry *ent;
@@ -2223,8 +2132,7 @@ decr_icount(addr)
  *-----------------------------------------------------------------*/
 
 void
-seticount(ent)
-    ntbl_entry *ent;
+seticount(ntbl_entry *ent)
 {
 #ifdef AutoIndexing
     if (!(ent->flags & NMSK_SPYSET) &&
@@ -2249,8 +2157,7 @@ seticount(ent)
 #endif
 
 long *
-next_choice_in_a_deleted_clause(addr)
-    long *addr;
+next_choice_in_a_deleted_clause(long *addr)
 {
     addr = next_clause(addr - WCI_CHOICEENTRY);
 
@@ -2273,7 +2180,7 @@ next_choice_in_a_deleted_clause(addr)
  *-----------------------------------------------------------------*/
 
 void
-w_collect()
+w_collect(void)
 {
     register PWord *h, *h_end;
     long **upd, *p;
@@ -2411,9 +2318,7 @@ w_collect()
 
 
 static long *
-clause_start_from_retaddr(ra,mp)
-    Code *ra;
-    long *mp;
+clause_start_from_retaddr(Code *ra, long *mp)
 {
 #ifndef GCMASK
     long *p;
@@ -2492,8 +2397,7 @@ clause_start_from_retaddr(ra,mp)
 }
 
 static void
-mark_fromretaddr(ra)
-    Code *ra;
+mark_fromretaddr(Code *ra)
 {
     long *ca = clause_start_from_retaddr(ra,0);
     if (ca)
@@ -2501,8 +2405,7 @@ mark_fromretaddr(ra)
 }
 
 static void
-mark_clause(c)
-    long *c;
+mark_clause(long *c)
 {
     long  size;
 
@@ -2539,10 +2442,7 @@ mark_clause(c)
  *-----------------------------------------------------------------*/
 
 PWord *
-w_frame_info(f,ca,mp)
-    PWord *f;
-    long **ca;
-    long *mp;
+w_frame_info(PWord *f, long **ca, long *mp)
 {
     long *nf;
     if (*(f+1)) {
@@ -2570,8 +2470,7 @@ w_frame_info(f,ca,mp)
  *-----------------------------------------------------------------*/
 
 void
-w_relink(ent)
-    ntbl_entry *ent;
+w_relink(ntbl_entry *ent)
 {
     if (ent->flags & NMSK_EXPORT) {
 	register PWord key;
@@ -2598,7 +2497,7 @@ w_relink(ent)
  *-----------------------------------------------------------------*/
 
 void
-w_relinkall()
+w_relinkall(void)
 {
     register int i;
     register ntbl_entry *e;
@@ -2624,9 +2523,7 @@ w_relinkall()
  *-----------------------------------------------------------------*/
 
 char *
-w_getnamestring(addr, buf)
-    Code *addr;
-    char *buf;
+w_getnamestring(Code *addr, char *buf)
 {
     int n;
     ntbl_entry *ent;

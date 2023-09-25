@@ -74,7 +74,7 @@ pptinfo prompts[3] =
 #endif
 
 void
-fio_init()
+fio_init(void)
 {
 #if !defined(DOS) && !defined(Portable) && !defined(VMS) && !defined(NeXTOS) && !defined(MSWin32)
 /* The Think C ANSI library has trouble with the setvbuf calls.  They seem
@@ -122,8 +122,7 @@ static char *univ_fgets(char *s, int n, FILE *stream)
 #define GEN_TABS(fncname,tbl,tbmax)				\
 static int fncname ( int );				\
 static int							\
-fncname(tok)							\
-    int tok;							\
+fncname(int tok)							\
 {								\
     int i;							\
     for (i=0;i<tbmax;i++)					\
@@ -140,8 +139,7 @@ fncname(tok)							\
 GEN_TABS(seeidx, seetbl, MAXSEE)
 GEN_TABS(tellidx, telltbl, MAXTELL)
 static void
-fio_nxln(lbp)
-    lxi_but *lbp;
+fio_nxln(lxi_but *lbp)
 {
     register char *b = seetbl[(lbp->see_idx)].buffer;
 
@@ -177,9 +175,7 @@ readit:
 }
 
 static int
-fio_syntax_err(lbp, errstring)
-    lxi_but *lbp;
-    const char *errstring;
+fio_syntax_err(lxi_but *lbp, const char *errstring)
 {
     char  b[SEEBFSZ];
     char *bp, *sp;
@@ -233,8 +229,7 @@ fio_syntax_err(lbp, errstring)
 
 
 int
-fio_see(tok)
-    int   tok;
+fio_see(int tok)
 {
     char  ebuf[100];
     int   i;
@@ -301,7 +296,7 @@ fio_see(tok)
 }
 
 void
-fio_seen()
+fio_seen(void)
 {
     if (cur_si == USRSEEI) {
 	clearerr(stdin);
@@ -328,15 +323,14 @@ fio_seen()
 /* returns the index to the token representing name of file */
 
 int
-fio_seeing()
+fio_seeing(void)
 {
     return (seetbl[cur_si].tkidx);
 }
 
 
 static void
-file_error(s)
-    const char *s;
+file_error(const char *s)
 {
     PI_oprintf("%s\n", s);
 }
@@ -350,7 +344,7 @@ file_error(s)
  */
 
 int
-fio_get0()
+fio_get0(void)
 {				/* returns next character read, -1 on end of
 				 * file.
 				 */
@@ -367,7 +361,7 @@ fio_get0()
 
 
 int
-fio_get()
+fio_get(void)
 {				/* returns next non-control character or
 				 * blank, -1 on eof
 				 */
@@ -387,10 +381,9 @@ fio_get()
 
 
 void
-fio_put(ch)			/* prints the single character ch to the
+fio_put(int ch)	/* prints the single character ch to the
 				 * current file
 				 */
-    int   ch;
 {
     PI_oputchar(ch);
 }
@@ -398,7 +391,7 @@ fio_put(ch)			/* prints the single character ch to the
 
 
 void
-fio_nl()
+fio_nl(void)
 {				/* writes the newline character to the
 				 * current output
 				 */
@@ -407,8 +400,7 @@ fio_nl()
 
 
 int
-fio_tell(tok)
-    int   tok;
+fio_tell(int tok)
 {
     char  ebuf[100];
     int   i;
@@ -439,7 +431,7 @@ fio_tell(tok)
 }
 
 void
-fio_told()
+fio_told(void)
 {
     if (cur_ti == USRTELI) {
 	return;			/* do nothing ... don't want to really close
@@ -455,13 +447,13 @@ fio_told()
 }
 
 int
-fio_telling()
+fio_telling(void)
 {
     return (telltbl[cur_ti].tkidx);
 }
 
 void
-fio_flush()
+fio_flush(void)
 {
     fflush(outfd);
 }

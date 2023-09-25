@@ -43,7 +43,7 @@
 
 #ifndef PURE_ANSI
 int
-pbi_access()
+pbi_access(void)
 {				/* $access(path,mode) */
     PWord v1, v2;
     int   t1, t2;
@@ -69,7 +69,7 @@ pbi_access()
 #ifdef OSACCESS
 #ifndef PURE_ANSI
 int
-pbi_chdir()
+pbi_chdir(void)
 {
     PWord v1;
     int   t1;
@@ -85,7 +85,7 @@ pbi_chdir()
 #endif /* PURE_ANSI */
 
 int
-pbi_getenv()
+pbi_getenv(void)
 {
     PWord v1, v2;
     PWord slv;
@@ -141,7 +141,7 @@ pbi_get_user_home(void)
 #endif /* OSACCESS */
 
 int
-pbi_system()
+pbi_system(void)
 {
     PWord v;
     int   t;
@@ -213,7 +213,7 @@ pbi_system()
  */
 
 int
-pbi_tmpnam()
+pbi_tmpnam(void)
 {
     PWord v1, vtn;
     int t1, ttn;
@@ -232,7 +232,7 @@ pbi_tmpnam()
 
 
 int
-pbi_protect_bottom_stack_page()
+pbi_protect_bottom_stack_page(void)
 {				/* $protect_bottom_stack_page */
 #if 0
     protect_bottom_stack_page();

@@ -110,7 +110,7 @@ pgetcwd(void)
  */
 
 int
-pchdir()
+pchdir(void)
 {
     PWord v1;
     int   t1;
@@ -170,7 +170,7 @@ punlink(void)
  */
 
 int
-getDirEntries()
+getDirEntries(void)
 {
     PWord v1, v2, v3;
     int   t1, t2, t3;
@@ -450,7 +450,7 @@ pcmp_fs(void)
  */
 
 int
-prmdir()
+prmdir(void)
 {
     PWord v1;
     int   t1;
@@ -477,7 +477,7 @@ prmdir()
  */
 
 int
-pmkdir()
+pmkdir(void)
 {
     PWord v1,v2;
     int   t1,t2;
@@ -548,14 +548,12 @@ static	void	stat_timedout		( void );
 static	int	stat_with_timeout	( const char *, struct stat * );
 
 static void
-stat_timedout()
+stat_timedout(void)
 {
 }
 
 static int
-stat_with_timeout(path, statbuf)
-    const char *path;
-    struct stat *statbuf;
+stat_with_timeout(const char *path, struct stat *statbuf)
 {
     struct sigaction newact;
     struct sigaction oldact;
@@ -600,9 +598,7 @@ stat_with_timeout(path, statbuf)
 #endif /* !defined(HAVE_SETITIMER) */
 
 static char *
-canonical_pathname(path_name,file_namep)
-    char *path_name;
-    char **file_namep;
+canonical_pathname(char *path_name, char **file_namep)
 {
     dev_t rootdev, thisdev;
     ino_t rootino, thisino;
@@ -798,7 +794,7 @@ canonical_pathname(path_name,file_namep)
 
 
 static int
-canonicalize_pathname()
+canonicalize_pathname(void)
 {
     PWord v1, v2, vp;
     int   t1, t2, tp;
@@ -833,8 +829,7 @@ canonicalize_pathname()
 #endif /* CCANONP */
 
 long 
-get_file_modified_time(fname)
-    const char *fname;
+get_file_modified_time(const char *fname)
 {
     struct stat buf;
 
@@ -849,8 +844,7 @@ get_file_modified_time(fname)
  *
  */
 int
-isdir(fname)
-    const char *fname;
+isdir(const char *fname)
 {
     struct stat buf;
 
@@ -861,7 +855,7 @@ isdir(fname)
 }
 
 int
-pgetpid()
+pgetpid(void)
 {
     PWord v1, vpid;
     int   t1, tpid;
@@ -962,7 +956,7 @@ PI_END
 /* *INDENT-ON* */
 
 void
-init_fsutils()
+init_fsutils(void)
 {
     PI_INIT;
 }

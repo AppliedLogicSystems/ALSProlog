@@ -16,7 +16,7 @@
 #include "defs.h"
 
 int
-pbi_gv_alloc()
+pbi_gv_alloc(void)
 {				/* gv_alloc(vn) */
     PWord v;
     int   t;
@@ -30,7 +30,7 @@ pbi_gv_alloc()
 }
 
 int
-pbi_gv_free()
+pbi_gv_free(void)
 {
     PWord v;
     int   t;
@@ -45,7 +45,7 @@ pbi_gv_free()
 }
 
 int
-pbi_gv_get()
+pbi_gv_get(void)
 {
     PWord v1;
     int   t1;
@@ -69,7 +69,7 @@ pbi_gv_get()
 }
 
 int
-pbi_gv_set()
+pbi_gv_set(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -93,7 +93,7 @@ pbi_gv_set()
  */
 
 int
-pbi_gv_alloc_init()
+pbi_gv_alloc_init(void)
 {
     PWord v1, v2;
     int   t1, t2;
@@ -121,7 +121,7 @@ pbi_gv_alloc_init()
 
 
 int
-pbi_gv_isfree()
+pbi_gv_isfree(void)
 {
     PWord v1;
     int   t1;
@@ -148,7 +148,7 @@ pbi_gv_isfree()
  */
 
 int
-pbi_gv_maxpossible()
+pbi_gv_maxpossible(void)
 {
     PWord v1;
     int   t1;

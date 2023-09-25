@@ -57,7 +57,7 @@ int pbi_kill_freeze		( void );
 #endif /* BigStruct */
 
 int
-pbi_delay()
+pbi_delay(void)
 {
 	PWord *dv,m,g,vv,rdt,*one,*two;
 	int dvt,mt,gt,vvt,rdtt;
@@ -205,7 +205,7 @@ if (debug_system[FRZDELAY]) {
 }
 
 int
-pbi_is_delay_var()
+pbi_is_delay_var(void)
 {
     PWord *dv;
     PWord *rdv;
@@ -230,7 +230,7 @@ if (debug_system[FRZDELAY]) {
 		FAIL;
 }
 
-int pbi_kill_freeze()
+int pbi_kill_freeze(void)
 {
     PWord *dv;
     int dvt;
@@ -247,8 +247,7 @@ int pbi_kill_freeze()
 }
 
 PWord
-deref_2(w)
-    register PWord w;
+deref_2(register PWord w)
 {
     register PWord x,w2;
 
@@ -264,7 +263,7 @@ deref_2(w)
 	 | collecting the active delay var terms;
 	 *-------------------------------------------------*/
 int
-pbi_clct_tr()
+pbi_clct_tr(void)
 {
 	PWord **CurT,*Back1,*Forw1;
 	PWord BStop,v1,clctv,DrT;
@@ -348,7 +347,7 @@ pbi_clct_tr()
 }
 
 int
-pbi_unset_2nd()
+pbi_unset_2nd(void)
 {
     PWord v1, s;
     int t1;
@@ -362,7 +361,7 @@ pbi_unset_2nd()
 }
 
 int
-pbi_del_tm_for()
+pbi_del_tm_for(void)
 {
 	PWord *Back1, v1,v2,DrT,tms;
 	int t1,t2;
@@ -387,8 +386,7 @@ pbi_del_tm_for()
 }
 
 int
-update_chpt_slots(hval)
-	PWord hval;
+update_chpt_slots(PWord hval)
 {
   PWord *CurP;
 
@@ -418,8 +416,7 @@ update_chpt_slots(hval)
 	 |	gc check will have been done just as we enter....
 	 *--------------------------------------------------------------*/
 void
-combin_dels(r,f)
-	PWord r, f;
+combin_dels(PWord r, PWord f)
 {
 	PWord mod,   goal,   cdfctr;
 	int   mod_t, goal_t, cdf_t;
@@ -456,7 +453,7 @@ int	disp_heap 		( void );
 	 *-------------------------------------------------*/
 
 int
-pbi_walk_cps()
+pbi_walk_cps(void)
 {
   PWord *CurP, *Stop;
   PWord pn;
@@ -519,7 +516,7 @@ pbi_walk_cps()
 	  Print out current values of WAM registers;
 	 *-------------------------------------------------*/
 int
-pbi_cptx()
+pbi_cptx(void)
 {
 	printf("Tr_b= %p  B= %p  TR= %p  H= %p  HB= %p  H_b= %p\n",
 			wm_trailbase,wm_B,wm_TR,
@@ -528,7 +525,7 @@ pbi_cptx()
 }
 
 int
-pbi_cptz()
+pbi_cptz(void)
 {
 	printf("Tr_b=\t%p\nB=\t%p\nTR=\t%p\nH=\t%p\nHB=\t%p\nH_b=\t%p\n",
 			wm_trailbase,wm_B,wm_TR,
@@ -541,8 +538,7 @@ pbi_cptz()
 	 *-------------------------------------------------*/
 
 void
-disp_heap_item(CurT)
-  PWord *CurT;
+disp_heap_item(PWord *CurT)
 {
   PWord Tagg, CTagg, *STRADDR;
   int FID;
@@ -659,7 +655,7 @@ pbi_swp_tr(void)
 	 *-------------------------------------------------*/
 
 int
-disp_heap()
+disp_heap(void)
 {
     PWord v1,v2;
     int   t1,t2; PWord start,stop;
@@ -706,7 +702,7 @@ printf("Heap display: start = %lx --> stop = %lx\n",start,stop);
 int disp_item	(void);
 
 int
-disp_item()
+disp_item(void)
 {
     PWord v1;
     int   t1;
@@ -728,8 +724,7 @@ int	pbi_x_swp_tr		( void );
 int	x_disp_heap 		( void );
 
 void
-x_disp_heap_item(CurT)
-  PWord *CurT;
+x_disp_heap_item(PWord *CurT)
 {
   PWord Tagg, CTagg, *STRADDR;
   int FID;
@@ -846,7 +841,7 @@ pbi_x_swp_tr(void)
 	 *-------------------------------------------------*/
 
 int
-x_disp_heap()
+x_disp_heap(void)
 {
     PWord v1,v2;
     int   t1,t2; PWord start,stop;
@@ -894,7 +889,7 @@ printf("====== Heap display_x: start = %lx --> stop = %lx\n",start,stop);
 int disp_item	(void);
 
 int
-disp_item()
+disp_item(void)
 {
     PWord v1;
     int   t1;
