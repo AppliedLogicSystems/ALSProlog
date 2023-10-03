@@ -1,0 +1,59 @@
+
+
+
+db_table(
+	name = 'Artists',
+
+	arg_decls = artist(a(artistid, 'INTEGER'), a(artistname, 'TEXT')),
+
+	primary = artistid,
+
+	index_fields = [],
+
+	data_file = singers_data,
+
+	test_data_term = artist(1, 'Dean Martin'),
+	test_data_term = artist(2, 'Frank Sinatra'),
+	update_data_term = artist(2, 'Franky Sinatra')
+).
+
+db_table(
+	name = 'Tracks',
+
+	arg_decls = track(a(trackid, 'INTEGER'), a(trackname, 'TEXT'), a(trackartist, 'INTEGER')),
+
+	primary = trackid,
+
+	index_fields = [trackname],
+
+	data_file = singers_data,
+
+		%% every row: trackartist must equal some artistid
+	foreign_keys =[ 
+		child = [table = track, column = trackartist],
+		parent = [table = artist, column = artistid]     ],
+
+	test_data_term = track(11, 'That''''s Amore', 1),
+	test_data_term = track(12, 'Christmas Blues', 1),
+	test_data_term = track(13, 'My Way', 2),
+	test_data_term = track(14, 'Mr. Bojangles', 3),
+	update_data_term = track(13, 'My Path', 2)
+).
+
+db_table(
+	name = 'Award Categories',
+
+	arg_decls = awardcat(a(awardcatid, 'INTEGER'), a(awardcatname, 'TEXT'), a(awardcatdesc, 'TEXT')),
+
+	primary = awardcatid,
+
+	index_fields = [awardcatname],
+
+	data_file = singers_data,
+
+	test_data_term = awardcat(1, 'Top Pop', 'Most Popular'),
+	test_data_term = awardcat(2, 'Singers Best', 'Voted Best by Singers'),
+	update_data_term = awardcat(2, 'Singers Best', 'Voted Best by All Singers'),
+	test_data_term = awardcat(3, 'Top Radio', 'Most Radio Plays'),
+	update_data_term = awardcat(3, 'Top Video', 'Most Video Plays')
+).

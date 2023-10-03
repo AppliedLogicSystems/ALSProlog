@@ -1,0 +1,130 @@
+
+
+0. For mental-agility, work in /Users/ken/ALS/A64/MA_SQLite/
+
+1.  Select a (typically, old strong-brain folder/task) to work on, e.g. words/bp; create as necessary.
+
+2.  If it needs a db, create a (sqlite3) db spec for it (see Db_Spec.txt) in the folder from step #1.
+
+3. Identify the sqllite/als source folder.  On my machine:
+	/Users/ken/ALS/A64/SQLite/
+
+4.  Identify the general db staging area; on my machine:
+	/Users/ken/Projects/MAfromSB/DB_Staging_ma/
+    Identify the subfolder corresponding to the choice in #1; for words/bp, it is:
+	/Users/ken/Projects/MAfromSB/DB_Staging_ma/brainy-puzzles/
+
+5.  cd into /Users/ken/ALS/A64/MA_SQLite/words/bp
+
+6.  Execute 
+    alspro  /Users/ken/ALS/A64/SQLite/dbsetup.pro -p -db /Users/ken/Projects/MAfromSB/DB_Staging_ma/brainy-puzzles/bp_data
+
+7.  Execute ?- manage_site_specs.   [or just ?- m.]   Should see something like:
+
+>> ---- Starting spec = "Brainy Puzzles"
+Warning: Missing index_fields = ___ in: db_table(name = "Brainy Puzzles",
+    arg_decls = bp(a(ctr,integer),a(puzzle,text),a(answer,text)),
+    primary = ctr,data_file = bp_data,
+    test_data_term = bp(1,This is puzzle text,This is answer text),
+    test_data_term = bp(2,More puzzle text,More answer text),
+    update_data_term = bp(2,Some more puzzle text,More answer text))
+
+CREATE TABLE bp_table (ctr INT PRIMARY KEY, puzzle TEXT , answer TEXT );
+Insert/Select tests passed: bp_table
+Update/Select tests passed: bp_table
+
+yes.
+
+8.  cd to:
+	/Users/ken/Projects/MAfromSB/DB_Staging_ma/brainy-puzzles
+    Execute
+    > ls        Should see something like:
+
+bp_code.pro             bp_data 	darwin/                 
+
+9.  If there ia a source for data for the db,  provide it.  E.g., for bp,
+the source is a file raw.brainy_puzzles.txt.  We moved into the folder:
+
+  > ls
+bp_code.pro             darwin/                 raw.brainy_puzzles.txt
+bp_data 
+
+10.  Then we started a file man_stuff.pro in which  we wrote code to read the data from the source file 
+and then insert in the sqlite3 db bbp_data:
+
+populate_db :-
+        clear_db_bp,
+        grab_lines('./raw.brainy_puzzles.txt', RawList),
+        make_bp_args_lists(RawList, 0, ListOfBPTermArgsLists),
+        insert_list_bp(ListOfBPTermArgsLists).
+
+make_bp_args_lists([], N, []).
+make_bp_args_lists([RawLine | RawList], N, [Args | ListOfBPTermArgsLists])
+        :-
+        atom_codes(RawLine, RLCs),
+        asplit0(RLCs, 0'@, LCs, RCs),
+        dbl_sgn_q(LCs, DLCs),
+        dbl_sgn_q(RCs, DRCs),
+        atom_codes(Ques, DLCs),
+        atom_codes(Ans, DRCs),
+        Args = [N, Ques, Ans],
+        M is N+1,
+        make_bp_args_lists(RawList, M, ListOfBPTermArgsLists).
+
+dbl_sgn_q([], []).
+dbl_sgn_q([0'' | Cs], [0'', 0'' | DCs])
+        :-
+        dbl_sgn_q(Cs, DCs).
+dbl_sgn_q([C | Cs], [C | DCs])
+        :-
+        dbl_sgn_q(Cs, DCs).
+
+We also added some elementary tests:
+
+a :- populate_db.
+
+b :-
+retrieve_bp(80, RP),
+retrieve_bp(ctr, 80, R3),
+write(rp=RP),nl,nl,
+write(r3=R3),nl,nl.
+
+c :- ColUpdateVals = [jj(answer, 'Junky answer')],
+        update_bp(56, ColUpdateVals),
+        retrieve_bp(56, BPTerm), write(r=BPTerm),nl.
+
+d :- delete_bp(56),
+        (retrieve_bp(ctr, 56, R) -> 
+                write(' delete_bp(56) FAILED'),nl ;
+                write(' delete_bp(56) SUCCEEDED'),nl).
+
+t :- toptests.
+toptests :- a,b,c,d,populate_db.
+
+KB-SSD > alspro man_stuff.pro 
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+   Copyright (c) 1987-2021 Applied Logic Systems, Inc.
+
+Setting up library indicies...may take a moment...Done.
+
+LOADED sqlite3_intf.psl
+
+gc not 64-bit yet
+?- t.
+gc not 64-bit yet
+rp = bp(80,A man pushes a car up to a hotel and tells the owner he's bankrupt.,The man is playing a game of Monopoly, and he has just landed on Boardwalk with a hotel on it.)
+
+r3 = bp(80,A man pushes a car up to a hotel and tells the owner he's bankrupt.,The man is playing a game of Monopoly, and he has just landed on Boardwalk with a hotel on it.)
+
+r = bp(56,What word reads the same both backwards and upside down?,Junky answer)
+ delete_bp(56) SUCCEEDED
+
+yes.
+
+
+
+
+
+
+
+

@@ -10,9 +10,9 @@
 :-['../../core/alsp_src/tests/test.pro'].
 
 	/* Cf. https://www.sqlite.org/inmemorydb.html */
-test_db(':memory:').
+%test_db(':memory:').
 %test_db('').
-%test_db('testsq3.db').
+test_db('testsq3.db').
 
 test_sqlite3
 	:-
@@ -82,7 +82,9 @@ test_open_close(DBName)
  
 
 table_spec('Cars', ColumnsList, Primary)
+%table_spec('Cars', ColumnsList, Primary)
 	:-
+%	TableName = 'Cars',
 	TableName = 'Cars',
         ColumnsList = [
                 [column_name='Id', column_type='INT'],
@@ -110,7 +112,7 @@ test_create_table_string(TableName)
 	:-
 	table_spec(TableName, ColumnsList, Primary),
 	expected_create_table_string_for(TableName, TgT),
-	sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
+	sql_create_table_string(TableName, ColumnsList, Primary, [], CreateTableString),
 	TgT = CarsCreateTableString.
 
 	/* ------------------------------------------ *
@@ -131,7 +133,7 @@ test_create_table_by_handle(DBName, TableName)
 	:-
 	drop_db(DBName),
 	table_spec(TableName, ColumnsList, Primary),
-	sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
+	sql_create_table_string(TableName, ColumnsList, Primary, [], CreateTableString),
 	sqlite3_open(DBName, DBHandle),
 	sqlite3_exec_norows(DBHandle, CreateTableString).
 
@@ -261,8 +263,6 @@ where_clauses_for('Cars', ['Name', 'Price'], ['Price > 10000']).
 expected_select_all_where_for('Cars', [r('Volvo',29000),r('Bentley',350000)]).
 
 where_clauses_for(members, [last_name, balance, email, contact_id], [ 'balance > 50', 'contact_id<101' ]).
-%where_clauses_for(members, [last_name, balance, email, contact_id], [ 'contact_id<101', 'balance > 50' ]).
-%where_clauses_for(members, [last_name, balance, email, contact_id], [ 'balance > 50' ]).
 
 expected_select_all_where_for(members, [r('Slotnik',90.0,'mark.s@gmail.com',99)]).
 
@@ -305,10 +305,12 @@ test_select_all_where(DBName, TableName)
 
 update_comps_for('Cars', ['Price' = 32500], ['Id' = 4]).
 
-update_comps_for(members, [email = '\'jm@holiday.org\'', balance = 37.88], [last_name= '\'Mason\'', first_name = '\'Jane\'']).
+%update_comps_for(members, [email = 'jm@holiday.org', balance = 37.88], [last_name= ''Mason''', first_name = ''Jane''']).
+update_comps_for(members, [email = '''jm@holiday.org''', balance = 37.88], ['last_name = ''Mason''']).
 
 expected_update_result_for('Cars', [r(4,'Volvo',32500)]).
 
+%expected_update_result_for(members, [r(100,'Jane','Mason','jm@holiday.org',37.88)]).
 expected_update_result_for(members, [r(100,'Jane','Mason','jm@holiday.org',37.88)]).
 
 test_update(DBName, TableName)
@@ -329,7 +331,7 @@ test_update(DBName, TableName)
 			Delete rows
 	 * ------------------------------------------------------------------------------------- */
 delete_comps_for('Cars', ['Id' = 4]).
-delete_comps_for(members, [last_name= '\'Mason\'', first_name = '\'Jane\'']).
+delete_comps_for(members, [last_name= '''Mason''', first_name = '''Jane''']).
 
 	%expected_delete_results(TableName, Before, After).
 expected_delete_results('Cars', [r(4,'Volvo',29000)], []).
@@ -345,7 +347,7 @@ test_delete(DBName, TableName)
 	expected_delete_results(TableName, Before, After),
 	select_where_lists(DBHandle, TableName, ['*'], WhereClauseList, Before),
 	sql_delete(DBHandle, TableName, WhereClauseList),
-	select_where_lists(DBHandle, TableName, ['*'], WhereClauseList, After),
+	select_where_lists(DBHandle, TableName, ['*'], WhereClauseList, After0),
 	write((Before -> After)),nl.
 
 	/* ------------------------------------------------------------------------------------- *

@@ -26,6 +26,9 @@ alsdev_b
 core/win32/alsdir
 core/unix/*/alsdir
 core/unix/*/examples
+extensions/sqlite/Archive
+extensions/sqlite/examples/Archive
+extensions/sqlite/tools/Archive
 unix/darwin
 unix/linux
 unix/cygwin
@@ -40,3 +43,4 @@ _local_site
 .jekyll-metadatabuild-xcode
 xcuserdata/
 *.swp
+*.sh

@@ -1,0 +1,19 @@
+
+db_table(
+	name = "Brainy Puzzles",
+
+        arg_decls = bp(a(ctr, integer), a(puzzle, text), a(answer, text)),
+
+	primary = ctr,
+
+	data_file = bp_data,
+
+		% Use only to override default dbmod_bp:
+	%module = dbmod,                         %% will actually be dbmod_bp
+
+		%% no import_to = ... statements
+
+	test_data_term =  bp(1,'This is puzzle text','This is answer text'),
+	test_data_term =  bp(2,'More puzzle text','More answer text'),
+	update_data_term =  bp(2,'Some more puzzle text','More answer text')
+).

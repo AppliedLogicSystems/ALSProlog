@@ -69,6 +69,7 @@ static int prolog_sqlite3_close(void)
 	PWord val1, val2;
 	int type1, type2, returnv;
 	sqlite3 *dbHandle;
+	sqlite3_stmt *pstmt;
 
 	PI_getan(&val1,&type1,1);
 	dbHandle = (sqlite3 *)val1;
@@ -84,15 +85,17 @@ static int prolog_sqlite3_exec_norows(void) {
 	PWord val1, val2;
 	int type1, type2, returnv, handle_opened=0;
 	char buf[PATH_MAX];
+	char sql[PATH_MAX];
 	sqlite3 *dbHandle;
+	sqlite3_stmt *pstmt;
 	char *err_msg = 0;
 
 	PI_getan(&val1,&type1,1);
 	PI_getan(&val2,&type2,2);
 
+
 	if (type1 == PI_INT) {
 		dbHandle = (sqlite3 *)val1;
-//fprintf(stderr, "norows-val1-dbHandle: %d\n", dbHandle);
 	} else {
 		switch(type1) {
 			case PI_SYM:
@@ -115,10 +118,10 @@ static int prolog_sqlite3_exec_norows(void) {
 	}
 	switch(type2) {
 		case PI_SYM:
-			PI_getsymname(buf,val2,PATH_MAX);
+			PI_getsymname(sql,val2,PATH_MAX);
 			break;
 		case PI_UIA:
-			PI_getuianame(buf,val2,PATH_MAX);
+			PI_getuianame(sql,val2,PATH_MAX);
 			break;
 		default:
 			if (handle_opened == 1){
@@ -127,12 +130,16 @@ static int prolog_sqlite3_exec_norows(void) {
 			PI_FAIL;
 	}
 
-//fprintf(stderr, "norows - val2 - buf: %s\n", buf);
-	returnv = sqlite3_exec(dbHandle, buf, 0, 0, &err_msg);
+	returnv = sqlite3_prepare_v2(dbHandle, sql, -1, &pstmt, NULL);
+        if (returnv != SQLITE_OK) {
+                if (handle_opened == 1){ sqlite3_close(dbHandle); }
+                fprintf(stderr, "Cannot prepare sql: %s\n", buf);
+                PI_FAIL;
+        }
 
-	if (returnv != SQLITE_OK ) {
-		fprintf(stderr, "SQL error: %s\n", err_msg);
-		sqlite3_free(err_msg);        
+	returnv = sqlite3_step(pstmt);
+
+	if (returnv != SQLITE_OK && returnv != SQLITE_DONE) {
 		if (handle_opened == 1){
 			sqlite3_close(dbHandle);
 		}
@@ -235,7 +242,7 @@ static int prolog_sqlite3_exec_rows(void) {
 	returnv = sqlite3_prepare_v2(dbHandle, sql, -1, &pstmt, NULL);
 	if (returnv != SQLITE_OK) {
 		if (handle_opened == 1){ sqlite3_close(dbHandle); }
-		fprintf(stderr, "Cannot prepare sql: %s\n", buf);
+		fprintf(stderr, "Cannot prepare sql: %s\n", sql);
 		PI_FAIL;
 	} 
 
@@ -309,7 +316,7 @@ static int prolog_sqlite3_exec_rows(void) {
 		const unsigned char * valBlog = sqlite3_column_text(pstmt, colIndex);
 		PI_makesym(&struct_functor,&struct_functor_type, "r");
 //		PI_makeuia(&uia, &uiatype, (const char *)valBlog);
-                	fprintf(stderr, "columnName = %s, BLOB\n", columnName);
+//                	fprintf(stderr, "columnName = %s, BLOB\n", columnName);
             }
             else if (type == SQLITE_NULL)
 		// should this be nil_sym or '' or ...?

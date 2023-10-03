@@ -13,7 +13,7 @@
  | (on the C side) to obtain a DBHandle against which the the SQL 
  | statement in question is executed.
  *=======================================================================*/
-:-['sqlite3_intf.psl'], write('LOADED sqlite3_intf.psl'), nl,nl.
+:-['./sqlite3_intf.psl'], write('LOCAL LOADED sqlite3_intf.psl'), nl,nl.
 
 module sqlite3.
 
@@ -44,17 +44,13 @@ export query_foreign_keys/2.
 export set_foreign_keys_on/1.
 export set_foreign_keys_off/1.
 	
-/*
 	/*----------------------------------------------------------------*
 	  sql_create_table/4
 	  sql_create_table(DBAccess, TableName, ColumnsList, Primary)
 	  sql_create_table(+, +, +, +)
 	 *----------------------------------------------------------------*/
-*/
 sql_create_table(DBAccess, TableName, ColumnsList, Primary)
 	:-
-%	sql_create_table_string(TableName, ColumnsList, Primary, CreateTableString),
-%	sqlite3_exec_norows(DBAccess, CreateTableString).
 	sql_create_table(DBAccess, TableName, ColumnsList, Primary, []).
 
 sql_create_table(DBAccess, TableName, ColumnsList, Primary, ForeignKeys)
@@ -66,34 +62,13 @@ sql_create_table_string(TableName, ColumnsList, Primary, ForeignKeyData, CreateT
 	:-
 	open(atom(CreateTableString), write, S),
 	printf(S, 'CREATE TABLE %t (', [TableName]),
-%	write_sql_create_table_columns(ColumnsList, S, Primary),
-%	(ForeignKeys \= [] -> write_foreign_keys(ForeignKeys, S) ; true),
-
 	write_sql_create_table_columns(ColumnsList, S, Primary, ForeignKeyData),
-
 	printf(S, ');', []),
 	close(S).
 
-/*
-write_sql_create_table_columns([], _, _).
-
-write_sql_create_table_columns([ColumnSpec], S, Primary)
-	:-
-	write_sql_column(ColumnSpec, S, Primary).
-
-write_sql_create_table_columns([ColumnSpec | RestColumnSpecs], S, Primary)
-	:-
-	write_sql_column(ColumnSpec, S, Primary),
-	printf(S, ', ', []),
-	write_sql_create_table_columns(RestColumnSpecs, S, Primary).
-*/
-
-%write_sql_create_table_columns([], S, Primary, ForeignKeyData)
 write_sql_create_table_columns([], S, Primary, FKLine)
 	:-
-	(FKLine \= nothing -> 
-%		printf(S, ', ', []),
-%		write_foreign_keys(ForeignKeys, S) 
+	((FKLine \= nothing, FKLine \= []) -> 
 		printf(S, ', %t ', [FKLine])
 		; 
 		true
@@ -115,14 +90,24 @@ write_sql_create_table_columns([ColumnSpec | RestColumnSpecs], S, Primary, Forei
 write_sql_column(ColumnSpec, S, Primary)
 	:-
 	member(column_name=ColumnName, ColumnSpec),
-	member(column_type=ColumnType, ColumnSpec),
+	member(column_type=IncomingColumnType, ColumnSpec),
+	sql_type(IncomingColumnType, ColumnType),
 	(member(constraints=ConstraintsList, ColumnSpec) -> true ; ConstraintsList = []),
-	printf(S, '%t %t', [ColumnName, ColumnType]),
+	printf(S, '%t %t ', [ColumnName, ColumnType]),
 	(ColumnName = Primary -> printf(S, ' PRIMARY KEY', []) 
 		; 
-%		printf(S, ' ', []),
 		print_constraints(ConstraintsList, S)
 	).
+
+sql_type(integer, 'INT').
+sql_type(int, 'INT').
+sql_type('INT', 'INT').
+sql_type('INTEGER', 'INT').
+sql_type(text, 'TEXT').
+sql_type('TEXT', 'TEXT').
+sql_type('REAL', 'REAL').       
+sql_type(double, 'REAL').
+sql_type(float, 'REAL').
 
 write_foreign_keys([], S).
 write_foreign_keys([ForeignKey], S)
@@ -133,7 +118,7 @@ write_foreign_keys([ForeignKey | ForeignKeys], S)
 	write_out_foreign_key(ForeignKey, S, notlast),
 	write_foreign_keys(ForeignKeys, S).
 
-%fk(<local column name>, <foreign table dentifying db functor>, <foreign table column>)
+	%fk(<local column name>, <foreign table identifying db functor>, <foreign table column>)
 write_out_foreign_key(fk(LocalColName, ForeignTable, ForeignColumn), S, Where)
 	:-
 	printf(S, 'FOREIGN KEY(%t) REFERENCES %t(%t) ', [LocalColName, ForeignTable, ForeignColumn]),
@@ -152,7 +137,7 @@ print_constraints([Constraint | RestConstraints], S)
 
 /* -------------------------------------------------------------- *
 	sql_drop_table/2
-	sql_drop_tableDBAccess, TableName)
+	sql_drop_table(DBAccess, TableName)
 	sql_drop_table(+, +)
  * -------------------------------------------------------------- */
 sql_drop_table(DBAccess, TableName)
@@ -246,22 +231,24 @@ compose_row([Value | RowList], Q4Boolean, S)
 	(RowList = [] -> 	% whether there's a terminating comma output:
 		(Q4Boolean=true ->
 			atom_codes(Value, VCs),
-			put_single_quotes(3, S),
+		%	put_single_quotes(3, S),
+			put_single_quotes(1, S),
 			q4_write(VCs, S),
-			put_single_quotes(3, S)
+		%	put_single_quotes(3, S)
+			put_single_quotes(1, S)
 			;
-			printf(S, '\'\'\'%t\'\'\' ', [Value])
+			printf(S, '\'%t\' ', [Value])
 		)
 		;
 		(Q4Boolean=true ->
 			atom_codes(Value, VCs),
-			put_single_quotes(3, S),
+			put_single_quotes(1, S),
 			q4_write(VCs, S),
-			put_single_quotes(3, S),
+			put_single_quotes(1, S),
 			put_code(S, 0',),
 			compose_row(RowList, Q4Boolean, S)
 			;
-			printf(S, '\'\'\'%t\'\'\', ', [Value]),
+			printf(S, '\'%t\', ', [Value]),
 			compose_row(RowList, Q4Boolean, S)
 		)
 	).
@@ -360,7 +347,6 @@ select_where_lists(+, +, +, +, -)
 select_where_lists(DBAccess, TableName, ColAtomsList, WhereClauseList, Result)
 	:-
         build_sql_select_string(ColAtomsList, TableName, WhereClauseList, SelectString),
-%write(SelectString),nl,
         Limit = all,
         sqlite3_exec_rows(DBAccess, SelectString, Limit,  Result).
 
@@ -372,7 +358,7 @@ build_sql_select_string(ColAtomsList, TableName, WhereClauseList, SelectString)
 	printf(S, ' FROM %t ', [TableName]),
 	printf(S, ' WHERE  ', []),
 	write_where_clauses(WhereClauseList, S),
-	printf(S, ';', []),
+	printf(S, '; ', []),
 	close(S).
 
 write_select_cols([], S).
@@ -417,7 +403,7 @@ sql_update(DBAccess, TableName, SetList, WhereClauseList)
 sql_update_string(TableName, SetList, WhereClauseList, UpdateString)
 	:-
 	open(atom(UpdateString), write, S),
-	printf(S, 'UPDATE %t SET ', [TableName]),
+	printf(S,'UPDATE %t SET ', [TableName]),
 	write_sql_sets(SetList, S),
 	printf(S, ' WHERE ', []),
 	write_where_clauses(WhereClauseList, S),
@@ -484,13 +470,11 @@ sql_create_index(ColExpr, Modifier, TableName, IndexName, Primary, WhereClause, 
 sql_create_index(ColExpr, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
 	:-
 	sql_index_string(ColExpr, Modifier, TableName, IndexName, WhereClause, CreateIndexString),
-%printf('Index String: %t\n', [CreateIndexString]),
         sqlite3_exec_norows(DBHandle, CreateIndexString).
 	
 sql_create_index(ColExprsList, Modifier, TableName, IndexName, Primary, WhereClause, DBHandle)
 	:-
 	sql_index_string(ColExprsList, Modifier, TableName, IndexName, WhereClause, CreateIndexString),
-%printf('%Index String: t\n', [CreateIndexString]),
         sqlite3_exec_norows(DBHandle, CreateIndexString).
 	
 sql_index_string(ColExpr, Modifier, TableName, IndexName, WhereClause, IndexString)
