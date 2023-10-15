@@ -1,0 +1,46 @@
+
+All files are at or below: ALSProlog/extensions/sqlite
+
+All can be run with:
+
+alspro <file> -g <Invocation>
+
+All of them load sqlite3_intf.pro, which in turn loads sqlite3_intf.psl
+All expect that both sqlite3_intf.pro and sqlite3_intf.psl can be found in
+	alsdir/shared
+All will create a sqlite3 <Test data file>
+
+
+Test file		Invocation		Test data file
+=========		==========		==============
+tests_sqlite3_intf.pro	test_sqlite3		testsq3.db
+
+In ALSProlog/extensions/sqlite/tools/singers:
+
+crooners.pro		singers_test		singers_data
+
+inj_test.pro		tir {try Robert}	singers_data
+			ta  {try AMore}		singers_data
+
+Tests in generated files in ALSProlog/extensions/sqlite/tools/singers:
+Load all three files:
+
+	alspro artist_code.pro track_code.pro awardcat_code.pro
+
+artist_code.pro		all_db_artist_tests	singers_data
+
+track_code.pro		all_db_track_tests	singers_data
+
+awardcat_code.pro	all_db_awardcat_tests	singers_data
+
+Tests in generated files in ALSProlog/extensions/sqlite/tools/bp:
+
+bp_code.pro		all_db_bp_tests		bp_data
+
+Examples in ALSProlog/extensions/sqlite/examples:
+
+extract_anthonies.pro	setup_aa_db, 		anthonies.sqlite3
+			aa_query0, aa_query1, aa_query2
+
+do_ca_vt_db.pro		setup_births_db_ca_vt,	db_ca_vt_2016_2021.sqlite3
+			query_births0

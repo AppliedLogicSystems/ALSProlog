@@ -129,6 +129,7 @@ static int prolog_sqlite3_exec_norows(void) {
 			}
 			PI_FAIL;
 	}
+//fprintf(stderr, "buf=%s  sql=%s\n\n", buf,sql);
 
 	returnv = sqlite3_prepare_v2(dbHandle, sql, -1, &pstmt, NULL);
         if (returnv != SQLITE_OK) {

@@ -197,6 +197,7 @@ insert_one_row(DBAccess, TableName, RowList)
 insert_one_row(DBAccess, TableName, RowList, Q4Boolean)
 	:-
 	insert_one_row_string(TableName, RowList, Q4Boolean, InsertString),
+%printf('ior = %t\n\n', [InsertString]),
         sqlite3_exec_norows(DBAccess, InsertString).
 
 insert_one_row_string(TableName, RowList, Q4Boolean, InsertString)
@@ -230,28 +231,26 @@ compose_row([Value | RowList], Q4Boolean, S)
         !,
 	(RowList = [] -> 	% whether there's a terminating comma output:
 		(Q4Boolean=true ->
-			atom_codes(Value, VCs),
-		%	put_single_quotes(3, S),
-			put_single_quotes(1, S),
-			q4_write(VCs, S),
-		%	put_single_quotes(3, S)
-			put_single_quotes(1, S)
+			q4_quoted_write(Value, S)
 			;
 			printf(S, '\'%t\' ', [Value])
 		)
 		;
 		(Q4Boolean=true ->
-			atom_codes(Value, VCs),
-			put_single_quotes(1, S),
-			q4_write(VCs, S),
-			put_single_quotes(1, S),
-			put_code(S, 0',),
-			compose_row(RowList, Q4Boolean, S)
+			q4_quoted_write(Value, S),
+			put_code(S, 0',)
 			;
-			printf(S, '\'%t\', ', [Value]),
-			compose_row(RowList, Q4Boolean, S)
-		)
+			printf(S, '\'%t\', ', [Value])
+		),
+		compose_row(RowList, Q4Boolean, S)
 	).
+
+q4_quoted_write(Value, S)
+	:-
+	atom_codes(Value, VCs),
+	put_single_quotes(1, S),
+	q4_write(VCs, S),
+	put_single_quotes(1, S).
 
 put_single_quotes(0, S) :-!.
 put_single_quotes(N, S)
@@ -263,7 +262,13 @@ put_single_quotes(N, S)
 q4_write([], S).
 q4_write([0'' | CCs], S)
         :-
-	put_single_quotes(4, S),
+	put_single_quotes(2, S),
+/*
+	put_code(S, 0'\\),
+	put_code(S, 0''),
+	put_code(S, 0'\\),
+	put_code(S, 0''),
+*/
         q4_write(CCs, S).
 q4_write([CC | CCs], S)
         :-
@@ -610,6 +615,12 @@ quad_sgn_q([C | Cs], [C | DCs])
 
 quad_sgn_q_a(Atom, DCs).
 
+atom_dbl_sngl_q(Atm, AtmDbl)
+	:-
+	atom_codes(Atm, Cs),
+        dbl_sgn_q(Cs, DCs),
+	atom_codes(AtmDbl, DCs).
+	
 
 export drop_db/1.
 drop_db(DBName) :- 

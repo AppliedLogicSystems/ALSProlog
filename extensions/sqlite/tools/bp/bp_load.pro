@@ -1,11 +1,9 @@
-%:-['./1-save-bp_code.pro'].
 :-['bp_code.pro'].
 
 bp_load
 	:-
 	sql_clear_table('./bp_data',bp_table),
-%	Src = './raw.brainy_puzzles.txt',
-	Src = './dbg_raw.txt',
+	Src = './raw.brainy_puzzles.txt',
 	grab_lines(Src, Lines),
 	load_bp(Lines, 0).
 

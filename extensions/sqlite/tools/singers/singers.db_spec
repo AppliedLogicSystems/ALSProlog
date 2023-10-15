@@ -36,7 +36,6 @@ db_table(
 	test_data_term = track(11, 'That''''s Amore', 1),
 	test_data_term = track(12, 'Christmas Blues', 1),
 	test_data_term = track(13, 'My Way', 2),
-	test_data_term = track(14, 'Mr. Bojangles', 3),
 	update_data_term = track(13, 'My Path', 2)
 ).
 

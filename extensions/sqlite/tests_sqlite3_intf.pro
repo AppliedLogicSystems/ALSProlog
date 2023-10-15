@@ -6,7 +6,7 @@
  |
  |	All tests utilize the sqlite3 database testsq3.db
  *=======================================================================*/
-:-['sqlite3_intf.pro'].
+:-['./sqlite3_intf.pro'].
 :-['../../core/alsp_src/tests/test.pro'].
 
 	/* Cf. https://www.sqlite.org/inmemorydb.html */

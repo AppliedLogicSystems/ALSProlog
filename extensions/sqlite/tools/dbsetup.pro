@@ -792,7 +792,7 @@ create_intf_code(SpecInfo, DtFunc, DBPath, Exports, FKInfoList, S)
         setGP(suffix, GenPreds, Suffix),
 	catenate(get_handle, Suffix, GetHandlePred),
         setGP(get_handle, GenPreds, GetHandlePred),
-	get_handle_code(SpecInfo, GenPreds, Suffix, DtFunc, DBPath, TableName, ExT0, FKInfoList, GetHandlePred, S),
+	get_handle_code(SpecInfo, GenPreds, Suffix, DtFunc, DBPath, TableName, ExT0, FKInfoList, GetHandlePred, IsHandlePred, S),
 
 %	open_session_code(SpecInfo, GenPreds, Suffix, DtFunc, DBPath, TableName, ExT0, FKInfoList, GetHandlePred, S),
 
@@ -807,9 +807,10 @@ create_intf_code(SpecInfo, DtFunc, DBPath, Exports, FKInfoList, S)
 			IndexFields, FKInfoList, ExT3, GetHandlePred, S),
 
 	delete_row_code(SpecInfo, GenPreds, ColDecls, Suffix, DtFunc, DBPath, TableName, Primary, 
-			IndexFields, FKInfoList, ExT4, GetHandlePred, S),
+			IndexFields, FKInfoList, ExT4, GetHandlePred, IsHandlePred, S),
 
-	append([ExT0, ExT1,ExT2, ExT3, ExT4, ['all_tests/0'] ], Exports),
+	catenate([all, Suffix, '_tests','/0'], AllTestsPred),
+	append([ExT0, ExT1,ExT2, ExT3, ExT4, [AllTestsPred] ], Exports),
 
 	test_code(SpecInfo, GenPreds, ColDecls, DtFunc, DBPath, TableName, Primary, IndexFields, FKInfoList, ColNums, ExT4, S),
 	true.
@@ -823,12 +824,12 @@ col_nums_asserts([a(Col,_) | RestColDecls], ColNum, [cn(Col, ColNum) | RestColNu
 	NextColNum is ColNum + 1,
 	col_nums_asserts(RestColDecls, NextColNum, RestColNums, S).
 
-get_handle_code(SpecInfo, GenPreds, Suffix, DtFunc, DBPath, TableName, ExT0, FKInfoList, GetHandlePred, S)
+get_handle_code(SpecInfo, GenPreds, Suffix, DtFunc, DBPath, TableName, ExT0, FKInfoList, GetHandlePred, IsHandlePred, S)
 	:-
 	catenate(is_handle, Suffix, IsHandlePred),
 	printf(S, ':- dynamic(%t/1).\n\n', [IsHandlePred]),
 	printf(S, '%t(DBHandle)\n\t:-\n', [GetHandlePred]),
-	printf(S, '\t%t(DBHandle).\n', [IsHandlePred]),
+	printf(S, '\t%t(DBHandle),!.\n', [IsHandlePred]),
 	printf(S, '%t(DBHandle)\n\t:-\n', [GetHandlePred]),
 	printf(S, '\tdb_path(DBPath),\n', []),
 	printf(S, '\tsqlite3_open(DBPath, DBHandle),\n', []),
@@ -952,7 +953,7 @@ printf('-------%t/update\n', [DtFunc]),
 	catenate(update_, DtFunc, UpdatePred),
 	ExT3 = [UpdatePred/2].	
 
-delete_row_code(SpecInfo, GenPreds, ColDecls, Suffix, DtFunc, DBPath, TableName, Primary, IndexFields, FFKI, ExT4, GetHandlePred, S)
+delete_row_code(SpecInfo, GenPreds, ColDecls, Suffix, DtFunc, DBPath, TableName, Primary, IndexFields, FFKI, ExT4, GetHandlePred, IsHandlePred, S)
 	:-
 printf('-------%t/delete\n', [DtFunc]),
 printf('-------Primary=%t\n\n', [Primary]),
@@ -966,7 +967,8 @@ printf('-------Primary=%t\n\n', [Primary]),
 
 	printf(S, '\n%t\n\t:-\n',[ClearPred]),
 	printf(S, '\t%t(DBHandle),\n',[GetHandlePred]),
-	printf(S, '\tsql_clear_table(DBHandle, %t_table).\n\n',[DtFunc]),
+	printf(S, '\tsql_clear_table(DBHandle, %t_table),\n',[DtFunc]),
+	printf(S, '\tabolish(%t/1).\n\n',[IsHandlePred]),
 
 	printf(S, '\t% delete by primary\n',[]),
         printf(S, 'delete%t(PrimaryValue)\n\t:-\n',[Suffix]),
@@ -978,10 +980,37 @@ printf('-------Primary=%t\n\n', [Primary]),
         printf(S, '\tsqlite3_exec_norows(DBHandle, SPP).\n',[]),
 	ExT4 = [ClearPred/0,DeletePred/1].
 
+is_an_fk_parent(DtFunc, FFKI, ChildDt)
+	:-
+	member(ChildDt+(parent=[table=DtFunc | _]), FFKI). 
+
+
+
+
 test_code(SpecInfo, GenPreds, ColDecls, DtFunc, DBPath, TableName, Primary, IndexFields, FFKI, ColNums, ExT4, S)
 	:-
+	accessGP(suffix, GenPreds, Suffix),
 	printf(S, '\n\n\t%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\t%%%%%%%% TESTS %%%%%%%%\n\t%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n', []),
-	printf(S, 'all_tests\n\t:-\n', []),
+	printf(S, 'all%t_tests\n\t:-\n', [Suffix]),
+%%%% NEED: IF TableName IS AN FK PARENT, MUST INVOKE clear_<FK CHILD> HERE
+
+%	(member(parent = ParentInfo, FFKI) ->
+(is_an_fk_parent(DtFunc, FFKI, ChildDt) -> 
+write(is_an_fk_parent=DtFunc),
+write('    '),
+write(child=ChildDt),
+nl,nl ; 
+write(is_an_fk_NOT_parent=DtFunc),nl,nl),
+
+	(is_an_fk_parent(DtFunc, FFKI, ChildDt) -> 
+		printf(S, '\tdbmod_%t:clear_db_%t,\n', [ChildDt,ChildDt])
+		;
+		true
+	),
+		
+
+
+
 	call_test_calls([test_inserts, test_retrieves], S),
 
 	accessGP(clear, GenPreds, ClearPred),

@@ -15,14 +15,30 @@
  *============================================================================*/
     	%% For dev: the searchdir fact finds sqlite3_intf.pro, 
 	%% and then finds sqlite3_intf.psl:
+	%% When installed properly, sqlite3_intf.pro should be
+	%% found in alsdir/shared
+/*
 module builtins.
 searchdir('..').
 endmod.
+*/
 
 :-['sqlite3_intf.pro'].
 
+xa :- run_all_anthonies.
 
-xl :- setup_aa_db.
+module anthonies.
+use sqlite3.
+
+export run_all_anthonies/0.
+run_all_anthonies
+	:-
+	setup_aa_db,	
+	all_aa_queries.
+
+export setup_aa_db/0.
+export extract_anthonies/1.
+export populate_db/1.
 
 source_data_file('AA_Lincoln.txt').
 sqlite_db_file('anthonies.sqlite3').
@@ -33,6 +49,8 @@ primary('RowId').
 
 setup_aa_db
 	:-
+	sqlite_db_file(AnthoniesDB),
+	(exists_file(AnthoniesDB) -> remove_file(AnthoniesDB) ; true),
 	extract_anthonies(OutLines),
 	populate_db(OutLines).
 
@@ -57,8 +75,9 @@ populate_db(OutLines)
 	drop_db(DBName),
 	sqlite3_open(DBName, DBHandle),
 	setup_table(DBHandle, TableName, ColNamesList, TypesList),
-	insert_rows(OutLines, DBHandle, TableName, TypesList, 0),
-	sqlite3_close(DBHandle).
+	a_insert_rows(OutLines, DBHandle, TableName, TypesList, 0),
+%	sqlite3_close(DBHandle).
+true.
 	
 
 
@@ -194,23 +213,23 @@ create_col_spec(ColName, ColType, [column_name=ColName, column_type=ColType]).
 	%% column_names(['RowId', 'Author', 'Title', 'Year', 'Award', 'Read']).
 	%% types_list(   ['INT',   'TEXT',   'TEXT',  'INT',  'TEXT',  'INT']).
 	%%	All Read entries default to 0 (unread)
-insert_rows([], DBHabndle, TableName, TypesList, Counter)
+a_insert_rows([], DBHabndle, TableName, TypesList, Counter)
 	:-
 	sqlite_db_file(DBName),
 	printf('Finished inserting %t rows to table %t in database %t\n', [Counter, TableName, DBName]).
 
-insert_rows([OLine | OutLines], DBHandle, TableName, TypesList, Counter)
+a_insert_rows([OLine | OutLines], DBHandle, TableName, TypesList, Counter)
 	:-
 	OLine = i(Author,Title,Year,Award),
 	!,
 	setup_insert_list([Counter,Author,Title,Year,Award,0], InsertsList),
 	insert_one_row(DBHandle, TableName, InsertsList),
 	NextCounter is Counter + 1,
-	insert_rows(OutLines, DBHandle, TableName, TypesList, NextCounter).
+	a_insert_rows(OutLines, DBHandle, TableName, TypesList, NextCounter).
 
-insert_rows([OLine | OutLines], DBHabndle, TableName, TypesList, Counter)
+a_insert_rows([OLine | OutLines], DBHabndle, TableName, TypesList, Counter)
 	:-
-	insert_rows(OutLines, DBHabndle, TableName, TypesList, Counter).
+	a_insert_rows(OutLines, DBHabndle, TableName, TypesList, Counter).
 
 setup_insert_list([], []).
 setup_insert_list([RawDataItem | RestLineList],  [ColInsertItem | RestInsertsList])
@@ -238,14 +257,57 @@ sqlite> pragma table_info(aa);
 	%% This query utilizes the columns/1 predicate
 	%% from the file rows_cols.pro in the ALS Prolog library
 	%% to display the query result:
-q2 :-
+
+
+export all_aa_queries/0.
+
+all_aa_queries
+	:-
+	aa_query0,
+	aa_query1,
+	aa_query2.
+
+export aa_query0/0.
+aa_query0 :-
 	sqlite_db_file(DBName),
 	sqlite3_open(DBName, DBHandle),
 	sqlite_table(TableName),
+	printf('\n\n>>> Anthonies query #0: select_all_table\n', []),
 	select_all_table(DBHandle, TableName, Result),
 	column_names(ColumnNames),
+	display_result(Result, ColumnNames).
+
+export aa_query1/0.
+aa_query1 :-
+	sqlite_db_file(DBName),
+	sqlite3_open(DBName, DBHandle),
+	sqlite_table(TableName),
+	SelectCols = ['Author', 'Title', 'Year', 'Award'],
+	WhereClauseList = ['Year > 1988', 'Year < 2021'],
+	printf('\n\n>>> Anthonies select query #1: %t - %t\n', [SelectCols, WhereClauseList]),
+	select_where_lists(DBHandle, TableName, SelectCols, WhereClauseList, Result),
+	display_result(Result, SelectCols).
+
+export aa_query2/0.
+aa_query2 :-
+	sqlite_db_file(DBName),
+	sqlite3_open(DBName, DBHandle),
+	sqlite_table(TableName),
+%	SelectCols = ['Author', 'Title', 'Year', 'Award'],
+	SelectCols = ['Author', 'Title', 'Year'],
+	WhereClauseList = ['Year > 2017', 'Year < 2021', 'Award = \'Best First Novel\''],
+	printf('\n\n>>> Anthonies select query #2: %t - %t\n', [SelectCols, WhereClauseList]),
+	select_where_lists(DBHandle, TableName, SelectCols, WhereClauseList, Result),
+	display_result(Result, SelectCols).
+
+
+
+
+display_result(Result, ColNames)
+	:-
 	rterms_2_lists(Result, ListOfLists),
-	columns([u(ColumnNames) | ListOfLists]).
+		%% columns is from the library:
+	columns([u(ColNames) | ListOfLists]).
 
 rterms_2_lists([], []).
 rterms_2_lists([RTerm | ListOfRTerms], [List | ListOfLists])
@@ -253,6 +315,16 @@ rterms_2_lists([RTerm | ListOfRTerms], [List | ListOfLists])
 	RTerm =.. [r | List],
 	rterms_2_lists(ListOfRTerms, ListOfLists).
 
+
+export test_oc/1.
+test_oc(DBName)
+        :-
+        drop_db(DBName),
+        sqlite3_open(DBName, DBHandle),
+        check_db_exists(DBName),
+        sqlite3_close(DBHandle).
+
+endmod.
 	
 
 

@@ -1,0 +1,217 @@
+State,State Abbreviation,Year,Gender,Education Level of Mother,Education Level Code,Number of Births,Average Age of Mother (years),Average Birth Weight (g)
+California,CA,2016,F,8th grade or less,1,9981,31.4,3253.9
+California,CA,2016,F,9th through 12th grade with no diploma,2,23614,26.6,3214.7
+California,CA,2016,F,High school graduate or GED completed,3,57435,27.1,3235.8
+California,CA,2016,F,"Some college credit, but not a degree",4,47094,28.4,3239.1
+California,CA,2016,F,"Associate degree (AA, AS)",5,15512,30.5,3256.2
+California,CA,2016,F,"Bachelor's degree (BA, AB, BS)",6,45550,32.3,3253.0
+California,CA,2016,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20235,33.4,3240.1
+California,CA,2016,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6741,34.7,3223.9
+California,CA,2016,F,Unknown or Not Stated,-9,12246,30.6,3200.7
+California,CA,2016,M,8th grade or less,1,10245,31.4,3345.4
+California,CA,2016,M,9th through 12th grade with no diploma,2,24405,26.6,3309.0
+California,CA,2016,M,High school graduate or GED completed,3,59967,27.1,3335.3
+California,CA,2016,M,"Some college credit, but not a degree",4,49404,28.4,3349.0
+California,CA,2016,M,"Associate degree (AA, AS)",5,16283,30.4,3358.5
+California,CA,2016,M,"Bachelor's degree (BA, AB, BS)",6,48516,32.2,3364.6
+California,CA,2016,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,21445,33.4,3354.4
+California,CA,2016,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7042,34.6,3324.8
+California,CA,2016,M,Unknown or Not Stated,-9,13112,30.6,3308.0
+California,CA,2017,F,8th grade or less,1,9023,31.3,3246.0
+California,CA,2017,F,9th through 12th grade with no diploma,2,21081,27.0,3219.8
+California,CA,2017,F,High school graduate or GED completed,3,55492,27.2,3229.8
+California,CA,2017,F,"Some college credit, but not a degree",4,45345,28.6,3241.9
+California,CA,2017,F,"Associate degree (AA, AS)",5,14970,30.6,3251.0
+California,CA,2017,F,"Bachelor's degree (BA, AB, BS)",6,45727,32.4,3251.1
+California,CA,2017,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20082,33.6,3243.9
+California,CA,2017,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6639,34.8,3218.0
+California,CA,2017,F,Unknown or Not Stated,-9,11401,30.9,3205.3
+California,CA,2017,M,8th grade or less,1,9238,31.4,3331.5
+California,CA,2017,M,9th through 12th grade with no diploma,2,22095,26.9,3301.8
+California,CA,2017,M,High school graduate or GED completed,3,57487,27.2,3329.7
+California,CA,2017,M,"Some college credit, but not a degree",4,47897,28.6,3347.6
+California,CA,2017,M,"Associate degree (AA, AS)",5,15877,30.5,3351.0
+California,CA,2017,M,"Bachelor's degree (BA, AB, BS)",6,48441,32.4,3361.6
+California,CA,2017,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,21374,33.5,3347.8
+California,CA,2017,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7064,34.7,3326.7
+California,CA,2017,M,Unknown or Not Stated,-9,12425,31.0,3291.9
+California,CA,2018,F,8th grade or less,1,8265,31.3,3253.3
+California,CA,2018,F,9th through 12th grade with no diploma,2,19133,27.2,3205.4
+California,CA,2018,F,High school graduate or GED completed,3,53314,27.4,3232.9
+California,CA,2018,F,"Some college credit, but not a degree",4,43584,28.8,3240.8
+California,CA,2018,F,"Associate degree (AA, AS)",5,14621,30.6,3243.2
+California,CA,2018,F,"Bachelor's degree (BA, AB, BS)",6,44835,32.5,3252.6
+California,CA,2018,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20175,33.7,3238.3
+California,CA,2018,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6774,34.8,3220.2
+California,CA,2018,F,Unknown or Not Stated,-9,11830,31.0,3190.4
+California,CA,2018,M,8th grade or less,1,8452,31.4,3328.1
+California,CA,2018,M,9th through 12th grade with no diploma,2,19711,27.2,3307.4
+California,CA,2018,M,High school graduate or GED completed,3,55222,27.4,3327.5
+California,CA,2018,M,"Some college credit, but not a degree",4,45121,28.8,3341.5
+California,CA,2018,M,"Associate degree (AA, AS)",5,15251,30.8,3353.9
+California,CA,2018,M,"Bachelor's degree (BA, AB, BS)",6,47166,32.5,3364.0
+California,CA,2018,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,21646,33.6,3350.9
+California,CA,2018,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7138,34.8,3339.4
+California,CA,2018,M,Unknown or Not Stated,-9,12682,31.1,3298.6
+California,CA,2019,F,8th grade or less,1,7278,31.2,3234.4
+California,CA,2019,F,9th through 12th grade with no diploma,2,17231,27.5,3204.5
+California,CA,2019,F,High school graduate or GED completed,3,51369,27.5,3224.5
+California,CA,2019,F,"Some college credit, but not a degree",4,41911,28.9,3239.9
+California,CA,2019,F,"Associate degree (AA, AS)",5,14383,30.8,3242.5
+California,CA,2019,F,"Bachelor's degree (BA, AB, BS)",6,44430,32.5,3244.1
+California,CA,2019,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20374,33.7,3231.7
+California,CA,2019,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6844,34.9,3206.7
+California,CA,2019,F,Unknown or Not Stated,-9,13456,31.1,3183.6
+California,CA,2019,M,8th grade or less,1,7632,31.2,3311.5
+California,CA,2019,M,9th through 12th grade with no diploma,2,18052,27.3,3302.7
+California,CA,2019,M,High school graduate or GED completed,3,54019,27.5,3323.1
+California,CA,2019,M,"Some college credit, but not a degree",4,43524,29.0,3339.2
+California,CA,2019,M,"Associate degree (AA, AS)",5,15469,30.7,3355.6
+California,CA,2019,M,"Bachelor's degree (BA, AB, BS)",6,47107,32.6,3353.1
+California,CA,2019,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,21683,33.7,3336.5
+California,CA,2019,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7226,34.8,3325.6
+California,CA,2019,M,Unknown or Not Stated,-9,14491,31.2,3282.9
+California,CA,2020,F,8th grade or less,1,6716,31.3,3223.7
+California,CA,2020,F,9th through 12th grade with no diploma,2,15306,27.5,3202.5
+California,CA,2020,F,High school graduate or GED completed,3,48899,27.7,3231.5
+California,CA,2020,F,"Some college credit, but not a degree",4,38645,29.1,3240.8
+California,CA,2020,F,"Associate degree (AA, AS)",5,13978,30.8,3253.8
+California,CA,2020,F,"Bachelor's degree (BA, AB, BS)",6,42045,32.6,3249.7
+California,CA,2020,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,19484,33.8,3232.4
+California,CA,2020,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6516,34.9,3204.3
+California,CA,2020,F,Unknown or Not Stated,-9,13892,31.0,3187.7
+California,CA,2020,M,8th grade or less,1,6691,31.2,3325.2
+California,CA,2020,M,9th through 12th grade with no diploma,2,15921,27.6,3286.6
+California,CA,2020,M,High school graduate or GED completed,3,50915,27.6,3327.6
+California,CA,2020,M,"Some college credit, but not a degree",4,40223,29.1,3339.1
+California,CA,2020,M,"Associate degree (AA, AS)",5,14387,30.8,3362.7
+California,CA,2020,M,"Bachelor's degree (BA, AB, BS)",6,44311,32.6,3362.2
+California,CA,2020,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20652,33.8,3346.9
+California,CA,2020,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7019,34.9,3317.8
+California,CA,2020,M,Unknown or Not Stated,-9,14659,31.1,3289.1
+California,CA,2021,F,8th grade or less,1,6186,31.0,3220.2
+California,CA,2021,F,9th through 12th grade with no diploma,2,13548,27.6,3203.9
+California,CA,2021,F,High school graduate or GED completed,3,48982,27.7,3223.8
+California,CA,2021,F,"Some college credit, but not a degree",4,37791,29.3,3234.7
+California,CA,2021,F,"Associate degree (AA, AS)",5,14064,30.8,3248.8
+California,CA,2021,F,"Bachelor's degree (BA, AB, BS)",6,42965,32.6,3243.9
+California,CA,2021,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,20431,33.9,3220.8
+California,CA,2021,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,6977,35.1,3208.2
+California,CA,2021,F,Unknown or Not Stated,-9,15072,31.0,3169.8
+California,CA,2021,M,8th grade or less,1,6324,31.0,3297.1
+California,CA,2021,M,9th through 12th grade with no diploma,2,13943,27.7,3282.8
+California,CA,2021,M,High school graduate or GED completed,3,50322,27.8,3319.4
+California,CA,2021,M,"Some college credit, but not a degree",4,39122,29.3,3338.7
+California,CA,2021,M,"Associate degree (AA, AS)",5,14802,30.9,3348.2
+California,CA,2021,M,"Bachelor's degree (BA, AB, BS)",6,45112,32.7,3353.9
+California,CA,2021,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,21231,33.8,3341.7
+California,CA,2021,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,7608,35.0,3316.6
+California,CA,2021,M,Unknown or Not Stated,-9,16128,31.1,3275.0
+Vermont,VT,2016,F,8th grade or less,1,19,29.0,3030.4
+Vermont,VT,2016,F,9th through 12th grade with no diploma,2,173,24.6,3098.3
+Vermont,VT,2016,F,High school graduate or GED completed,3,730,26.5,3213.4
+Vermont,VT,2016,F,"Some college credit, but not a degree",4,505,27.8,3333.8
+Vermont,VT,2016,F,"Associate degree (AA, AS)",5,206,29.9,3353.7
+Vermont,VT,2016,F,"Bachelor's degree (BA, AB, BS)",6,688,31.7,3355.0
+Vermont,VT,2016,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,356,33.2,3326.6
+Vermont,VT,2016,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,98,34.2,3334.4
+Vermont,VT,2016,F,Unknown or Not Stated,-9,25,29.2,3063.8
+Vermont,VT,2016,M,8th grade or less,1,18,28.7,3273.6
+Vermont,VT,2016,M,9th through 12th grade with no diploma,2,198,24.9,3224.4
+Vermont,VT,2016,M,High school graduate or GED completed,3,706,26.3,3335.6
+Vermont,VT,2016,M,"Some college credit, but not a degree",4,541,27.9,3417.2
+Vermont,VT,2016,M,"Associate degree (AA, AS)",5,235,30.4,3477.0
+Vermont,VT,2016,M,"Bachelor's degree (BA, AB, BS)",6,734,31.6,3526.5
+Vermont,VT,2016,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,396,33.2,3460.9
+Vermont,VT,2016,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,109,33.9,3372.8
+Vermont,VT,2016,M,Unknown or Not Stated,-9,19,31.3,3346.6
+Vermont,VT,2017,F,8th grade or less,1,26,31.1,3278.8
+Vermont,VT,2017,F,9th through 12th grade with no diploma,2,159,24.3,3080.3
+Vermont,VT,2017,F,High school graduate or GED completed,3,717,26.3,3228.5
+Vermont,VT,2017,F,"Some college credit, but not a degree",4,490,28.6,3264.0
+Vermont,VT,2017,F,"Associate degree (AA, AS)",5,207,29.7,3370.8
+Vermont,VT,2017,F,"Bachelor's degree (BA, AB, BS)",6,691,31.8,3345.6
+Vermont,VT,2017,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,372,33.5,3336.7
+Vermont,VT,2017,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,103,34.1,3311.5
+Vermont,VT,2017,F,Unknown or Not Stated,-9,19,29.1,3085.4
+Vermont,VT,2017,M,8th grade or less,1,19,28.4,3272.7
+Vermont,VT,2017,M,9th through 12th grade with no diploma,2,193,24.3,3180.6
+Vermont,VT,2017,M,High school graduate or GED completed,3,695,26.7,3373.8
+Vermont,VT,2017,M,"Some college credit, but not a degree",4,516,28.2,3448.8
+Vermont,VT,2017,M,"Associate degree (AA, AS)",5,206,30.4,3458.4
+Vermont,VT,2017,M,"Bachelor's degree (BA, AB, BS)",6,744,31.6,3495.1
+Vermont,VT,2017,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,375,33.5,3434.4
+Vermont,VT,2017,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,108,34.2,3435.9
+Vermont,VT,2017,M,Unknown or Not Stated,-9,15,29.5,3454.4
+Vermont,VT,2018,F,8th grade or less,1,22,33.8,3215.7
+Vermont,VT,2018,F,9th through 12th grade with no diploma,2,170,24.4,3125.6
+Vermont,VT,2018,F,High school graduate or GED completed,3,628,26.7,3207.4
+Vermont,VT,2018,F,"Some college credit, but not a degree",4,482,28.1,3267.3
+Vermont,VT,2018,F,"Associate degree (AA, AS)",5,238,30.2,3253.9
+Vermont,VT,2018,F,"Bachelor's degree (BA, AB, BS)",6,653,32.1,3348.9
+Vermont,VT,2018,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,339,33.6,3376.3
+Vermont,VT,2018,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,110,33.8,3315.8
+Vermont,VT,2018,F,Unknown or Not Stated,-9,24,30.0,3205.6
+Vermont,VT,2018,M,8th grade or less,1,19,32.8,3459.0
+Vermont,VT,2018,M,9th through 12th grade with no diploma,2,200,24.5,3270.7
+Vermont,VT,2018,M,High school graduate or GED completed,3,674,27.1,3330.6
+Vermont,VT,2018,M,"Some college credit, but not a degree",4,500,28.3,3431.1
+Vermont,VT,2018,M,"Associate degree (AA, AS)",5,210,30.4,3471.5
+Vermont,VT,2018,M,"Bachelor's degree (BA, AB, BS)",6,688,31.7,3464.7
+Vermont,VT,2018,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,353,33.7,3427.7
+Vermont,VT,2018,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,104,34.5,3449.9
+Vermont,VT,2018,M,Unknown or Not Stated,-9,18,28.9,3548.1
+Vermont,VT,2019,F,8th grade or less,1,27,29.6,3179.9
+Vermont,VT,2019,F,9th through 12th grade with no diploma,2,155,24.5,3102.6
+Vermont,VT,2019,F,High school graduate or GED completed,3,624,26.8,3209.6
+Vermont,VT,2019,F,"Some college credit, but not a degree",4,462,28.5,3277.0
+Vermont,VT,2019,F,"Associate degree (AA, AS)",5,171,30.1,3235.8
+Vermont,VT,2019,F,"Bachelor's degree (BA, AB, BS)",6,668,31.9,3356.1
+Vermont,VT,2019,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,394,33.7,3347.4
+Vermont,VT,2019,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,93,35.1,3331.1
+Vermont,VT,2019,F,Unknown or Not Stated,-9,13,31.3,3117.5
+Vermont,VT,2019,M,8th grade or less,1,21,30.0,3330.2
+Vermont,VT,2019,M,9th through 12th grade with no diploma,2,162,24.9,3121.1
+Vermont,VT,2019,M,High school graduate or GED completed,3,630,26.9,3334.1
+Vermont,VT,2019,M,"Some college credit, but not a degree",4,525,28.6,3433.5
+Vermont,VT,2019,M,"Associate degree (AA, AS)",5,199,30.3,3490.2
+Vermont,VT,2019,M,"Bachelor's degree (BA, AB, BS)",6,681,32.0,3447.4
+Vermont,VT,2019,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,403,33.7,3458.0
+Vermont,VT,2019,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,114,34.2,3409.7
+Vermont,VT,2019,M,Unknown or Not Stated,-9,19,27.7,3330.0
+Vermont,VT,2020,F,8th grade or less,1,21,30.2,3255.5
+Vermont,VT,2020,F,9th through 12th grade with no diploma,2,173,25.2,3086.9
+Vermont,VT,2020,F,High school graduate or GED completed,3,578,27.1,3163.6
+Vermont,VT,2020,F,"Some college credit, but not a degree",4,435,28.9,3216.0
+Vermont,VT,2020,F,"Associate degree (AA, AS)",5,176,30.4,3317.8
+Vermont,VT,2020,F,"Bachelor's degree (BA, AB, BS)",6,634,32.4,3377.4
+Vermont,VT,2020,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,382,33.9,3355.0
+Vermont,VT,2020,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,110,35.2,3303.2
+Vermont,VT,2020,F,Unknown or Not Stated,-9,14,30.4,3101.5
+Vermont,VT,2020,M,8th grade or less,1,27,30.3,3312.8
+Vermont,VT,2020,M,9th through 12th grade with no diploma,2,160,24.4,3191.8
+Vermont,VT,2020,M,High school graduate or GED completed,3,623,27.0,3324.0
+Vermont,VT,2020,M,"Some college credit, but not a degree",4,479,28.9,3406.6
+Vermont,VT,2020,M,"Associate degree (AA, AS)",5,184,30.8,3419.6
+Vermont,VT,2020,M,"Bachelor's degree (BA, AB, BS)",6,635,32.2,3505.3
+Vermont,VT,2020,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,368,33.8,3430.6
+Vermont,VT,2020,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,119,34.4,3347.9
+Vermont,VT,2020,M,Unknown or Not Stated,-9,15,31.1,3100.7
+Vermont,VT,2021,F,8th grade or less,1,16,30.1,3402.4
+Vermont,VT,2021,F,9th through 12th grade with no diploma,2,150,24.8,3140.2
+Vermont,VT,2021,F,High school graduate or GED completed,3,544,27.2,3254.4
+Vermont,VT,2021,F,"Some college credit, but not a degree",4,444,29.1,3247.0
+Vermont,VT,2021,F,"Associate degree (AA, AS)",5,212,30.4,3261.3
+Vermont,VT,2021,F,"Bachelor's degree (BA, AB, BS)",6,721,32.5,3382.8
+Vermont,VT,2021,F,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,430,33.6,3373.7
+Vermont,VT,2021,F,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,112,34.1,3264.4
+Vermont,VT,2021,F,Unknown or Not Stated,-9,15,29.8,2451.9
+Vermont,VT,2021,M,8th grade or less,1,27,31.3,3433.0
+Vermont,VT,2021,M,9th through 12th grade with no diploma,2,161,24.5,3159.9
+Vermont,VT,2021,M,High school graduate or GED completed,3,571,27.6,3361.2
+Vermont,VT,2021,M,"Some college credit, but not a degree",4,494,28.8,3357.2
+Vermont,VT,2021,M,"Associate degree (AA, AS)",5,188,30.7,3426.8
+Vermont,VT,2021,M,"Bachelor's degree (BA, AB, BS)",6,776,32.4,3477.3
+Vermont,VT,2021,M,"Master's degree (MA, MS, MEng, MEd, MSW, MBA)",7,410,34.0,3501.1
+Vermont,VT,2021,M,"Doctorate (PhD, EdD) or Professional Degree (MD, DDS, DVM, LLB, JD)",8,103,34.9,3489.3
+Vermont,VT,2021,M,Unknown or Not Stated,-9,10,33.0,3067.9
