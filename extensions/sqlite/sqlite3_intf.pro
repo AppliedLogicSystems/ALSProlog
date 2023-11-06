@@ -12,10 +12,18 @@
  | DBHandle database..  If DBAccess is a DBName, sqlite3_open is called 
  | (on the C side) to obtain a DBHandle against which the the SQL 
  | statement in question is executed.
+ |	Note: Mostly below, the use of "string" is in the sense of SQL
+ |	and C, not in the sense of prolog.
  *=======================================================================*/
 :-['./sqlite3_intf.psl'], write('LOCAL LOADED sqlite3_intf.psl'), nl,nl.
 
 module sqlite3.
+
+export sqlite3_open/2.
+export sqlite3_close/1.
+export sqlite3_exec_norows/2.
+export sqlite3_exec_rows/4.
+
 
 export sql_create_table/4.
 export sql_create_table/5.
@@ -23,7 +31,7 @@ export sql_create_table_string/5.
 export sql_drop_table/2.
 export insert_one_row/3.
 export insert_one_row/4.
-export insert_one_row_string/3.
+export insert_one_row_string/4.
 export insert_rows/3.
 export select_one_table/3.
 export select_all_table/3.
@@ -44,6 +52,96 @@ export query_foreign_keys/2.
 export set_foreign_keys_on/1.
 export set_foreign_keys_off/1.
 	
+	/*----------------------------------------------------------------*
+		check_return_val/1
+		check_return_val(RetVal)
+		check_return_val(+)
+	 *----------------------------------------------------------------*/
+
+	% SQLITE_OK
+sqlite3_result_ok(0, _) :-!.
+	% SQLITE_DONE
+sqlite3_result_ok(101, _) :-!.
+	% SQLITE_ROW
+sqlite3_result_ok(100, _) :-!.
+
+sqlite3_result_ok(Code, DBHandle) :-
+	sqlite3_errstr_x(Code, ErrStr),
+	sqlite3_errmsg_x(DBHandle, ErrMsg),
+	throw(error(sqlite_error(ErrStr), [errmsg(ErrMsg), errcode(Code)])).
+
+	/*----------------------------------------------------------------*
+	 |	sqlite3_open/2
+         |	sqlite3_open(DBName, DBHandle)
+         |	sqlite3_open(+, -)
+	 *----------------------------------------------------------------*/
+sqlite3_open(DBName, DBHandle)
+	:-
+	atom_ok(DBName),
+	var_ok(DBHandle),
+	sqlite3_open_x(DBName, DBHandle, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+	
+	/*----------------------------------------------------------------*
+	 |	sqlite3_close/1
+         |	sqlite3_close(DBHandle)
+         |	sqlite3_close(+)
+	 *----------------------------------------------------------------*/
+sqlite3_close(DBHandle)
+	:-
+	number_ok(DBHandle),
+	sqlite3_close_x(DBHandle, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+
+	/*----------------------------------------------------------------*
+	 |	sqlite3_exec_norows/2
+         |	sqlite3_exec_norows(DBHandle, Cmd)
+         |	sqlite3_exec_norows(+, +)
+	 *----------------------------------------------------------------*/
+sqlite3_exec_norows(DBAccess, Cmd)
+	:-
+	atom(DBAccess),
+	!,
+	sqlite3_open(DBAccess, DBHandle),
+	atom_ok(Cmd),
+	sqlite3_exec_norows_x(DBHandle, Cmd, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+sqlite3_exec_norows(DBHandle, Cmd)
+	:-
+	number_ok(DBHandle),
+	atom_ok(Cmd),
+	sqlite3_exec_norows_x(DBHandle, Cmd, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+	
+	/*----------------------------------------------------------------*
+	 |	sqlite3_exec_rows/4
+         |	sqlite3_exec_rows(DBHandle, Cmd)
+         |	sqlite3_exec_rows(+, +)
+	 *----------------------------------------------------------------*/
+sqlite3_exec_rows(DBAccess, Cmd, Limit, Result)
+	:-
+	atom(DBAccess),
+	!,
+	sqlite3_open(DBAccess, DBHandle),
+	atom_ok(Cmd),
+	(Limit = 'all', !; number_ok(Limit)),
+	var_ok(Result),
+	sqlite3_exec_rows_x(DBHandle, Cmd, Limit, Result, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+sqlite3_exec_rows(DBHandle, Cmd, Limit, Result)
+	:-
+	number_ok(DBHandle),
+	atom_ok(Cmd),
+	(Limit = 'all', !; number_ok(Limit)),
+	var_ok(Result),
+	sqlite3_exec_rows_x(DBHandle, Cmd, Limit, Result, ReturnVal),
+	sqlite3_result_ok(ReturnVal, DBHandle).
+
+
+
+
+
+
 	/*----------------------------------------------------------------*
 	  sql_create_table/4
 	  sql_create_table(DBAccess, TableName, ColumnsList, Primary)
@@ -194,101 +292,27 @@ insert_one_row(DBAccess, TableName, RowList)
 	:-
 	insert_one_row(DBAccess, TableName, RowList, false).
 
-insert_one_row(DBAccess, TableName, RowList, Q4Boolean)
+insert_one_row(DBAccess, TableName, TermOrArgs, Q4Boolean)
 	:-
-	insert_one_row_string(TableName, RowList, Q4Boolean, InsertString),
-%printf('ior = %t\n\n', [InsertString]),
+	(TermOrArgs = [_ | _] -> ArgsList = TermOrArgs ; TermOrArgs =.. [_ | ArgsList]),
+	insert_one_row_string(TableName, ArgsList, Q4Boolean, InsertString),
+%printf('insert_one_row_string = %t\n\n', [InsertString]),
+	!,
         sqlite3_exec_norows(DBAccess, InsertString).
 
 insert_one_row_string(TableName, RowList, Q4Boolean, InsertString)
 	:-
 	open(atom(InsertString), write, S),
 	printf(S, 'INSERT INTO %t VALUES (', [TableName]), 
-	(RowList = [_|_] -> 
-		compose_row(RowList, Q4Boolean, S)
-		;
-		RowList =.. [_ | Args],
-		compose_row(Args, Q4Boolean, S)
-	),
+	sql_quote_list_top(RowList, S),
 	printf(S, ');', []),
 	close(S).
-
-compose_row([], Q4Boolean, S).
-compose_row([Value | RowList], Q4Boolean, S)
-	:-
-	number(Value),
-        !,
-	(RowList = [] -> 
-		printf(S, '%t ', [Value])
-		;
-		printf(S, '%t, ', [Value]),
-		compose_row(RowList, Q4Boolean, S)
-	).
-
-compose_row([Value | RowList], Q4Boolean, S)
-	:-
-	atom(Value),
-        !,
-	(RowList = [] -> 	% whether there's a terminating comma output:
-		(Q4Boolean=true ->
-			q4_quoted_write(Value, S)
-			;
-			printf(S, '\'%t\' ', [Value])
-		)
-		;
-		(Q4Boolean=true ->
-			q4_quoted_write(Value, S),
-			put_code(S, 0',)
-			;
-			printf(S, '\'%t\', ', [Value])
-		),
-		compose_row(RowList, Q4Boolean, S)
-	).
-
-q4_quoted_write(Value, S)
-	:-
-	atom_codes(Value, VCs),
-	put_single_quotes(1, S),
-	q4_write(VCs, S),
-	put_single_quotes(1, S).
-
-put_single_quotes(0, S) :-!.
-put_single_quotes(N, S)
-	:-
-	put_code(S, 0''),
-	M is N-1,
-	put_single_quotes(M, S).
-
-q4_write([], S).
-q4_write([0'' | CCs], S)
-        :-
-	put_single_quotes(2, S),
-/*
-	put_code(S, 0'\\),
-	put_code(S, 0''),
-	put_code(S, 0'\\),
-	put_code(S, 0''),
-*/
-        q4_write(CCs, S).
-q4_write([CC | CCs], S)
-        :-
-	put_code(S, CC),
-        q4_write(CCs, S).
-
 
 insert_rows([], DBAccess, TableName).
 insert_rows([RowList | ListOfRows], DBAccess, TableName)
 	:-
 	insert_one_row(DBAccess, TableName, RowList),
 	insert_rows(ListOfRows, DBAccess, TableName).
-
-
-
-
-
-
-
-
 
 	/* -------------------------------------------- *
 	    Simple SELECT * FROM TABLE SQL queries
@@ -353,7 +377,8 @@ select_where_lists(DBAccess, TableName, ColAtomsList, WhereClauseList, Result)
 	:-
         build_sql_select_string(ColAtomsList, TableName, WhereClauseList, SelectString),
         Limit = all,
-        sqlite3_exec_rows(DBAccess, SelectString, Limit,  Result).
+        sqlite3_exec_rows(DBAccess, SelectString, Limit,  Result0),
+	Result = Result0.
 
 build_sql_select_string(ColAtomsList, TableName, WhereClauseList, SelectString)
 	:-
@@ -632,4 +657,90 @@ check_db_exists(DBName) :-
 	((DBName \= ':memory:', DBName \= '') -> 
 		exists_file(DBName) ; true).
 
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%	Top Level
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+sql_quote(Expr, SQLQuotedExpr)
+	:-
+	open(atom(SQLQuotedExpr), write, S),
+	printf(S, '''', []),
+	sql_quote_expr(Expr, S), 
+	printf(S, '''', []),
+	close(S).
+	
+	%% Individually apply sql_quote to each element of the list:
+sql_quote_list([], []).
+sql_quote_list([Head | Tail], [QuotedHead | QuotedTail])
+	:-
+	sql_quote(Head, QuotedHead),
+	sql_quote_list(Tail, QuotedTail).
+
+sql_quote_list_top([], S).
+sql_quote_list_top([Value | RestRowList], S)
+	:-
+	sql_quote_expr_top(Value, S),
+	( RestRowList = [] -> true ; printf(S, ', ', []) ),
+	sql_quote_list_top(RestRowList, S).
+
+
+sql_quote_expr_top(Value, S)
+	:-
+atom(Value),
+!,
+	printf(S, '''', []),
+	sql_quote_expr(Value, S),
+	printf(S, '''', []).
+
+sql_quote_expr_top(Value, S)
+	:-
+	sql_quote_expr(Value, S).
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%	Workhorses
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+	%% sql_quote_expr(<List>, S) applies sql_quote_expr to the entire list:
+sql_quote_expr([], _) :-!.
+sql_quote_expr([Head | Tail], S)
+	:-!,
+	sql_quote_expr(Head, S),
+	( Tail = [] -> true ; printf(S, ', ', []) ),
+	sql_quote_expr(Tail, S).
+
+sql_quote_expr(Expr,  S)
+	:-
+	number(Expr), 
+	!,
+	printf(S, '%t', [Expr]).
+
+sql_quote_expr(Item,  S)
+	:-
+	atom(Item),
+	!,
+	sql_quote_atom(Item,  S).
+
+sql_quote_expr(Expr,  S)
+	:-
+	Expr =.. [Functor | Args],
+	sql_quote_expr(Args, S).
+
+sql_quote_atom(Expr,  S)
+	:-
+	atom_codes(Expr, Codes),
+	qtd_printf(Codes, S).
+	
+qtd_printf([], S).
+qtd_printf([0'' | Codes], S)
+	:-
+	put_code(S, 0''),
+	put_code(S, 0''),
+	qtd_printf(Codes, S).
+qtd_printf([C | Codes], S)
+	:-
+	put_code(S, C),
+	qtd_printf(Codes, S).
+	
 endmod.

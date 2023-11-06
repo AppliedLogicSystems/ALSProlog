@@ -50,12 +50,20 @@ make_track
 
 try_bojangles
         :-
-        insert_db_track(track(14,'Mr. Bojangles',3)),
-        !.
-try_bojangles
+	catch(
+        	insert_db_track(track(14,'Mr. Bojangles',3)),
+		error(ERR, EArgs),
+		do_sqlite3_err(ERR, EArgs)  ).
+
+do_sqlite3_err(ERR, EArgs)
+	:-
+	write( do_sqlite3_err = ERR),nl,
+	write( do_sqlite3_err_args = EArgs),nl,
+	try_bojangles_err.
+
+try_bojangles_err
         :-
         nl,printf('Attempt to insert track(14,''Mr. Bojangles'',3) violated foreign key constraints\n', []),
         nl,printf('Current track_table rows:\n', []),
         select_all_table('./singers_data', track_table, TrackRows),
         write_lines(TrackRows).
-

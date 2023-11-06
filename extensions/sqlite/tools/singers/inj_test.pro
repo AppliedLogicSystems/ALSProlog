@@ -4,6 +4,10 @@
 
 test_insert_bobby_tables 
 	:-
+	catch( test_insert_bobby_tables0, error(Err,EArgs), do_bobby_err(Err,EArgs)).
+
+test_insert_bobby_tables0
+	:-
 	(exists_file(singers_data) ->
         	remove_file(singers_data) ; true ),
 	dbmod_track:abolish(is_handle_db_track/1),
@@ -18,20 +22,12 @@ test_insert_bobby_tables
 		;
 		printf('Attempt to insert "%t" FAILED\n', [Title])
 	).
+do_bobby_err(Err,EArgs)
+	:-
+	write(do_bobby_err = bobby_err(Err,EArgs)),nl.
 
-/*-------
 
-(1) 1 call: user:insert_db_track(track(11,That''s Amore,1))?l
-
-compose_row [false] That''s Amore
-
-ior = INSERT INTO track_table VALUES (11, 'That''s Amore', 1 );
-
-buf=./singers_data  sql=INSERT INTO track_table VALUES (11, 'That''s Amore', 1 );
-
------*/
-	
-test_insert_with_single_quote 
+init_track
 	:-
 	(exists_file(singers_data) ->
         	remove_file(singers_data) ; true ),
@@ -39,12 +35,27 @@ test_insert_with_single_quote
 	dbmod_artist:abolish(is_handle_db_artist/1),
 	recreate_table_db_artist,
         recreate_table_db_track,
-        make_artists,
+        make_artists.
+	
+test_insert_with_single_quote 
+	:-
+	init_track,
+	AM = 'That''s Amore',
+	printf('test_insert_AM = %t\n\n', [AM]),
+        insert_db_track(track(11,AM,1)),
+	show_tt.
 
-        insert_db_track(track(11,'That\'\'s Amore',1)),
-        insert_db_track(track(12,'Christmas Blues',1)),
-        insert_db_track(track(13,'My Way',2)),
-        nl,printf('track_table rows:\n', []),
+show_tt :-
+        printf('Retrieve:  track_table rows:\n\n', []),
         select_all_table('./singers_data', track_table, TrackRows),
         write_lines(TrackRows).
+
+t0 :-  init_track,
+	printf('\nInput (get_line(X)):  ',[]),
+	get_line(AM),
+	printf('test_insert_AM = %t\n\n', [AM]),
+        printf('Execute:  insert_db_track(track(11,AM,1))\n\n', []),
+        printf('Execute:  insert_db_track(track(11,%t,1))\n\n', [AM]),
+        insert_db_track(track(11,AM,1)),
+	show_tt.
 

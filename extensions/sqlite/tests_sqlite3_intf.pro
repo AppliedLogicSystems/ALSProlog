@@ -57,17 +57,6 @@ test_sqlite3
 
 	true]).
 
-/*
-drop_db(DBName) :- 
-	(exists_file(DBName) ->
-		remove_file(DBName) ; true ).
-
-check_db_exists(DBName) :- 
-	((DBName \= ':memory:', DBName \= '') -> 
-		exists_file(DBName) ; true).
-*/
-
-
 test_open(DBName)
 	:-
 	sqlite3_open(DBName, DBHandle), 
@@ -82,9 +71,7 @@ test_open_close(DBName)
  
 
 table_spec('Cars', ColumnsList, Primary)
-%table_spec('Cars', ColumnsList, Primary)
 	:-
-%	TableName = 'Cars',
 	TableName = 'Cars',
         ColumnsList = [
                 [column_name='Id', column_type='INT'],
@@ -305,12 +292,10 @@ test_select_all_where(DBName, TableName)
 
 update_comps_for('Cars', ['Price' = 32500], ['Id' = 4]).
 
-%update_comps_for(members, [email = 'jm@holiday.org', balance = 37.88], [last_name= ''Mason''', first_name = ''Jane''']).
 update_comps_for(members, [email = '''jm@holiday.org''', balance = 37.88], ['last_name = ''Mason''']).
 
 expected_update_result_for('Cars', [r(4,'Volvo',32500)]).
 
-%expected_update_result_for(members, [r(100,'Jane','Mason','jm@holiday.org',37.88)]).
 expected_update_result_for(members, [r(100,'Jane','Mason','jm@holiday.org',37.88)]).
 
 test_update(DBName, TableName)

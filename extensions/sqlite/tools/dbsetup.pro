@@ -903,7 +903,11 @@ retrieve_rows_code(SpecInfo,  GenPreds, ColDecls, Suffix, DtFunc, DBPath, TableN
         printf(S, '\tprintf(S, SelectByPrimaryPat, [PrimaryValue]),\n',[]),
         printf(S, '\tclose(S),\n',[]),
 	printf(S, '\t%t(DBHandle),\n', [GetHandlePred]),
-        printf(S, '\tsqlite3_exec_rows(DBHandle, SPP, 1,  [Result_r_Row | _]),\n',[], [quoted(true)]),
+
+%        printf(S, '\tsqlite3_exec_rows(DBHandle, SPP, 1,  [Result_r_Row | _]),\n',[], [quoted(true)]),
+
+        printf(S, '\tsqlite3_exec_rows(DBHandle, SPP, 1,  ResultRowsFound),\n',[], [quoted(true)]),
+	printf(S, '\tResultRowsFound = [Result_r_Row | _],', []),
         printf(S, '\tResult_r_Row =.. [_ | Args].\n\n',[]),
 
         printf(S, '%t(ResultList)\n\t:-\n',[RetrieveAllPred]),

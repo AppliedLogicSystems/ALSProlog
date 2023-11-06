@@ -12,7 +12,7 @@ The file sqlite3_intf.psl provides the very low-level somewhat raw direct C inte
 We describe the various calls, providing examples.  There are a few low-level C-languge interface calls from sqlite3_intf.psl that one needs to be aware of.  After discussing them, we go on to discuss the calls from  sqlite3_intf.pro.
 
 In discussing examples,  we'll make use the command-line tool sqlite3 (https://sqlite.org/cli.html) to "look behind the scenes" and see what's actually in the db.  We'll will run the prolog side of the examples in the partially complete 64-bit version of ALS Prolog under development.
-The examples are drawn from the file examps.pro.
+The examples are drawn from the file doc_examples.pro.
 
 Low Level Immediate (C language) Interface
 ==========================================
@@ -21,7 +21,7 @@ sqlite3_open/2
 sqlite3_open(DBName, DBHandle)
 sqlite3_open(+, -)
 
-DBName is an atom naming a file in which the sqlite3 database resides.  DBHandle is an integer serving as a handle to an opaque object managing a connection to the database; it is a parameter in most other access predicates.  If the file does not exist, it is created.
+DBName is an atom naming a file in which the sqlite3 database resides.  DBHandle is an integer serving as a handle to an opaque object managing a connection to the database; it is a parameter in most other access predicates.  If the file DBName does not exist, it is created.
 
 > ls *.db
 ls: *.db: No such file or directory
@@ -43,7 +43,7 @@ sqlite3_close/1
 sqlite3_close(DBHandle)
 sqlite3_close(+)
 
-DBHandle is an integer returned as DBHandle by eqlite3_open.
+DBHandle is an integer that was returned as DBHandle by eqlite3_open.
 Closes the  database connection DBHandle, but leaves the database file (e.g. my_sqlite3.db) intact.
 
 > ls *.db
@@ -58,7 +58,7 @@ DBHandle=5401233312
 
 yes.
 
-The haandle (connection) to the database has been closed in prolog, but the database file rmains intact:
+The handle (connection) to the database has been closed in prolog, but the database file rmains intact:
 
 > ls *.db
 my_sqlite3.db
@@ -83,6 +83,48 @@ sqlite3_exec_norows(+, +)
 DBAccess is either a DBName or a DBHandle.  SQLStatement is a UIA representing an sql statement from which no rows will be returned, e.g., a CREATE TABLE.
 If DBAccess is a DBHandle, the statement is executed  against the DBHandle database..
 If DBAccess is a DBName, sqlite3_open is called (on the C side) to obtain a DBHandle against which the statement is executed.
+
+
+sqlite3_exec_norows_x/3
+sqlite3_exec_norows_x(DBAccess, SQLStatement, ReturnValue)
+sqlite3_exec_norows_x(+, +, -)
+
+DBAccess and SQLStatement are as for sqlite3_exec_norows/2. ReturnValue is a variable which is bound to an expession indicating the status of the C calls underlying
+[Note: In the original interface, sqlite3_exec_norows/2 would fail from the C side whenever any of the involved sqlite C function calls returned a value other than SQLITE_OK (0).  Now, because we want to see the value of those returned values, the calls to sqlite3_exec_norows_x will always succeed, binding ReturnValue to something.  The prolog side examines ReturnValue and decides what to do: succeed, fail, or throw an error exception.  Roughly:
+
+sqlite3_exec_norows(DBAccess, SQLStatement)
+	:-
+	sqlite3_exec_norows_x(DBAccess, SQLStatement, ReturnValue),
+	continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement).
+
+continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
+	:-
+	is_sqlite3_ok(ReturnValue)
+	!.
+	
+	%% E.g., (val1,type1) or (val2,type2) are not syms or uias:
+continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
+	:-
+	is_sqlite3_failure(ReturnValue)
+	!,
+	fail.
+
+	%% Some call in the C code returned a non-SQLITE_OK value:
+continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
+	:-
+	decode_sqlite3_error(ReturnValue, ErrMsg),
+	throw(error(sqlite_error(ErrMsg), [errcode()ReturnValue, ...])).
+	
+The question is: how to represent the ReturnValues.  One simple way is that ReturnValue will always be bound to an integer, with something like the following interpretations for sqlite3_exec_norows_x (and similarly for sqlite3_exec_rows_x):
+
+	0 - SQLITE_OK
+	101 - (val1,type1) not a sym or uia
+	102 - (val2,type2) not a sym or uia
+	200 + N  - return value from sqlite3_prepare_v2 call, N \= SQLITE_OK
+	300 + N  - return value from sqlite3_step call, N \= SQLITE_OK
+
+[Similarly for sqlite3_exec_rows_x]
+
 
 --------------------------------------------
 
