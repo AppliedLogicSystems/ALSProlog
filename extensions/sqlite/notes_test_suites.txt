@@ -10,6 +10,9 @@ All expect that both sqlite3_intf.pro and sqlite3_intf.psl can be found in
 	alsdir/shared
 All will create a sqlite3 <Test data file>
 
+The entire collection of tests can be run as a batch by loading and running
+
+	alspro run_tests_examples.pro -g run_tests_examples
 
 Test file		Invocation		Test data file
 =========		==========		==============
@@ -19,11 +22,11 @@ In ALSProlog/extensions/sqlite/tools/singers:
 
 crooners.pro		singers_test		singers_data
 
-inj_test.pro		tir {try Robert}	singers_data
-			ta  {try AMore}		singers_data
+inj_test.pro		test_insert_bobby_tables  singers_data
+			test_insert_with_single_quote  singers_dataA
 
 Tests in generated files in ALSProlog/extensions/sqlite/tools/singers:
-Load all three files:
+These test foreign key constraints between different tables, so load all three files:
 
 	alspro artist_code.pro track_code.pro awardcat_code.pro
 
@@ -40,7 +43,7 @@ bp_code.pro		all_db_bp_tests		bp_data
 Examples in ALSProlog/extensions/sqlite/examples:
 
 extract_anthonies.pro	setup_aa_db, 		anthonies.sqlite3
-			aa_query0, aa_query1, aa_query2
+			run_all_anthonies
 
 do_ca_vt_db.pro		setup_births_db_ca_vt,	db_ca_vt_2016_2021.sqlite3
 			query_births0

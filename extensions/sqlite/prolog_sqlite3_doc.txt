@@ -2,6 +2,7 @@ ALSProlog <-> SQLite3 Interface
 ===============================
 
 For information on sqlite(3) itself, see:
+
 https://www.sqlite.org/docs.html
 https://www.sqlite.org/c3ref/intro.html
 https://www.sqlite.org/inmemorydb.html
@@ -9,13 +10,22 @@ https://www.sqlite.org/inmemorydb.html
 The interface between ALS Prolog and Sqlite is provided by the files sqlite3_intf.psl and sqlite3_intf.pro.
 The file sqlite3_intf.psl provides the very low-level somewhat raw direct C interface between ALS Prolog and the C api of Sqlite3.  This file must be consulted or loaded from the command line in order to interface to Sqlite3.  The file sqlite3_intf.pro provides a more convenient layer of prolog over the calls in sqlite3_intf.psl; when consulted/loaded, it automatically loads sqlite3_intf.psl. 
 
-We describe the various calls, providing examples.  There are a few low-level C-languge interface calls from sqlite3_intf.psl that one needs to be aware of.  After discussing them, we go on to discuss the calls from  sqlite3_intf.pro.
+We describe the various calls, providing examples.  
+The actual interface between ALS Prolog and calls to Sqlite3 API predicates is provided by four pairs of predicates, shown in the following table:
 
-In discussing examples,  we'll make use the command-line tool sqlite3 (https://sqlite.org/cli.html) to "look behind the scenes" and see what's actually in the db.  We'll will run the prolog side of the examples in the partially complete 64-bit version of ALS Prolog under development.
-The examples are drawn from the file doc_examples.pro.
+  Basic ALS Prolog interface predicate	  | ALS Prolog / Sqlite3 interface edge predicate
+  ========================================|==============================================
+  sqlite3_open(DBName, DBHandle)	  | sqlite3_open_x(DBName, DBHandle, ReturnVal)
+  sqlite3_close(DBHandle)		  | sqlite3_close_x(DBHandle, ReturnVal)
+  sqlite3_exec_norows(DBAccess, Cmd)	  | sqlite3_exec_norows_x(DBHandle, Cmd, ReturnVal)
+  sqlite3_exec_rows(DBAccess, Cmd, Limit, Result) | sqlite3_exec_rows_x(DBHandle, Cmd, Limit, Result, ReturnVal)
 
-Low Level Immediate (C language) Interface
-==========================================
+The implementation of the Basic ALS Prolog interface predicates in terms of the ALS Prolog / Sqlite3 interface edge predicates is provided at the beginning of the file sqlite3_intf.pro.  The edge predicates all contain an argument ReturnVal which makes the return values of the C sqlite3 API calls available to prolog.  Essentially, the basic interface predicates provide a wrapper around the edge predicates managing these return values.  If the a return value indicates an error, the interface predicate predicate throws a prolog error.
+
+In discussing examples,  we'll make use the command-line tool sqlite3 (https://sqlite.org/cli.html) to "look behind the scenes" and see what's actually in the db.  We'll will run the prolog side of the examples in the partially complete 64-bit version of ALS Prolog under development.  The examples are drawn from the file doc_examples.pro.
+
+Basic ALS Prolog interface predicates
+=====================================
 
 sqlite3_open/2
 sqlite3_open(DBName, DBHandle)
@@ -43,7 +53,7 @@ sqlite3_close/1
 sqlite3_close(DBHandle)
 sqlite3_close(+)
 
-DBHandle is an integer that was returned as DBHandle by eqlite3_open.
+DBHandle is an integer that was returned as DBHandle by seqlite3_open.
 Closes the  database connection DBHandle, but leaves the database file (e.g. my_sqlite3.db) intact.
 
 > ls *.db
@@ -80,51 +90,61 @@ sqlite3_exec_norows/2
 sqlite3_exec_norows(DBAccess, SQLStatement)
 sqlite3_exec_norows(+, +)
 
-DBAccess is either a DBName or a DBHandle.  SQLStatement is a UIA representing an sql statement from which no rows will be returned, e.g., a CREATE TABLE.
+DBAccess is either a DBName or a DBHandle.  SQLStatement is a UIA representing an sql statement from which no rows will be returned, e.g., a CREATE TABLE statement, for example,
+	'CREATE TABLE Cars (Id INT PRIMARY KEY, Name TEXT, Price INT);'
+
 If DBAccess is a DBHandle, the statement is executed  against the DBHandle database..
-If DBAccess is a DBName, sqlite3_open is called (on the C side) to obtain a DBHandle against which the statement is executed.
+If DBAccess is a DBName, sqlite3_open is called to obtain a DBHandle against which the SQLStatement is executed.
 
+Here, the database file exists, but contains no tables:
 
-sqlite3_exec_norows_x/3
-sqlite3_exec_norows_x(DBAccess, SQLStatement, ReturnValue)
-sqlite3_exec_norows_x(+, +, -)
+KB-SSD > ls *.db
+my_sqlite3.db
+KB-SSD > sqlite3 my_sqlite3.db 
+SQLite version 3.39.5 2022-10-14 20:58:05
+Enter ".help" for usage hints.
+sqlite> .tables
+sqlite> 
 
-DBAccess and SQLStatement are as for sqlite3_exec_norows/2. ReturnValue is a variable which is bound to an expession indicating the status of the C calls underlying
-[Note: In the original interface, sqlite3_exec_norows/2 would fail from the C side whenever any of the involved sqlite C function calls returned a value other than SQLITE_OK (0).  Now, because we want to see the value of those returned values, the calls to sqlite3_exec_norows_x will always succeed, binding ReturnValue to something.  The prolog side examines ReturnValue and decides what to do: succeed, fail, or throw an error exception.  Roughly:
+>alspro sqlite3_intf.psl sqlite3_intf.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+........
+?- Cmd = 'CREATE TABLE Cars (Id INT PRIMARY KEY, Name TEXT, Price INT);',
+	sqlite3_open('my_sqlite3.db', DBHandle),
+	sqlite3_exec_norows(DBHandle, Cmd).
 
-sqlite3_exec_norows(DBAccess, SQLStatement)
-	:-
-	sqlite3_exec_norows_x(DBAccess, SQLStatement, ReturnValue),
-	continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement).
+Cmd='CREATE TABLE Cars (Id INT PRIMARY KEY, Name TEXT, Price INT);' 
+DBHandle=4862263424 
 
-continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
-	:-
-	is_sqlite3_ok(ReturnValue)
-	!.
-	
-	%% E.g., (val1,type1) or (val2,type2) are not syms or uias:
-continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
-	:-
-	is_sqlite3_failure(ReturnValue)
-	!,
-	fail.
+Now a table has bneen created:
 
-	%% Some call in the C code returned a non-SQLITE_OK value:
-continue_sqlite3_exec_norows(ReturnValue, DBAccess, SQLStatement)
-	:-
-	decode_sqlite3_error(ReturnValue, ErrMsg),
-	throw(error(sqlite_error(ErrMsg), [errcode()ReturnValue, ...])).
-	
-The question is: how to represent the ReturnValues.  One simple way is that ReturnValue will always be bound to an integer, with something like the following interpretations for sqlite3_exec_norows_x (and similarly for sqlite3_exec_rows_x):
+KB-SSD > sqlite3 my_sqlite3.db 
+SQLite version 3.39.5 2022-10-14 20:58:05
+Enter ".help" for usage hints.
+sqlite> .tables
+Cars
+sqlite> 
 
-	0 - SQLITE_OK
-	101 - (val1,type1) not a sym or uia
-	102 - (val2,type2) not a sym or uia
-	200 + N  - return value from sqlite3_prepare_v2 call, N \= SQLITE_OK
-	300 + N  - return value from sqlite3_step call, N \= SQLITE_OK
+Since inserting a row does not return any rows, we can insert a row in the Cars table of my_sqlite3.db as follows:
 
-[Similarly for sqlite3_exec_rows_x]
+>alspro sqlite3_intf.psl sqlite3_intf.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+........
+?- Cmd = 'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);',
+?_          sqlite3_open('my_sqlite3.db', DBHandle),
+?_ 	sqlite3_exec_norows(DBHandle, Cmd).
 
+Cmd='INSERT INTO Cars VALUES(3, \'Skoda\', 9000);' 
+DBHandle=5090863280 
+
+Now:
+
+KB-SSD > sqlite3 my_sqlite3.db 
+SQLite version 3.39.5 2022-10-14 20:58:05
+Enter ".help" for usage hints.
+sqlite> select* from Cars;
+3|Skoda|9000
+sqlite> 
 
 --------------------------------------------
 
@@ -132,15 +152,45 @@ sqlite3_exec_rows/4
 sqlite3_exec_rows(DBAccess, SelectString, Limit,  Result),
 sqlite3_exec_rows(+, +, +, -)
 
+sqlite3_exec_rows/4 executes SQL commonds which return rows.
 DBAccess is either a DBName or a DBHandle just as for sqlite3_exec_norows/2.
 Limit is either an integer or the atom 'all', used to set an upper limit on the number of rows returned.  
 Result is a list of terms of the form 
 
-	r(v1,...,vn)
+	r(v1),...,r(vn)
 
 where <v1,...,vn> are the rows returned by executing the SELECT statement, in order.
 
+First add another row to Cars:
 
+>alspro sqlite3_intf.psl sqlite3_intf.pro
+ALS Prolog (Byte) Version 3.5.0-212-gb050f08a [darwin]
+........
+?- Cmd = 'INSERT INTO Cars VALUES(1, \'Audi\', 52642);',
+?_        sqlite3_open('my_sqlite3.db', DBHandle),
+?_ 	sqlite3_exec_norows(DBHandle, Cmd).
+
+Cmd='INSERT INTO Cars VALUES(1, \'Audi\', 52642);' 
+DBHandle=5299521712 
+
+Now:
+
+?- SelectString = 'SELECT * FROM CARS;',
+?_         sqlite3_open('my_sqlite3.db', DBHandle),
+?_ sqlite3_exec_rows(DBHandle, SelectString, all, Result).
+gc not 64-bit yet
+
+SelectString='SELECT * FROM CARS;' 
+DBHandle=4862263424 
+Result=[r(3,'Skoda',9000),r(1,'Audi',52642)] 
+
+KB-SSD > sqlite3 my_sqlite3.db 
+SQLite version 3.39.5 2022-10-14 20:58:05
+Enter ".help" for usage hints.
+sqlite> select* from Cars;
+3|Skoda|9000
+1|Audi|52642
+sqlite>
 
 Upper Level Convenience Predicates
 --------------------------------

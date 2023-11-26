@@ -15,7 +15,8 @@
  |	Note: Mostly below, the use of "string" is in the sense of SQL
  |	and C, not in the sense of prolog.
  *=======================================================================*/
-:-['./sqlite3_intf.psl'], write('LOCAL LOADED sqlite3_intf.psl'), nl,nl.
+%:-['./sqlite3_intf.psl'], write('LOCAL LOADED sqlite3_intf.psl'), nl,nl.
+:-['./sqlite3_intf.psl'].
 
 module sqlite3.
 
@@ -23,7 +24,6 @@ export sqlite3_open/2.
 export sqlite3_close/1.
 export sqlite3_exec_norows/2.
 export sqlite3_exec_rows/4.
-
 
 export sql_create_table/4.
 export sql_create_table/5.
@@ -53,19 +53,27 @@ export set_foreign_keys_on/1.
 export set_foreign_keys_off/1.
 	
 	/*----------------------------------------------------------------*
-		check_return_val/1
-		check_return_val(RetVal)
-		check_return_val(+)
+	 |	sqlite3_result_ok/2
+	 |	sqlite3_result_ok(Code, DBHandle)
+	 |	sqlite3_result_ok(+, +)
 	 *----------------------------------------------------------------*/
+sqlite3_result_ok(Code, DBHandle) :-
+	integer_ok(Code),
+	Code == 0, !.
+	
 
 	% SQLITE_OK
 sqlite3_result_ok(0, _) :-!.
+%/*
 	% SQLITE_DONE
 sqlite3_result_ok(101, _) :-!.
 	% SQLITE_ROW
 sqlite3_result_ok(100, _) :-!.
-
-sqlite3_result_ok(Code, DBHandle) :-
+%*/
+sqlite3_result_ok(Code, DBHandle) 
+	:-
+	integer_ok(Code),
+	integer_ok(DBHandle),
 	sqlite3_errstr_x(Code, ErrStr),
 	sqlite3_errmsg_x(DBHandle, ErrMsg),
 	throw(error(sqlite_error(ErrStr), [errmsg(ErrMsg), errcode(Code)])).
@@ -89,13 +97,13 @@ sqlite3_open(DBName, DBHandle)
 	 *----------------------------------------------------------------*/
 sqlite3_close(DBHandle)
 	:-
-	number_ok(DBHandle),
+	integer_ok(DBHandle),
 	sqlite3_close_x(DBHandle, ReturnVal),
 	sqlite3_result_ok(ReturnVal, DBHandle).
 
 	/*----------------------------------------------------------------*
 	 |	sqlite3_exec_norows/2
-         |	sqlite3_exec_norows(DBHandle, Cmd)
+         |	sqlite3_exec_norows(DBAccess, Cmd)
          |	sqlite3_exec_norows(+, +)
 	 *----------------------------------------------------------------*/
 sqlite3_exec_norows(DBAccess, Cmd)
@@ -108,14 +116,14 @@ sqlite3_exec_norows(DBAccess, Cmd)
 	sqlite3_result_ok(ReturnVal, DBHandle).
 sqlite3_exec_norows(DBHandle, Cmd)
 	:-
-	number_ok(DBHandle),
+	integer_ok(DBHandle),
 	atom_ok(Cmd),
 	sqlite3_exec_norows_x(DBHandle, Cmd, ReturnVal),
 	sqlite3_result_ok(ReturnVal, DBHandle).
 	
 	/*----------------------------------------------------------------*
 	 |	sqlite3_exec_rows/4
-         |	sqlite3_exec_rows(DBHandle, Cmd)
+         |	sqlite3_exec_rows(DBAccess, Cmd, Limit, Result)
          |	sqlite3_exec_rows(+, +)
 	 *----------------------------------------------------------------*/
 sqlite3_exec_rows(DBAccess, Cmd, Limit, Result)
@@ -124,23 +132,18 @@ sqlite3_exec_rows(DBAccess, Cmd, Limit, Result)
 	!,
 	sqlite3_open(DBAccess, DBHandle),
 	atom_ok(Cmd),
-	(Limit = 'all', !; number_ok(Limit)),
+	(Limit = 'all', !; integer_ok(Limit)),
 	var_ok(Result),
 	sqlite3_exec_rows_x(DBHandle, Cmd, Limit, Result, ReturnVal),
 	sqlite3_result_ok(ReturnVal, DBHandle).
 sqlite3_exec_rows(DBHandle, Cmd, Limit, Result)
 	:-
-	number_ok(DBHandle),
+	integer_ok(DBHandle),
 	atom_ok(Cmd),
-	(Limit = 'all', !; number_ok(Limit)),
+	(Limit = 'all', !; integer_ok(Limit)),
 	var_ok(Result),
 	sqlite3_exec_rows_x(DBHandle, Cmd, Limit, Result, ReturnVal),
 	sqlite3_result_ok(ReturnVal, DBHandle).
-
-
-
-
-
 
 	/*----------------------------------------------------------------*
 	  sql_create_table/4
@@ -286,7 +289,7 @@ sql_drop_table(DBAccess, TableName)
 
 		'INSERT INTO Cars VALUES(3, \'Skoda\', 9000);' 
 
-	   whiach can be executed by sqlite3_exec_norows/2.
+	   which can be executed by sqlite3_exec_norows/2.
 	 *----------------------------------------------------------------*/
 insert_one_row(DBAccess, TableName, RowList)
 	:-
@@ -696,11 +699,9 @@ sql_quote_expr_top(Value, S)
 	:-
 	sql_quote_expr(Value, S).
 
-
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%	Workhorses
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 	%% sql_quote_expr(<List>, S) applies sql_quote_expr to the entire list:
 sql_quote_expr([], _) :-!.

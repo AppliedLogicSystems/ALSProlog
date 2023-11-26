@@ -28,8 +28,10 @@ run_tests_examples
 	test_sqlite3,
 	printf('< FINISHED: tests_sqlite3_intf.pro\n=====\n\n'),
 
+consult('tools/dbsetup.pro'),
 	do_next,
 	change_cwd('tools/singers'),
+dbsetup_one('singers.db_spec'),
 	consult('crooners.pro'),
 	printf('=====\n> STARTING: %t:\t%t\n=====\n',['crooners.pro','singers_test']),
 	singers_test,
@@ -52,6 +54,7 @@ run_tests_examples
 
 	do_next,
 	change_cwd('tools/bp'),
+dbsetup_one('bp.db_spec'),
 	consult('bp_code.pro'),
 	printf('=====\n> STARTING: %t:\t%t\n=====\n',['bp_code.pro','all_db_bp_tests']),
 	all_db_bp_tests,

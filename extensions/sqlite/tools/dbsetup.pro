@@ -16,28 +16,6 @@
  |	If no -spec or -dbd is present, looks for *.db_spec files in the current directory
  *=======================================================================*/
 
-%%%%%%%%%%%%%% To be moved to library (in miscatom.pro):
-/*!---------------------------------------------------------------------
- |	pat_atom/3.
- |	pat_atom(Pattern, Vals, Result)
- |	pat_atom(+, +, -)
- |
- |	- creates an atom using Pattern,Vals in the style of printf
- |
- | Example:
- |		pat_atom('Name: %t -- Height: %t ft', ['George', 6]
-				'Name: George -- Height: 6 ft')
- *!---------------------------------------------------------------------*/
-module builtins.
-export pat_atom/3.
-pat_atom(Pattern, Vals, Result)
-	:-
-	open(atom(Result), write, S),
-	printf(S, Pattern, Vals),
-	close(S).
-endmod.
-%%%%%%%%%%%%%% Move to library (in miscatom.pro):
-
 /*
         %% For dev: the searchdir fact finds sqlite3_intf.pro,
         %% and then finds sqlite3_intf.psl:
@@ -137,15 +115,26 @@ dumpSecDetailsProps([Prop | Properties], SpecStruct)
 
 export m/0.
 export manage_site_specs/0.
+export dbsetup_one/1.
+export dbsetup_local_list/0.
 
 m :- manage_site_specs.
 
+export t1/0.
+t1 :- 
+        catch( handle_single_spec('bp.db_spec', CmdInfo), ErrorInfo, dbsetup_exception(ErrorInfo)).
+
+export t2/0.
+t2 :-
+	dbsetup_one('bp.db_spec'). 
+
+
 /* ---------------------------------------------------------------------- 
-	Main entry point
+	Main entry point: conmmand line entry
 * ----------------------------------------------------------------------*/
 manage_site_specs
         :-
-        catch(manage_dbsetup, dbsetup_error(ErrorInfo), dbsetup_excpetion(ErrorInfo)).
+        catch(manage_dbsetup, ErrorInfo, dbsetup_exception(ErrorInfo)).
 
 manage_dbsetup
 	:-
@@ -162,12 +151,8 @@ manage_dbsetup
 get_specfile_list(CmdInfo, [SingleSpecFilePath])
 	:-
 	accessCmd(spec, CmdInfo, SingleSpecFilePath),
-	SingleSpecFilePath \= '',
-	exists_file(SingleSpecFilePath),
-	!,
-	pathPlusFile(SrcFolderPath, _, SingleSpecFilePath),
-	setCmd(specSrc, CmdInfo,  SrcFolderPath).
-	
+	prep_for_single_spec(SingleSpecFilePath, CmdInfo).
+
 get_specfile_list(CmdInfo, RawSpecFileList)
 	:-
 	accessCmd(dbd, CmdInfo, CmdlineFolderPath),
@@ -188,6 +173,49 @@ get_specfile_list(CmdInfo, RawSpecFileList)
 	),
 	attachPaths(InitSpecFileList, Path, RawSpecFileList).
 
+/* ---------------------------------------------------------------------- 
+	Entry point: procedure call entry
+* ----------------------------------------------------------------------*/
+
+dbsetup_one(FilePath) 
+	:- 
+        catch( handle_single_spec(FilePath, CmdInfo), ErrorInfo, dbsetup_exception(ErrorInfo)).
+
+dbsetup_local_list :-
+        catch( handle_local_list, ErrorInfo, dbsetup_exception(ErrorInfo)).
+	
+handle_local_list
+	:-
+	makeCmdInfo(Cmd),
+	setCmd(spec, Cmd, ''),
+	setCmd(dbd, Cmd, ''),
+	setCmd(db, Cmd, ''),
+	setCmd(tdbd, Cmd, ''),
+	files('./', '*.db_spec', RawSpecFileList),
+	Path = './',
+	setCmd(specSrc, Cmd,  Path),
+%	processEachSpecFile(RawSpecFileList, ListOfListsSpecDetailsStructs, Cmd).
+	processEachSpecFile(RawSpecFileList, _, Cmd).
+
+handle_single_spec(SingleSpecFilePath, Cmd)
+	:-
+	makeCmdInfo(Cmd),
+	setCmd(spec, Cmd, SingleSpecFilePath),
+	setCmd(dbd, Cmd, ''),
+	setCmd(db, Cmd, ''),
+	setCmd(tdbd, Cmd, ''),
+
+	prep_for_single_spec(SingleSpecFilePath, Cmd),
+	processEachSpecFile([SingleSpecFilePath], ListOfListsSpecDetailsStructs, Cmd).
+
+prep_for_single_spec(SingleSpecFilePath, CmdInfo)
+	:-
+	SingleSpecFilePath \= '',
+	exists_file(SingleSpecFilePath),
+	!,
+	pathPlusFile(SrcFolderPath, _, SingleSpecFilePath),
+	setCmd(specSrc, CmdInfo,  SrcFolderPath).
+	
 attachPaths([], Path, []).
 attachPaths([File | FilesList], Path, [FileWithPath | RawSpecFileList])
 	:-
@@ -213,7 +241,6 @@ processEachSpecFile([FilePath | RawSpecFileList],
 	:-
 	processIndivSpecFile(FilePath, FileStructsList, CmdInfo),
 	processEachSpecFile(RawSpecFileList, ListOfListsSpecDetailsStructs, CmdInfo).
-
 	/* ----------------------------------------------------------------------------
 	   There may be multiple specs in a file, and they may have foreign key
 	   interaction.  Make a first pass through all the specs using pass1ReadFileSpecs/3,
@@ -228,14 +255,13 @@ processIndivSpecFile(FilePath, FileStructsList, CmdInfo)
 	printf(user, '\n>> Starting file %t\n', [FilePath]),
 	pass1ReadFileSpecs(FileTerms, FileSpecInfoList, FKInfoListOfLists, CmdInfo),
 	append(FKInfoListOfLists, FKInfoList),
-
-printf(user, 'pISF_FKI=%t\n ', [FKInfoList]),
+%printf(user, 'pISF_FKI=%t\n ', [FKInfoList]),
 	pass2CompleteDBs(FileSpecInfoList, FKInfoList, CmdInfo).
 
 processIndivSpecFile(FilePath, FileStructsList, CmdInfo)
 	:-
-	pat_atom('Can''t find spec file: %t', [FilePath], ErrMsg),
-	throw(dbsetup_error(ErrMsg)).
+	sprintf(atom(ErrMsg), 'Can''t find spec file: %t', [FilePath]),
+	throw(ErrMsg).
 
 	/* ----------------------------------------------------------------------------
 	   pass1ReadFileSpecs/3
@@ -270,7 +296,7 @@ prelimWorkTerm(DBTerm, SpecStruct, CmdInfo)
 	DBTerm =.. [_ | DBTLines],
 	(member(name=SpecName, DBTLines) -> printf(user, 'Reading spec: %t\n', [SpecName])
 		;
-		hard_error(db_spec, 'Missing spec name', [])
+		hard_error(db_spec, 'Missing spec name', [DBTerm])
 	),
         setSpec(srcLines, SpecStruct, DBTLines),
 	plug_in_lines(DBTLines, SpecStruct),
@@ -477,9 +503,9 @@ sql_type('TEXT', 'TEXT').
 sql_type('REAL', 'REAL').
 sql_type(double, 'REAL').
 sql_type(float, 'REAL').
-sql_type(date,_)
+sql_type(date,Expr)
 	:-
-	hard_error(db_spec, 'date_not_yet_implemented', []).
+	hard_error(db_spec, 'date_not_yet_implemented', [Expr]).
 sql_type(T,_)
 	:-
 	hard_error(db_spec, 'unknown_type', [T]).
@@ -691,11 +717,11 @@ make_set(Type, ColName, UpdV, Set)
 	:-
 	sql_text_type(Type),
 	!,
-	pat_atom('%t = ''%t'' ', [ColName, UpdV], Set).
+	sprintf(atom(Set), '%t = ''%t'' ', [ColName, UpdV]).
 
 make_set(Type, ColName, UpdV, Set) 
 	:- 
-	pat_atom('%t = %t', [ColName, UpdV], Set).
+	sprintf(atom(Set), '%t = %t', [ColName, UpdV]).
 
 sql_text_type(text).
 sql_text_type('TEXT').
@@ -1160,7 +1186,7 @@ fk_create_table_string(child, ChildDtFunc + fk(ChildKey, DtFunc, ParentKey), FKT
 	:-!,
 	    %%	CREATE TABLE track_table (trackid INT PRIMARY KEY, trackname TEXT, trackartist INT, 
 	    %%	FOREIGN KEY(trackartist) REFERENCES artist(artistid) 
-	pat_atom('FOREIGN KEY(%t) REFERENCES %t_table(%t) ', [ChildCol, ParentTable, ParentCol], FKTableLine).
+	sprintf(atom(FKTableLine), 'FOREIGN KEY(%t) REFERENCES %t_table(%t) ', [ChildCol, ParentTable, ParentCol]).
 
 fk_create_table_string(_, _, nothing).
 
@@ -1174,7 +1200,7 @@ fk_line(ForeignKeys, DtFunc, FKLine)
 	member(column = ChildColumn, ChildInfo),
 	member(table = ParentTable, ParentInfo),
 	member(column = ParentColumn, ParentInfo),
-	pat_atom('FOREIGN KEY(%t) REFERENCES %t_table(%t)', [ChildColumn, ParentTable, ParentColumn], FKLine).
+	sprintf(atom(FKLine), 'FOREIGN KEY(%t) REFERENCES %t_table(%t)', [ChildColumn, ParentTable, ParentColumn]).
 fk_line(_, _, nothing).
 	
 
@@ -1212,10 +1238,9 @@ processCommandLine(CmdInfo)
 
 hard_error(Category, Msg_Key, PatternArgs)
 	:-
-%printf(user, 'Starting hard_error: Msg_Key  = %t PatternArgs=%t \n', [Msg_Key, PatternArgs]),
 	error_msg(Category, Msg_Key, Pattern),
-	pat_atom(Pattern, PatternArgs, Msg),
-	throw(dbsetup_error(Msg)).
+	sprintf(atom(Msg), Pattern, PatternArgs),
+	throw(Msg).
 
 warning(Category, Msg_Key, SpecLines)
 	:-
@@ -1233,13 +1258,13 @@ warning_msg(db_spec, missing_index_fields, 'Warning: No index_fields found\n\n')
 warning_msg(db_spec, missing_name, '\n>> ---- Warning: Missing Name\n\n').
 warning_msg(db_spec, missing_data_file, 'Warning: Missing data_file = __ Using %t \n\n').
 
-
-dbsetup_excpetion(ErrorInfo)
+export dbsetup_exception/1.
+dbsetup_exception(ErrorInfo)
 	:-
-%printf(user, 'Starting dbsetup_excpetion: ErrorInfo = %t\n', [ErrorInfo]),
 	printf(user, '\n========================\n', []),
-	printf(user, 'ERROR: %t\n', [ErrorInfo]),
+	printf(user, 'dbsetup ERROR: %t\n', [ErrorInfo]),
 	flush_output,
 	printf(user, 'Exiting\n\n', []).
 
 endmod.
+
