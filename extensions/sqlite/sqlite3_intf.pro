@@ -64,12 +64,6 @@ sqlite3_result_ok(Code, DBHandle) :-
 
 	% SQLITE_OK
 sqlite3_result_ok(0, _) :-!.
-%/*
-	% SQLITE_DONE
-sqlite3_result_ok(101, _) :-!.
-	% SQLITE_ROW
-sqlite3_result_ok(100, _) :-!.
-%*/
 sqlite3_result_ok(Code, DBHandle) 
 	:-
 	integer_ok(Code),

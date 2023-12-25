@@ -113,6 +113,7 @@ static int prolog_sqlite3_exec_norows_x(void) {
 	}
 	returnv = sqlite3_prepare_v2(dbHandle, sql, -1, &pstmt, NULL);
 	returnv = sqlite3_step(pstmt);
+	returnv = sqlite3_finalize(pstmt);
 
         PI_unify(val3, type3, returnv, PI_INT);
         PI_SUCCEED;
@@ -305,6 +306,7 @@ static int prolog_sqlite3_exec_rows_x(void) {
 	} 
     }   // end while
 
+    returnv = sqlite3_finalize(pstmt);
     if (returnv != SQLITE_OK && returnv != 100 && returnv != 101) {
 		if (handle_opened == 1){ sqlite3_close(dbHandle); }
         	PI_unify(val5, type5, returnv, PI_INT);
