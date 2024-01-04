@@ -12,7 +12,7 @@ jobs:
       BUNDLE_PATH:  ~/.gem
     steps:
      - uses: actions/checkout@v3
-     - run: sudo gem install bundler
+     - run: sudo gem install bundler -v 2.4.22
      - run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install gcc-multilib libcurl4-openssl-dev:i386 tk-dev:i386
      - run: CFLAGS=-m32 ./cibuild
 
