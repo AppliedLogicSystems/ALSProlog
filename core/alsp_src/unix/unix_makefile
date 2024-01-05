@@ -72,6 +72,7 @@ installer: alspro
 			ln -s ../../alsdir/builtins . ; \
 			ln -s ../../alsdir/library . ; \
 			mkdir shared ; \
+	echo 'shared=`pwd`'
 			cd shared ; \
 				ln -s $(TCL_DIR)/$(SUBOS)/dist/* . ; \
 			cd .. ; \
@@ -109,11 +110,29 @@ alsdir/library : $(SOURCE_DIR)/library $(MAKEFS)
 	cd alsdir/library ; ln -s ../../$(SOURCE_DIR)/library/*.alb .
 	cd alsdir/library ; ln -fs ../../$(SOURCE_DIR)/library/tests .  
 
-alsdir/shared : $(MAKEFS)
+# paths from ~darwin/als-prolog
+
+SQLITE_PATH = ../../../extensions/sqlite
+FSDK_PATH = ../../../foreign_sdk/unix
+
+# path from ~darwin/als-prolog/alsdir/shared
+
+DEEP_SQLITE_PATH = ../../../../../extensions/sqlite
+
+fsdk : $(MAKEFS)
+	echo 'fsdk: SWITCHING FROM ' `pwd` ' TO ' $(FSDK_PATH) 
+	cd $(FSDK_PATH) ; sh build.sh 
+
+sqlite : fsdk $(SQLITE_PATH)/GNUmakefile $(MAKEFS)
+	cd $(SQLITE_PATH) ; make 
+
+alsdir/shared : sqlite $(MAKEFS)
 	mkdir -p alsdir/shared
 	rm -f alsdir/shared/*.pro alsdir/shared/*.psl alsdir/shared/*.tcl
 	cd alsdir/shared ; ln -s ../../$(CORE)/als_dev/alsdev/*.tcl .
-				 
+	cd alsdir/shared ; ln -v -s $(DEEP_SQLITE_PATH)/sqlite3_intf.pro . ; ln -v -s $(DEEP_SQLITE_PATH)/sqlite3_intf.psl . 
+
+
 alsdir/images : $(CORE)/als_dev/alsdev $(MAKEFS)
 	mkdir -p alsdir/images
 	rm -f alsdir/images/*.*
