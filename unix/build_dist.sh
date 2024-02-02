@@ -66,7 +66,10 @@ done
 cp -p "$MAN/welcome_standard.txt" "$DISTDIR/README.txt"
 cp -p $MAN/$MANUAL "$DISTDIR/$MANUALNAME"
 cp -p $MAN/$REFMANUAL "$DISTDIR/$REFMANUALNAME"
-cp -pr $DOCS "$DISTDIR/docs"
+if test -d "$DOCS"
+then
+	cp -pr $DOCS "$DISTDIR/docs"
+fi
 cp -p "$ALS_PROLOG/core/alsp_src/doc/alspro.1" "$DISTDIR/alspro.1"
 
 

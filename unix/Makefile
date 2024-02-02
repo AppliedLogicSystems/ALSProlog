@@ -2,13 +2,18 @@ all: standard
 
 core:
 	$(MAKE) -C ../core/unix all
-	$(MAKE) -C ../docs all
 	cd ../foreign_sdk/unix ; ./build.sh
+
+doc:
+	$(MAKE) -C ../docs all
 
 odbc:
 	cd ../extensions/odbc/i386_mswin32 ; ./build.bat
 	  
-standard: core
+standard: core doc
+	./build_dist.sh standard
+
+standard-nodoc: core
 	./build_dist.sh standard
 
 # If you want to just capture test output to a file, execute:
