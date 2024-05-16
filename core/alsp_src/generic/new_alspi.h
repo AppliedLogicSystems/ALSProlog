@@ -40,7 +40,7 @@ AP_API(AP_Result) AP_SetException(AP_World *w, AP_Obj ball);
 AP_API(AP_Obj) AP_GetException(AP_World *w);
 AP_API(AP_Result) AP_SetError(AP_World *w, AP_Obj error_term);
 AP_API(AP_Result) AP_SetStandardError(AP_World *w, AP_StandardError error_type, ...);
-AP_API(int) AP_OldToNewCall(AP_Result (*new_func)(void), int arity);
+AP_API(int) AP_OldToNewCall(AP_Result (*new_func)(), int arity);
 AP_API(int) AP_GetStructureArity(AP_World *w, AP_Obj struc);
 AP_API(AP_Obj) AP_GetStructureFunctor(AP_World *w, AP_Obj struc);
 
