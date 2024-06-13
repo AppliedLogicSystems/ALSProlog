@@ -297,7 +297,6 @@ objs_run.pro:
 
 simplio.pro:
 ==========
-      nth/3
       output_prolog_list/1
       output_prolog_list/6
       output_prolog_list/7
