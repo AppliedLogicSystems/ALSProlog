@@ -16,9 +16,20 @@ jobs:
      - run: sudo gem install bundler
      - run: sudo apt-get update && sudo apt-get install libcurl4-openssl-dev tk-dev
      - run: ./cibuild
+     - name: Archive build
+        uses: actions/upload-artifact@v4
+        with:
+          name: als-prolog-linux
+          path: als-prolog-linux.tgz
+
 
   MacOS:
     runs-on: macos-latest
     steps:
      - uses: actions/checkout@v3
      - run: ./cibuild
+     - name: Archive build
+        uses: actions/upload-artifact@v4
+        with:
+          name: als-prolog-darwin
+          path: als-prolog-darwin.tgz
