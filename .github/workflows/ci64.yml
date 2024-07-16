@@ -20,7 +20,7 @@ jobs:
        uses: actions/upload-artifact@v4
        with:
          name: als-prolog-linux
-         path: als-prolog-linux.tgz
+         path: unix/als-prolog-linux.tgz
 
 
   MacOS:
@@ -32,4 +32,4 @@ jobs:
        uses: actions/upload-artifact@v4
        with:
          name: als-prolog-darwin
-         path: als-prolog-darwin.tgz
+         path: unix/als-prolog-darwin.tgz
