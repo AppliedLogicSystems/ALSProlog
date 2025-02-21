@@ -2,6 +2,7 @@ Welcome to the ALS Prolog Source Tree
 =====================================
 
 [![Build & Test](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml/badge.svg)](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci.yml)
+[![64-bit Build & PARTIAL-TESTS](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci64.yml/badge.svg)](https://github.com/AppliedLogicSystems/ALSProlog/actions/workflows/ci64.yml)
 <!-- [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/786esihnss6ksk7k/branch/master?svg=true)](https://ci.appveyor.com/project/AppliedLogicSystems/alsprolog/branch/master) -->
 
 The ALS Prolog source tree is divided into core and peripheral
