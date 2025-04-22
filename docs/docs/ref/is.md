@@ -60,7 +60,7 @@ _Arithmetic Functions_ can also be evaluated when their arguments can be evaluat
 | j1(X) | Bessel function of order 1 | 
 | log(X) | natural logarithm | 
 | log10(X) | base 10 logarithm | 
-| random | returns a random floating point number such that 0.0 ≤ X < 1.0 | 
+| random | returns a <span id=random>pseudo-random</span> floating point number such that 0.0 ≤ X < 1.0<br>(use [`srandom/1`](srandom.html) to initialize the <abbr title="Psuedo-Random Number Generator">PRNG</abbr>) |
 | realtime | actual  time in seconds since ALS Prolog started | 
 | round(X) | integer rounding of X | 
 | sin(X) | sine | 
