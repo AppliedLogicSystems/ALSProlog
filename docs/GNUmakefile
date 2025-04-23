@@ -52,6 +52,7 @@ test-site : site
 	bundle exec htmlproofer \
 	--internal-domains "alsprolog.com" \
 	--check-html --check-img-http --check-opengraph --check-sri \
+	--url-ignore /mitp-content-server.mit.edu/ \
 	--check-external-hash --empty-alt-ignore _site
 
 ## Test local docs
