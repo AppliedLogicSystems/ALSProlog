@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  {%- if jekyll.environment != "production" %}
+  <script>
+  window.onerror = function(message, source, lineno, colno, error) {
+  	alert(message);
+  	return false;
+  }
+  </script>
+  {% endif -%}
+
+  <script type="text/javascript" src="/assets/jquery-3.4.1.js"></script>
+  <script type="text/javascript" src="/assets/searchhelp.js"></script>
+
+  <body>
+
+    {%- include header.html -%}
+
+    <main class="page-content" aria-label="Content" style="margin-left:30px;">
+        {{ content }}
+    </main>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>

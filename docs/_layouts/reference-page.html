@@ -10,6 +10,9 @@ layout: default
 {% if jekyll.environment == "production" %}{% include edit-source.html %}{% endif %}
 </nav>
 
+<div class="doc-wrapper">
+<div class="doc-main">
+
 <h1>{{ page.title | escape }}</h1>
 <h3>Module: {{ page.module | escape }}</h3>
 
@@ -31,3 +34,14 @@ layout: default
 {% endif -%}
 
 {{ content }}
+
+</div>
+
+<script type="text/javascript" src="/assets/searchhelp.js"></script>
+<aside class="doc-sidebar">
+<h2 style="text-align:center;font-weigt:bold;">ALS Packages</h2>
+<nav style="margin-top:-10px">
+{% include sidebar.html %}
+</nav>
+</aside>
+</div>

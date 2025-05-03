@@ -22,3 +22,12 @@ pre, code, .highlighter-rouge .highlight { background-color: #f8f8f8; }
 
 // Avoid wrapping of email address
 .contact-list .u-email { font-size: 95%; }
+
+.doc-wrapper {
+	display: flex;
+	flex-direction: row-reverse;
+
+	.doc-main { flex: 3; }
+	.doc-sidebar  { flex: 1; margin-right:5px;}
+}
+

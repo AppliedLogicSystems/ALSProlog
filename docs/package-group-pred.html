@@ -1,0 +1,45 @@
+---
+---
+<pre>
+
+Ref Packages List:
+
+{{ site.ref_packages | inspect }}
+
+Print each packages:
+
+{% for p in site.ref_packages %}
+{{ p }}
+{%- endfor %}
+
+Groups of pages in the 'Core Prolog' package:
+
+{%- assign groups = site.pages | where: "reference", true | where: "package", "Core Prolog" | group_by: "group" | sort: "name" %}
+
+{{ groups | inspect }}
+
+Print name of each group in 'Core Prolog' package:
+
+{% for g in groups %}
+{{ g.name }}
+{%- endfor %}
+
+Predicates in the 'Prolog Database' group of the 'Core Prolog' package:
+
+{%- assign dbgroup = groups | where: "name", "Prolog Database" | first %}
+{%- assign predicates = "" | split: "" %}
+{%- for dbpage in dbgroup.items %}
+	{% for p in dbpage.predicates %}
+		{% assign predicates = predicates | push: p %}
+	{% endfor %}
+{%- endfor %}
+
+{{ predicates | inspect }}
+
+Print sig of each predicate in 'Prolog Database' group of the 'Core Prolog' package:
+
+{% for p in predicates %}
+{{ p.sig }}
+{%- endfor %}
+
+</pre>
