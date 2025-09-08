@@ -3,7 +3,7 @@
 #CC=clang -O0 -DBytecode=1
 CC=clang
 
-CFLAGS += -MMD -Weverything \
+CFLAGS += -MMD -Wall \
 -Wno-unused-parameter \
 -Wno-shadow \
 -Wno-reserved-id-macro -Wno-undef -Wno-unused-macros -Wno-disabled-macro-expansion \
