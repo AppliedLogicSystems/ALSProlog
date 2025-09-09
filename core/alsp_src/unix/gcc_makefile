@@ -24,4 +24,4 @@ endif
 # -Wno-unused-result -Wno-unused-but-set-variable - Fix someday.
 
 CFLAGS += -fPIC -MMD -Wall -Wextra \
--Wno-unused-parameter
+-Wno-unused-parameter -Wno-incompatible-pointer-types

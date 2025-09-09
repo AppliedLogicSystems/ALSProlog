@@ -16,4 +16,4 @@ CC=gcc -m32
 
 # Added -Wno-error=pointer-sign to avoid blocking errors in socket code
 
-CFLAGS += -MMD -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -MMD -Wall -Wextra -Wno-unused-parameter -Wno-incompatible-pointer-types
