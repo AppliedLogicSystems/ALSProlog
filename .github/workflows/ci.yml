@@ -17,7 +17,7 @@ jobs:
      - run: CFLAGS=-m32 ./cibuild
 
   Windows:
-    runs-on: windows-2025
+    runs-on: windows-latest
     steps:
      - uses: actions/checkout@v3
      - uses: ruby/setup-ruby@v1
@@ -26,6 +26,7 @@ jobs:
      - uses: msys2/setup-msys2@v2
        with:
           msystem: MINGW32
+          location: D:\a\_temp\msys32
           install: git mingw-w64-i686-gcc base-devel mingw-w64-i686-tk mingw-w64-i686-curl zip procps
      - shell: msys2 {0}
        run: ./cibuild
