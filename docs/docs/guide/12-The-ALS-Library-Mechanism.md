@@ -7,7 +7,7 @@
 * TOC
 {:toc}
 
-The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution proceeds as if the file had already been loaded.. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
+The ALS Library mechanism provides a sophisticated device for managing large libraries of code in an efficient and flexible manner. Many files of potentially useful code can be available to a program without the cost of loading these files at the time the program is initially loaded. Only if program execution leads to a need for code from a particular library file is that file in fact loaded. Thereafter, execution proceeds as if the file had already been loaded. The library mechanism is essentially invisibile to the programmer, except for a possible momentary pause when a particular group of library predicates is first loaded. Consequently, the line between the predicates which are called 'builtin' and those which are called 'library' is quite gray.
 The files making up the library reside in the folder `...alsdir/library/`.
 
 ## 12.1 Overview of the ALS Library Mechanism and Tools
@@ -21,9 +21,11 @@ them which must cause the library file to be loaded.
 Like most symbolic languages, ALS Prolog utilizes a name table which is a hash
 table recording the association between names of predicates and the internal addresses at which their executable code is stored. Quite simply, the ALS library
 mechanism replaces the normal name table entry for the library predicates by a special 'stub' name table entry which accomplishes three things:
+
 * it indicates that the predicate in question is a library predicate;
 * it indicates the file in which the library predicate resides;
 * it issues an internal ALS Prolog interrupt which is regarded as a library interrupt.
+
 In essence, execution is interrupted before execution of the called predicate, say p,
 has actually commenced. During handling of the interrupt, the indicated file is
 loaded (really, reconsulted, which is important), and the interrupt is released, resuming normal execution at the call to p. However, since the library file reconsulted during the interrupt contains a definition of p, the special name table entry
