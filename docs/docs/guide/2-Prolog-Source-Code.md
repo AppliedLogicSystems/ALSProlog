@@ -216,9 +216,9 @@ are found in alsdir.  If none of these directories provides a means of locating 
 
 The facts searchdir/1 in module builtins can be manipulated by a user program or by the user at the console. However, ALS Prolog provides several automatic facilities for installing these facts.
 
-* On Linux (including Mac OS X) and Windows, if the ALSPATH environment variable is set , the
+* On Linux (including Mac OS X) and Windows, if the ALSPATH environment variable is set, the
 entries from this are used to create searchdir/1 assertions.
-* If ALS Prolog was started from the command line, any '-s' switches on the command line will cause searchdir/1assertions to be added.
+* If ALS Prolog was started from the command line, any '-s' switches on the command line will cause searchdir/1 assertions to be added.
 
 Thus, the directories which will be searched appear as follows:
 
