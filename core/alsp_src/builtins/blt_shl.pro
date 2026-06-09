@@ -303,7 +303,8 @@ ss_load_the_dot_alspro(AutoFile, Verbosity)
 print_banner(OutS,L) 
 	:-
 	system_name(L, Name),
-	dmember(os_variation = OSVar, L),
+	dmember(sysname = Sysname, L),
+	dmember(machine = Machine, L),
 	dmember(prologVersion = Version, L),
 	dmember(prologYear = Year, L),
 	current_prolog_flag(windows_system, WinsName),
@@ -312,9 +313,9 @@ print_banner(OutS,L)
 	name(WBan, [UInC | WNCs]),
 	!,
 #if (all_procedures(syscfg,intconstr,0,_))
-	printf(OutS,'CLP(BNR)(r) \[%s Version %s \[%s\]\]\n',[Name,Version,OSVar]),
+	printf(OutS,'CLP(BNR)(r) \[%s Version %s \[%s/%s\]\]\n',[Name,Version,Sysname,Machine]),
 #else
-	printf(OutS,'%s Version %s \[%s\]\n',[Name,Version,OSVar]),
+	printf(OutS,'%s Version %s \[%s/%s\]\n',[Name,Version,Sysname,Machine]),
 #endif
 	printf(OutS,'   Copyright (c) 1987-%s Applied Logic Systems, Inc.\n\n',[Year]),
 	flush_output(OutS).

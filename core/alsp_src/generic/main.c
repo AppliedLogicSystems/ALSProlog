@@ -34,6 +34,7 @@
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#include <sys/utsname.h>
 #endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -129,8 +130,8 @@ static	void	panic_continue	( void );
 static	void	abolish_predicate ( const char *, const char *, int );
 static	void	assert_sys_searchdir ( char * );
 static	void	assert_als_system (const char *, const char *,
-					  const char *, const char *,
-					  const char *, const char *, int);
+					  const char *, const char *, const char *,
+					  const char *, const char *, const char *, int);
 static	void	assert_atom_in_module ( const char*, const char * );
 
 
@@ -426,7 +427,19 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     /*---------------------------------------*
      | Set up the als_system fact.
      *---------------------------------------*/
-     
+
+	const char *System = "sys", *Machine = "arch", *Release = "";
+
+#ifdef UNIX
+
+	struct utsname name;
+	uname(&name);
+	System = name.sysname;
+	Machine = name.machine;
+	Release = name.release;
+
+#endif
+
 #ifdef MSWin32
 
 
@@ -434,11 +447,14 @@ static int PI_prolog_init0(const PI_system_setup *setup)
     else if (IS_WIN32S) MinorOSStr = "mswin32s";
     else if (IS_WIN95) MinorOSStr = "mswin95";
 
+	System = OSStr;
+	Machine = MinorOSStr;
+
 #endif
 
 #ifndef KERNAL
     assert_als_system(OSStr, MinorOSStr, ProcStr,
-		      SysManufacturer, versionNum, versionYear, heapWordBytes);
+		      System, Release, Machine, versionNum, versionYear, heapWordBytes);
 
     /*-------------------------------------------*
      | Set up conditional configuration controls:
@@ -618,7 +634,7 @@ assert_atom_in_module(const char *mod_name, const char *atom_name)
  *-----------------------------------------------------------------------------*/
 static void
 assert_als_system(const char *os, const char *os_var, const char *proc,
-	const char *man, const char *ver, const char *year, int hwb)
+	const char *sys, const char *rel, const char *mach, const char *ver, const char *year, int hwb)
 {
     char  command[2048];
 
@@ -626,11 +642,11 @@ assert_als_system(const char *os, const char *os_var, const char *proc,
 		return;
 
     sprintf(command,
-	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',manufacturer='%s',prologVersion='%s',prologYear='%s',heapWordBytes=%d]),_,0)",
+	    "assertz(builtins,als_system([os='%s',os_variation='%s',processor='%s',sysname='%s',release='%s',machine='%s',prologVersion='%s',prologYear='%s',heapWordBytes=%d]),_,0)",
 	    os,
 	    os_var,
 	    proc,
-	    man,
+	    sys, rel, mach,
 	    ver,
 	    year,
 	    heapWordBytes);
