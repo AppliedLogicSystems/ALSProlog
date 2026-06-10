@@ -26,7 +26,7 @@ test: core
 	$(MAKE) -C ../core/unix test
 
 testdocs:
-	$(MAKE) -C ../docs test
+	$(MAKE) -C ../docs test-local
 
 distclean:
 	$(MAKE) -C ../core/unix distclean
