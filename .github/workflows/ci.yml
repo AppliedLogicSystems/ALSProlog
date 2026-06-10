@@ -23,6 +23,9 @@ jobs:
      - uses: ruby/setup-ruby@v1
        with:
          ruby-version: '3'
+     - name: Clean Ruby MSYS2 temp directory
+       run: Remove-Item -Recurse -Force D:\a\_temp\msys64
+       shell: pwsh
      - uses: msys2/setup-msys2@v2
        with:
           msystem: MINGW32

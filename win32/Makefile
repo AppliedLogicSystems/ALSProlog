@@ -2,7 +2,8 @@ all: standard
 
 core:
 	$(MAKE) -C ../core/win32 all
-	$(MAKE) -C ../docs all
+	: $(MAKE) -C ../docs all
+	mkdir -p ../docs/_local_site
 	cd ../foreign_sdk/win32 ; ./make.bat
 
 odbc:
@@ -22,5 +23,5 @@ test: core
 
 distclean:
 	$(MAKE) -C ../core/win32 distclean
-	$(MAKE) -C ../docs clean
+	: $(MAKE) -C ../docs clean
 	sh ../unix/superclean.sh
