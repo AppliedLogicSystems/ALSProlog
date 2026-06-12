@@ -37,7 +37,9 @@ Each property appears at most once. The properties and their possible values are
 | os | unix, dos, macos, mswins32, vms | 
 | os_variation |(unix) : solaris2.4 | 
 | processor | port_thread, port_byte, i386, m68k, m88k, sparc, powerpc | 
-| manufacturer | generic, sun, motorola, dec, | 
+| sysname | SunOS, Linux, Darwin, ... |
+| release | OS release version |
+| machine | sparc, i368, arm64, ... |
 | prologVersion | `nnn-mm` | 
 | wins | nowins, motif, macos, ... | 
 
@@ -59,5 +61,5 @@ On a Sun SPARC running Solaris 2.4, TTY portable version :
 ?- als_system(X).
 
 X = [os = unix, os_variation = solaris2.4, processor = port_thread, 
-manufacturer = generic, prologVersion = '1-76 ', wins = nowins ]
+sysname = 'SunOS', release = '2.4', machine = sparc, prologVersion = '1-76', wins = nowins ]
 ```

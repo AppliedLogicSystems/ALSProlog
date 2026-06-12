@@ -43,9 +43,6 @@
  | script instead, and configure appropriately inside the sources.
  *---------------------------------------------------------------------*/
 
-	/* #define SysName "ALS Prolog" -- now computed in blt_shl.pro */
-#define SysManufacturer "generic"
-
 /* Like UNIX and OSStr above, assume that the OS has a brk() call. */
 
 #ifdef MacOS
