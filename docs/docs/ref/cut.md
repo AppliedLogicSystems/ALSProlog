@@ -13,7 +13,9 @@ FirstGoal, !; SecondGoal
 ```
 ## DESCRIPTION
 
-Discards all choicepoints made since the parent goal started execution, including the choicepoints, if any, created by calling the parent goal. In the following two cases, a cut in `Condition` will remove all choicepoints created by the `Condition`, any subgoals to the left of the `Condition`, and the choicepoint for the parent goal.
+
+Discards all choicepoints made since the parent goal started execution, including the choicepoints, if any, created by calling the parent goal. In the following three cases, a cut in `Condition` will remove all choicepoints created by the `Condition`, any subgoals to the left of the `Condition`, and the choicepoint for the parent goal.
+
 ```
 Condition = (Things, !, MoreThings)
 

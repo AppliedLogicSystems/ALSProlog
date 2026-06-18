@@ -1,0 +1,110 @@
+<script> $( document ).ready(function() {
+    $("#outer-nav").removeAttr("hidden");
+    setupRef();
+});
+</script>
+
+<script>
+$(document).ready(function(){
+        $('#searchdiv').change(function(){
+	    clearSearch();
+	    doSearch();
+        });
+    });
+</script>
+
+<script>
+$(document).ready(function(){
+    $("#searchInput").on("search", function(evt){
+        if($(this).val().length > 0){
+        	// the search is being executed
+	    clearSearch();
+	    doSearch();
+        } else {
+        	// user clicked reset
+	    clearSearch()
+        }
+    })
+});
+</script>
+
+<nav id="outer-nav" hidden>
+
+<div style="border:1px solid black;margin-left:10px; width:94%;">
+<input type="search" id="searchInput" autocomplete="off" class="mysearch" 
+	placeholder="Search predicates..." incremental 
+ 	style="border:1px solid white; width:100%; font-size:18px;">
+<br>
+<div id="searchdiv">
+<input type="radio" name="searchtype" id="srchname" value="srchname"><label style="font-size:12px;" for="srchname">By Name</label>
+<input type="radio" name="searchtype" id="srchdesc" value="srchdesc"><label style="font-size:12px;" for="srchdesc">By Desc</label>
+<input type="radio" name="searchtype" id="srchboth" value="srchboth" checked><label style="font-size:12px;" for="srchboth">By Both</label>
+</div>
+<hr style="border:1px solid black;">
+<div style="text-align:center;"><a href="/docs/ref/#control">View All Predicates</a></div>
+</div>
+
+<ul>			<!-- packages list -->
+	{%- for package in site.ref_packages %}
+
+<li class="pkg" >	<!-- package -->
+<details {% if package == page.package %}open{% endif %}>
+<summary>{{package | escape}}</summary>
+
+	{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
+
+<ul>			<!-- group list -->
+	{%- for g in groups %}
+
+<li class="grp" >	<!-- group -->
+<details >		<!-- group details -->
+<summary>{{g.name | escape}}</summary>
+<ul>			<!-- predicates list -->
+
+	{%- assign predicates = "" | split: "" %}
+	{%- for r in g.items %}
+		{% for p in r.predicates %}
+			{% assign predicates = predicates | push: p %}
+		{% endfor %}
+	{%- endfor %}
+
+	{%- assign sorted_preds = predicates | sort: "sig" %}
+
+	{%- for p in sorted_preds %}
+		{%- assign ppage = g.items | where_exp: "item", "item.predicates contains p" | first %}
+<li class="prd">	<!-- predicates list -->
+		{%- assign predname =  ppage.url | split: "/" | last | split: "." | first %}
+<a href="{{ppage.url}}" 
+		{%- assign psig0 = p.sig | slice: 0 %}
+		{%- assign psigt = p.sig | slice: 1, 100 %}
+			{%- if psig0 == "$" %}
+				{%- assign thepred = p.sig %}
+				{%- assign apppred = psigt | split: "/" | first %}
+			{% elsif p.sig == "</2" %}
+				{%- assign thepred = "<" %}
+				{%- assign apppred = "lessthan" %}
+			{% elsif p.sig == "=</2" %}
+				{%- assign thepred = "=<" %}
+				{%- assign apppred = "lessthaneq" %}
+			{% elsif p.sig == "!/0" %}
+				{%- assign thepred = "!" %}
+				{%- assign apppred = "cut" %}
+			{%- else %}
+				{%- assign thepred = p.sig %}
+				{%- assign apppred = p.sig | split: "/" | first %}
+			{%- endif %}
+			id="{{ppage.url | split: "/" | last | split: "." | first}}_{{apppred}}"
+			onclick="accessPredPage('{{ppage.url | split: "/" | last | split: "." | first}}','{{apppred}}')" >{{thepred}}
+			{%- if p.args %}/[{% for a in p.args %}{{ a[0] }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% comment %} for-p.args {% endcomment %}{% endif %}</a> 
+<div class="dscr" hidden>{%- if p.args %}{{p.args | first}}{% else %}{{p.desc}}{% endif %}</div>
+</li>	<!-- END prd class list entry -->
+	{%- endfor %}			{% comment %} for p-sorted_preds {% endcomment %}
+</ul>			<!-- END predicates list -->
+</details>		<!-- END group details -->
+</li>			<!-- END group list entry in pkg -->
+	{%- endfor %}			{% comment %} for g {% endcomment %}
+</ul>			<!-- END group list -->
+</details>		<!-- END package details -->
+	{%- endfor %}
+
+</nav>

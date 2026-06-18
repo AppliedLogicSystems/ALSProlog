@@ -2,17 +2,14 @@
 {%- for package in site.ref_packages %}
 
 <li>
-<strong>{{package | escape}}</strong>
+<strong><a href="
+{% if package == "Core Prolog" %}ref/cut.html"{%  endif %}
+{% if package == "ALS Library" %}ref/arithx1.html"{%  endif %}
+{% if package == "ALSDev" %}ref/Edit_Menu.html"{%  endif %}
+{% if package == "C Interface" %}ref/c_malloc.html"{%  endif %}
+>{{package | escape}}{{package.name}}</a></strong>
 
-{%- assign groups = site.pages | where: "reference", true | where: "package", package | group_by: "group" | sort: "name" %}
-
-<ul>
-{%- for g in groups %}
-  <li>
-    <a href="ref/#{{g.name|slugify}}">{{g.name}}</a>
-  </li>
-{%- endfor %}
-</ul>
 </li>
 {%- endfor %}
-</ul>
+</ul> 
+<div style="margin-top:-1em;margin-left:1.8em;"><a href="/docs/ref/#control">View All Predicates</a></div>
