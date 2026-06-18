@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eu
+set -eux
 
 case `uname -rs` in
     "SunOS 4"*)	ARCH=sunos   ; SOEXT=so    ;;
