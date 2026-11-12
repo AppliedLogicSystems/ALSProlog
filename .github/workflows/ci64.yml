@@ -1,6 +1,7 @@
 name: 64-bit Build & PARTIAL-TESTS
 on:
   push:
+  workflow_dispatch:
   schedule:
     - cron: '8 8 8 * *'
 env:
